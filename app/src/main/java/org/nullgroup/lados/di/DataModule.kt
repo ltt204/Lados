@@ -13,6 +13,10 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object DataModule {
+
+
+
+
     @Singleton
     @Provides
     fun provideUserRepository(

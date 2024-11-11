@@ -2,9 +2,11 @@ package org.nullgroup.lados.data.repositories.implementations
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import dagger.hilt.android.scopes.ActivityScoped
 import org.nullgroup.lados.data.models.User
 import org.nullgroup.lados.data.repositories.interfaces.UserRepository
 import javax.inject.Inject
+
 
 class UserRepositoryImplement (
     private val firestore: FirebaseFirestore,
