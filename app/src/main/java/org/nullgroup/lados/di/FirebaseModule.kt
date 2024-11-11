@@ -1,5 +1,6 @@
 package org.nullgroup.lados.di
 
+import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import dagger.Module
@@ -15,14 +16,14 @@ object FirebaseModule {
     @Singleton
     @Provides
     fun provideFirebaseFirestore(): FirebaseFirestore {
-        return lazy {
-            FirebaseFirestore.getInstance()
-        }.value
+        val instance = FirebaseFirestore.getInstance()
+        return instance
     }
 
     @Singleton
     @Provides
     fun provideFirebaseAuth(): FirebaseAuth {
-        return FirebaseAuth.getInstance()
+        val instance = FirebaseAuth.getInstance()
+        return instance
     }
 }

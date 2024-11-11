@@ -50,9 +50,6 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
-    kotlin {
-        jvmToolchain(8)
-    }
 }
 
 dependencies {
@@ -62,8 +59,11 @@ dependencies {
 
     implementation(libs.androidx.core.ktx)
     //Dagger hilt
-    implementation ("com.google.dagger:hilt-android:2.48.1")
-    kapt ("com.google.dagger:hilt-android-compiler:2.48.1")
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.android.compiler)
+//    kapt(libs.hilt.android.compiler)
+    implementation(libs.androidx.hilt.navigation.compose)
+//    kapt(libs.androidx.hilt.compiler)
 
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -76,8 +76,8 @@ dependencies {
     //Testing
 
     // For Hilt testing
-    testImplementation ("com.google.dagger:hilt-android-testing:2.48.1")
-    kaptTest ("com.google.dagger:hilt-android-compiler:2.48.1")
+    testImplementation (libs.dagger.hilt.android.testing)
+    kaptTest (libs.hilt.android.compiler)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

@@ -6,7 +6,7 @@ import org.nullgroup.lados.data.models.User
 import org.nullgroup.lados.data.repositories.interfaces.UserRepository
 import javax.inject.Inject
 
-class UserRepositoryImplement @Inject constructor(
+class UserRepositoryImplement (
     private val firestore: FirebaseFirestore,
     private val firebaseAuth: FirebaseAuth
 ) : UserRepository {

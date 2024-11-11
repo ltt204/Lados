@@ -1,11 +1,15 @@
 [versions]
 agp = "8.5.0"
+androidxHiltCompiler = "1.0.0"
 artifactid = "version"
 daggerCompiler = "2.51.1"
 hiltAndroid = "2.52"
+hiltAndroidCompiler = "2.48.1"
 hiltAndroidGradlePlugin = "2.52"
 hiltAndroidTesting = "2.52"
 hiltCompiler = "2.52"
+hiltCompilerVersion = "1.0.0"
+hiltLifecycleViewmodel = "1.0.0-alpha03"
 kotlin = "1.9.0"
 coreKtx = "1.13.1"
 junit = "4.13.2"
@@ -21,13 +25,20 @@ firebaseFirestore = "25.1.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-hilt-compiler = { module = "androidx.hilt:hilt-compiler", version.ref = "hiltCompilerVersion" }
+androidx-hilt-lifecycle-viewmodel = { module = "androidx.hilt:hilt-lifecycle-viewmodel", version.ref = "hiltLifecycleViewmodel" }
+androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltLifecycleViewmodel" }
 artifactid = { module = "groupId:artifactId", version.ref = "artifactid" }
 dagger-compiler = { module = "com.google.dagger:dagger-compiler", version.ref = "daggerCompiler" }
+dagger-hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler" }
 dagger-hilt-android-gradle-plugin = { module = "'com.google.dagger:hilt-android-gradle-plugin", version.ref = "hiltAndroidGradlePlugin" }
 dagger-hilt-android-testing = { module = "com.google.dagger:hilt-android-testing", version.ref = "hiltAndroidTesting" }
 dagger-hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hiltCompiler" }
+google-hilt-android-gradle-plugin = { module = "com.google.dagger:hilt-android-gradle-plugin", version.ref = "hiltAndroidCompiler" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
+hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltAndroidCompiler" }
 hilt-android-gradle-plugin = { module = "com.google.dagger:hilt-android-gradle-plugin" }
+hilt-androidx-hilt-compiler = { module = "androix.hilt:androidx.hilt-compiler", version.ref = "androidxHiltCompiler" }
 hilt-compiler = { module = "com.google.dagger:hilt-compiler" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
