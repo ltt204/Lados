@@ -1,8 +1,10 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
-    id("kotlin-kapt")
     alias(libs.plugins.google.gms.google.services)
+    id("com.google.devtools.ksp")
+    id("kotlin-kapt")
+    id("dagger.hilt.android.plugin")
 }
 
 android {
@@ -21,7 +23,6 @@ android {
             useSupportLibrary = true
         }
     }
-
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -49,19 +50,20 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+    kotlin {
+        jvmToolchain(8)
+    }
 }
 
 dependencies {
     implementation(libs.firebase.auth)
     implementation(libs.firebase.database)
     implementation(libs.firebase.firestore)
-    //Kapt
-    kapt(libs.artifactid)
 
     implementation(libs.androidx.core.ktx)
     //Dagger hilt
-    implementation(libs.hilt.android)
-    kapt(libs.dagger.hilt.compiler)
+    implementation ("com.google.dagger:hilt-android:2.48.1")
+    kapt ("com.google.dagger:hilt-android-compiler:2.48.1")
 
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -73,9 +75,9 @@ dependencies {
 
     //Testing
 
-    //Dagger hilt local testing
-    testImplementation(libs.dagger.hilt.android.testing)
-    kaptTest(libs.dagger.hilt.compiler)
+    // For Hilt testing
+    testImplementation ("com.google.dagger:hilt-android-testing:2.48.1")
+    kaptTest ("com.google.dagger:hilt-android-compiler:2.48.1")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
@@ -84,4 +86,8 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+}
+
+kapt {
+    correctErrorTypes = true
 }

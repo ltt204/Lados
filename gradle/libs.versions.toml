@@ -1,7 +1,9 @@
 [versions]
 agp = "8.5.0"
 artifactid = "version"
+daggerCompiler = "2.51.1"
 hiltAndroid = "2.52"
+hiltAndroidGradlePlugin = "2.52"
 hiltAndroidTesting = "2.52"
 hiltCompiler = "2.52"
 kotlin = "1.9.0"
@@ -20,9 +22,13 @@ firebaseFirestore = "25.1.1"
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 artifactid = { module = "groupId:artifactId", version.ref = "artifactid" }
+dagger-compiler = { module = "com.google.dagger:dagger-compiler", version.ref = "daggerCompiler" }
+dagger-hilt-android-gradle-plugin = { module = "'com.google.dagger:hilt-android-gradle-plugin", version.ref = "hiltAndroidGradlePlugin" }
 dagger-hilt-android-testing = { module = "com.google.dagger:hilt-android-testing", version.ref = "hiltAndroidTesting" }
 dagger-hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hiltCompiler" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
+hilt-android-gradle-plugin = { module = "com.google.dagger:hilt-android-gradle-plugin" }
+hilt-compiler = { module = "com.google.dagger:hilt-compiler" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }

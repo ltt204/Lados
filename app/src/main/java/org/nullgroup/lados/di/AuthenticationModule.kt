@@ -6,6 +6,6 @@ import dagger.hilt.components.SingletonComponent
 
 @Module
 @InstallIn(SingletonComponent::class)
-object DataModule {
+abstract class AuthenticationModule {
 
 }
