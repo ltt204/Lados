@@ -1,9 +1,12 @@
 package org.nullgroup.lados.data.repositories.implementations
 
+import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.scopes.ActivityScoped
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withTimeout
 import org.nullgroup.lados.data.models.User
 import org.nullgroup.lados.data.repositories.interfaces.UserRepository
 import javax.inject.Inject
@@ -53,6 +56,37 @@ class UserRepositoryImplement (
             val users = firestore.collection("users").get().await().toObjects(User::class.java)
             Result.success(users)
         } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun getUserRole(email: String): Result<String> {
+        return try {
+            Log.d("UserRepositoryImplement", "Starting getUserRole for email: $email")
+
+            // Add timeout
+            withTimeout(5000L) {
+                // Check if document exists first
+                val docRef = firestore.collection("users").document(email)
+                val snapshot = docRef.get().await()
+
+                if (!snapshot.exists()) {
+                    Log.d("UserRepositoryImplement", "Document does not exist")
+                    return@withTimeout Result.failure(Exception("User not found"))
+                }
+
+                val user = snapshot.toObject(User::class.java)
+                Log.d("UserRepositoryImplement", "User role: ${user?.role ?: "null"}")
+
+                user?.role?.let {
+                    Result.success(it)
+                } ?: Result.failure(Exception("User data is null"))
+            }
+        } catch (e: TimeoutCancellationException) {
+            Log.e("UserRepositoryImplement", "Timeout getting user role", e)
+            Result.failure(e)
+        } catch (e: Exception) {
+            Log.e("UserRepositoryImplement", "Error getting user role", e)
             Result.failure(e)
         }
     }

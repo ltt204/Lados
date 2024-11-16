@@ -55,12 +55,12 @@ android {
 }
 
 dependencies {
+    // Firebase
     implementation(libs.firebase.auth)
     implementation(libs.firebase.database)
     implementation(libs.firebase.firestore)
 
     implementation(libs.androidx.core.ktx)
-
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
@@ -85,7 +85,22 @@ dependencies {
     testImplementation (libs.dagger.hilt.android.testing)
     kaptTest (libs.hilt.android.compiler)
 
+    // For JUnit test Firebase
+    testImplementation(libs.firebase.auth.ktx)
+    testImplementation(libs.firebase.firestore.ktx)
+
+    // For JUnit test Coroutines
     testImplementation(libs.junit)
+    testImplementation(libs.junit.jupiter.api)
+    testRuntimeOnly(libs.junit.jupiter.engine)
+
+    // For JUnit test Mockito
+    testImplementation(libs.mockito.junit.jupiter)
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.inline)
+    testImplementation(libs.kotlinx.coroutines.test)
+
+    // For Android Instrumentation test
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
@@ -96,4 +111,8 @@ dependencies {
 
 kapt {
     correctErrorTypes = true
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
 }

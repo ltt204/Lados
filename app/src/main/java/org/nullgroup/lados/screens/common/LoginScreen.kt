@@ -1,5 +1,6 @@
-package org.nullgroup.lados.screens.Common
+package org.nullgroup.lados.screens.common
 
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -10,28 +11,29 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import org.nullgroup.lados.data.models.UserRole
+import org.nullgroup.lados.navigations.AdminGraph
+import org.nullgroup.lados.navigations.CustomerGraph
+import org.nullgroup.lados.navigations.StaffGraph
+import org.nullgroup.lados.viewmodels.AuthScreenViewModel
 
 @Composable
 fun LoginScreen(
     modifier: Modifier = Modifier,
-    onLogin: () -> Unit,
-    onSignup: () -> Unit
 ) {
+    val authScreenViewModel: AuthScreenViewModel = hiltViewModel()
+
     val userName = remember {
         mutableStateOf("")
     }
     val password = remember {
         mutableStateOf("")
-    }
-    var isPasswordShowed by remember {
-        mutableStateOf(false)
     }
 
     Column(modifier = modifier) {
@@ -55,15 +57,7 @@ fun LoginScreen(
         )
         Button(
             onClick = {
-                onLogin()
-                // authViewModel.login(email, password)
-                // if (authViewModel.result.value == Result.Success(true)) {
-                // onLoginAccept()
-                // email = ""
-                // password = ""
-                // } else {
-                //      Toast.makeText(context, "Login failed", Toast.LENGTH_SHORT).show()
-                // }
+                authScreenViewModel.login(userName.value, password.value)
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -75,17 +69,28 @@ fun LoginScreen(
         Text("Does not have an account? Sign up.",
             modifier = Modifier.clickable {
                 // onNavigateToSignup()
-                onSignup()
+
             }
         )
     }
-}
 
-@Composable
-@Preview(showBackground = true)
-fun LoginScreenPreview() {
-    LoginScreen(
-        onLogin = {},
-        onSignup = {}
-    )
+    val loginResult = authScreenViewModel.result.collectAsState().value
+    Log.d("LoginScreen", "Login result: $loginResult")
+    val userRole = authScreenViewModel.user.collectAsState().value
+    if (loginResult.isSuccess && userRole != null) {
+        Log.d("LoginScreen", "User role: $userRole")
+        when (userRole) {
+            UserRole.CUSTOMER.name -> {
+                CustomerGraph()
+            }
+
+            UserRole.ADMIN.name -> {
+                AdminGraph()
+            }
+
+            UserRole.STAFF.name -> {
+                StaffGraph()
+            }
+        }
+    }
 }

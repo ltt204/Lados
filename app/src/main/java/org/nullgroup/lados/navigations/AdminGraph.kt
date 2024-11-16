@@ -7,25 +7,33 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import org.nullgroup.lados.screens.Screen
-import org.nullgroup.lados.screens.common.LoginScreen
+import org.nullgroup.lados.screens.customer.HomeScreen
+
 
 @Composable
-fun RoleBasedNavigation(
+fun AdminGraph(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
-    startDestination: String = Screen.Common.LoginScreen.route
+    startDestination: String = Screen.Admin.AdminPanel.route
 ) {
-
     NavHost(navController = navController, startDestination = startDestination) {
-        Screen.Common.getAllScreens().forEach { screen ->
+        Screen.Admin.getAllScreens().forEach { screen ->
             composable(screen.route) {
                 when (screen.route) {
-                    Screen.Common.LoginScreen.route -> {
-                        LoginScreen()
+                    Screen.Admin.AdminPanel.route -> {
+                        // AdminPanel()
                     }
 
-                    Screen.Common.RegisterScreen.route -> {
-                        // RegisterScreen()
+                    Screen.Admin.UserManagement.route -> {
+                        // UserManagement()
+                    }
+
+                    Screen.Admin.SystemSettings.route -> {
+                        // SystemSettings()
+                    }
+
+                    Screen.Admin.Analytics.route -> {
+                        // Analytics()
                     }
                 }
             }
