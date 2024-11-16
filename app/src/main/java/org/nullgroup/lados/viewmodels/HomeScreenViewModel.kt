@@ -12,13 +12,4 @@ class HomeScreenViewModel @Inject constructor(
     private val userRepository: UserRepository
 ) : ViewModel() {
 
-    fun getAll(): List<User> {
-        return listOf(
-            User(1, "John Doe", "example1@mail.com", "customer"),
-            User(2, "Jane Doe 1", "example1@mail.com", "customer"),
-            User(3, "Jane Doe 2", "example1@mail.com", "customer"),
-            User(4, "Jane Doe 3", "example1@mail.com", "customer"),
-            User(5, "Jane Doe 4", "example1@mail.com", "customer")
-        )
-    }
 }

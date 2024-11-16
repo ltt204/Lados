@@ -75,7 +75,11 @@ dependencies {
     ksp ("com.google.dagger:hilt-android-compiler:2.49")
     ksp ("androidx.hilt:hilt-compiler:1.2.0")
 
-    //Testing
+    //Constraint Layout
+    implementation(libs.androidx.constraintlayout.compose)
+
+    //Material 3
+    implementation(libs.material3)
 
     // For Hilt testing
     testImplementation (libs.dagger.hilt.android.testing)

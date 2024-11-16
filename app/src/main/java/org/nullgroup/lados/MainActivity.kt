@@ -15,6 +15,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import org.nullgroup.lados.data.models.UserRole
+import org.nullgroup.lados.navigations.RoleBasedNavigation
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.viewmodels.HomeScreenViewModel
 
@@ -26,34 +28,10 @@ class MainActivity : ComponentActivity() {
         setContent {
             LadosTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+                    RoleBasedNavigation(userRole = UserRole.ADMIN, modifier = Modifier.padding(innerPadding))
                 }
 
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    val viewModel: HomeScreenViewModel = hiltViewModel()
-    val users = viewModel.getAll()
-    LazyColumn(
-        modifier = modifier.padding(12.dp),
-    ) {
-        items(users.size) { index ->
-            Text(text = users[index].name)
-        }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    LadosTheme {
-        Greeting("Android")
     }
 }
