@@ -5,5 +5,10 @@ data class  User (
     val name: String,
     val email: String,
     val role: String,
-
 )
+
+enum class UserRole {
+    CUSTOMER,
+    STAFF,
+    ADMIN
+}

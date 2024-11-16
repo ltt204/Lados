@@ -60,13 +60,6 @@ dependencies {
     implementation(libs.firebase.firestore)
 
     implementation(libs.androidx.core.ktx)
-    //Dagger hilt
-   // implementation(libs.hilt.android)
-    //implementation(libs.firebase.firestore.ktx)
-   // kapt(libs.hilt.android.compiler)
-//    kapt(libs.hilt.android.compiler)
-    implementation(libs.androidx.hilt.navigation.compose)
-//    kapt(libs.androidx.hilt.compiler)
 
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -75,7 +68,6 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-
 
     //Should use in Dagger Hilt
     implementation("com.google.dagger:hilt-android:2.49")
