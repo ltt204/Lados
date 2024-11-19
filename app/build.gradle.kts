@@ -80,6 +80,8 @@ dependencies {
 
     //Material 3
     implementation(libs.material3)
+    implementation(libs.androidx.material)
+    implementation(libs.androidx.compose.material3.material3)
 
     // For Hilt testing
     testImplementation (libs.dagger.hilt.android.testing)
