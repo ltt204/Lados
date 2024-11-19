@@ -1,6 +1,12 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    alias(libs.plugins.google.gms.google.services)
+    id("com.google.devtools.ksp")
+    id("kotlin-kapt")
+    id("dagger.hilt.android.plugin")
+
+
 }
 
 android {
@@ -19,7 +25,6 @@ android {
             useSupportLibrary = true
         }
     }
-
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -50,6 +55,10 @@ android {
 }
 
 dependencies {
+    // Firebase
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.database)
+    implementation(libs.firebase.firestore)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -59,11 +68,53 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+
+    //Should use in Dagger Hilt
+    implementation("com.google.dagger:hilt-android:2.49")
+    implementation ("androidx.hilt:hilt-navigation-compose:1.2.0")
+    ksp ("com.google.dagger:hilt-android-compiler:2.49")
+    ksp ("androidx.hilt:hilt-compiler:1.2.0")
+
+    //Constraint Layout
+    implementation(libs.androidx.constraintlayout.compose)
+
+    //Material 3
+    implementation(libs.material3)
+    implementation(libs.androidx.material)
+    implementation(libs.androidx.compose.material3.material3)
+
+    // For Hilt testing
+    testImplementation (libs.dagger.hilt.android.testing)
+    kaptTest (libs.hilt.android.compiler)
+
+    // For JUnit test Firebase
+    testImplementation(libs.firebase.auth.ktx)
+    testImplementation(libs.firebase.firestore.ktx)
+
+    // For JUnit test Coroutines
     testImplementation(libs.junit)
+    testImplementation(libs.junit.jupiter.api)
+    testRuntimeOnly(libs.junit.jupiter.engine)
+
+    // For JUnit test Mockito
+    testImplementation(libs.mockito.junit.jupiter)
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.inline)
+    testImplementation(libs.kotlinx.coroutines.test)
+
+    // For Android Instrumentation test
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+}
+
+kapt {
+    correctErrorTypes = true
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
 }
