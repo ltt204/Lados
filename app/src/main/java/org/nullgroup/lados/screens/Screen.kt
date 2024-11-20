@@ -2,7 +2,6 @@ package org.nullgroup.lados.screens
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MailOutline
 import androidx.compose.material.icons.filled.ShoppingCart
@@ -24,7 +23,7 @@ sealed class Screen(
         icon: ImageVector? = null
     ) : Screen(name, route, icon) {
         data object LoginScreen : Common(route = "login")
-        data object RegisterScreen : Common(route = "register",)
+        data object RegisterScreen : Common(route = "register")
 
         companion object {
             fun getAllScreens(): List<Common> {
@@ -46,12 +45,11 @@ sealed class Screen(
     ) : Screen(name, route, icon) {
         data object HomeScreen : Customer("Home Screen", "customer_home", Icons.Default.Home)
         data object ChatScreen : Customer("Chat", "customer_chat", Icons.Default.MailOutline)
-        data object Profile : Customer("Profile", "customer_profile", Icons.Default.AccountCircle)
         data object Order : Customer("Order", "customer_order", Icons.Filled.ShoppingCart)
-        data object WishList : Customer("Wish List", "customer_wish_list", Icons.Default.FavoriteBorder)
+        data object Profile : Customer("Profile", "customer_profile", Icons.Default.AccountCircle)
 
         companion object {
-            fun getAllScreens() = listOf(HomeScreen, ChatScreen, Profile, Order, WishList)
+            fun getAllScreens() = listOf(HomeScreen, ChatScreen, Order, Profile)
         }
     }
 
@@ -65,7 +63,8 @@ sealed class Screen(
     ) : Screen(name, route, icon) {
         data object ChatScreen : Staff("Chat", "staff_chat", Icons.Default.MailOutline)
         data object Reports : Staff("Reports", "staff_reports", Icons.Default.AccountCircle)
-        data object TeamAnalytics : Staff("Team Analytics", "staff_team_analytics", Icons.Default.AccountCircle)
+        data object TeamAnalytics :
+            Staff("Team Analytics", "staff_team_analytics", Icons.Default.AccountCircle)
 
         companion object {
             fun getAllScreens() = listOf(ChatScreen, Reports, TeamAnalytics)
@@ -81,8 +80,12 @@ sealed class Screen(
         icon: ImageVector
     ) : Screen(name, route, icon) {
         data object AdminPanel : Admin("Panel", "admin_panel", Icons.Default.AccountCircle)
-        data object UserManagement : Admin("User Management", "user_management", Icons.Default.AccountCircle)
-        data object SystemSettings : Admin("System Settings", "system_settings", Icons.Default.AccountCircle)
+        data object UserManagement :
+            Admin("User Management", "user_management", Icons.Default.AccountCircle)
+
+        data object SystemSettings :
+            Admin("System Settings", "system_settings", Icons.Default.AccountCircle)
+
         data object Analytics : Admin("Analytics", "analytics", Icons.Default.AccountCircle)
 
         companion object {
