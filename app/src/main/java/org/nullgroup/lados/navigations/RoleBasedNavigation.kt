@@ -21,7 +21,7 @@ fun RoleBasedNavigation(
             composable(screen.route) {
                 when (screen.route) {
                     Screen.Common.LoginScreen.route -> {
-                        LoginScreen()
+                        // LoginScreen()
                     }
 
                     Screen.Common.RegisterScreen.route -> {

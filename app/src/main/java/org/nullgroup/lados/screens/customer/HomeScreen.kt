@@ -16,7 +16,8 @@ fun HomeScreen(
     paddingValues: PaddingValues = PaddingValues(0.dp),
     navController: NavController
 ) {
-    Surface(modifier = modifier.padding(paddingValues).fillMaxSize()) {
-        Text(text = "Home Screen")
-    }
+//    Surface(modifier = modifier.padding(paddingValues).fillMaxSize()) {
+//        Text(text = "Home Screen")
+//    }
+    CartScreen()
 }

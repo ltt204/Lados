@@ -18,7 +18,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.screens.customer.HomeScreen
-import org.nullgroup.lados.screens.customer.ProfileScreen
+// import org.nullgroup.lados.screens.customer.ProfileScreen
 
 @Composable
 fun CustomerGraph(
@@ -65,12 +65,12 @@ fun CustomerGraph(
                         }
 
                         Screen.Customer.Profile.route -> {
-                            ProfileScreen(
-                                modifier = Modifier.padding(
-                                    vertical = 32.dp,
-                                    horizontal = 16.dp
-                                ), paddingValues = innerPadding
-                            )
+//                            ProfileScreen(
+//                                modifier = Modifier.padding(
+//                                    vertical = 32.dp,
+//                                    horizontal = 16.dp
+//                                ), paddingValues = innerPadding
+//                            )
                         }
 
                         Screen.Customer.Order.route -> {

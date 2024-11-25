@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import org.nullgroup.lados.data.models.UserRole
+import org.nullgroup.lados.navigations.CustomerGraph
 import org.nullgroup.lados.navigations.RoleBasedNavigation
 import org.nullgroup.lados.screens.common.LoginScreen
 import org.nullgroup.lados.ui.theme.LadosTheme
@@ -29,7 +30,10 @@ class MainActivity : ComponentActivity() {
         setContent {
             LadosTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    RoleBasedNavigation(
+//                    RoleBasedNavigation(
+//                        modifier = Modifier.padding(innerPadding)
+//                    )
+                    CustomerGraph(
                         modifier = Modifier.padding(innerPadding)
                     )
                 }

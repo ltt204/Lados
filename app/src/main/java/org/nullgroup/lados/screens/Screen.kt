@@ -29,7 +29,7 @@ sealed class Screen(
             fun getAllScreens(): List<Common> {
                 return listOf(
                     LoginScreen,
-                    RegisterScreen
+                    RegisterScreen,
                 )
             }
         }
