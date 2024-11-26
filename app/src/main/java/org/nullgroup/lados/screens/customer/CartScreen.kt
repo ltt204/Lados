@@ -26,7 +26,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -50,21 +49,67 @@ fun CartScreen(
 
     val cartItems = cartViewModel.cartItems.collectAsStateWithLifecycle()
     val cartItemInformation = cartViewModel.cartItemInformation.collectAsStateWithLifecycle()
+    val cartItemSelection = cartViewModel.cartItemSelection.collectAsStateWithLifecycle().value
 
-    val selectedItems = remember { mutableStateListOf<CartItem>() }
-    val checkoutDetail: (List<CartItem>) -> Triple<String, String, String> = { selectedItems ->
-        val validItems = selectedItems.filter { cartItemInformation.value.containsKey(it.id) }
-        val total = validItems.sumOf {
-            (cartItemInformation.value[it.id]?.second?.salePrice ?: 0.0) * it.amount
-        }
-        val subtotal = validItems.sumOf {
-            (cartItemInformation.value[it.id]?.second?.originalPrice ?: 0.0) * it.amount
+    val cartItemIds = cartItems.value.map { it.id }
+    val selectedItemIds = cartItemSelection
+        .filter { it.key in cartItemIds }
+        .map { if (it.value) it.key else null }
+        .filterNotNull()
+    val selectedItems = cartItems.value.filter { it.id in selectedItemIds }
+    val isAnyItemSelected = selectedItems.isNotEmpty()
+
+    val checkoutDetail: () -> Triple<String, String, String> = {
+        // val validVariantIds = cartItemInformation.value.values.map { it.second?.id }.filterNotNull()
+//        val validItems = selectedItems.filter {
+//            val itemInformation = cartItemInformation.value[it.id]
+//            val variantInformation = itemInformation?.second
+//            return@filter(
+//                // Id of the cartItem must be in cartItemInformation
+//                cartItemInformation.value.containsKey(it.id) &&
+//                // productVariant of the cartItem must be in the cartItemInformation
+//                // validVariantIds.contains(cartItemInformation.value[it.id]?.second?.id)
+//                cartItemInformation.value[it.id]?.second != null
+//            )
+//        }
+//
+//        val total = validItems.sumOf {
+//            (cartItemInformation.value[it.id]?.second?.salePrice ?: 0.0) * it.amount
+//        }
+//        val subtotal = validItems.sumOf {
+//            (cartItemInformation.value[it.id]?.second?.originalPrice ?: 0.0) * it.amount
+//        }
+//        val discount = subtotal - total
+
+        var subtotal = 0.0
+        var total = 0.0
+        selectedItems.forEach { cartItem ->
+            val productVariant = cartItemInformation.value[cartItem.id]?.second
+            if (productVariant != null) {
+                subtotal += productVariant.originalPrice * cartItem.amount
+                total += productVariant.salePrice * cartItem.amount
+            }
         }
         val discount = subtotal - total
         Triple(subtotal.toString(), discount.toString(), total.toString())
     }
 
-    val hardcodedCartId = "0"
+    val onItemSelected = { cartItem: CartItem ->
+        if (cartItem in selectedItems) {
+            cartViewModel.onCartItemSelectionChanged(cartItem.id, false)
+        } else {
+            cartViewModel.onCartItemSelectionChanged(cartItem.id, true)
+        }
+    }
+
+    val onItemAmountChanged = { cartItem: CartItem, amountDelta: Int ->
+        cartViewModel.updateCartItemAmount(cartItem.id, amountDelta)
+    }
+
+    val onItemRemoving = { cartItem: CartItem ->
+        cartViewModel.removeCartItem(cartItem.id)
+    }
+
     val defaultImageUrl = "https://placehold.co/600x400"
     val defaultTitle = "Unknown Product"
     val defaultValue = "???"
@@ -87,23 +132,25 @@ fun CartScreen(
             )
         },
         bottomBar = {
-            val (subtotal, discount, total) = checkoutDetail(selectedItems)
+            val (subtotal, discount, total) = checkoutDetail()
             CartBottomBar(
                 "$$subtotal", "$$discount", "$$total",
-                isEnabled = selectedItems.isNotEmpty(),
+                isEnabled = isAnyItemSelected,
                 modifier = Modifier.padding(horizontal = 20.dp)
             )
         },
         floatingActionButton = {
-            OutlinedButton(
-                onClick = {
-                    selectedItems.clear()
-                    cartViewModel.getCartItems(hardcodedCartId)
-                    cartViewModel.getItemsInformation()
-                },
-                modifier = Modifier.padding(bottom = 8.dp)
-            ) {
-                Text("Load Cart")
+            if (isAnyItemSelected) {
+                OutlinedButton(
+                    onClick = {
+                        selectedItems.forEach {
+                            onItemRemoving(it)
+                        }
+                    },
+                    modifier = Modifier.padding(bottom = 8.dp)
+                ) {
+                    Text("Remove from cart")
+                }
             }
 
         },
@@ -127,15 +174,11 @@ fun CartScreen(
                                 indication = null,
                                 onClick = {
                                     // Prevent click if interacting with child components
-                                    if (!selectedItems.contains(cartItem)) {
-                                        selectedItems.add(cartItem)
-                                    } else {
-                                        selectedItems.remove(cartItem)
-                                    }
+                                    onItemSelected(cartItem)
                                 }
                             )
                             .background(
-                                if (!selectedItems.contains(cartItem)) Color.Transparent
+                                if (cartItem !in selectedItems) Color.Transparent
                                 else if (productVariant == null) Color.Red
                                 else Color.LightGray,
                                 shape = RoundedCornerShape(8.dp)
@@ -148,9 +191,11 @@ fun CartScreen(
                             salePrice = "$" + (productVariant?.salePrice ?: defaultValue).toString(),
                             size = productVariant?.size?.sizeName ?: defaultValue,
                             color = productVariant?.color?.colorName ?: defaultValue,
-                            onAddClick = { /* TODO */ },
+                            onAddClick = { onItemAmountChanged(cartItem, 1) },
                             quantity = cartItem.amount,
-                            onRemoveClick = { /* TODO */ },
+                            onRemoveClick = {
+                                onItemAmountChanged(cartItem, -1)
+                            },
                             modifier = Modifier.fillMaxWidth()
                         )
                     }

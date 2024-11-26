@@ -9,11 +9,34 @@ data class CartItem(
     val variantId: String = "",  // Reference to variant document ID
     val amount: Int = 1,
     val addedAt: Long = System.currentTimeMillis()
-)
+) {
+    companion object {
+        // Convert Firebase Map to CartItem object
+        fun fromMap(map: Map<String, Any>): CartItem {
+            return CartItem(
+                id = map["id"] as String,
+                productId = map["productId"] as String,
+                variantId = map["variantId"] as String,
+                amount = (map["amount"] as Long).toInt(),
+                addedAt = map["addedAt"] as Long
+            )
+        }
+    }
+
+    // Convert CartItem to Firebase Map
+    fun toMap(): Map<String, Any> {
+        return hashMapOf(
+            "id" to id,
+            "productId" to productId,
+            "variantId" to variantId,
+            "amount" to amount,
+            "addedAt" to addedAt,
+        )
+    }
+}
 
 // Main Cart data class
 data class Cart(
-    val id: String = UUID.randomUUID().toString(),
     val customerId: String,  // Reference to customer document ID
     val items: Map<String, CartItem> = mapOf(),
     val createdAt: Long = System.currentTimeMillis(),
@@ -33,7 +56,6 @@ data class Cart(
         fun fromMap(map: Map<String, Any>): Cart {
             @Suppress("UNCHECKED_CAST")
             return Cart(
-                id = map["id"] as String,
                 customerId = map["customerId"] as String,
                 items = (map["items"] as? Map<String, Map<String, Any>>)?.mapValues {
                     CartItem(
@@ -52,22 +74,10 @@ data class Cart(
     // Convert Cart to Firebase Map
     fun toMap(): Map<String, Any> {
         return hashMapOf(
-            "id" to id,
             "customerId" to customerId,
             "items" to items.mapValues { it.value.toMap() },
             "createdAt" to createdAt,
             "updatedAt" to updatedAt,
         )
     }
-}
-
-// Extension function to convert CartItem to Map
-fun CartItem.toMap(): Map<String, Any> {
-    return hashMapOf(
-        "id" to id,
-        "productId" to productId,
-        "variantId" to variantId,
-        "amount" to amount,
-        "addedAt" to addedAt,
-    )
 }
