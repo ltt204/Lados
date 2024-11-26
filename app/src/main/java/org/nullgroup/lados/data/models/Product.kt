@@ -39,7 +39,7 @@ data class Color(
 data class Image(
     val id: String = "", // UUID
     val productVariantId: String = "", // UUID
-    val imageLink: String = "",
+    val link: String = "",
     val imageFileName: String = ""
 )
 

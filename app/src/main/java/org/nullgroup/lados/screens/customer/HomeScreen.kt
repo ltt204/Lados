@@ -19,5 +19,5 @@ fun HomeScreen(
 //    Surface(modifier = modifier.padding(paddingValues).fillMaxSize()) {
 //        Text(text = "Home Screen")
 //    }
-    CartScreen()
+    CartScreen(innerPadding = paddingValues)
 }
