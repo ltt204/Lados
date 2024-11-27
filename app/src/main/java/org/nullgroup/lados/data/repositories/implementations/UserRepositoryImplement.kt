@@ -3,13 +3,11 @@ package org.nullgroup.lados.data.repositories.implementations
 import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import dagger.hilt.android.scopes.ActivityScoped
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withTimeout
 import org.nullgroup.lados.data.models.User
 import org.nullgroup.lados.data.repositories.interfaces.UserRepository
-import javax.inject.Inject
 
 
 class UserRepositoryImplement (

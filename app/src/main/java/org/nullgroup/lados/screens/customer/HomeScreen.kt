@@ -16,7 +16,7 @@ fun HomeScreen(
     paddingValues: PaddingValues = PaddingValues(0.dp),
     navController: NavController
 ) {
-    Surface(modifier = modifier.padding(paddingValues).fillMaxSize()) {
+    Surface(modifier = modifier.padding(top = paddingValues.calculateTopPadding()).fillMaxSize()) {
         Text(text = "Home Screen")
     }
 }

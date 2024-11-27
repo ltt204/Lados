@@ -83,6 +83,14 @@ dependencies {
     implementation(libs.androidx.material)
     implementation(libs.androidx.compose.material3.material3)
 
+    //Gson converter
+    implementation(libs.retrofit2.converter.gson)
+
+    //Retrofit
+    implementation(libs.retrofit)
+    implementation(libs.okhttp)
+    implementation(libs.coil.compose)
+
     // For Hilt testing
     testImplementation (libs.dagger.hilt.android.testing)
     kaptTest (libs.hilt.android.compiler)

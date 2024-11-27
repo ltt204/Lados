@@ -1,7 +1,9 @@
 package org.nullgroup.lados.data.models
 
+import com.google.firebase.firestore.DocumentId
+
 data class User(
-    val id: Int = 0,
+    @DocumentId val id: String = "",
     val name: String = "",
     val email: String = "",
     val role: String = "",
