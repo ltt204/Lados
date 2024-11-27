@@ -5,8 +5,6 @@ plugins {
     id("com.google.devtools.ksp")
     id("kotlin-kapt")
     id("dagger.hilt.android.plugin")
-
-
 }
 
 android {
@@ -55,6 +53,7 @@ android {
 }
 
 dependencies {
+
     // Firebase
     implementation(libs.firebase.auth)
     implementation(libs.firebase.database)
@@ -70,10 +69,12 @@ dependencies {
     implementation(libs.androidx.material3)
 
     //Should use in Dagger Hilt
-    implementation("com.google.dagger:hilt-android:2.49")
-    implementation ("androidx.hilt:hilt-navigation-compose:1.2.0")
-    ksp ("com.google.dagger:hilt-android-compiler:2.49")
-    ksp ("androidx.hilt:hilt-compiler:1.2.0")
+    implementation(libs.hilt.android)
+    implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.play.services.auth)
+    implementation(libs.androidx.runtime.livedata)
+    ksp(libs.hilt.android.compiler.v249)
+    ksp(libs.androidx.hilt.compiler)
 
     //Constraint Layout
     implementation(libs.androidx.constraintlayout.compose)
@@ -84,8 +85,8 @@ dependencies {
     implementation(libs.androidx.compose.material3.material3)
 
     // For Hilt testing
-    testImplementation (libs.dagger.hilt.android.testing)
-    kaptTest (libs.hilt.android.compiler)
+    testImplementation(libs.dagger.hilt.android.testing)
+    kaptTest(libs.hilt.android.compiler)
 
     // For JUnit test Firebase
     testImplementation(libs.firebase.auth.ktx)
@@ -109,6 +110,17 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    // For login facebook
+    implementation(libs.facebook.android.sdk)
+    implementation(libs.facebook.login)
+    implementation(libs.android.facebook.login)
+    implementation(libs.facebook.share)
+    implementation(libs.facebook.common)
+
+    implementation(libs.androidx.browser)
+    implementation(libs.kotlinx.coroutines.play.services)
+
 }
 
 kapt {

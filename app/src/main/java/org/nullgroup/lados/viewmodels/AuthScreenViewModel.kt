@@ -8,13 +8,15 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import org.nullgroup.lados.data.models.User
+import org.nullgroup.lados.data.repositories.interfaces.AuthRepository
 import org.nullgroup.lados.data.repositories.interfaces.UserRepository
 import javax.inject.Inject
 
 @HiltViewModel
 class AuthScreenViewModel @Inject constructor(
-    private val userRepository: UserRepository
-): ViewModel() {
+    private val userRepository: UserRepository,
+    private val authRepository: AuthRepository,
+) : ViewModel() {
     var result = MutableStateFlow<Result<Boolean>>(Result.success(false))
         private set
 
@@ -24,7 +26,7 @@ class AuthScreenViewModel @Inject constructor(
     fun login(email: String, password: String) {
         viewModelScope.launch {
             try {
-                userRepository.login(email, password).let {
+                authRepository.login(email, password).let {
                     result.value = it
                 }
                 if (result.value.isSuccess) {
@@ -42,7 +44,7 @@ class AuthScreenViewModel @Inject constructor(
     fun signUp(fullName: String, email: String, password: String) {
         viewModelScope.launch {
             try {
-                userRepository.signUp(fullName, email, password).let {
+                authRepository.signUp(fullName, email, password).let {
                     result.value = it
                 }
             } catch (e: Exception) {

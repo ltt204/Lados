@@ -1,10 +1,20 @@
 [versions]
 agp = "8.5.0"
+browser = "1.8.0"
 constraintlayoutCompose = "1.0.1"
+facebookAndroidSdk = "[4,5)"
+facebookCommon = "16.3.0"
+facebookLogin = "latest.release"
+facebookLoginVersion = "17.0.2"
+facebookShare = "16.3.0"
 firebaseAuthKtx = "22.3.1"
 firebaseFirestoreKtx = "24.10.3"
+hiltAndroid = "2.52"
 hiltAndroidCompiler = "2.48.1"
+hiltAndroidCompilerVersion = "2.49"
 hiltAndroidTesting = "2.52"
+hiltCompiler = "1.2.0"
+hiltNavigationCompose = "1.2.0"
 junitJupiterApi = "5.8.1"
 junitJupiterEngine = "5.8.1"
 kotlin = "1.9.0"
@@ -12,6 +22,7 @@ coreKtx = "1.13.1"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
+kotlinxCoroutinesPlayServices = "1.8.0"
 kotlinxCoroutinesTest = "1.8.0"
 lifecycleRuntimeKtx = "2.8.6"
 activityCompose = "1.9.2"
@@ -25,17 +36,30 @@ material3 = "1.3.0"
 mockitoCore = "3.12.4"
 mockitoInline = "3.12.4"
 mockitoJunitJupiter = "4.0.0"
+playServicesAuth = "21.2.0"
+runtimeLivedata = "1.7.5"
 
 [libraries]
+android-facebook-login = { module = "com.facebook.android:facebook-login", version.ref = "facebookLogin" }
+androidx-browser = { module = "androidx.browser:browser", version.ref = "browser" }
 androidx-compose-material3-material3 = { module = "androidx.compose.material3:material3" }
 androidx-constraintlayout-compose = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "constraintlayoutCompose" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-hilt-compiler = { module = "androidx.hilt:hilt-compiler", version.ref = "hiltCompiler" }
+androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 androidx-material = { module = "androidx.compose.material:material", version.ref = "material" }
 dagger-hilt-android-testing = { module = "com.google.dagger:hilt-android-testing", version.ref = "hiltAndroidTesting" }
+facebook-android-sdk = { module = "com.facebook.android:facebook-android-sdk", version.ref = "facebookAndroidSdk" }
+facebook-common = { module = "com.facebook.android:facebook-common", version.ref = "facebookCommon" }
+facebook-login = { module = "com.facebook.android:facebook-login" }
+facebook-login-v1702 = { module = "com.facebook.android:facebook-login", version.ref = "facebookLoginVersion" }
+facebook-share = { module = "com.facebook.android:facebook-share", version.ref = "facebookShare" }
 firebase-auth-ktx = { module = "com.google.firebase:firebase-auth-ktx", version.ref = "firebaseAuthKtx" }
 firebase-firestore-ktx = { module = "com.google.firebase:firebase-firestore-ktx", version.ref = "firebaseFirestoreKtx" }
 google-hilt-android-gradle-plugin = { module = "com.google.dagger:hilt-android-gradle-plugin", version.ref = "hiltAndroidCompiler" }
+hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
 hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltAndroidCompiler" }
+hilt-android-compiler-v249 = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltAndroidCompilerVersion" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -54,11 +78,14 @@ firebase-database = { group = "com.google.firebase", name = "firebase-database",
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore", version.ref = "firebaseFirestore" }
 junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junitJupiterApi" }
 junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junitJupiterEngine" }
+kotlinx-coroutines-play-services = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref = "kotlinxCoroutinesPlayServices" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
 material3 = { module = "androidx.compose.material3:material3", version.ref = "material3" }
 mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockitoCore" }
 mockito-inline = { module = "org.mockito:mockito-inline", version.ref = "mockitoInline" }
 mockito-junit-jupiter = { module = "org.mockito:mockito-junit-jupiter", version.ref = "mockitoJunitJupiter" }
+play-services-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "playServicesAuth" }
+androidx-runtime-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata", version.ref = "runtimeLivedata" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

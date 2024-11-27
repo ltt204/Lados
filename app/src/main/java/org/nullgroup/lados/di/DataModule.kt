@@ -1,10 +1,13 @@
 package org.nullgroup.lados.di
 
+import android.app.Activity
+import android.content.Context
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ActivityContext
 import dagger.hilt.components.SingletonComponent
 import org.nullgroup.lados.data.repositories.implementations.UserRepositoryImplement
 import org.nullgroup.lados.data.repositories.interfaces.UserRepository
@@ -21,5 +24,13 @@ object DataModule {
         firebaseAuth: FirebaseAuth
     ): UserRepository {
         return UserRepositoryImplement(firestore, firebaseAuth)
+    }
+
+    @Provides
+    @Singleton
+    fun provideActivity(
+        @ActivityContext context: Context
+    ) : Activity {
+        return context as Activity
     }
 }
