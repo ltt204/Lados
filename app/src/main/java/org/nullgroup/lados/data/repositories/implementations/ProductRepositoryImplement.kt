@@ -66,7 +66,8 @@ class ProductRepositoryImplement (
                         "userId" to engagement.userId,
                         "productId" to engagement.productId,
                         "ratings" to engagement.ratings,
-                        "reviews" to engagement.reviews
+                        "reviews" to engagement.reviews,
+                        "createdAt" to engagement.createdAt
                     )
                     batch.set(engagementDocRef, engagementData)
                 }
@@ -230,7 +231,6 @@ class ProductRepositoryImplement (
                 }
             }
 
-            // Xóa engagements của sản phẩm
             val engagements = firestore.collection("products")
                 .document(id)
                 .collection("engagements")
@@ -309,7 +309,8 @@ class ProductRepositoryImplement (
                     "userId" to engagement.userId,
                     "productId" to engagement.productId,
                     "ratings" to engagement.ratings,
-                    "reviews" to engagement.reviews
+                    "reviews" to engagement.reviews,
+                    "createAt" to engagement.createdAt
                 )
                 engagementDocRef.set(engagementData).await()
             }

@@ -45,7 +45,8 @@ data class UserEngagement(
     val userId: String = "",
     val productId: String = "",
     val ratings: Int = 1,
-    val reviews: String = ""
+    val reviews: String = "",
+    val createdAt: String = ""
 )
 
 data class ProductAttribute(
