@@ -72,6 +72,7 @@ dependencies {
     //Should use in Dagger Hilt
     implementation("com.google.dagger:hilt-android:2.49")
     implementation ("androidx.hilt:hilt-navigation-compose:1.2.0")
+    implementation(libs.firebase.storage)
     ksp ("com.google.dagger:hilt-android-compiler:2.49")
     ksp ("androidx.hilt:hilt-compiler:1.2.0")
 

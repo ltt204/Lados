@@ -4,13 +4,16 @@ import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withTimeout
 import org.nullgroup.lados.data.models.User
 import org.nullgroup.lados.data.repositories.interfaces.UserRepository
 
 
-class UserRepositoryImplement (
+class UserRepositoryImplement(
     private val firestore: FirebaseFirestore,
     private val firebaseAuth: FirebaseAuth
 ) : UserRepository {
@@ -42,7 +45,8 @@ class UserRepositoryImplement (
 
     override suspend fun getUserFromFirestore(email: String): Result<User> {
         return try {
-            val user = firestore.collection("users").document(email).get().await().toObject(User::class.java)
+            val user = firestore.collection("users").document(email).get().await()
+                .toObject(User::class.java)
             Result.success(user!!)
         } catch (e: Exception) {
             Result.failure(e)
@@ -105,5 +109,27 @@ class UserRepositoryImplement (
         } catch (e: Exception) {
             Result.failure(e)
         }
+    }
+
+    override suspend fun updateUser(user: User): Result<Boolean> {
+        return try {
+            firestore.collection("users").document(user.email).set(user).await()
+            Result.success(true)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun getCurrentUser(): User {
+        val firebaseUser = firebaseAuth.currentUser
+        val profileUri = firebaseUser?.photoUrl?.toString()
+
+        val userRef = firestore.collection("users").document(firebaseUser?.email!!)
+
+        val user = userRef.get().await().toObject(User::class.java) ?: User()
+
+        user.avatarUri =
+            profileUri ?: "" // TODO: set the default avatar uri for this user's profile picture
+        return userRef.get().await().toObject(User::class.java)!!
     }
 }

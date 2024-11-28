@@ -9,6 +9,7 @@ data class User(
     val role: String = "",
     val phoneNumber: String = "",
     val address: List<String> = emptyList(),
+    var avatarUri: String = ""
 )
 
 enum class UserRole {

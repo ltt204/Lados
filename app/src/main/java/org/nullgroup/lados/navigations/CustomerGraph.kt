@@ -4,7 +4,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material3.Icon
@@ -17,7 +16,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -30,6 +28,7 @@ import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.screens.customer.AddAddressScreen
 import org.nullgroup.lados.screens.customer.AddressList
 import org.nullgroup.lados.screens.customer.EditAddressScreen
+import org.nullgroup.lados.screens.customer.EditProfileScreen
 import org.nullgroup.lados.screens.customer.HomeScreen
 import org.nullgroup.lados.screens.customer.ProfileScreen
 
@@ -42,6 +41,7 @@ fun CustomerGraph(
     var isVisibility by remember { mutableStateOf(true) }
 
     Scaffold(
+        modifier = modifier,
         bottomBar = {
             AnimatedVisibility(
                 visible = isVisibility,
@@ -92,7 +92,6 @@ fun CustomerGraph(
             composable(route = Screen.Customer.Profile.route) {
                 isVisibility = true
                 ProfileScreen(
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp).background(color = Color.Transparent),
                     paddingValues = innerPadding,
                     navController = navController
                 )
@@ -101,7 +100,7 @@ fun CustomerGraph(
             composable(route = Screen.Customer.Address.AddressList.route) {
                 isVisibility = false
                 AddressList(
-                    modifier = Modifier.padding(horizontal = 16.dp),
+                    modifier = Modifier,
                     navController = navController,
                     paddingValues = innerPadding
                 )
@@ -116,10 +115,8 @@ fun CustomerGraph(
             ) {
                 isVisibility = false
                 EditAddressScreen(
-                    modifier = Modifier.padding(horizontal = 16.dp),
+                    modifier = Modifier,
                     navController = navController,
-                    addressId = it.arguments?.getString(Screen.Customer.Address.EditAddress.ID_ARG)
-                        ?: "",
                     paddingValues = innerPadding
                 )
             }
@@ -127,7 +124,16 @@ fun CustomerGraph(
             composable(route = Screen.Customer.Address.AddAddress.route) {
                 isVisibility = false
                 AddAddressScreen(
-                    modifier = Modifier.padding(horizontal = 16.dp),
+                    modifier = Modifier,
+                    paddingValues = innerPadding,
+                    navController = navController
+                )
+            }
+
+            composable(route = Screen.Customer.EditProfile.route) {
+                isVisibility = false
+                EditProfileScreen(
+                    modifier = Modifier,
                     paddingValues = innerPadding,
                     navController = navController
                 )

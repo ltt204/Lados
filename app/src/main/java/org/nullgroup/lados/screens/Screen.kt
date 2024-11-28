@@ -43,6 +43,7 @@ sealed class Screen(
         data object ChatScreen : Customer("Chat", "customer_chat", Icons.Default.MailOutline)
         data object Order : Customer("Order", "customer_order", Icons.Filled.ShoppingCart)
         data object Profile : Customer("Profile", "customer_profile", Icons.Default.AccountCircle)
+        data object EditProfile : Customer("Edit Profile", "customer_edit_profile", Icons.Default.AccountCircle)
 
         sealed class Address(
             name: String,

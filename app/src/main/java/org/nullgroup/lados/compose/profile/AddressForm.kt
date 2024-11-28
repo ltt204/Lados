@@ -23,9 +23,6 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.nullgroup.lados.data.models.Address
-import org.nullgroup.lados.data.models.District
-import org.nullgroup.lados.data.models.Province
-import org.nullgroup.lados.data.models.Ward
 import org.nullgroup.lados.viewmodels.customer.MenuItemsUIState
 
 @Composable

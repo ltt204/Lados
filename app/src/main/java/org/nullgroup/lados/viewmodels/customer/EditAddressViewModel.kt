@@ -32,11 +32,11 @@ class EditAddressViewModel @Inject constructor(
     private var cacheDistricts = MutableStateFlow<List<District>>(emptyList())
     private var cacheWards = MutableStateFlow<List<Ward>>(emptyList())
 
-    var provincesUiState: MenuItemsUIState by mutableStateOf(MenuItemsUIState.Loading)
+    var provincesUiState: MenuItemsUIState by mutableStateOf(MenuItemsUIState.Default())
         private set
-    var districtsUiState: MenuItemsUIState by mutableStateOf(MenuItemsUIState.Loading)
+    var districtsUiState: MenuItemsUIState by mutableStateOf(MenuItemsUIState.Default())
         private set
-    var wardsUiState: MenuItemsUIState by mutableStateOf(MenuItemsUIState.Loading)
+    var wardsUiState: MenuItemsUIState by mutableStateOf(MenuItemsUIState.Default())
         private set
 
     val userAddress = MutableStateFlow(Address())
@@ -60,7 +60,7 @@ class EditAddressViewModel @Inject constructor(
                 is MenuItemsUIState.Success -> {
                     val provinceName = it.data[index]
                     districtsUiState = MenuItemsUIState.Loading
-                    wardsUiState = MenuItemsUIState.Loading
+                    wardsUiState = MenuItemsUIState.Default()
 
                     viewModelScope.launch {
                         userAddress.emit(
@@ -139,7 +139,7 @@ class EditAddressViewModel @Inject constructor(
         }
     }
 
-    fun loadProvinces() {
+    private fun loadProvinces() {
         viewModelScope.launch {
             if (cacheProvinces.value.isNotEmpty()) {
                 provincesUiState =
@@ -159,12 +159,12 @@ class EditAddressViewModel @Inject constructor(
             if (userAddress.value.district.isNotEmpty()) {
                 loadDistricts(userAddress.value.province)
             } else {
-                districtsUiState = MenuItemsUIState.Success(emptyList())
+                // Do nothing
             }
         }
     }
 
-    fun loadDistricts(provinceName: String) {
+    private fun loadDistricts(provinceName: String) {
         viewModelScope.launch {
             if (cacheDistricts.value.isNotEmpty()) {
                 districtsUiState =
@@ -184,12 +184,12 @@ class EditAddressViewModel @Inject constructor(
             if (userAddress.value.ward.isNotEmpty()) {
                 loadWards(userAddress.value.district)
             } else {
-                wardsUiState = MenuItemsUIState.Success(emptyList())
+                // Do nothing
             }
         }
     }
 
-    fun loadWards(districtName: String) {
+    private fun loadWards(districtName: String) {
         viewModelScope.launch {
             if (cacheWards.value.isNotEmpty()) {
                 wardsUiState = MenuItemsUIState.Success(cacheWards.value.map { it.full_name })
@@ -208,10 +208,10 @@ class EditAddressViewModel @Inject constructor(
             }
         }
     }
-
 }
 
 sealed interface MenuItemsUIState {
+    data class Default(var data: List<String> = emptyList()) : MenuItemsUIState
     data class Success(var data: List<String>) : MenuItemsUIState
     data object Loading : MenuItemsUIState
     data object Failed : MenuItemsUIState

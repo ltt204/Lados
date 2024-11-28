@@ -46,7 +46,7 @@ fun AddressList(
         topBar = {
             ProfileTopAppBar(onBackClick = { navController?.navigateUp() }, content = "Address")
         }) { innerPadding ->
-        Column(modifier = Modifier.padding(top = innerPadding.calculateTopPadding())) {
+        Column(modifier = Modifier.padding(top = innerPadding.calculateTopPadding(), start = 16.dp, end = 16.dp)) {
             if (addressList.value.isEmpty()) {
                 Box(
                     modifier = Modifier
@@ -64,7 +64,7 @@ fun AddressList(
                     items(items = addressList.value, key = { it.id }) { address ->
                         TwoColsItem(
                             modifier = Modifier
-                                .padding(horizontal = 8.dp, vertical = 8.dp)
+                                .padding(vertical = 8.dp)
                                 .height(80.dp),
                             content = {
                                 Log.d("AddressList", "Address: $address")

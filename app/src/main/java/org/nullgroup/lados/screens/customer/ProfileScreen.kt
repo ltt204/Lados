@@ -1,13 +1,13 @@
 package org.nullgroup.lados.screens.customer
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -47,16 +47,21 @@ fun ProfileScreen(
     paddingValues: PaddingValues = PaddingValues(0.dp)
 ) {
     Scaffold(
-        topBar = {
-            CenterAlignedTopAppBar(title = { Text(text = "Profile") })
-        },
         modifier = modifier
-            .padding(bottom = paddingValues.calculateTopPadding())
-            .background(color = Color.Transparent)
+            .fillMaxSize()
+            .padding(vertical = paddingValues.calculateTopPadding()),
+        topBar = {
+            CenterAlignedTopAppBar(title = { Text(text = "Profile", fontWeight = FontWeight.Bold) })
+        }
     ) { innerPadding ->
         Column(
-            modifier = Modifier.padding(top = 16.dp, bottom = 32.dp)
-                .fillMaxHeight()
+            modifier = Modifier
+                .padding(
+                    top = innerPadding.calculateTopPadding(),
+                    bottom = 32.dp,
+                    start = 16.dp,
+                    end = 16.dp
+                ),
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Box(
@@ -77,7 +82,10 @@ fun ProfileScreen(
                 Detail(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 32.dp)
+                        .padding(bottom = 32.dp),
+                    onEditProfileClicked = {
+                        navController?.navigate(Screen.Customer.EditProfile.route)
+                    }
                 )
 
                 Column(
@@ -206,7 +214,8 @@ fun Detail(
     modifier: Modifier = Modifier,
     userName: String = "User Name",
     email: String = "example@gamil.com",
-    phoneNumber: String = "+91 1234567890"
+    phoneNumber: String = "+91 1234567890",
+    onEditProfileClicked: () -> Unit = {}
 ) {
     Card(
         modifier = modifier
@@ -244,9 +253,9 @@ fun Detail(
                 modifier = Modifier
                     .fillMaxHeight()
                     .height(20.dp),
-                onClick = { /*TODO*/ }
+                onClick = { onEditProfileClicked() }
             ) {
-                Text(text = "Edit", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                Text(text = "Edit", fontSize = 16.sp, fontWeight = FontWeight.Bold)
             }
         }
     }

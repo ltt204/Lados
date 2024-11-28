@@ -3,7 +3,6 @@ package org.nullgroup.lados.compose.profile
 import android.util.Log
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -29,13 +28,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 import org.nullgroup.lados.viewmodels.customer.MenuItemsUIState
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
@@ -87,12 +84,26 @@ fun AddressExposedDropDownMenu(
             onDismissRequest = { isExpanded = false }
         ) {
             when (itemsUiState) {
+                is MenuItemsUIState.Default -> {
+                    DropdownMenuItem(
+                        text = { Text(text = "No items") },
+                        onClick = { /* No action */ },
+                        contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                    )
+                }
+
                 is MenuItemsUIState.Loading -> {
                     DropdownMenuItem(
                         text = {
-                            LoadProgress(
+                            LoadOnProgress(
                                 modifier = Modifier
-                                    .fillMaxWidth()
+                                    .fillMaxWidth(),
+                                content = {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(30.dp),
+                                        color = Color.Gray
+                                    )
+                                }
                             )
                         },
                         onClick = { /* No action */ },
@@ -100,34 +111,32 @@ fun AddressExposedDropDownMenu(
                     )
                 }
 
-                is MenuItemsUIState.Failed -> LoadError()
+                is MenuItemsUIState.Failed -> LoadOnError()
                 is MenuItemsUIState.Success -> {
                     if (itemsUiState.data.isEmpty()) {
                         Text(text = "No items")
                     } else {
-                        Box(
+                        menuHeight = (itemsUiState.data.size * 48).coerceAtMost(192)
+                        LazyColumn(
                             modifier = Modifier
                                 .width(400.dp)
                                 .height(300.dp)
                         ) {
-                            LazyColumn {
-                                menuHeight = (itemsUiState.data.size * 48).coerceAtMost(192)
-                                itemsIndexed(itemsUiState.data) { index, value ->
-                                    val isSelected = value == selectedItem
-                                    DropdownMenuItem(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .background(
-                                                if (isSelected) Color.Gray.copy(alpha = 0.1f) else Color.Transparent
-                                            ),
-                                        text = { Text(text = value) },
-                                        onClick = {
-                                            onItemSelected(value, index)
-                                            isExpanded = false
-                                        },
-                                        contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
-                                    )
-                                }
+                            itemsIndexed(itemsUiState.data) { index, value ->
+                                val isSelected = value == selectedItem
+                                DropdownMenuItem(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .background(
+                                            if (isSelected) Color.Gray.copy(alpha = 0.1f) else Color.Transparent
+                                        ),
+                                    text = { Text(text = value) },
+                                    onClick = {
+                                        onItemSelected(value, index)
+                                        isExpanded = false
+                                    },
+                                    contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                                )
                             }
                         }
 //                        itemsUiState.data.forEachIndexed { index, value ->
@@ -151,28 +160,6 @@ fun AddressExposedDropDownMenu(
             }
         }
     }
-}
-
-@Composable
-fun LoadProgress(
-    modifier: Modifier = Modifier
-) {
-    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        CircularProgressIndicator(
-            modifier = Modifier.size(30.dp),
-            color = Color.Gray
-        )
-    }
-}
-
-@Composable
-fun LoadError() {
-    Text(text = "Failed to load data.")
-}
-
-@Composable
-fun LoadSuccess() {
-    Text(text = "Empty")
 }
 
 @Preview(showBackground = true)

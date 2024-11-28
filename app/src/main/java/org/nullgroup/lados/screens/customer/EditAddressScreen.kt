@@ -15,14 +15,13 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import kotlinx.coroutines.CoroutineScope
 import org.nullgroup.lados.compose.profile.AddressForm
+import org.nullgroup.lados.compose.profile.ConfirmDialog
 import org.nullgroup.lados.compose.profile.ProfileTopAppBar
 import org.nullgroup.lados.viewmodels.customer.EditAddressViewModel
 
@@ -30,16 +29,14 @@ import org.nullgroup.lados.viewmodels.customer.EditAddressViewModel
 @Composable
 fun EditAddressScreen(
     modifier: Modifier = Modifier,
-    addressId: String,
     navController: NavController? = null,
     paddingValues: PaddingValues = PaddingValues(0.dp),
     viewModel: EditAddressViewModel = hiltViewModel(),
 ) {
     var saveConfirmation by remember { mutableStateOf(false) }
 
-    val address = viewModel.userAddress.collectAsState()
+    val userAddress = viewModel.userAddress.collectAsState()
 
-    val streetDetail = viewModel.streetDetail.collectAsState()
     val provincesUiState = viewModel.provincesUiState
     val districtsUiState = viewModel.districtsUiState
     val wardsUiState = viewModel.wardsUiState
@@ -49,7 +46,10 @@ fun EditAddressScreen(
             .fillMaxSize()
             .padding(vertical = paddingValues.calculateTopPadding()),
         topBar = {
-            ProfileTopAppBar(onBackClick = { navController?.navigateUp() }, content = "Edit Address")
+            ProfileTopAppBar(
+                onBackClick = { navController?.navigateUp() },
+                content = "Edit Address"
+            )
         }
     ) { innerPadding ->
         Column(
@@ -77,7 +77,7 @@ fun EditAddressScreen(
                 onDetailChanged = {
                     viewModel.onStreetDetailChanged(it)
                 },
-                address = address.value,
+                address = userAddress.value,
             )
             Button(
                 modifier = Modifier
@@ -92,8 +92,9 @@ fun EditAddressScreen(
     }
 
     if (saveConfirmation) {
-        ConfirmAddressDialog(
-            detailAddress = address.value.toString(),
+        ConfirmDialog(
+            title = { Text(text = "Confirm Address") },
+            message = { Text(text = userAddress.value.toString()) },
             onDismissRequest = { saveConfirmation = false },
             confirmButton = {
                 saveConfirmation = false
