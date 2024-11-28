@@ -103,15 +103,17 @@ class UserAddressRepository(
         addressRef.delete().addOnFailureListener {
             throw Exception("Failed to delete address")
         }.addOnSuccessListener {
-            Log.d("AddressRepository", "Address deleted")
+            Log.d("UserAddressRepository", "Address deleted")
         }
     }
 
     private suspend fun addAddressToCollection(address: Address) {
         val addressCol = firestore.collection("addresses")
-        val task = addressCol.add(address)
-        task.addOnSuccessListener {
-            address.id = it.id
-        }.await()
+        try {
+            val addressRef = addressCol.add(address).await()
+            address.id = addressRef.id
+        } catch (e: Exception) {
+            e.message?.let { Log.d("UserAddressRepository", it) };
+        }
     }
 }
