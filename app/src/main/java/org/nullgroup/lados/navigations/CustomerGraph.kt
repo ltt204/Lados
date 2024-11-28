@@ -30,7 +30,6 @@ import org.nullgroup.lados.screens.customer.AddressList
 import org.nullgroup.lados.screens.customer.EditAddressScreen
 import org.nullgroup.lados.screens.customer.EditProfileScreen
 import org.nullgroup.lados.screens.customer.HomeScreen
-import org.nullgroup.lados.screens.customer.ProfileScreen
 
 @Composable
 fun CustomerGraph(
