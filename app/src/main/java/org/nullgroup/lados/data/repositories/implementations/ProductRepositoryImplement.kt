@@ -231,6 +231,7 @@ class ProductRepositoryImplement (
                 }
             }
 
+            // Xóa engagements của sản phẩm
             val engagements = firestore.collection("products")
                 .document(id)
                 .collection("engagements")
@@ -310,7 +311,7 @@ class ProductRepositoryImplement (
                     "productId" to engagement.productId,
                     "ratings" to engagement.ratings,
                     "reviews" to engagement.reviews,
-                    "createAt" to engagement.createdAt
+                    "createdAt" to engagement.createdAt
                 )
                 engagementDocRef.set(engagementData).await()
             }
