@@ -80,6 +80,10 @@ dependencies {
     //Constraint Layout
     implementation(libs.androidx.constraintlayout.compose)
 
+    // Coil for image loading
+    implementation (libs.coil)
+
+
     //Material 3
     implementation(libs.material3)
     implementation(libs.androidx.material)

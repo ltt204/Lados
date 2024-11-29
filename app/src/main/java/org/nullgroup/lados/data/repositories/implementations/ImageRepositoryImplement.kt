@@ -2,7 +2,6 @@ package org.nullgroup.lados.data.repositories.implementations
 
 import android.util.Log
 import com.google.firebase.storage.FirebaseStorage
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.tasks.await
 import org.nullgroup.lados.data.repositories.interfaces.ImageRepository
 
@@ -51,12 +50,29 @@ class ImageRepositoryImplement(
      * Sample usage:
      * ```
      * val imageRepository = ImageRepositoryImplement(firebaseStorage)
-     * val path = imageRepository.getPath("child", "name", "fileExtension")
+     * val path = imageRepository.getPath("child", "shortSkirt", ".png")
      * ```
      **/
-    override suspend fun getPath(child: String, name: String, fileExtension: String): String {
+    override suspend fun getPath(child: String, fileName: String, fileExtension: String): String {
         val imageRef =
-            firebaseStorage.reference.child("images").child(child).child("$name.$fileExtension")
+            firebaseStorage.reference.child("images").child(child).child("$fileName.$fileExtension")
         return imageRef.path
+    }
+
+    /**
+     * Sample usage:
+     * ```
+     * val imageRepository = ImageRepositoryImplement(firebaseStorage)
+     * val link = imageRepository.getImageLink("child", "shortSkirt", ".png")
+     * ```
+     **/
+    override suspend fun getImageLink(
+        child: String,
+        fileName: String,
+        fileExtension: String
+    ): String {
+        val imageRef =
+            firebaseStorage.reference.child("images").child(child).child("$fileName.$fileExtension")
+        return imageRef.downloadUrl.await().toString()
     }
 }

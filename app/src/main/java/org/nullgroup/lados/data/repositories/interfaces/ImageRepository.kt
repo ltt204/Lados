@@ -19,9 +19,18 @@ interface ImageRepository {
     /**
      *  Gets the path of an image from the Firebase Storage
      * @param child: String - The child to get the image from
-     * @param name: String - The name of the image
+     * @param fileName: String - The name of the image
      * @param fileExtension: String - The file extension of the image
      * @return String - The path of the image
      **/
-    suspend fun getPath(child: String, name: String, fileExtension: String): String
+    suspend fun getPath(child: String, fileName: String, fileExtension: String): String
+
+    /**
+     *  Gets the image from the Firebase Storage and sets it to an ImageView
+     * @param child: String - The child to get the image from
+     * @param fileName: String - The name of the image
+     * @param fileExtension: String - The file extension of the image
+     * @return String - The link of the image
+     **/
+    suspend fun getImageLink(child: String, fileName: String, fileExtension: String): String
 }
