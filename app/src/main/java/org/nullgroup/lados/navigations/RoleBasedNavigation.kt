@@ -18,7 +18,6 @@ fun RoleBasedNavigation(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
     startDestination: String = Screen.Common.LoginScreen.route,
-    lifecycleScope: LifecycleCoroutineScope
 ) {
 
     NavHost(navController = navController, startDestination = startDestination) {
@@ -26,15 +25,15 @@ fun RoleBasedNavigation(
             composable(screen.route) {
                 when (screen.route) {
                     Screen.Common.LoginScreen.route -> {
-                        LoginScreen(lifecycleScope, navController)
+                        LoginScreen(navController, modifier)
                     }
 
                     Screen.Common.RegisterScreen.route -> {
-                        RegisterScreen(navController, {})
+                        RegisterScreen(navController, modifier)
                     }
 
                     Screen.Common.ForgotPasswordScreen.route -> {
-                        ForgotPasswordScreen(navController)
+                        ForgotPasswordScreen(navController, modifier)
                     }
                 }
             }

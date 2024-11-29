@@ -23,7 +23,7 @@ import org.nullgroup.lados.data.repositories.interfaces.GoogleAuthRepository
 import javax.inject.Inject
 import kotlin.coroutines.cancellation.CancellationException
 
-class GoogleAuthRepositoryImplement @Inject constructor(
+class GoogleAuthRepositoryImpl @Inject constructor(
     private val context: Context,
     private val oneTapClient: SignInClient,
     private val auth: FirebaseAuth,

@@ -2,35 +2,63 @@ package org.nullgroup.lados.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavController
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import org.nullgroup.lados.data.models.ForgotPasswordState
-import org.nullgroup.lados.data.repositories.interfaces.AuthRepository
+import org.nullgroup.lados.viewmodels.states.ForgotPasswordScreenState
+import org.nullgroup.lados.data.repositories.interfaces.EmailAuthRepository
+import org.nullgroup.lados.viewmodels.events.ForgotPasswordScreenEvent
 import javax.inject.Inject
 
 @HiltViewModel
 class ForgotPasswordScreenViewModel @Inject constructor(
-    private val authRepository: AuthRepository
+    private val emailAuth: EmailAuthRepository
 ) : ViewModel() {
-    private val _result = MutableStateFlow<ForgotPasswordState>(ForgotPasswordState.Initialize)
-    val result: StateFlow<ForgotPasswordState> = _result.asStateFlow()
+    var forgotPasswordState =
+        MutableStateFlow<ForgotPasswordScreenState>(ForgotPasswordScreenState.Idle)
+        private set
 
-    fun resetPassword(email: String) {
-        _result.value = ForgotPasswordState.Loading
+    private fun handleResetPassword(email: String) {
+        forgotPasswordState.value = ForgotPasswordScreenState.Loading
         viewModelScope.launch {
             try {
-                authRepository.resetPassword(email).let {
+                emailAuth.resetPassword(email).let {
                     if (it.isSuccess) {
-                        _result.value = ForgotPasswordState.Success
+                        forgotPasswordState.value = ForgotPasswordScreenState.Success
                     } else {
-                        _result.value = ForgotPasswordState.Error(it.exceptionOrNull()?.message)
+                        forgotPasswordState.value =
+                            ForgotPasswordScreenState.Error(it.exceptionOrNull()?.message)
                     }
                 }
             } catch (e: Exception) {
-                _result.value = ForgotPasswordState.Error(e.message)
+                forgotPasswordState.value = ForgotPasswordScreenState.Error(e.message)
+            }
+        }
+    }
+
+    private fun handleBackStack() {
+
+    }
+
+    private fun handleReturnToLogin(navController: NavController) {
+        navController.navigate("login")
+    }
+
+    fun handleEvent(event: ForgotPasswordScreenEvent) {
+        when (event) {
+            is ForgotPasswordScreenEvent.HandleResetPassword -> {
+                forgotPasswordState.value = ForgotPasswordScreenState.Loading
+                handleResetPassword(event.email)
+                forgotPasswordState.value = ForgotPasswordScreenState.Success
+            }
+
+            ForgotPasswordScreenEvent.HandleBackStack -> {
+
+            }
+
+            is ForgotPasswordScreenEvent.HandleReturnToLogin -> {
+                handleReturnToLogin(event.navController)
             }
         }
     }

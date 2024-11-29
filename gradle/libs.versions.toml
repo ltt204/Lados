@@ -2,6 +2,7 @@
 agp = "8.5.0"
 browser = "1.8.0"
 constraintlayoutCompose = "1.0.1"
+coreSplashscreen = "1.0.1"
 facebookAndroidSdk = "[4,5)"
 facebookCommon = "16.3.0"
 facebookLogin = "latest.release"
@@ -9,6 +10,7 @@ facebookLoginVersion = "17.0.2"
 facebookShare = "16.3.0"
 firebaseAuthKtx = "22.3.1"
 firebaseFirestoreKtx = "24.10.3"
+googleHiltAndroidCompiler = "2.51.1"
 hiltAndroid = "2.52"
 hiltAndroidCompiler = "2.48.1"
 hiltAndroidCompilerVersion = "2.49"
@@ -45,6 +47,7 @@ androidx-browser = { module = "androidx.browser:browser", version.ref = "browser
 androidx-compose-material3-material3 = { module = "androidx.compose.material3:material3" }
 androidx-constraintlayout-compose = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "constraintlayoutCompose" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
 androidx-hilt-compiler = { module = "androidx.hilt:hilt-compiler", version.ref = "hiltCompiler" }
 androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 androidx-material = { module = "androidx.compose.material:material", version.ref = "material" }
@@ -60,6 +63,7 @@ google-hilt-android-gradle-plugin = { module = "com.google.dagger:hilt-android-g
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
 hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltAndroidCompiler" }
 hilt-android-compiler-v249 = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltAndroidCompilerVersion" }
+hilt-android-compiler-v2511 = { module = "com.google.dagger:hilt-android-compiler", version.ref = "googleHiltAndroidCompiler" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }

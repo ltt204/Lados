@@ -16,11 +16,12 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import org.nullgroup.lados.R
-import org.nullgroup.lados.data.repositories.implementations.AuthRepositoryImplement
-import org.nullgroup.lados.data.repositories.implementations.GoogleAuthRepositoryImplement
-import org.nullgroup.lados.data.repositories.interfaces.AuthRepository
+import org.nullgroup.lados.data.repositories.implementations.EmailAuthRepositoryImpl
+import org.nullgroup.lados.data.repositories.implementations.FacebookAuthRepositoryImpl
+import org.nullgroup.lados.data.repositories.implementations.GoogleAuthRepositoryImpl
+import org.nullgroup.lados.data.repositories.interfaces.EmailAuthRepository
+import org.nullgroup.lados.data.repositories.interfaces.FacebookAuthRepository
 import org.nullgroup.lados.data.repositories.interfaces.GoogleAuthRepository
-import org.nullgroup.lados.data.repositories.interfaces.UserRepository
 import javax.inject.Singleton
 
 @Module
@@ -28,19 +29,43 @@ import javax.inject.Singleton
 object AuthenticationModule {
     @Provides
     @Singleton
-    fun provideAuthRepository(
+    fun provideEmailAuthRepository(
         firestore: FirebaseFirestore,
         firebaseAuth: FirebaseAuth,
-        userRepos: UserRepository,
-        loginManager: LoginManager,
-        callbackManager: CallbackManager
-    ): AuthRepository {
-        return AuthRepositoryImplement(
+    ): EmailAuthRepository {
+        return EmailAuthRepositoryImpl(
             firebaseAuth,
             firestore,
-            userRepos,
-            loginManager,
-            callbackManager
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun provideGoogleAuthRepository(
+        @ApplicationContext context: Context,
+        oneTapClient: SignInClient,
+        firebaseAuth: FirebaseAuth,
+        googleSignInClient: GoogleSignInClient
+    ): GoogleAuthRepository {
+        return GoogleAuthRepositoryImpl(
+            context,
+            oneTapClient,
+            firebaseAuth,
+            googleSignInClient
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun provideFacebookAuthRepository(
+        firebaseAuth: FirebaseAuth,
+        loginManager: LoginManager,
+        callbackManager: CallbackManager,
+    ): FacebookAuthRepository {
+        return FacebookAuthRepositoryImpl(
+            auth = firebaseAuth,
+            loginManager = loginManager,
+            callbackManager = callbackManager
         )
     }
 
@@ -58,22 +83,6 @@ object AuthenticationModule {
             .requestEmail()
             .build()
         return GoogleSignIn.getClient(context, gso)
-    }
-
-    @Provides
-    @Singleton
-    fun provideGoogleAuthRepository(
-        @ApplicationContext context: Context,
-        oneTapClient: SignInClient,
-        firebaseAuth: FirebaseAuth,
-        googleSignInClient: GoogleSignInClient
-    ): GoogleAuthRepository {
-        return GoogleAuthRepositoryImplement(
-            context,
-            oneTapClient,
-            firebaseAuth,
-            googleSignInClient
-        )
     }
 
     @Provides

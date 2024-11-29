@@ -15,6 +15,7 @@ import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
 import org.mockito.junit.jupiter.MockitoExtension
+import org.nullgroup.lados.data.repositories.interfaces.EmailAuthRepository
 import org.nullgroup.lados.data.repositories.interfaces.UserRepository
 
 @ExperimentalCoroutinesApi
@@ -30,6 +31,8 @@ class UserRepositoryImplementTest {
     private lateinit var authResult: Task<AuthResult>
 
     private lateinit var userRepository: UserRepository
+
+    private lateinit var emailAuthRepository: EmailAuthRepository
 
     @BeforeEach
     fun setUp() {
@@ -47,7 +50,7 @@ class UserRepositoryImplementTest {
             .thenReturn(authResult)
 
         // Act
-        val result = userRepository.login(email, password)
+        val result = emailAuthRepository.signIn(email, password)
 
         // Assert
         Assertions.assertTrue(result.isSuccess)
@@ -64,7 +67,7 @@ class UserRepositoryImplementTest {
             .thenReturn(authResult)
 
         // Act
-        val result = userRepository.signUp(fullName, email, password)
+        val result = emailAuthRepository.signUp(fullName, email, password)
 
         // Assert
         Assertions.assertTrue(result.isSuccess)

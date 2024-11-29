@@ -15,7 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -27,7 +27,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -45,13 +44,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import org.nullgroup.lados.data.models.ForgotPasswordState
 import org.nullgroup.lados.ui.theme.Purple40
 import org.nullgroup.lados.viewmodels.ForgotPasswordScreenViewModel
+import org.nullgroup.lados.viewmodels.events.ForgotPasswordScreenEvent
+import org.nullgroup.lados.viewmodels.events.LoginScreenEvent
+import org.nullgroup.lados.viewmodels.states.ForgotPasswordScreenState
 
 @Composable
 fun ForgotPasswordScreen(
@@ -59,89 +59,123 @@ fun ForgotPasswordScreen(
     modifier: Modifier = Modifier,
 ) {
     val forgotPasswordViewModel = hiltViewModel<ForgotPasswordScreenViewModel>()
-    var email by remember { mutableStateOf("") }
-    val result by forgotPasswordViewModel.result.collectAsState()
+    val forgotPasswordState by forgotPasswordViewModel.forgotPasswordState.collectAsState()
     val context = LocalContext.current
 
-    LaunchedEffect(result) {
-        when (result) {
-            is ForgotPasswordState.Initialize -> {}
-            is ForgotPasswordState.Loading -> {}
-            is ForgotPasswordState.Success -> {}
-            is ForgotPasswordState.Error -> {
-                Toast.makeText(
-                    context,
-                    "${(result as ForgotPasswordState.Error).message}",
-                    Toast.LENGTH_LONG
-                ).show()
-            }
+    when (val state = forgotPasswordState) {
+        is ForgotPasswordScreenState.Error -> {
+            val message = state.message
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+            ForgotPasswordInputScreen(modifier)
+        }
+
+        ForgotPasswordScreenState.Idle -> {
+            ForgotPasswordInputScreen(modifier)
+        }
+
+        ForgotPasswordScreenState.Loading -> {
+            ForgotPasswordInputScreen(modifier)
+        }
+
+        ForgotPasswordScreenState.Success -> {
+            PasswordResetConfirmationScreen(
+                navController = navController,
+                modifier = modifier,
+            )
         }
     }
+}
 
-    if (result is ForgotPasswordState.Initialize || result is ForgotPasswordState.Loading) {
-        Column(
+@Composable
+fun ForgotPasswordInputScreen(modifier: Modifier = Modifier) {
+    var email by remember { mutableStateOf("") }
+    val forgotPasswordViewModel = hiltViewModel<ForgotPasswordScreenViewModel>()
+    val forgotPasswordState by forgotPasswordViewModel.forgotPasswordState.collectAsState()
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
+            .padding(horizontal = 24.dp)
+    ) {
+
+        Box(
             modifier = Modifier
-                .fillMaxSize()
-                .background(Color.White)
-                .padding(horizontal = 24.dp)
+                .fillMaxWidth()
+                .padding(top = 16.dp)
         ) {
-
-            Box(
+            IconButton(
+                onClick = { forgotPasswordViewModel.handleEvent(ForgotPasswordScreenEvent.HandleBackStack) },
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 16.dp)
+                    .align(Alignment.CenterStart)
+                    .clip(RoundedCornerShape(100.dp))
+                    .background(Color.LightGray)
             ) {
-                IconButton(
-                    onClick = {},
-                    modifier = Modifier
-                        .align(Alignment.CenterStart)
-                        .clip(RoundedCornerShape(100.dp))
-                        .background(Color.LightGray)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowBack,
-                        contentDescription = "Back",
-                        tint = Color.Black
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Back",
+                    tint = Color.Black
+                )
+            }
+        }
+
+        Text(
+            text = "Forgot Password",
+            style = MaterialTheme.typography.headlineMedium.copy(
+                fontWeight = FontWeight.Bold
+            ),
+            modifier = Modifier.padding(top = 24.dp, bottom = 32.dp)
+        )
+
+        CustomTextField(
+            value = email,
+            onValueChange = { email = it },
+            label = "Email Address",
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        Button(
+            onClick = {
+                forgotPasswordViewModel.handleEvent(
+                    ForgotPasswordScreenEvent.HandleResetPassword(
+                        email
+                    )
+                )
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Purple40
+            ),
+            shape = RoundedCornerShape(8.dp)
+        ) {
+            when (val state = forgotPasswordState) {
+                is ForgotPasswordScreenState.Error -> {
+                    Text(
+                        text = "Continue",
+                        color = Color.White
                     )
                 }
-            }
 
-            Text(
-                text = "Forgot Password",
-                style = MaterialTheme.typography.headlineMedium.copy(
-                    fontWeight = FontWeight.Bold
-                ),
-                modifier = Modifier.padding(top = 24.dp, bottom = 32.dp)
-            )
+                ForgotPasswordScreenState.Idle -> {
+                    Text(
+                        text = "Continue",
+                        color = Color.White
+                    )
+                }
 
-            CustomTextField(
-                value = email,
-                onValueChange = { email = it },
-                label = "Email Address",
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            Button(
-                onClick = {
-                    forgotPasswordViewModel.resetPassword(email)
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Purple40
-                ),
-                shape = RoundedCornerShape(8.dp)
-            ) {
-                if (result is ForgotPasswordState.Loading) {
+                ForgotPasswordScreenState.Loading -> {
                     CircularProgressIndicator(
                         color = Color.White,
                         modifier = Modifier.size(24.dp)
                     )
-                } else {
+                }
+
+                ForgotPasswordScreenState.Success -> {
                     Text(
                         text = "Continue",
                         color = Color.White
@@ -149,10 +183,6 @@ fun ForgotPasswordScreen(
                 }
             }
         }
-    } else if (result is ForgotPasswordState.Success) {
-        PasswordResetConfirmationScreen(
-            onReturnToLoginClick = { navController.navigate("login") }
-        )
     }
 }
 
@@ -185,9 +215,11 @@ private fun CustomTextField(
 
 @Composable
 fun PasswordResetConfirmationScreen(
+    navController: NavController,
     modifier: Modifier = Modifier,
-    onReturnToLoginClick: () -> Unit = {},
 ) {
+    val forgotPasswordViewModel = hiltViewModel<ForgotPasswordScreenViewModel>()
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -249,7 +281,13 @@ fun PasswordResetConfirmationScreen(
         Spacer(modifier = Modifier.height(24.dp))
 
         Button(
-            onClick = onReturnToLoginClick,
+            onClick = {
+                forgotPasswordViewModel.handleEvent(
+                    ForgotPasswordScreenEvent.HandleReturnToLogin(
+                        navController
+                    )
+                )
+            },
             modifier = Modifier
                 .height(48.dp),
             colors = ButtonDefaults.buttonColors(
@@ -264,11 +302,4 @@ fun PasswordResetConfirmationScreen(
             )
         }
     }
-}
-
-
-@Preview
-@Composable
-private fun ForgotPasswordScreenPreview() {
-
 }

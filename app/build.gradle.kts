@@ -73,7 +73,7 @@ dependencies {
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.play.services.auth)
     implementation(libs.androidx.runtime.livedata)
-    ksp(libs.hilt.android.compiler.v249)
+    kapt(libs.hilt.android.compiler.v2511)
     ksp(libs.androidx.hilt.compiler)
 
     //Constraint Layout
@@ -96,6 +96,7 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.junit.jupiter.api)
     testRuntimeOnly(libs.junit.jupiter.engine)
+    implementation(libs.kotlinx.coroutines.play.services)
 
     // For JUnit test Mockito
     testImplementation(libs.mockito.junit.jupiter)
@@ -117,9 +118,10 @@ dependencies {
     implementation(libs.android.facebook.login)
     implementation(libs.facebook.share)
     implementation(libs.facebook.common)
-
     implementation(libs.androidx.browser)
-    implementation(libs.kotlinx.coroutines.play.services)
+
+    // For splash screen
+    implementation(libs.androidx.core.splashscreen)
 
 }
 
