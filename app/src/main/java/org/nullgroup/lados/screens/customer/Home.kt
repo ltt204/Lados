@@ -32,9 +32,13 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -79,7 +83,7 @@ fun SearchAndFilter(modifier: Modifier=Modifier) {
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .height(48.dp)
+            .height(56.dp)
         ,
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
@@ -93,24 +97,27 @@ fun SearchAndFilter(modifier: Modifier=Modifier) {
 
 @Composable
 fun SearchBar(modifier: Modifier=Modifier) {
-
-    NormalTextField(
-        label = "Search", modifier = modifier
-            .clip(androidx.compose.foundation.shape.RoundedCornerShape(8.dp))
-            .background(Color.Transparent)
-            .fillMaxHeight()
-
-            .border(
-                BorderStroke(1.dp, GrayMaterial),
-                shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp)
+    OutlinedTextField(
+        value = "", // Set initial value to empty for placeholder to be visible
+        onValueChange = {},
+        modifier = Modifier
+            .clip(RoundedCornerShape(16.dp)),
+        singleLine = true,
+        placeholder = { Text("Search") }, // Add placeholder
+        leadingIcon = {
+            Icon(
+                imageVector = Icons.Filled.Search, // Replace with your desired icon
+                contentDescription = "Search"
             )
-    ) {
-        Icon(
-            Icons.Outlined.Search,
-            contentDescription = "Search",
-            tint = BrownMaterial
+        },
+        shape = RoundedCornerShape(16.dp),
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+            unfocusedBorderColor = GrayMaterial,
+            focusedBorderColor = BrownMaterial
         )
-    }
+    )
 }
 
 
@@ -123,10 +130,9 @@ fun FilterButton(modifier: Modifier=Modifier/*, onClick: () -> Unit*/) {
             BrownMaterial
         ),
         modifier = modifier
-            .fillMaxHeight()
-            .width(48.dp)
+            .size(48.dp)
         ,
-        shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
+        shape = RoundedCornerShape(8.dp),
     )
     {
         Icon(

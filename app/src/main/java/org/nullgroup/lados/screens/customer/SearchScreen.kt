@@ -25,13 +25,19 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -45,6 +51,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -79,32 +87,33 @@ fun SearchBarSearchScreen(modifier: Modifier=Modifier) {
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp)
-            .height(48.dp),
+            .padding(horizontal = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {
 
-        NormalTextFieldSearchScreen(
-            label = "Search", modifier = modifier
-                .clip(androidx.compose.foundation.shape.RoundedCornerShape(50))
-                .background(Color.Transparent)
-                .fillMaxHeight()
+        OutlinedTextField(
+            value = "", // Set initial value to empty for placeholder to be visible
+            onValueChange = {},
+            modifier = Modifier
                 .fillMaxWidth()
-                .
-                border(
-                    BorderStroke(1.dp, GrayMaterial.copy(alpha=0.3f)),
-                    shape = androidx.compose.foundation.shape.RoundedCornerShape(50)
+                .clip(RoundedCornerShape(50)),
+            singleLine = true,
+            placeholder = { Text("Search") }, // Add placeholder
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Filled.Search, // Replace with your desired icon
+                    contentDescription = "Search"
                 )
-        ) {
-            Icon(
-                Icons.Outlined.Search,
-                contentDescription = "Search",
-                tint = BrownMaterial,
-                modifier = Modifier.size(32.dp)
-
+            },
+            shape = RoundedCornerShape(50),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                unfocusedBorderColor = GrayMaterial,
+                focusedBorderColor = BrownMaterial
             )
-        }
+        )
     }
 }
 
