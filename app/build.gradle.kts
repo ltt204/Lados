@@ -84,6 +84,10 @@ dependencies {
     implementation (libs.coil)
     implementation(libs.coil.compose)
 
+    // Image Slider
+    implementation("com.google.accompanist:accompanist-pager:0.28.0") // Or latest version
+    implementation("com.google.accompanist:accompanist-pager-indicators:0.28.0") //
+
 
     //Material 3
     implementation(libs.material3)
