@@ -13,8 +13,8 @@ class ImageRepositoryImplement(
      * Sample usage:
      * ```
      * val imageRepository = ImageRepositoryImplement(firebaseStorage)
-     * val image = drawable.toByteArray() // <- drawable is a Drawable object and uses the toByteArray extension function (which is in the ExtensionFunction.kt file)
-     * val path = imageRepository.uploadImage(image, "child")
+     * val userImage = drawable.toByteArray() // <- drawable is a Drawable object and uses the toByteArray extension function (which is in the ExtensionFunction.kt file)
+     * val path = imageRepository.uploadImage(userImage, "users", "imageName", "png")
      * ```
      **/
     override suspend fun uploadImage(
@@ -30,6 +30,7 @@ class ImageRepositoryImplement(
         imageRef.putBytes(image).addOnSuccessListener {
             Log.d("ImageRepositoryImplement", "Upload successful")
         }.addOnFailureListener {
+            // Will changes to Result sealed class for better handle exception
             throw Exception("Upload failed")
         }
         return imageRef.path
@@ -39,7 +40,7 @@ class ImageRepositoryImplement(
      * Sample usage:
      * ```
      * val imageRepository = ImageRepositoryImplement(firebaseStorage)
-     * imageRepository.deleteImage("imageId", "child")
+     * imageRepository.deleteImage("users","imageName", "png")
      * ```
      **/
     override suspend fun deleteImage(child: String, fileName: String, extension: String) {
@@ -48,6 +49,7 @@ class ImageRepositoryImplement(
         imageRef.delete().addOnSuccessListener {
             Log.d("ImageRepositoryImplement", "Delete successful")
         }.addOnFailureListener {
+            // Will changes to Result sealed class for better handle exception
             throw Exception("Delete failed")
         }
     }
@@ -56,7 +58,7 @@ class ImageRepositoryImplement(
      * Sample usage:
      * ```
      * val imageRepository = ImageRepositoryImplement(firebaseStorage)
-     * val path = imageRepository.getPath("child", "shortSkirt", ".png")
+     * val path = imageRepository.getPath("users", "userImage", ".png")
      * ```
      **/
     override suspend fun getPath(child: String, fileName: String, fileExtension: String): String {
@@ -77,8 +79,16 @@ class ImageRepositoryImplement(
         fileName: String,
         fileExtension: String
     ): String {
+
         val imageRef =
             firebaseStorage.reference.child("images").child(child).child("$fileName.$fileExtension")
-        return imageRef.downloadUrl.await().toString()
+        val imageUrl = try {
+            imageRef.downloadUrl.await().toString()
+        } catch (e: Exception) {
+            // Will changes to Result sealed class for better handle exception
+            throw Exception("Failed to get image URL")
+        }
+
+        return imageUrl
     }
 }
