@@ -82,6 +82,7 @@ dependencies {
 
     // Coil for image loading
     implementation (libs.coil)
+    implementation(libs.coil.compose)
 
 
     //Material 3

@@ -19,9 +19,14 @@ class ImageRepositoryImplement(
      **/
     override suspend fun uploadImage(
         image: ByteArray,
-        child: String
+        child: String,
+        fileName: String,
+        extension: String,
     ): String {
-        val imageRef = firebaseStorage.reference.child("images").child(child)
+        val imageRef = firebaseStorage.reference
+            .child("images")
+            .child(child)
+            .child("$fileName.$extension")
         imageRef.putBytes(image).addOnSuccessListener {
             Log.d("ImageRepositoryImplement", "Upload successful")
         }.addOnFailureListener {
@@ -37,8 +42,9 @@ class ImageRepositoryImplement(
      * imageRepository.deleteImage("imageId", "child")
      * ```
      **/
-    override suspend fun deleteImage(imageId: String, child: String) {
-        val imageRef = firebaseStorage.reference.child("images").child(child)
+    override suspend fun deleteImage(child: String, fileName: String, extension: String) {
+        val imageRef =
+            firebaseStorage.reference.child("images").child(child).child("$fileName.$extension")
         imageRef.delete().addOnSuccessListener {
             Log.d("ImageRepositoryImplement", "Delete successful")
         }.addOnFailureListener {
@@ -66,7 +72,7 @@ class ImageRepositoryImplement(
      * val link = imageRepository.getImageLink("child", "shortSkirt", ".png")
      * ```
      **/
-    override suspend fun getImageLink(
+    override suspend fun getImageUrl(
         child: String,
         fileName: String,
         fileExtension: String
