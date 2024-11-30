@@ -57,26 +57,33 @@ android {
 dependencies {
     // Firebase
     implementation(libs.firebase.auth)
+    implementation(libs.firebase.storage)
     implementation(libs.firebase.database)
     implementation(libs.firebase.firestore)
+    implementation(platform(libs.firebase.bom))
 
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.activity.compose)
-    implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
-    implementation(libs.androidx.ui.graphics)
-    implementation(libs.androidx.ui.tooling.preview)
+    implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.ui.graphics)
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.ui.tooling.preview)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(platform(libs.androidx.compose.bom))
 
     //Should use in Dagger Hilt
+    ksp ("androidx.hilt:hilt-compiler:1.2.0")
+    ksp ("com.google.dagger:hilt-android-compiler:2.49")
     implementation("com.google.dagger:hilt-android:2.49")
     implementation ("androidx.hilt:hilt-navigation-compose:1.2.0")
-    ksp ("com.google.dagger:hilt-android-compiler:2.49")
-    ksp ("androidx.hilt:hilt-compiler:1.2.0")
 
     //Constraint Layout
     implementation(libs.androidx.constraintlayout.compose)
+
+    // Coil for image loading
+    implementation (libs.coil)
+    implementation(libs.coil.compose)
+
 
     //Material 3
     implementation(libs.material3)
@@ -84,8 +91,8 @@ dependencies {
     implementation(libs.androidx.compose.material3.material3)
 
     // For Hilt testing
-    testImplementation (libs.dagger.hilt.android.testing)
     kaptTest (libs.hilt.android.compiler)
+    testImplementation (libs.dagger.hilt.android.testing)
 
     // For JUnit test Firebase
     testImplementation(libs.firebase.auth.ktx)
@@ -96,19 +103,23 @@ dependencies {
     testImplementation(libs.junit.jupiter.api)
     testRuntimeOnly(libs.junit.jupiter.engine)
 
+    // For JUnit test MockK
+    testImplementation (libs.mockk)
+
     // For JUnit test Mockito
-    testImplementation(libs.mockito.junit.jupiter)
     testImplementation(libs.mockito.core)
     testImplementation(libs.mockito.inline)
-    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.mockito.junit.jupiter)
+    testImplementation (libs.kotlinx.coroutines.test)
 
     // For Android Instrumentation test
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
+    androidTestImplementation(libs.androidx.junit)
     debugImplementation(libs.androidx.ui.test.manifest)
+    androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(libs.androidx.ui.test.junit4)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+
 }
 
 kapt {

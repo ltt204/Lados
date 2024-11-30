@@ -3,6 +3,7 @@ package org.nullgroup.lados.di
 import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -24,6 +25,13 @@ object FirebaseModule {
     @Provides
     fun provideFirebaseAuth(): FirebaseAuth {
         val instance = FirebaseAuth.getInstance()
+        return instance
+    }
+
+    @Singleton
+    @Provides
+    fun provideFirebaseStorage(): FirebaseStorage {
+        val instance = FirebaseStorage.getInstance()
         return instance
     }
 }
