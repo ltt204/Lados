@@ -1,13 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.App.SplashScreenApp" parent="Theme.SplashScreen">
-        <item name="android:windowSplashScreenBackground">
-            @color/splash_screen_background
-        </item>
-        <!--        <item name="android:windowSplashScreenAnimatedIcon">@drawable/splash</item>-->
-        <item name="android:windowSplashScreenAnimationDuration">1000</item>
-        <item name="android:windowSplashScreenIconBackgroundColor">@color/splash_screen_background</item>
-        <!--        <item name="android:windowSplashScreenBrandingImage">@drawable/splash</item>-->
+    <style name="Theme.Lados" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowIsTranslucent">true</item>
     </style>
 </resources>

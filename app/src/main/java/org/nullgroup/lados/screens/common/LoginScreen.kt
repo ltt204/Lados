@@ -47,8 +47,10 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import org.nullgroup.lados.R
 import org.nullgroup.lados.data.models.UserRole
 import org.nullgroup.lados.navigations.AdminGraph
@@ -80,6 +82,10 @@ fun EmailScreen(
         mutableStateOf("")
     }
 
+    var isError by remember {
+        mutableStateOf(false)
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -90,8 +96,9 @@ fun EmailScreen(
 
         Text(
             text = "Sign in",
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold
+            style = MaterialTheme.typography.displaySmall.copy(
+                fontWeight = FontWeight.Bold
+            )
         )
 
         OutlinedTextField(
@@ -103,25 +110,66 @@ fun EmailScreen(
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Email, imeAction = ImeAction.Done
             ),
+            isError = isError,
             colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-                unfocusedBorderColor = Color.Transparent,
-                focusedBorderColor = MaterialTheme.colorScheme.primary
+                focusedContainerColor = MaterialTheme.colorScheme.secondary.copy(
+                    alpha = 1f,
+                    red = 244f / 255,
+                    green = 244f / 255,
+                    blue = 244f / 255,
+                ),
+                focusedBorderColor = MaterialTheme.colorScheme.secondary.copy(
+                    alpha = 1f,
+                    red = 142f / 255,
+                    green = 108f / 255,
+                    blue = 239f / 255,
+                ),
+                unfocusedContainerColor = MaterialTheme.colorScheme.secondary.copy(
+                    alpha = 1f,
+                    red = 244f / 255,
+                    green = 244f / 255,
+                    blue = 244f / 255,
+                ),
+                unfocusedBorderColor = MaterialTheme.colorScheme.secondary.copy(
+                    alpha = 1f,
+                    red = 244f / 255,
+                    green = 244f / 255,
+                    blue = 244f / 255,
+                ),
+                errorBorderColor = MaterialTheme.colorScheme.error,
             )
         )
 
         Button(
             onClick = {
+                if (loginScreenViewModel.isValidateEmail(email)) {
+                    isError = false
+                } else {
+                    isError = true
+                }
+
                 loginScreenViewModel.handleLoginEvent(LoginScreenEvent.HandleEnterEmail(email))
             },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(50.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primary.copy(
+                    alpha = 1f,
+                    red = 142f / 255,
+                    green = 108f / 255,
+                    blue = 239f / 255,
+                )
+            ),
             shape = RoundedCornerShape(32.dp)
         ) {
-            Text("Continue")
+            Text(
+                text = "Continue",
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            )
         }
 
         Row(
@@ -198,7 +246,18 @@ fun SocialLoginButton(
             .fillMaxWidth()
             .height(50.dp),
         colors = ButtonDefaults.outlinedButtonColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainer, contentColor = Color.Black
+            containerColor = MaterialTheme.colorScheme.surfaceContainer.copy(
+                alpha = 1f,
+                red = 244f / 255,
+                green = 244f / 255,
+                blue = 244f / 255,
+            ),
+            contentColor = MaterialTheme.colorScheme.primary.copy(
+                alpha = 1f,
+                red = 25f / 255,
+                green = 25f / 255,
+                blue = 25f / 255,
+            )
         ),
         border = BorderStroke(0.dp, Color.Transparent),
         shape = RoundedCornerShape(32.dp)

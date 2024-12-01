@@ -9,7 +9,9 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ActivityContext
 import dagger.hilt.components.SingletonComponent
+import org.nullgroup.lados.data.repositories.implementations.ProductRepositoryImplement
 import org.nullgroup.lados.data.repositories.implementations.UserRepositoryImplement
+import org.nullgroup.lados.data.repositories.interfaces.ProductRepository
 import org.nullgroup.lados.data.repositories.interfaces.UserRepository
 import javax.inject.Singleton
 
@@ -24,6 +26,14 @@ object DataModule {
         firebaseAuth: FirebaseAuth
     ): UserRepository {
         return UserRepositoryImplement(firestore, firebaseAuth)
+    }
+
+    @Singleton
+    @Provides
+    fun provideProductRepository(
+        firestore: FirebaseFirestore
+    ): ProductRepository {
+        return ProductRepositoryImplement(firestore)
     }
 
     @Provides

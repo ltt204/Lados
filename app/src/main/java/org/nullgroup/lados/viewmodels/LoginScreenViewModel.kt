@@ -46,7 +46,7 @@ class LoginScreenViewModel @Inject constructor(
         }
     }
 
-    private fun isValidateEmail(email: String): Boolean {
+    fun isValidateEmail(email: String): Boolean {
         return EMAIL_ADDRESS.matcher(email).matches()
     }
 
@@ -154,10 +154,6 @@ class LoginScreenViewModel @Inject constructor(
                 } catch (e: Exception) {
                     loginState.value = LoginScreenState.Error(e.message)
                     Log.d("LoginScreenViewModel", "handleEnterPassword: ${e.message}")
-                    Log.d(
-                        "LoginScreenViewModel",
-                        "handleEnterPassword(stackTrace): ${e.stackTrace}"
-                    )
                 }
             }
 

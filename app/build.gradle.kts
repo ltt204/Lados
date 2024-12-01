@@ -73,6 +73,10 @@ dependencies {
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.play.services.auth)
     implementation(libs.androidx.runtime.livedata)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.material)
+    implementation(libs.androidx.activity)
+    implementation(libs.androidx.constraintlayout)
     kapt(libs.hilt.android.compiler.v2511)
     ksp(libs.androidx.hilt.compiler)
 
