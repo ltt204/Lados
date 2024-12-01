@@ -12,7 +12,6 @@ import org.nullgroup.lados.data.repositories.interfaces.UserRepository
 
 class UserRepositoryImplement(
     private val firestore: FirebaseFirestore,
-    private val firebaseAuth: FirebaseAuth
 ) : UserRepository {
 
     override suspend fun addUserToFirestore(user: User) {

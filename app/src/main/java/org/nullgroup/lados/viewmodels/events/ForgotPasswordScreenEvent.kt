@@ -5,5 +5,4 @@ import androidx.navigation.NavController
 sealed class ForgotPasswordScreenEvent {
     data class HandleResetPassword(val email: String): ForgotPasswordScreenEvent()
     data class HandleReturnToLogin(val navController: NavController): ForgotPasswordScreenEvent()
-    data object HandleBackStack: ForgotPasswordScreenEvent()
 }

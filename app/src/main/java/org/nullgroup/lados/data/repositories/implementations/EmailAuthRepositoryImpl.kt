@@ -6,6 +6,7 @@ import kotlinx.coroutines.tasks.await
 import org.nullgroup.lados.data.models.User
 import org.nullgroup.lados.data.models.UserRole
 import org.nullgroup.lados.data.repositories.interfaces.EmailAuthRepository
+import org.nullgroup.lados.data.repositories.interfaces.SharedPreferencesRepository
 import org.nullgroup.lados.data.repositories.interfaces.UserRepository
 import org.nullgroup.lados.viewmodels.states.ResourceState
 
@@ -14,23 +15,19 @@ class EmailAuthRepositoryImpl(
     private val auth: FirebaseAuth,
     private val firestore: FirebaseFirestore,
     private val userRepository: UserRepository,
+    private val sharedPreferences: SharedPreferencesRepository,
 ) : EmailAuthRepository {
 
     override suspend fun signIn(email: String, password: String): ResourceState<User> {
         return try {
             val result = auth.signInWithEmailAndPassword(email, password).await()
             val user = userRepository.getUserFromFirestore(result.user?.uid ?: "").getOrNull()
-            val token = auth.currentUser?.getIdToken(true)?.await()?.token
 
             if (user == null) {
                 return ResourceState.Error("User not found")
             }
 
-            ResourceState.Success(
-                user.copy(
-                    token = token ?: ""
-                )
-            )
+            ResourceState.Success(user)
         } catch (e: Exception) {
             ResourceState.Error(e.message)
         }
@@ -53,9 +50,11 @@ class EmailAuthRepositoryImpl(
                 phoneNumber = result.user?.phoneNumber ?: "",
                 photoUrl = result.user?.photoUrl.toString(),
                 provider = result.user?.providerId ?: "",
-                address = emptyList(),
-                token = result.user?.getIdToken(true)?.await()?.token ?: "",
             )
+            val token =result.user?.getIdToken(true)?.await()?.token
+            if (token != null) {
+                sharedPreferences.saveData(result.user?.providerId!!, token)
+            }
             userRepository.addUserToFirestore(user)
             ResourceState.Success(user)
         } catch (e: Exception) {

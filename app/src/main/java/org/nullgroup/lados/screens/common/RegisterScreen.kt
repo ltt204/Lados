@@ -57,6 +57,7 @@ import org.nullgroup.lados.viewmodels.events.LoginScreenEvent
 import org.nullgroup.lados.viewmodels.events.RegisterScreenEvent
 import org.nullgroup.lados.viewmodels.states.LoginScreenState
 import org.nullgroup.lados.viewmodels.states.RegisterScreenState
+import org.nullgroup.lados.viewmodels.states.ResourceState
 
 
 @Composable
@@ -65,45 +66,41 @@ fun RegisterScreen(
     modifier: Modifier = Modifier
 ) {
     val registerViewModel = hiltViewModel<RegisterScreenViewModel>()
-    val loginViewModel = hiltViewModel<LoginScreenViewModel>()
-
-    val loginState by loginViewModel.loginState.collectAsState()
     val registerState by registerViewModel.registerState.collectAsState()
     val context = LocalContext.current
 
 
     when (val state = registerState) {
-        is RegisterScreenState.Error -> {
+        is ResourceState.Error -> {
             RegisterInputScreen(navController, modifier)
             Toast.makeText(context, state.message, Toast.LENGTH_SHORT).show()
         }
 
-        RegisterScreenState.Idle -> {
+        ResourceState.Idle -> {
             RegisterInputScreen(navController, modifier)
         }
 
-        RegisterScreenState.Loading -> {
+        ResourceState.Loading -> {
             RegisterInputScreen(navController, modifier)
+            LoadingScreen(modifier = Modifier.fillMaxSize())
         }
 
-        RegisterScreenState.Success -> {
+        is ResourceState.Success -> {
             Toast.makeText(context, "You create account successful", Toast.LENGTH_SHORT).show()
 
-            if (loginState is LoginScreenState.Success) {
-                val userRole = (loginState as LoginScreenState.Success).userRole
-                Log.d("role", userRole!!)
-                when (userRole) {
-                    UserRole.CUSTOMER.name -> {
-                        CustomerGraph()
-                    }
+            val userRole = (registerState as ResourceState.Success).data?.role
 
-                    UserRole.ADMIN.name -> {
-                        AdminGraph()
-                    }
+            when (userRole) {
+                UserRole.CUSTOMER.name -> {
+                    CustomerGraph()
+                }
 
-                    UserRole.STAFF.name -> {
-                        StaffGraph()
-                    }
+                UserRole.ADMIN.name -> {
+                    AdminGraph()
+                }
+
+                UserRole.STAFF.name -> {
+                    StaffGraph()
                 }
             }
         }

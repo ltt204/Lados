@@ -19,6 +19,7 @@ import kotlinx.coroutines.tasks.await
 import org.nullgroup.lados.data.models.User
 import org.nullgroup.lados.data.models.UserRole
 import org.nullgroup.lados.data.repositories.interfaces.FacebookAuthRepository
+import org.nullgroup.lados.data.repositories.interfaces.SharedPreferencesRepository
 import org.nullgroup.lados.data.repositories.interfaces.UserRepository
 import org.nullgroup.lados.viewmodels.states.ResourceState
 
@@ -27,6 +28,7 @@ class FacebookAuthRepositoryImpl(
     private val loginManager: LoginManager,
     private val callbackManager: CallbackManager,
     private val userRepository: UserRepository,
+    private val sharedPreferences: SharedPreferencesRepository,
 ) : FacebookAuthRepository {
 
     @OptIn(DelicateCoroutinesApi::class)
@@ -72,10 +74,16 @@ class FacebookAuthRepositoryImpl(
                 email = it.email ?: "",
                 photoUrl = it.photoUrl.toString(),
                 provider = it.providerId ?: "",
-                token = it.getIdToken(true).await()?.token ?: "",
                 role = UserRole.CUSTOMER.name,
                 phoneNumber = it.phoneNumber ?: "",
             )
+        }
+
+        if (authResult.user != null) {
+            val token = authResult.user?.getIdToken(true)?.await()?.token
+            if (token != null) {
+                sharedPreferences.saveData(authResult.user?.providerId!!, token)
+            }
         }
 
         if (user != null) {

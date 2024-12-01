@@ -5,16 +5,18 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import org.nullgroup.lados.data.models.User
 import org.nullgroup.lados.data.repositories.interfaces.EmailAuthRepository
 import org.nullgroup.lados.viewmodels.events.RegisterScreenEvent
 import org.nullgroup.lados.viewmodels.states.RegisterScreenState
+import org.nullgroup.lados.viewmodels.states.ResourceState
 import javax.inject.Inject
 
 @HiltViewModel
 class RegisterScreenViewModel @Inject constructor(
     private val emailAuth: EmailAuthRepository
 ) : ViewModel() {
-    var registerState = MutableStateFlow<RegisterScreenState>(RegisterScreenState.Idle)
+    var registerState = MutableStateFlow<ResourceState<User>>(ResourceState.Idle)
         private set
 
     private fun handleSignUp(
@@ -23,30 +25,36 @@ class RegisterScreenViewModel @Inject constructor(
         email: String,
         password: String,
     ) {
-        registerState.value = RegisterScreenState.Loading
         viewModelScope.launch {
             try {
                 emailAuth.signUp("$firstName $lastName", email, password).let {
-                    if (it.isSuccess) {
-                        registerState.value = RegisterScreenState.Success
-                    } else {
-                        registerState.value =
-                            RegisterScreenState.Error(it.exceptionOrNull()?.message)
+                    when (it) {
+                        is ResourceState.Error -> {
+                            registerState.value = ResourceState.Error(it.message)
+                        }
+
+                        ResourceState.Idle -> {}
+                        ResourceState.Loading -> {}
+                        is ResourceState.Success -> {
+                            registerState.value = ResourceState.Success(it.data)
+                        }
                     }
                 }
             } catch (e: Exception) {
-                registerState.value = RegisterScreenState.Error(e.message)
+                registerState.value = ResourceState.Error(e.message)
             }
         }
     }
 
     fun handleEvent(event: RegisterScreenEvent) {
+        registerState.value = ResourceState.Loading
+
         when (event) {
             is RegisterScreenEvent.HandleSignUp -> {
                 handleSignUp(event.firstName, event.lastName, event.email, event.password)
             }
 
-            RegisterScreenEvent.HandleBackStack -> TODO()
+            RegisterScreenEvent.HandleBackStack -> {}
         }
     }
 }

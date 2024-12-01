@@ -51,6 +51,7 @@ import org.nullgroup.lados.viewmodels.ForgotPasswordScreenViewModel
 import org.nullgroup.lados.viewmodels.events.ForgotPasswordScreenEvent
 import org.nullgroup.lados.viewmodels.events.LoginScreenEvent
 import org.nullgroup.lados.viewmodels.states.ForgotPasswordScreenState
+import org.nullgroup.lados.viewmodels.states.ResourceState
 
 @Composable
 fun ForgotPasswordScreen(
@@ -62,21 +63,22 @@ fun ForgotPasswordScreen(
     val context = LocalContext.current
 
     when (val state = forgotPasswordState) {
-        is ForgotPasswordScreenState.Error -> {
+        is ResourceState.Error -> {
             val message = state.message
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
             ForgotPasswordInputScreen(modifier)
         }
 
-        ForgotPasswordScreenState.Idle -> {
+        ResourceState.Idle -> {
             ForgotPasswordInputScreen(modifier)
         }
 
-        ForgotPasswordScreenState.Loading -> {
+        ResourceState.Loading -> {
             ForgotPasswordInputScreen(modifier)
+            LoadingScreen(modifier = Modifier.fillMaxSize())
         }
 
-        ForgotPasswordScreenState.Success -> {
+        is ResourceState.Success -> {
             PasswordResetConfirmationScreen(
                 navController = navController,
                 modifier = modifier,
@@ -97,27 +99,6 @@ fun ForgotPasswordInputScreen(modifier: Modifier = Modifier) {
             .background(Color.White)
             .padding(horizontal = 24.dp)
     ) {
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 16.dp)
-        ) {
-            IconButton(
-                onClick = { forgotPasswordViewModel.handleEvent(ForgotPasswordScreenEvent.HandleBackStack) },
-                modifier = Modifier
-                    .align(Alignment.CenterStart)
-                    .clip(RoundedCornerShape(100.dp))
-                    .background(Color.LightGray)
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
-                    tint = Color.Black
-                )
-            }
-        }
-
         Text(
             text = "Forgot Password",
             style = MaterialTheme.typography.headlineMedium.copy(
@@ -152,35 +133,10 @@ fun ForgotPasswordInputScreen(modifier: Modifier = Modifier) {
             ),
             shape = RoundedCornerShape(8.dp)
         ) {
-            when (val state = forgotPasswordState) {
-                is ForgotPasswordScreenState.Error -> {
-                    Text(
-                        text = "Continue",
-                        color = Color.White
-                    )
-                }
-
-                ForgotPasswordScreenState.Idle -> {
-                    Text(
-                        text = "Continue",
-                        color = Color.White
-                    )
-                }
-
-                ForgotPasswordScreenState.Loading -> {
-                    CircularProgressIndicator(
-                        color = Color.White,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-
-                ForgotPasswordScreenState.Success -> {
-                    Text(
-                        text = "Continue",
-                        color = Color.White
-                    )
-                }
-            }
+            Text(
+                text = "Continue",
+                color = Color.White
+            )
         }
     }
 }

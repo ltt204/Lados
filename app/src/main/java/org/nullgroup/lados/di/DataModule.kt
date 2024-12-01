@@ -10,8 +10,10 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ActivityContext
 import dagger.hilt.components.SingletonComponent
 import org.nullgroup.lados.data.repositories.implementations.ProductRepositoryImplement
+import org.nullgroup.lados.data.repositories.implementations.SharedPreferencesImpl
 import org.nullgroup.lados.data.repositories.implementations.UserRepositoryImplement
 import org.nullgroup.lados.data.repositories.interfaces.ProductRepository
+import org.nullgroup.lados.data.repositories.interfaces.SharedPreferencesRepository
 import org.nullgroup.lados.data.repositories.interfaces.UserRepository
 import javax.inject.Singleton
 
@@ -23,9 +25,8 @@ object DataModule {
     @Provides
     fun provideUserRepository(
         firestore: FirebaseFirestore,
-        firebaseAuth: FirebaseAuth
     ): UserRepository {
-        return UserRepositoryImplement(firestore, firebaseAuth)
+        return UserRepositoryImplement(firestore)
     }
 
     @Singleton
@@ -43,4 +44,13 @@ object DataModule {
     ) : Activity {
         return context as Activity
     }
+
+    @Provides
+    @Singleton
+    fun provideSharedPreferencesRepository(
+        @ActivityContext context: Context
+    ) : SharedPreferencesRepository {
+        return SharedPreferencesImpl(context)
+    }
+
 }

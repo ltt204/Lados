@@ -9,6 +9,7 @@ import kotlinx.coroutines.launch
 import org.nullgroup.lados.viewmodels.states.ForgotPasswordScreenState
 import org.nullgroup.lados.data.repositories.interfaces.EmailAuthRepository
 import org.nullgroup.lados.viewmodels.events.ForgotPasswordScreenEvent
+import org.nullgroup.lados.viewmodels.states.ResourceState
 import javax.inject.Inject
 
 @HiltViewModel
@@ -16,45 +17,33 @@ class ForgotPasswordScreenViewModel @Inject constructor(
     private val emailAuth: EmailAuthRepository
 ) : ViewModel() {
     var forgotPasswordState =
-        MutableStateFlow<ForgotPasswordScreenState>(ForgotPasswordScreenState.Idle)
+        MutableStateFlow<ResourceState<Boolean>>(ResourceState.Idle)
         private set
 
     private fun handleResetPassword(email: String) {
-        forgotPasswordState.value = ForgotPasswordScreenState.Loading
         viewModelScope.launch {
             try {
                 emailAuth.resetPassword(email).let {
-                    if (it.isSuccess) {
-                        forgotPasswordState.value = ForgotPasswordScreenState.Success
-                    } else {
-                        forgotPasswordState.value =
-                            ForgotPasswordScreenState.Error(it.exceptionOrNull()?.message)
-                    }
+                    forgotPasswordState.value = it
                 }
+                forgotPasswordState.value = ResourceState.Success(true)
             } catch (e: Exception) {
-                forgotPasswordState.value = ForgotPasswordScreenState.Error(e.message)
+                forgotPasswordState.value = ResourceState.Error(e.message)
             }
         }
     }
 
-    private fun handleBackStack() {
-
-    }
-
     private fun handleReturnToLogin(navController: NavController) {
         navController.navigate("login")
+        forgotPasswordState.value = ResourceState.Idle
     }
 
     fun handleEvent(event: ForgotPasswordScreenEvent) {
+        forgotPasswordState.value = ResourceState.Loading
         when (event) {
             is ForgotPasswordScreenEvent.HandleResetPassword -> {
-                forgotPasswordState.value = ForgotPasswordScreenState.Loading
                 handleResetPassword(event.email)
-                forgotPasswordState.value = ForgotPasswordScreenState.Success
-            }
-
-            ForgotPasswordScreenEvent.HandleBackStack -> {
-
+                forgotPasswordState.value = ResourceState.Success(true)
             }
 
             is ForgotPasswordScreenEvent.HandleReturnToLogin -> {

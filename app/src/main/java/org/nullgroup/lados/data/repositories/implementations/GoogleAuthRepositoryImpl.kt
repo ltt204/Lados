@@ -20,17 +20,19 @@ import org.nullgroup.lados.data.models.SignInResult
 import org.nullgroup.lados.data.models.User
 import org.nullgroup.lados.data.models.UserRole
 import org.nullgroup.lados.data.repositories.interfaces.GoogleAuthRepository
+import org.nullgroup.lados.data.repositories.interfaces.SharedPreferencesRepository
 import org.nullgroup.lados.data.repositories.interfaces.UserRepository
 import org.nullgroup.lados.viewmodels.states.ResourceState
 import javax.inject.Inject
 import kotlin.coroutines.cancellation.CancellationException
 
-class GoogleAuthRepositoryImpl @Inject constructor(
+class GoogleAuthRepositoryImpl(
     private val context: Context,
     private val oneTapClient: SignInClient,
     private val auth: FirebaseAuth,
     private val googleSignInClient: GoogleSignInClient,
     private val userRepository: UserRepository,
+    private val sharedPreferences: SharedPreferencesRepository,
 ) : GoogleAuthRepository {
 
     override suspend fun signIn(): IntentSender? {
@@ -98,8 +100,11 @@ class GoogleAuthRepositoryImpl @Inject constructor(
                     phoneNumber = it.phoneNumber ?: "",
                     photoUrl = it.photoUrl.toString(),
                     provider = it.providerId,
-                    token = it.getIdToken(true).await()?.token ?: "",
                 )
+                val token = it.getIdToken(true).await()?.token
+                if (token != null) {
+                    sharedPreferences.saveData(it.providerId, token)
+                }
             }
 
 

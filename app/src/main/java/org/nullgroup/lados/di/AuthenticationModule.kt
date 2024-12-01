@@ -22,6 +22,7 @@ import org.nullgroup.lados.data.repositories.implementations.GoogleAuthRepositor
 import org.nullgroup.lados.data.repositories.interfaces.EmailAuthRepository
 import org.nullgroup.lados.data.repositories.interfaces.FacebookAuthRepository
 import org.nullgroup.lados.data.repositories.interfaces.GoogleAuthRepository
+import org.nullgroup.lados.data.repositories.interfaces.SharedPreferencesRepository
 import org.nullgroup.lados.data.repositories.interfaces.UserRepository
 import javax.inject.Singleton
 
@@ -34,11 +35,13 @@ object AuthenticationModule {
         firestore: FirebaseFirestore,
         firebaseAuth: FirebaseAuth,
         userRepository: UserRepository,
+        sharedPreferences: SharedPreferencesRepository,
     ): EmailAuthRepository {
         return EmailAuthRepositoryImpl(
             firebaseAuth,
             firestore,
             userRepository,
+            sharedPreferences,
         )
     }
 
@@ -50,12 +53,15 @@ object AuthenticationModule {
         firebaseAuth: FirebaseAuth,
         googleSignInClient: GoogleSignInClient,
         userRepository: UserRepository,
+        sharedPreferences: SharedPreferencesRepository,
     ): GoogleAuthRepository {
         return GoogleAuthRepositoryImpl(
             context,
             oneTapClient,
             firebaseAuth,
-            googleSignInClient
+            googleSignInClient,
+            userRepository,
+            sharedPreferences,
         )
     }
 
@@ -66,12 +72,14 @@ object AuthenticationModule {
         loginManager: LoginManager,
         callbackManager: CallbackManager,
         userRepository: UserRepository,
+        sharedPreferences: SharedPreferencesRepository,
     ): FacebookAuthRepository {
         return FacebookAuthRepositoryImpl(
             auth = firebaseAuth,
             loginManager = loginManager,
             callbackManager = callbackManager,
             userRepository = userRepository,
+            sharedPreferences = sharedPreferences,
         )
     }
 

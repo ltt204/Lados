@@ -26,7 +26,6 @@ import javax.inject.Inject
 
 @HiltViewModel
 class LoginScreenViewModel @Inject constructor(
-    private val userRepository: UserRepository,
     private val emailAuth: EmailAuthRepository,
     private val googleAuth: GoogleAuthRepository,
     private val facebookAuth: FacebookAuthRepository

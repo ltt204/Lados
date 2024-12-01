@@ -17,6 +17,7 @@ import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.screens.common.ForgotPasswordScreen
 import org.nullgroup.lados.screens.common.LoginScreen
 import org.nullgroup.lados.screens.common.RegisterScreen
+import org.nullgroup.lados.screens.customer.HomeScreen
 import org.nullgroup.lados.ui.theme.darkColorScheme
 import org.nullgroup.lados.ui.theme.lightColorScheme
 

@@ -8,10 +8,8 @@ data class User(
     val email: String = "",
     val role: String = "",
     val phoneNumber: String = "",
-    val address: List<String> = emptyList(),
     val photoUrl: String = "",
     val provider: String = "",
-    val token: String = "",
 )
 
 enum class UserRole {
