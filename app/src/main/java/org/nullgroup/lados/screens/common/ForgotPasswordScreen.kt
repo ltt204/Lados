@@ -47,7 +47,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import org.nullgroup.lados.ui.theme.Purple40
 import org.nullgroup.lados.viewmodels.ForgotPasswordScreenViewModel
 import org.nullgroup.lados.viewmodels.events.ForgotPasswordScreenEvent
 import org.nullgroup.lados.viewmodels.events.LoginScreenEvent
@@ -149,7 +148,7 @@ fun ForgotPasswordInputScreen(modifier: Modifier = Modifier) {
                 .fillMaxWidth()
                 .height(50.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Purple40
+                containerColor = Color(0xFF7C4DFF)
             ),
             shape = RoundedCornerShape(8.dp)
         ) {
@@ -204,7 +203,7 @@ private fun CustomTextField(
             focusedContainerColor = Color(0xFFF7F7F7),
             unfocusedContainerColor = Color(0xFFF7F7F7),
             unfocusedBorderColor = Color.Transparent,
-            focusedBorderColor = Purple40
+            focusedBorderColor = Color.White
         ),
         shape = RoundedCornerShape(8.dp),
         keyboardOptions = keyboardOptions,

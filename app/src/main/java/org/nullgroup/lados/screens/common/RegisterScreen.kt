@@ -49,7 +49,6 @@ import org.nullgroup.lados.data.models.UserRole
 import org.nullgroup.lados.navigations.AdminGraph
 import org.nullgroup.lados.navigations.CustomerGraph
 import org.nullgroup.lados.navigations.StaffGraph
-import org.nullgroup.lados.ui.theme.Purple40
 import org.nullgroup.lados.viewmodels.LoginScreenViewModel
 import org.nullgroup.lados.viewmodels.RegisterScreenViewModel
 import org.nullgroup.lados.viewmodels.events.LoginScreenEvent
@@ -216,7 +215,7 @@ fun RegisterInputScreen(navController: NavController, modifier: Modifier = Modif
                 .fillMaxWidth()
                 .height(50.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Purple40
+                containerColor = Color.Black
             ),
             shape = RoundedCornerShape(8.dp)
         ) {
@@ -245,7 +244,7 @@ fun RegisterInputScreen(navController: NavController, modifier: Modifier = Modif
             )
             Text(
                 text = "Reset",
-                color = Purple40,
+                color = Color.White,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.clickable { navController.navigate("forgot_password") }
             )
@@ -271,7 +270,7 @@ private fun CustomTextField(
             focusedContainerColor = Color(0xFFF7F7F7),
             unfocusedContainerColor = Color(0xFFF7F7F7),
             unfocusedBorderColor = Color.Transparent,
-            focusedBorderColor = Purple40
+            focusedBorderColor = Color.White
         ),
         shape = RoundedCornerShape(8.dp),
         keyboardOptions = keyboardOptions,

@@ -1,4 +1,6 @@
 [versions]
+accompanistSystemuicontroller = "<version>"
+activityKtx = "1.1.1"
 agp = "8.5.0"
 browser = "1.8.0"
 constraintlayoutCompose = "1.0.1"
@@ -46,7 +48,9 @@ activity = "1.9.3"
 constraintlayout = "2.2.0"
 
 [libraries]
+accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanistSystemuicontroller" }
 android-facebook-login = { module = "com.facebook.android:facebook-login", version.ref = "facebookLogin" }
+androidx-activity-ktx = { module = "androidx.activity:activity-ktx", version.ref = "activityKtx" }
 androidx-browser = { module = "androidx.browser:browser", version.ref = "browser" }
 androidx-compose-material3-material3 = { module = "androidx.compose.material3:material3" }
 androidx-constraintlayout-compose = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "constraintlayoutCompose" }
@@ -55,6 +59,7 @@ androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", versi
 androidx-hilt-compiler = { module = "androidx.hilt:hilt-compiler", version.ref = "hiltCompiler" }
 androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 androidx-material = { module = "androidx.compose.material:material", version.ref = "material" }
+androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
 dagger-hilt-android-testing = { module = "com.google.dagger:hilt-android-testing", version.ref = "hiltAndroidTesting" }
 facebook-android-sdk = { module = "com.facebook.android:facebook-android-sdk", version.ref = "facebookAndroidSdk" }
 facebook-common = { module = "com.facebook.android:facebook-common", version.ref = "facebookCommon" }

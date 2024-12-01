@@ -9,6 +9,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -21,9 +22,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -40,27 +45,33 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import org.nullgroup.lados.R
+import org.nullgroup.lados.compose.SignIn.ButtonSubmit
+import org.nullgroup.lados.compose.SignIn.EmailTextField
+import org.nullgroup.lados.compose.SignIn.Headline
+import org.nullgroup.lados.compose.SignIn.OutlineButton
+import org.nullgroup.lados.compose.SignIn.PasswordTextField
+import org.nullgroup.lados.compose.SignIn.TextClickable
+import org.nullgroup.lados.compose.SignIn.TextNormal
 import org.nullgroup.lados.data.models.UserRole
 import org.nullgroup.lados.navigations.AdminGraph
 import org.nullgroup.lados.navigations.CustomerGraph
 import org.nullgroup.lados.navigations.StaffGraph
+import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.viewmodels.LoginScreenViewModel
 import org.nullgroup.lados.viewmodels.events.LoginScreenEvent
 import org.nullgroup.lados.viewmodels.states.LoginScreenState
 import org.nullgroup.lados.viewmodels.states.LoginScreenStepState
-import kotlin.math.log
 
 @Composable
 fun EmailScreen(
@@ -86,6 +97,8 @@ fun EmailScreen(
         mutableStateOf(false)
     }
 
+    val context = LocalContext.current
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -94,190 +107,73 @@ fun EmailScreen(
     ) {
         Spacer(modifier = Modifier.height(70.dp))
 
-        Text(
-            text = "Sign in",
-            style = MaterialTheme.typography.displaySmall.copy(
-                fontWeight = FontWeight.Bold
-            )
-        )
+        Headline("Sign in")
 
-        OutlinedTextField(
-            value = email,
+        EmailTextField(
+            email = email,
             onValueChange = { email = it },
-            label = { Text("Email Address") },
             modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Email, imeAction = ImeAction.Done
-            ),
-            isError = isError,
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = MaterialTheme.colorScheme.secondary.copy(
-                    alpha = 1f,
-                    red = 244f / 255,
-                    green = 244f / 255,
-                    blue = 244f / 255,
-                ),
-                focusedBorderColor = MaterialTheme.colorScheme.secondary.copy(
-                    alpha = 1f,
-                    red = 142f / 255,
-                    green = 108f / 255,
-                    blue = 239f / 255,
-                ),
-                unfocusedContainerColor = MaterialTheme.colorScheme.secondary.copy(
-                    alpha = 1f,
-                    red = 244f / 255,
-                    green = 244f / 255,
-                    blue = 244f / 255,
-                ),
-                unfocusedBorderColor = MaterialTheme.colorScheme.secondary.copy(
-                    alpha = 1f,
-                    red = 244f / 255,
-                    green = 244f / 255,
-                    blue = 244f / 255,
-                ),
-                errorBorderColor = MaterialTheme.colorScheme.error,
-            )
+            isError = isError
         )
 
-        Button(
+        ButtonSubmit(
+            text = "Continue",
             onClick = {
                 if (loginScreenViewModel.isValidateEmail(email)) {
+                    loginScreenViewModel.handleLoginEvent(LoginScreenEvent.HandleEnterEmail(email))
                     isError = false
                 } else {
                     isError = true
+                    Toast.makeText(context, "Invalid Email", Toast.LENGTH_SHORT).show()
                 }
-
-                loginScreenViewModel.handleLoginEvent(LoginScreenEvent.HandleEnterEmail(email))
             },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary.copy(
-                    alpha = 1f,
-                    red = 142f / 255,
-                    green = 108f / 255,
-                    blue = 239f / 255,
-                )
-            ),
-            shape = RoundedCornerShape(32.dp)
-        ) {
-            Text(
-                text = "Continue",
-                style = MaterialTheme.typography.bodyLarge.copy(
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            )
-        }
+        )
 
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Center,
         ) {
-            Text("Don't have an Account? ")
-            Text(text = "Create One",
-                color = MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.clickable {
+            TextNormal("Don't have an Account? ")
+            TextClickable(
+                text = "Create One",
+                onClick = {
                     loginScreenViewModel.handleLoginEvent(
                         LoginScreenEvent.HandleSignUp(
                             navController
                         )
                     )
-                })
+                },
+            )
         }
 
         Spacer(modifier = Modifier.height(40.dp))
 
-        val context = LocalContext.current
-        SocialLoginButtons(
-            onClickGoggle = {
-                loginScreenViewModel.handleLoginEvent(
-                    LoginScreenEvent.HandleLogInWithGoogle(
-                        launcher
-                    )
-                )
-            },
-            onClickFacebook = {
-                loginScreenViewModel.handleLoginEvent(
-                    LoginScreenEvent.HandleLogInWithFacebook(
-                        context as ComponentActivity
-                    )
-                )
-            }
-        )
-    }
-}
-
-@Composable
-fun SocialLoginButtons(
-    modifier: Modifier = Modifier,
-    onClickGoggle: () -> Unit,
-    onClickFacebook: () -> Unit,
-) {
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(10.dp),
-    ) {
-        SocialLoginButton(
-            text = "Continue With Google",
-            icon = R.drawable.ic_google,
-            onClick = onClickGoggle
-        )
-
-        SocialLoginButton(
-            text = "Continue With Facebook",
-            icon = R.drawable.ic_facebook,
-            onClick = onClickFacebook
-        )
-    }
-}
-
-@Composable
-fun SocialLoginButton(
-    text: String, @DrawableRes icon: Int,
-    onClick: () -> Unit
-) {
-    OutlinedButton(
-        onClick = onClick,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(50.dp),
-        colors = ButtonDefaults.outlinedButtonColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainer.copy(
-                alpha = 1f,
-                red = 244f / 255,
-                green = 244f / 255,
-                blue = 244f / 255,
-            ),
-            contentColor = MaterialTheme.colorScheme.primary.copy(
-                alpha = 1f,
-                red = 25f / 255,
-                green = 25f / 255,
-                blue = 25f / 255,
-            )
-        ),
-        border = BorderStroke(0.dp, Color.Transparent),
-        shape = RoundedCornerShape(32.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Start,
-            verticalAlignment = Alignment.CenterVertically
+        Column(
+            modifier = modifier,
+            verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
-            Image(
-                painter = painterResource(id = icon),
-                contentDescription = null,
-                modifier = Modifier.size(32.dp),
+            OutlineButton(
+                text = "Continue With Google",
+                icon = R.drawable.ic_google,
+                onClick = {
+                    loginScreenViewModel.handleLoginEvent(
+                        LoginScreenEvent.HandleLogInWithGoogle(
+                            launcher
+                        )
+                    )
+                }
             )
-            Text(
-                text = text,
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.fillMaxWidth()
+
+            OutlineButton(
+                text = "Continue With Facebook",
+                icon = R.drawable.ic_facebook,
+                onClick = {
+                    loginScreenViewModel.handleLoginEvent(
+                        LoginScreenEvent.HandleLogInWithFacebook(
+                            context as ComponentActivity
+                        )
+                    )
+                }
             )
         }
     }
@@ -290,37 +186,14 @@ fun PasswordScreen(
 ) {
     val loginScreenViewModel = hiltViewModel<LoginScreenViewModel>()
     val loginState by loginScreenViewModel.loginState.collectAsState()
-
-    when (val state = loginState) {
-        is LoginScreenState.Error -> {
-            PasswordInput(navController, modifier)
-            Toast.makeText(
-                LocalContext.current,
-                state.message ?: "Login Failed",
-                Toast.LENGTH_SHORT
-            ).show()
-        }
-
-        LoginScreenState.Idle -> {
-            PasswordInput(navController, modifier)
-        }
-
-        LoginScreenState.Loading -> {
-            PasswordInput(navController, modifier)
-        }
-
-        is LoginScreenState.Success -> {
-            PasswordInput(navController, modifier)
-            Toast.makeText(LocalContext.current, "Login Success", Toast.LENGTH_SHORT).show()
-        }
-    }
-}
-
-@Composable
-fun PasswordInput(navController: NavHostController, modifier: Modifier = Modifier) {
-    val loginScreenViewModel = hiltViewModel<LoginScreenViewModel>()
     var password by remember {
         mutableStateOf("")
+    }
+    var passwordVisible by remember {
+        mutableStateOf(false)
+    }
+    var isError by remember {
+        mutableStateOf(false)
     }
 
     Column(
@@ -331,56 +204,37 @@ fun PasswordInput(navController: NavHostController, modifier: Modifier = Modifie
     ) {
         Spacer(modifier = Modifier.height(70.dp))
 
-        Text(
-            text = "Sign in",
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold
-        )
+        Headline("Sign in")
 
-        OutlinedTextField(
-            value = password,
+        PasswordTextField(
+            password = password,
             onValueChange = { password = it },
-            label = { Text("Password") },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-            visualTransformation = PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Password,
-                imeAction = ImeAction.Done
-            ),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-                unfocusedBorderColor = Color.Transparent,
-                focusedBorderColor = MaterialTheme.colorScheme.primary,
-            )
+            isError = isError,
+            passwordVisible = passwordVisible,
+            onPasswordClick = {
+                passwordVisible = !passwordVisible
+            }
         )
 
-        Button(
+        ButtonSubmit(
+            text = "Sign in",
             onClick = {
-                loginScreenViewModel.handleLoginEvent(LoginScreenEvent.HandleEnterPassword(password))
+                loginScreenViewModel.handleLoginEvent(
+                    LoginScreenEvent.HandleEnterPassword(
+                        password
+                    )
+                )
             },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary
-            ),
-            shape = RoundedCornerShape(32.dp)
-        ) {
-            Text("Log In")
-        }
+        )
 
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Center,
         ) {
-            Text("Forgot Password? ")
-            Text(
+            TextNormal(text = "Forgot Password? ")
+            TextClickable(
                 text = "Reset",
-                color = MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.clickable {
+                onClick = {
                     loginScreenViewModel.handleLoginEvent(
                         LoginScreenEvent.HandleForgotPassword(
                             navController
@@ -388,6 +242,32 @@ fun PasswordInput(navController: NavHostController, modifier: Modifier = Modifie
                     )
                 }
             )
+        }
+    }
+
+    val context = LocalContext.current
+    LaunchedEffect(loginState) {
+        when (val state = loginState) {
+            is LoginScreenState.Error -> {
+                isError = true
+                Toast.makeText(
+                    context,
+                    state.message ?: "Login Failed",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+
+            LoginScreenState.Idle -> {}
+
+            LoginScreenState.Loading -> {}
+
+            is LoginScreenState.Success -> {
+                Toast.makeText(
+                    context,
+                    "Login Success",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
         }
     }
 }

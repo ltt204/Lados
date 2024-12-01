@@ -1,7 +1,13 @@
 package org.nullgroup.lados.navigations
 
+import android.app.Activity
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -11,6 +17,8 @@ import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.screens.common.ForgotPasswordScreen
 import org.nullgroup.lados.screens.common.LoginScreen
 import org.nullgroup.lados.screens.common.RegisterScreen
+import org.nullgroup.lados.ui.theme.darkColorScheme
+import org.nullgroup.lados.ui.theme.lightColorScheme
 
 
 @Composable
@@ -19,6 +27,18 @@ fun RoleBasedNavigation(
     navController: NavHostController = rememberNavController(),
     startDestination: String = Screen.Common.LoginScreen.route,
 ) {
+    val darkTheme = isSystemInDarkTheme()
+    val view = LocalView.current
+
+    if (!view.isInEditMode) {
+        val colorScheme = if (darkTheme) darkColorScheme else lightColorScheme
+        SideEffect {
+            val window = (view.context as Activity).window
+            window.statusBarColor = colorScheme.background.toArgb()
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
+        }
+    }
+
 
     NavHost(navController = navController, startDestination = startDestination) {
         Screen.Common.getAllScreens().forEach { screen ->

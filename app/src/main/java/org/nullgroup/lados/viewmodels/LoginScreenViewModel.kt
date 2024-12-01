@@ -53,6 +53,7 @@ class LoginScreenViewModel @Inject constructor(
     private fun handleEnterEmail(email: String) {
         if (isValidateEmail(email ?: "")) {
             loginStep.value = LoginScreenStepState.Password(email)
+            loginState.value = LoginScreenState.Idle
         } else {
             loginState.value = LoginScreenState.Error("Invalid email")
         }
@@ -68,7 +69,7 @@ class LoginScreenViewModel @Inject constructor(
         viewModelScope.launch {
             emailAuth.signIn(email, password).let { result ->
                 if (result.isSuccess) {
-                    currentState = LoginScreenState.Success("")
+                    currentState = LoginScreenState.Success(UserRole.CUSTOMER.name)
                 } else if (result.isFailure) {
                     currentState =
                         LoginScreenState.Error(result.exceptionOrNull()?.message)
@@ -76,17 +77,22 @@ class LoginScreenViewModel @Inject constructor(
                         "LoginScreenViewModel",
                         "handleEnterPassword: ${result.exceptionOrNull()?.message}"
                     )
-                    Log.d(
-                        "LoginScreenViewModel",
-                        "handleEnterPassword(stackTrace): ${result.exceptionOrNull()?.stackTrace}"
-                    )
                 }
             }
 
             when (currentState) {
-                is LoginScreenState.Error -> {}
-                LoginScreenState.Idle -> {}
-                LoginScreenState.Loading -> {}
+                is LoginScreenState.Error -> {
+                    loginState.value = currentState
+                }
+
+                LoginScreenState.Idle -> {
+                    loginState.value = currentState
+                }
+
+                LoginScreenState.Loading -> {
+                    loginState.value = currentState
+                }
+
                 is LoginScreenState.Success -> {
                     userRepository.getUserRole(email).let { userRole ->
                         loginState.value =
@@ -115,23 +121,23 @@ class LoginScreenViewModel @Inject constructor(
     private fun handleLogInWithGoogle(launcher: ActivityResultLauncher<IntentSenderRequest>) {
         viewModelScope.launch {
             val signInIntentSender = googleAuth.signIn()
+
             launcher.launch(
                 IntentSenderRequest.Builder(
                     signInIntentSender ?: return@launch
                 ).build()
             )
-
-            Log.d("LoginScreen", "handleSignInWithGoogle: $signInIntentSender")
         }
-        Log.d("LoginScreen", "handleSignInWithGoogle: $launcher")
     }
 
     private fun handleSignUp(navController: NavController) {
         navController.navigate("register")
+        loginState.value = LoginScreenState.Idle
     }
 
     private fun handleForgotPassword(navController: NavController) {
         navController.navigate("forgot_password")
+        loginState.value = LoginScreenState.Idle
     }
 
     fun onGoogleSignInResult(result: ActivityResult) {
@@ -143,6 +149,7 @@ class LoginScreenViewModel @Inject constructor(
     }
 
     fun handleLoginEvent(event: LoginScreenEvent) {
+        loginState.value = LoginScreenState.Loading
         when (event) {
             is LoginScreenEvent.HandleEnterEmail -> {
                 handleEnterEmail(event.email)
