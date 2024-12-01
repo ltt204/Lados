@@ -45,6 +45,8 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import org.nullgroup.lados.compose.SignIn.CustomTextField
+import org.nullgroup.lados.compose.SignIn.Headline
 import org.nullgroup.lados.data.models.UserRole
 import org.nullgroup.lados.navigations.AdminGraph
 import org.nullgroup.lados.navigations.CustomerGraph
@@ -130,56 +132,32 @@ fun RegisterInputScreen(navController: NavController, modifier: Modifier = Modif
             .background(Color.White)
             .padding(horizontal = 24.dp)
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 16.dp)
-        ) {
-            IconButton(
-                onClick = {},
-                modifier = Modifier
-                    .align(Alignment.CenterStart)
-                    .clip(RoundedCornerShape(100.dp))
-                    .background(Color.LightGray)
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
-                    tint = Color.Black
-                )
-            }
-        }
+        Spacer(modifier = Modifier.height(70.dp))
 
-        Text(
-            text = "Create Account",
-            style = MaterialTheme.typography.headlineMedium.copy(
-                fontWeight = FontWeight.Bold
-            ),
-            modifier = Modifier.padding(top = 24.dp, bottom = 32.dp)
-        )
+        Headline(text = "Create Account")
 
         CustomTextField(
-            value = firstName,
+            label = "First Name",
+            text = firstName,
             onValueChange = { firstName = it },
-            label = "Firstname",
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         CustomTextField(
-            value = lastName,
-            onValueChange = { lastName = it },
             label = "Lastname",
+            text = lastName,
+            onValueChange = { lastName = it },
             modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         CustomTextField(
-            value = email,
-            onValueChange = { email = it },
             label = "Email Address",
+            text = email,
+            onValueChange = { email = it },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
             modifier = Modifier.fillMaxWidth()
         )
@@ -187,9 +165,9 @@ fun RegisterInputScreen(navController: NavController, modifier: Modifier = Modif
         Spacer(modifier = Modifier.height(16.dp))
 
         CustomTextField(
-            value = password,
-            onValueChange = { password = it },
             label = "Password",
+            text = password,
+            onValueChange = { password = it },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth()
@@ -219,17 +197,10 @@ fun RegisterInputScreen(navController: NavController, modifier: Modifier = Modif
             ),
             shape = RoundedCornerShape(8.dp)
         ) {
-            if (registerState is RegisterScreenState.Loading) {
-                CircularProgressIndicator(
-                    color = Color.White,
-                    modifier = Modifier.size(24.dp)
-                )
-            } else {
-                Text(
-                    text = "Continue",
-                    color = Color.White
-                )
-            }
+            Text(
+                text = "Continue",
+                color = Color.White
+            )
         }
 
         Row(
@@ -250,31 +221,4 @@ fun RegisterInputScreen(navController: NavController, modifier: Modifier = Modif
             )
         }
     }
-}
-
-@Composable
-private fun CustomTextField(
-    value: String,
-    onValueChange: (String) -> Unit,
-    label: String,
-    modifier: Modifier = Modifier,
-    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
-    visualTransformation: VisualTransformation = VisualTransformation.None
-) {
-    OutlinedTextField(
-        value = value,
-        onValueChange = onValueChange,
-        label = { Text(label) },
-        modifier = modifier,
-        colors = OutlinedTextFieldDefaults.colors(
-            focusedContainerColor = Color(0xFFF7F7F7),
-            unfocusedContainerColor = Color(0xFFF7F7F7),
-            unfocusedBorderColor = Color.Transparent,
-            focusedBorderColor = Color.White
-        ),
-        shape = RoundedCornerShape(8.dp),
-        keyboardOptions = keyboardOptions,
-        visualTransformation = visualTransformation,
-        singleLine = true
-    )
 }

@@ -12,6 +12,7 @@ import androidx.navigation.NavController
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import org.nullgroup.lados.data.models.User
 import org.nullgroup.lados.data.models.UserRole
 import org.nullgroup.lados.data.repositories.interfaces.EmailAuthRepository
 import org.nullgroup.lados.data.repositories.interfaces.FacebookAuthRepository
@@ -20,6 +21,7 @@ import org.nullgroup.lados.data.repositories.interfaces.UserRepository
 import org.nullgroup.lados.viewmodels.events.LoginScreenEvent
 import org.nullgroup.lados.viewmodels.states.LoginScreenState
 import org.nullgroup.lados.viewmodels.states.LoginScreenStepState
+import org.nullgroup.lados.viewmodels.states.ResourceState
 import javax.inject.Inject
 
 @HiltViewModel
@@ -32,7 +34,7 @@ class LoginScreenViewModel @Inject constructor(
 
     var loginStep = MutableStateFlow<LoginScreenStepState>(LoginScreenStepState.Email())
         private set
-    var loginState = MutableStateFlow<LoginScreenState>(LoginScreenState.Idle)
+    var loginState = MutableStateFlow<ResourceState<User>>(ResourceState.Idle)
         private set
 
     fun onBackPressed() {
@@ -43,6 +45,8 @@ class LoginScreenViewModel @Inject constructor(
                 val email = currentStep.email
                 loginStep.value = LoginScreenStepState.Email(email)
             }
+
+            is LoginScreenStepState.Home -> TODO()
         }
     }
 
@@ -53,115 +57,113 @@ class LoginScreenViewModel @Inject constructor(
     private fun handleEnterEmail(email: String) {
         if (isValidateEmail(email ?: "")) {
             loginStep.value = LoginScreenStepState.Password(email)
-            loginState.value = LoginScreenState.Idle
+            loginState.value = ResourceState.Idle
         } else {
-            loginState.value = LoginScreenState.Error("Invalid email")
+            loginState.value = ResourceState.Error("Invalid email")
         }
 
         Log.d("LoginScreenViewModel", "handleEnterEmail: $email")
     }
 
     private fun handleEnterPassword(password: String) {
-        var currentState = loginState.value
-        val email = (loginStep.value as LoginScreenStepState.Password).email
-        Log.d("test", "$email $password")
+        try {
+            val email = (loginStep.value as LoginScreenStepState.Password).email
 
-        viewModelScope.launch {
-            emailAuth.signIn(email, password).let { result ->
-                if (result.isSuccess) {
-                    currentState = LoginScreenState.Success(UserRole.CUSTOMER.name)
-                } else if (result.isFailure) {
-                    currentState =
-                        LoginScreenState.Error(result.exceptionOrNull()?.message)
-                    Log.d(
-                        "LoginScreenViewModel",
-                        "handleEnterPassword: ${result.exceptionOrNull()?.message}"
-                    )
-                }
-            }
+            viewModelScope.launch {
+                emailAuth.signIn(email, password).let { result ->
+                    loginState.value = result
 
-            when (currentState) {
-                is LoginScreenState.Error -> {
-                    loginState.value = currentState
-                }
+                    when (result) {
+                        is ResourceState.Error -> {
+                            loginState.value =
+                                ResourceState.Error(result.message)
+                        }
 
-                LoginScreenState.Idle -> {
-                    loginState.value = currentState
-                }
-
-                LoginScreenState.Loading -> {
-                    loginState.value = currentState
-                }
-
-                is LoginScreenState.Success -> {
-                    userRepository.getUserRole(email).let { userRole ->
-                        loginState.value =
-                            LoginScreenState.Success(userRole.getOrNull())
+                        ResourceState.Idle -> {}
+                        ResourceState.Loading -> {}
+                        is ResourceState.Success -> {
+                            loginStep.value =
+                                LoginScreenStepState.Home(result.data!!)
+                        }
                     }
                 }
             }
+        } catch (e: Exception) {
+            loginState.value = ResourceState.Error(e.message)
         }
     }
 
     private fun handleLogInWithFacebook(activity: ComponentActivity) {
-        viewModelScope.launch {
-            val result = facebookAuth.signIn(activity)
-            if (result.isSuccess) {
-                loginState.value = LoginScreenState.Success(UserRole.CUSTOMER.name)
-            } else if (result.isFailure) {
-                loginState.value = LoginScreenState.Error(result.exceptionOrNull()?.message)
-                Log.d(
-                    "LoginScreenViewModel",
-                    "handleLogInWithFacebook: ${result.exceptionOrNull()?.message}"
-                )
+        try {
+            viewModelScope.launch {
+                when (val result = facebookAuth.signIn(activity)) {
+                    is ResourceState.Error -> {
+                        loginState.value = ResourceState.Error(result.message)
+                    }
+
+                    ResourceState.Idle -> TODO()
+                    ResourceState.Loading -> TODO()
+                    is ResourceState.Success -> {
+                        loginState.value = ResourceState.Success(result.data)
+                        loginStep.value = LoginScreenStepState.Home(result.data!!)
+                    }
+                }
             }
+        } catch (e: Exception) {
+            ResourceState.Error(e.message)
         }
+
     }
 
-    private fun handleLogInWithGoogle(launcher: ActivityResultLauncher<IntentSenderRequest>) {
+    private fun handleLogInWithGoogle(
+        launcher: ActivityResultLauncher<IntentSenderRequest>,
+        user: User
+    ) {
         viewModelScope.launch {
             val signInIntentSender = googleAuth.signIn()
-
             launcher.launch(
                 IntentSenderRequest.Builder(
                     signInIntentSender ?: return@launch
                 ).build()
-            )
+            ).also {
+                loginState.value = ResourceState.Success(user)
+                loginStep.value = LoginScreenStepState.Home(user)
+            }
         }
     }
 
     private fun handleSignUp(navController: NavController) {
         navController.navigate("register")
-        loginState.value = LoginScreenState.Idle
+        loginState.value = ResourceState.Idle
     }
 
     private fun handleForgotPassword(navController: NavController) {
         navController.navigate("forgot_password")
-        loginState.value = LoginScreenState.Idle
+        loginState.value = ResourceState.Idle
     }
 
-    fun onGoogleSignInResult(result: ActivityResult) {
+    fun onGoogleSignInResult(result: ActivityResult): ResourceState<User>? {
+        var signInResult: ResourceState<User>? = null
+
         viewModelScope.launch {
-            val signInResult = googleAuth.signInWithIntent(
+            signInResult = googleAuth.signInWithIntent(
                 intent = result.data ?: return@launch
             )
         }
+
+        return signInResult
     }
 
     fun handleLoginEvent(event: LoginScreenEvent) {
-        loginState.value = LoginScreenState.Loading
+        loginState.value = ResourceState.Loading
+
         when (event) {
             is LoginScreenEvent.HandleEnterEmail -> {
                 handleEnterEmail(event.email)
             }
 
             is LoginScreenEvent.HandleEnterPassword -> {
-                try {
-                    handleEnterPassword(event.password)
-                } catch (e: Exception) {
-                    loginState.value = LoginScreenState.Error(e.message)
-                    Log.d("LoginScreenViewModel", "handleEnterPassword: ${e.message}")
-                }
+                handleEnterPassword(event.password)
             }
 
             is LoginScreenEvent.HandleForgotPassword -> {
@@ -173,7 +175,7 @@ class LoginScreenViewModel @Inject constructor(
             }
 
             is LoginScreenEvent.HandleLogInWithGoogle -> {
-                handleLogInWithGoogle(event.launcher)
+                handleLogInWithGoogle(event.launcher, event.user)
             }
 
             is LoginScreenEvent.HandleSignUp -> {

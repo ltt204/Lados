@@ -7,20 +7,26 @@ import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withTimeout
 import org.nullgroup.lados.data.models.User
+import org.nullgroup.lados.data.models.UserRole
 import org.nullgroup.lados.data.repositories.interfaces.UserRepository
 
-class UserRepositoryImplement (
+class UserRepositoryImplement(
     private val firestore: FirebaseFirestore,
     private val firebaseAuth: FirebaseAuth
 ) : UserRepository {
 
-    override suspend fun saveUserToFirestore(user: User) {
-        firestore.collection("users").document(user.email).set(user).await()
+    override suspend fun addUserToFirestore(user: User) {
+        firestore.collection("users").add(user).await()
     }
 
-    override suspend fun getUserFromFirestore(email: String): Result<User> {
+    override suspend fun saveUserToFirestore(user: User) {
+        firestore.collection("users").document(user.id).set(user).await()
+    }
+
+    override suspend fun getUserFromFirestore(id: String): Result<User> {
         return try {
-            val user = firestore.collection("users").document(email).get().await().toObject(User::class.java)
+            val user =
+                firestore.collection("users").document(id).get().await().toObject(User::class.java)
             Result.success(user!!)
         } catch (e: Exception) {
             Result.failure(e)
@@ -36,14 +42,14 @@ class UserRepositoryImplement (
         }
     }
 
-    override suspend fun getUserRole(email: String): Result<String> {
+    override suspend fun getUserRole(id: String): Result<String> {
         return try {
-            Log.d("UserRepositoryImplement", "Starting getUserRole for email: $email")
+            Log.d("UserRepositoryImplement", "Starting getUserRole for email: $id")
 
             // Add timeout
             withTimeout(5000L) {
                 // Check if document exists first
-                val docRef = firestore.collection("users").document(email)
+                val docRef = firestore.collection("users").document(id)
                 val snapshot = docRef.get().await()
 
                 if (!snapshot.exists()) {
@@ -67,18 +73,18 @@ class UserRepositoryImplement (
         }
     }
 
-    override suspend fun updateUserRole(email: String, role: String): Result<Boolean> {
+    override suspend fun updateUserRole(id: String, role: String): Result<Boolean> {
         return try {
-            firestore.collection("users").document(email).update("role", role).await()
+            firestore.collection("users").document(id).update("role", role).await()
             Result.success(true)
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 
-    override suspend fun deleteUser(email: String): Result<Boolean> {
+    override suspend fun deleteUser(id: String): Result<Boolean> {
         return try {
-            firestore.collection("users").document(email).delete().await()
+            firestore.collection("users").document(id).delete().await()
             Result.success(true)
         } catch (e: Exception) {
             Result.failure(e)

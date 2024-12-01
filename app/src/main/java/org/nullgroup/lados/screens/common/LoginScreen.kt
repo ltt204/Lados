@@ -6,11 +6,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.DrawableRes
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,20 +14,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Text
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -40,29 +29,23 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import org.nullgroup.lados.R
 import org.nullgroup.lados.compose.SignIn.ButtonSubmit
-import org.nullgroup.lados.compose.SignIn.EmailTextField
+import org.nullgroup.lados.compose.SignIn.CustomTextField
 import org.nullgroup.lados.compose.SignIn.Headline
 import org.nullgroup.lados.compose.SignIn.OutlineButton
-import org.nullgroup.lados.compose.SignIn.PasswordTextField
 import org.nullgroup.lados.compose.SignIn.TextClickable
 import org.nullgroup.lados.compose.SignIn.TextNormal
+import org.nullgroup.lados.data.models.User
 import org.nullgroup.lados.data.models.UserRole
 import org.nullgroup.lados.navigations.AdminGraph
 import org.nullgroup.lados.navigations.CustomerGraph
@@ -72,6 +55,7 @@ import org.nullgroup.lados.viewmodels.LoginScreenViewModel
 import org.nullgroup.lados.viewmodels.events.LoginScreenEvent
 import org.nullgroup.lados.viewmodels.states.LoginScreenState
 import org.nullgroup.lados.viewmodels.states.LoginScreenStepState
+import org.nullgroup.lados.viewmodels.states.ResourceState
 
 @Composable
 fun EmailScreen(
@@ -80,11 +64,24 @@ fun EmailScreen(
 ) {
     val loginScreenViewModel = hiltViewModel<LoginScreenViewModel>()
 
+    var user: User? by remember {
+        mutableStateOf(null)
+    }
+
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartIntentSenderForResult(),
         onResult = { result ->
             if (result.resultCode == Activity.RESULT_OK) {
-                loginScreenViewModel.onGoogleSignInResult(result)
+                when (val signInResult = loginScreenViewModel.onGoogleSignInResult(result)) {
+                    is ResourceState.Error -> {}
+                    ResourceState.Idle -> {}
+                    ResourceState.Loading -> {}
+                    is ResourceState.Success -> {
+                        user = signInResult.data!!
+                    }
+
+                    null -> {}
+                }
             }
         }
     )
@@ -109,10 +106,22 @@ fun EmailScreen(
 
         Headline("Sign in")
 
-        EmailTextField(
-            email = email,
+        CustomTextField(
+            label = "Email Address",
+            text = email,
             onValueChange = { email = it },
             modifier = Modifier.fillMaxWidth(),
+            leadingIcon = {
+                Icon(
+                    Icons.Default.Email,
+                    contentDescription = "email",
+                    tint = LadosTheme.colorScheme.onBackground
+                )
+            },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Email,
+                imeAction = ImeAction.Done
+            ),
             isError = isError
         )
 
@@ -156,11 +165,14 @@ fun EmailScreen(
                 text = "Continue With Google",
                 icon = R.drawable.ic_google,
                 onClick = {
-                    loginScreenViewModel.handleLoginEvent(
-                        LoginScreenEvent.HandleLogInWithGoogle(
-                            launcher
+                    user?.let {
+                        loginScreenViewModel.handleLoginEvent(
+                            LoginScreenEvent.HandleLogInWithGoogle(
+                                launcher,
+                                it,
+                            )
                         )
-                    )
+                    }
                 }
             )
 
@@ -206,14 +218,38 @@ fun PasswordScreen(
 
         Headline("Sign in")
 
-        PasswordTextField(
-            password = password,
+        CustomTextField(
+            label = "Password",
+            text = password,
             onValueChange = { password = it },
+            modifier = Modifier.fillMaxWidth(),
+            leadingIcon = {
+                Icon(
+                    Icons.Default.Lock, contentDescription = "Password",
+                    tint = LadosTheme.colorScheme.onBackground
+                )
+            },
+            trailingIcon = {
+                val image = if (passwordVisible)
+                    Icons.Filled.Visibility
+                else Icons.Filled.VisibilityOff
+
+                val description = if (passwordVisible) "Hide password" else "Show password"
+
+                IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                    Icon(
+                        imageVector = image,
+                        contentDescription = description,
+                        tint = LadosTheme.colorScheme.onBackground
+                    )
+                }
+            },
+            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Password,
+                imeAction = ImeAction.Done
+            ),
             isError = isError,
-            passwordVisible = passwordVisible,
-            onPasswordClick = {
-                passwordVisible = !passwordVisible
-            }
         )
 
         ButtonSubmit(
@@ -248,7 +284,7 @@ fun PasswordScreen(
     val context = LocalContext.current
     LaunchedEffect(loginState) {
         when (val state = loginState) {
-            is LoginScreenState.Error -> {
+            is ResourceState.Error -> {
                 isError = true
                 Toast.makeText(
                     context,
@@ -257,11 +293,11 @@ fun PasswordScreen(
                 ).show()
             }
 
-            LoginScreenState.Idle -> {}
+            ResourceState.Idle -> {}
 
-            LoginScreenState.Loading -> {}
+            ResourceState.Loading -> {}
 
-            is LoginScreenState.Success -> {
+            is ResourceState.Success -> {
                 Toast.makeText(
                     context,
                     "Login Success",
@@ -285,30 +321,34 @@ fun LoginScreen(
         loginScreenViewModel.onBackPressed()
     }
 
-    when (loginState) {
-        is LoginScreenState.Error -> {
-            when (loginStep) {
-                is LoginScreenStepState.Email -> EmailScreen(navController, modifier)
-                is LoginScreenStepState.Password -> PasswordScreen(navController, modifier)
-            }
+    when (val state = loginState) {
+        is ResourceState.Error -> {
+            val message = state.message ?: "Login Failed"
+            Toast.makeText(LocalContext.current, message, Toast.LENGTH_SHORT).show()
         }
 
-        LoginScreenState.Idle -> {
-            when (loginStep) {
-                is LoginScreenStepState.Email -> EmailScreen(navController, modifier)
-                is LoginScreenStepState.Password -> PasswordScreen(navController, modifier)
-            }
+        ResourceState.Idle -> {}
+
+        ResourceState.Loading -> {
+            LoadingScreen(modifier)
         }
 
-        LoginScreenState.Loading -> {
-            when (loginStep) {
-                is LoginScreenStepState.Email -> EmailScreen(navController, modifier)
-                is LoginScreenStepState.Password -> PasswordScreen(navController, modifier)
-            }
+        is ResourceState.Success -> {
+
+        }
+    }
+
+    when (loginStep) {
+        is LoginScreenStepState.Email -> {
+            EmailScreen(navController = navController, modifier = modifier)
         }
 
-        is LoginScreenState.Success -> {
-            val userRole = (loginState as LoginScreenState.Success).userRole
+        is LoginScreenStepState.Password -> {
+            PasswordScreen(navController = navController, modifier = modifier)
+        }
+
+        is LoginScreenStepState.Home -> {
+            val userRole = (loginStep as LoginScreenStepState.Home).user.role
             when (userRole) {
                 UserRole.CUSTOMER.name -> {
                     CustomerGraph()

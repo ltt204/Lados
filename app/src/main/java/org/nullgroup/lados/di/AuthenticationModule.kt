@@ -22,6 +22,7 @@ import org.nullgroup.lados.data.repositories.implementations.GoogleAuthRepositor
 import org.nullgroup.lados.data.repositories.interfaces.EmailAuthRepository
 import org.nullgroup.lados.data.repositories.interfaces.FacebookAuthRepository
 import org.nullgroup.lados.data.repositories.interfaces.GoogleAuthRepository
+import org.nullgroup.lados.data.repositories.interfaces.UserRepository
 import javax.inject.Singleton
 
 @Module
@@ -32,10 +33,12 @@ object AuthenticationModule {
     fun provideEmailAuthRepository(
         firestore: FirebaseFirestore,
         firebaseAuth: FirebaseAuth,
+        userRepository: UserRepository,
     ): EmailAuthRepository {
         return EmailAuthRepositoryImpl(
             firebaseAuth,
             firestore,
+            userRepository,
         )
     }
 
@@ -45,7 +48,8 @@ object AuthenticationModule {
         @ApplicationContext context: Context,
         oneTapClient: SignInClient,
         firebaseAuth: FirebaseAuth,
-        googleSignInClient: GoogleSignInClient
+        googleSignInClient: GoogleSignInClient,
+        userRepository: UserRepository,
     ): GoogleAuthRepository {
         return GoogleAuthRepositoryImpl(
             context,
@@ -61,11 +65,13 @@ object AuthenticationModule {
         firebaseAuth: FirebaseAuth,
         loginManager: LoginManager,
         callbackManager: CallbackManager,
+        userRepository: UserRepository,
     ): FacebookAuthRepository {
         return FacebookAuthRepositoryImpl(
             auth = firebaseAuth,
             loginManager = loginManager,
-            callbackManager = callbackManager
+            callbackManager = callbackManager,
+            userRepository = userRepository,
         )
     }
 

@@ -13,7 +13,7 @@ fun Headline(text: String, modifier: Modifier = Modifier) {
         style = LadosTheme.typography.headlineLarge.copy(
             fontWeight = FontWeight.Bold,
         ),
-        color = LadosTheme.colorScheme.onPrimary,
+        color = LadosTheme.colorScheme.onBackground,
         modifier = modifier,
     )
 }

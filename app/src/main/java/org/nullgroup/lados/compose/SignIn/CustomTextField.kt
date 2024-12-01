@@ -2,53 +2,56 @@ package org.nullgroup.lados.compose.SignIn
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import org.nullgroup.lados.ui.theme.LadosTheme
 
 @Composable
-fun EmailTextField(
-    email: String,
+fun CustomTextField(
+    label: String,
+    text: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
+    shape: Shape = LadosTheme.shape.medium,
+    leadingIcon: @Composable() (() -> Unit)? = null,
+    trailingIcon: @Composable() (() -> Unit)? = null,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    visualTransformation: VisualTransformation = VisualTransformation.None,
     isError: Boolean = false,
 ) {
     OutlinedTextField(
-        value = email,
+        value = text,
         onValueChange = onValueChange,
+        shape = shape,
         label = {
             Text(
-                text = "Email Address",
+                text = label,
                 style = LadosTheme.typography.bodyLarge,
                 color = LadosTheme.colorScheme.onBackground
             )
         },
         placeholder = {
             Text(
-                text="Email Address",
+                text = label,
                 style = LadosTheme.typography.titleMedium,
                 color = LadosTheme.colorScheme.onBackground
             )
         },
         textStyle = LadosTheme.typography.titleMedium,
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier,
         singleLine = true,
-        leadingIcon = {
-            Icon(Icons.Default.Email, contentDescription = "email")
-        },
-        keyboardOptions = KeyboardOptions(
-            keyboardType = KeyboardType.Email, imeAction = ImeAction.Done
-        ),
+        leadingIcon = leadingIcon,
+        trailingIcon = trailingIcon,
+        keyboardOptions = keyboardOptions,
         isError = isError,
+        visualTransformation = visualTransformation,
         colors = OutlinedTextFieldDefaults.colors(
             focusedContainerColor = LadosTheme.colorScheme.surfaceContainerHighest,
             focusedBorderColor = LadosTheme.colorScheme.primary,

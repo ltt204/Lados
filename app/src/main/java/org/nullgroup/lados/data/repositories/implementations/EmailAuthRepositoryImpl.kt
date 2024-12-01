@@ -3,21 +3,36 @@ package org.nullgroup.lados.data.repositories.implementations
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
+import org.nullgroup.lados.data.models.User
 import org.nullgroup.lados.data.models.UserRole
 import org.nullgroup.lados.data.repositories.interfaces.EmailAuthRepository
+import org.nullgroup.lados.data.repositories.interfaces.UserRepository
+import org.nullgroup.lados.viewmodels.states.ResourceState
 
 
 class EmailAuthRepositoryImpl(
     private val auth: FirebaseAuth,
     private val firestore: FirebaseFirestore,
+    private val userRepository: UserRepository,
 ) : EmailAuthRepository {
 
-    override suspend fun signIn(email: String, password: String): Result<Boolean> {
+    override suspend fun signIn(email: String, password: String): ResourceState<User> {
         return try {
             val result = auth.signInWithEmailAndPassword(email, password).await()
-            Result.success(true)
+            val user = userRepository.getUserFromFirestore(result.user?.uid ?: "").getOrNull()
+            val token = auth.currentUser?.getIdToken(true)?.await()?.token
+
+            if (user == null) {
+                return ResourceState.Error("User not found")
+            }
+
+            ResourceState.Success(
+                user.copy(
+                    token = token ?: ""
+                )
+            )
         } catch (e: Exception) {
-            Result.failure(e)
+            ResourceState.Error(e.message)
         }
     }
 
@@ -25,39 +40,44 @@ class EmailAuthRepositoryImpl(
         fullName: String,
         email: String,
         password: String,
-    ): Result<Boolean> {
+    ): ResourceState<User> {
         return try {
             val result = auth.createUserWithEmailAndPassword(email, password).await()
-            if (result.user != null) {
-                firestore.collection("users")
-                    .document(email)
-                    .set(
-                        mapOf(
-                            "name" to fullName,
-                            "email" to email,
-                            "role" to UserRole.CUSTOMER.name
-                        )
-                    ).await()
-                Result.success(true)
-            } else {
-                Result.failure(Exception("Failed to create user"))
+            if (result.user == null) {
+                return ResourceState.Error("Failed to create user")
             }
+            val user = User(
+                email = email,
+                name = fullName,
+                role = UserRole.CUSTOMER.name,
+                phoneNumber = result.user?.phoneNumber ?: "",
+                photoUrl = result.user?.photoUrl.toString(),
+                provider = result.user?.providerId ?: "",
+                address = emptyList(),
+                token = result.user?.getIdToken(true)?.await()?.token ?: "",
+            )
+            userRepository.addUserToFirestore(user)
+            ResourceState.Success(user)
         } catch (e: Exception) {
-            Result.failure(e)
+            ResourceState.Error(e.message)
         }
     }
 
-    override suspend fun signOut(): Result<Boolean> {
-        auth.signOut()
-        return Result.success(true)
+    override suspend fun signOut(): ResourceState<Boolean> {
+        return try {
+            auth.signOut()
+            ResourceState.Success(true)
+        } catch (e: Exception) {
+            ResourceState.Error(e.message)
+        }
     }
 
-    override suspend fun resetPassword(email: String): Result<Boolean> {
+    override suspend fun resetPassword(email: String): ResourceState<Boolean> {
         return try {
             auth.sendPasswordResetEmail(email).await()
-            Result.success(true)
+            ResourceState.Success(true)
         } catch (e: Exception) {
-            Result.failure(e)
+            ResourceState.Error(e.message)
         }
     }
 }

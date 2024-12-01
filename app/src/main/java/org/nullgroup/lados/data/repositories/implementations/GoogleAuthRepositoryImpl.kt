@@ -20,6 +20,8 @@ import org.nullgroup.lados.data.models.SignInResult
 import org.nullgroup.lados.data.models.User
 import org.nullgroup.lados.data.models.UserRole
 import org.nullgroup.lados.data.repositories.interfaces.GoogleAuthRepository
+import org.nullgroup.lados.data.repositories.interfaces.UserRepository
+import org.nullgroup.lados.viewmodels.states.ResourceState
 import javax.inject.Inject
 import kotlin.coroutines.cancellation.CancellationException
 
@@ -28,6 +30,7 @@ class GoogleAuthRepositoryImpl @Inject constructor(
     private val oneTapClient: SignInClient,
     private val auth: FirebaseAuth,
     private val googleSignInClient: GoogleSignInClient,
+    private val userRepository: UserRepository,
 ) : GoogleAuthRepository {
 
     override suspend fun signIn(): IntentSender? {
@@ -64,19 +67,16 @@ class GoogleAuthRepositoryImpl @Inject constructor(
             .build()
     }
 
-    override suspend fun signInWithIntent(intent: Intent): SignInResult {
+    override suspend fun signInWithIntent(intent: Intent): ResourceState<User> {
         return try {
             val credential = try {
-                // Try OneTap sign-in first
                 oneTapClient.getSignInCredentialFromIntent(intent)
             } catch (e: ApiException) {
-                // Fall back to traditional sign-in
                 val task = GoogleSignIn.getSignedInAccountFromIntent(intent)
                 val account = task.getResult(ApiException::class.java)
                 GoogleAuthProvider.getCredential(account?.idToken, null)
             }
 
-            // Get Firebase credentials and sign in
             val firebaseCredential = when (credential) {
                 is SignInCredential -> GoogleAuthProvider.getCredential(
                     credential.googleIdToken,
@@ -88,47 +88,40 @@ class GoogleAuthRepositoryImpl @Inject constructor(
             }
 
             val authResult = auth.signInWithCredential(firebaseCredential).await()
-            val user = authResult.user
 
-            SignInResult(
-                data = user?.run {
-                    User(
-                        id = uid,
-                        name = displayName ?: "",
-                        email = email ?: "",
-                        role = UserRole.CUSTOMER.name,
-                        phoneNumber = phoneNumber ?: ""
-                    )
-                },
-                errorMessage = null
-            )
+            var user: User? = null
+            authResult.user?.let {
+                user = User(
+                    name = it.displayName ?: "",
+                    email = it.email ?: "",
+                    role = UserRole.CUSTOMER.name,
+                    phoneNumber = it.phoneNumber ?: "",
+                    photoUrl = it.photoUrl.toString(),
+                    provider = it.providerId,
+                    token = it.getIdToken(true).await()?.token ?: "",
+                )
+            }
+
+
+            if (authResult.additionalUserInfo!!.isNewUser) {
+                if (user != null) {
+                    userRepository.addUserToFirestore(user!!)
+                }
+            }
+
+            ResourceState.Success(user)
         } catch (e: Exception) {
-            e.printStackTrace()
-            if (e is CancellationException) throw e
-            SignInResult(
-                data = null,
-                errorMessage = e.message
-            )
+            ResourceState.Error(e.message)
         }
     }
 
-    override suspend fun signOut() {
-        try {
+    override suspend fun signOut(): ResourceState<Boolean> {
+        return try {
             oneTapClient.signOut().await()
             auth.signOut()
+            ResourceState.Success(true)
         } catch (e: Exception) {
-            e.printStackTrace()
-            if (e is CancellationException) throw e
+            ResourceState.Error(e.message)
         }
-    }
-
-    override suspend fun getSignedInUser(): User? = auth.currentUser?.run {
-        User(
-            id = uid,
-            name = displayName ?: "",
-            email = email ?: "",
-            role = UserRole.CUSTOMER.name,
-            phoneNumber = phoneNumber ?: "",
-        )
     }
 }
