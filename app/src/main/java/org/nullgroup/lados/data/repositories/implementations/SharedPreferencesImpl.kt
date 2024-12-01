@@ -3,13 +3,15 @@ package org.nullgroup.lados.data.repositories.implementations
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Base64
+import dagger.hilt.android.qualifiers.ActivityContext
+import dagger.hilt.android.qualifiers.ApplicationContext
 import org.nullgroup.lados.data.repositories.interfaces.SharedPreferencesRepository
 
 class SharedPreferencesImpl(
-    private val context: Context
+    private val context: Context,
 ) : SharedPreferencesRepository {
 
-    private lateinit var sharedPreferences: SharedPreferences
+    private var sharedPreferences: SharedPreferences
 
     init {
         sharedPreferences =

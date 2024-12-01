@@ -73,7 +73,7 @@ class FacebookAuthRepositoryImpl(
                 name = it.displayName ?: "",
                 email = it.email ?: "",
                 photoUrl = it.photoUrl.toString(),
-                provider = it.providerId ?: "",
+                provider = it.providerId,
                 role = UserRole.CUSTOMER.name,
                 phoneNumber = it.phoneNumber ?: "",
             )

@@ -19,6 +19,7 @@ import org.nullgroup.lados.R
 import org.nullgroup.lados.data.repositories.implementations.EmailAuthRepositoryImpl
 import org.nullgroup.lados.data.repositories.implementations.FacebookAuthRepositoryImpl
 import org.nullgroup.lados.data.repositories.implementations.GoogleAuthRepositoryImpl
+import org.nullgroup.lados.data.repositories.implementations.SharedPreferencesImpl
 import org.nullgroup.lados.data.repositories.interfaces.EmailAuthRepository
 import org.nullgroup.lados.data.repositories.interfaces.FacebookAuthRepository
 import org.nullgroup.lados.data.repositories.interfaces.GoogleAuthRepository
@@ -29,6 +30,7 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object AuthenticationModule {
+
     @Provides
     @Singleton
     fun provideEmailAuthRepository(

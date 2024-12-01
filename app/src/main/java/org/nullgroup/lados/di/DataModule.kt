@@ -8,6 +8,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ActivityContext
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import org.nullgroup.lados.data.repositories.implementations.ProductRepositoryImplement
 import org.nullgroup.lados.data.repositories.implementations.SharedPreferencesImpl
@@ -39,18 +40,18 @@ object DataModule {
 
     @Provides
     @Singleton
-    fun provideActivity(
-        @ActivityContext context: Context
-    ) : Activity {
-        return context as Activity
+    fun provideSharedPreferencesRepository(
+        @ApplicationContext context: Context
+    ) : SharedPreferencesRepository {
+        return SharedPreferencesImpl(context)
     }
 
     @Provides
     @Singleton
-    fun provideSharedPreferencesRepository(
+    fun provideActivity(
         @ActivityContext context: Context
-    ) : SharedPreferencesRepository {
-        return SharedPreferencesImpl(context)
+    ) : Activity {
+        return context as Activity
     }
 
 }
