@@ -4,6 +4,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MailOutline
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.ui.graphics.vector.ImageVector
 import org.nullgroup.lados.data.models.UserRole
@@ -48,10 +49,15 @@ sealed class Screen(
         data object Order : Customer("Order", "customer_order", Icons.Filled.ShoppingCart)
         data object Profile : Customer("Profile", "customer_profile", Icons.Default.AccountCircle)
         data object Home: Customer("Home", "customer_home", Icons.Default.Home)
+        data object SearchScreen: Customer("Search", "customer_search", Icons.Default.Search)
+        data object FilterScreen: Customer("Filter", "customer_filter", Icons.Default.Search)
 
         companion object {
-            fun getAllScreens() = listOf(HomeScreen, ChatScreen, Order, Profile, Home)
+            fun getAllScreens() = listOf(HomeScreen, ChatScreen, Order, Profile, Home, SearchScreen, FilterScreen)
+            fun getBaseScreens() = listOf(HomeScreen, ChatScreen, Order, Profile)
         }
+
+
     }
 
     /**

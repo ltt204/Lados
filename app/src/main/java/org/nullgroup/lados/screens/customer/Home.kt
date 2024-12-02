@@ -6,6 +6,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,6 +19,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -36,8 +38,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -73,6 +73,7 @@ import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.yield
 import org.nullgroup.lados.R
+import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.ui.theme.BlackMaterial
 import org.nullgroup.lados.ui.theme.BrownMaterial
 import org.nullgroup.lados.ui.theme.GrayMaterial
@@ -81,66 +82,58 @@ import org.nullgroup.lados.viewmodels.HomeViewModel
 import java.util.Calendar
 
 @Composable
-fun SearchAndFilter(modifier: Modifier=Modifier) {
+fun SearchAndFilter(modifier: Modifier=Modifier, navController: NavController) {
     Row(
         modifier = modifier
-            .fillMaxWidth()
+            .padding(horizontal = 4.dp)
             .height(56.dp)
         ,
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {
-        SearchBar(Modifier.weight(0.6f), onSearch = {})
+        SearchBar(Modifier.weight(0.7f), navController = navController, onSearch = {})
         Spacer(Modifier.weight(0.025f))
-        FilterButton(Modifier.weight(0.3f))
+        FilterButton(Modifier.weight(0.1f), navController = navController)
     }
 
 }
 
 @Composable
-fun SearchBar(modifier: Modifier=Modifier, onSearch: (String) -> Unit) {
+fun SearchBar(modifier: Modifier=Modifier, navController: NavController, onSearch: (String) -> Unit) {
     var searchText by remember { mutableStateOf("") }
     val focusManager = LocalFocusManager.current
-    OutlinedTextField(
-        value = searchText,
-        onValueChange = { searchContent -> searchText = searchContent },
-        modifier = Modifier
-            .clip(RoundedCornerShape(16.dp))
-            ,
-        singleLine = true,
-        placeholder = { Text("Search") },
-        leadingIcon = {
-            Icon(
-                imageVector = Icons.Filled.Search,
-                contentDescription = "Search"
+
+    Box(modifier = Modifier.clickable { navController.navigate(Screen.Customer.SearchScreen.route) }) {
+        OutlinedTextField(
+            value = searchText,
+            onValueChange = {},
+            enabled = false,
+            modifier = modifier,
+            singleLine = true,
+            placeholder = { Text("Search") },
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Filled.Search,
+                    contentDescription = "Search"
+                )
+            },
+
+            shape = RoundedCornerShape(16.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                unfocusedBorderColor = GrayMaterial,
+                focusedBorderColor = BrownMaterial
             )
-        },
-        keyboardOptions = KeyboardOptions(
-            keyboardType = KeyboardType.Text,
-            imeAction = ImeAction.Search
-        ),
-        keyboardActions = KeyboardActions(
-            onSearch = {
-                onSearch(searchText)
-                focusManager.clearFocus() // Hide the keyboard
-            }
-        ),
-        shape = RoundedCornerShape(16.dp),
-        colors = OutlinedTextFieldDefaults.colors(
-            focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-            unfocusedBorderColor = GrayMaterial,
-            focusedBorderColor = BrownMaterial
         )
-    )
+    }
 }
 
-
 @Composable
-fun FilterButton(modifier: Modifier=Modifier/*, onClick: () -> Unit*/) {
+fun FilterButton(modifier: Modifier=Modifier, navController: NavController/*, onClick: () -> Unit*/) {
     Button(
-        onClick = { /*onClick()*/ },
-        contentPadding = PaddingValues(4.dp),
+        onClick = { navController.navigate(Screen.Customer.FilterScreen.route) },
+        contentPadding = PaddingValues(2.dp),
         colors = androidx.compose.material3.ButtonDefaults.buttonColors(
             BrownMaterial
         ),
@@ -151,6 +144,10 @@ fun FilterButton(modifier: Modifier=Modifier/*, onClick: () -> Unit*/) {
     {
         Icon(
             Icons.Filled.Menu,
+            modifier=Modifier
+                .fillMaxSize()
+                .padding(8.dp)
+            ,
             contentDescription = "Filter",
             tint = WhiteMaterial
         )
@@ -464,14 +461,14 @@ fun ProductScreen(modifier: Modifier = Modifier,
 ) {
     Column(
         modifier = modifier
-            .padding(horizontal = 16.dp, vertical = 12.dp)
+            .padding(paddingValues)
     ) {
         LazyColumn(
             modifier = modifier,
             verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
             item {
-                SearchAndFilter()
+                SearchAndFilter(navController = navController)
             }
             item {
                 BannerSlider()

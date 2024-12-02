@@ -1,13 +1,6 @@
 package org.nullgroup.lados.screens.customer
 
-import android.annotation.SuppressLint
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,23 +8,24 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Button
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RangeSlider
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -46,15 +40,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
 import org.nullgroup.lados.ui.theme.BlackMaterial
 import org.nullgroup.lados.ui.theme.BrownMaterial
 import org.nullgroup.lados.ui.theme.GrayMaterial
-import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.ui.theme.WhiteMaterial
 import org.nullgroup.lados.ui.theme.YellowMaterial
+import org.nullgroup.lados.viewmodels.HomeViewModel
 
 @Composable
 fun Header(modifier: Modifier = Modifier, content: String) {
@@ -147,6 +143,50 @@ fun PricingRange(modifier: Modifier=Modifier, start: Float, end: Float){
 }
 
 @Composable
+fun CustomSlider() {
+    var sliderValue by remember { mutableStateOf(2f) }
+    val steps = listOf(2f, 7f, 22f, 50f, 100f, 150f)
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
+        // Custom Slider
+        Slider(
+            value = sliderValue,
+            onValueChange = { value ->
+                sliderValue = value
+            },
+            valueRange = steps.first()..steps.last(),
+            steps = steps.size - 2,
+            modifier = Modifier.fillMaxWidth(),
+            colors = SliderDefaults.colors(
+                thumbColor = Color(0xFF6B4F29),
+                activeTrackColor = Color(0xFF6B4F29),
+                inactiveTrackColor = Color(0xFFDDC9B0)
+            )
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Labels
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            steps.forEach { step ->
+                BasicText(
+                    text = if (step == steps.last()) "${step.toInt()}+" else step.toInt().toString(),
+                    style = TextStyle(fontSize = 12.sp),
+                    modifier = Modifier
+                )
+            }
+        }
+    }
+}
+
+@Composable
 fun FilterCateRow(modifier: Modifier=Modifier, content: List<String>) {
     LazyRow(
         modifier = modifier
@@ -221,10 +261,55 @@ fun RadioButtonGroupDraw(modifier: Modifier=Modifier, content: List<String>) {
 }
 
 @Composable
-fun FilterScreenDraw(modifier: Modifier=Modifier) {
+fun FilterScreenBottom(
+    onResetFilterClick: () -> Unit,
+    onApplyChangesClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceAround,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Button(
+            onClick = onResetFilterClick,
+            modifier = Modifier
+                .weight(1f)
+                .height(48.dp)
+            ,
+            colors = ButtonDefaults.buttonColors(
+                BrownMaterial
+            )
+        ) {
+            Text("Reset Filter", color = Color.White)
+        }
+
+        Spacer(modifier = Modifier.width(16.dp))
+
+        Button(
+            onClick = onApplyChangesClick,
+            modifier = Modifier
+                .weight(1f)
+                .height(48.dp)
+            ,
+            colors = ButtonDefaults.buttonColors(
+                BrownMaterial
+            )
+        ) {
+            Text("Apply Changes", color = Color.White)
+        }
+    }
+}
+
+
+@Composable
+fun FilterScreenDraw(modifier: Modifier=Modifier, navController: NavController, paddingValues: PaddingValues) {
+    val homeViewModel: HomeViewModel = hiltViewModel()
+    val categories = homeViewModel.categories.collectAsStateWithLifecycle()
+
     LazyColumn(
         modifier = modifier
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .padding(paddingValues),
         verticalArrangement = Arrangement.spacedBy(8.dp),
 
         ) {
@@ -233,28 +318,28 @@ fun FilterScreenDraw(modifier: Modifier=Modifier) {
         }
 
         item {
-            FilterCateRow(content=listOf("All", "Nike", "Adidas", "Puma", "LV"))
+            FilterCateRow(content = categories.value.map { it.categoryName })
         }
         item {
             Header(content = "Gender")
         }
 
         item {
-            FilterCateRow(content=listOf("All", "Men", "Women"))
+            FilterCateRow(content = listOf("All", "Men", "Women"))
         }
         item {
             Header(content = "Sort by")
         }
 
         item {
-            FilterCateRow(content=listOf("Most Recent", "Popular", "Price High"))
+            FilterCateRow(content = listOf("Most Recent", "Popular", "Price High"))
         }
 
         item {
             Header(content = "Pricing Range")
         }
         item {
-            PricingRange(start = 1f, end = 10f)
+            CustomSlider()
         }
         item {
             Header(content = "Reviews")
@@ -273,13 +358,16 @@ fun FilterScreenDraw(modifier: Modifier=Modifier) {
                 )
             )
         }
+        item{
+            FilterScreenBottom({},{})
+        }
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    LadosTheme {
-        FilterScreenDraw()
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun GreetingPreview() {
+//    LadosTheme {
+//        FilterScreenDraw()
+//    }
+//}

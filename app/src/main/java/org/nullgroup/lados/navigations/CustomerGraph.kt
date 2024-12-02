@@ -15,7 +15,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import org.nullgroup.lados.screens.Screen
+import org.nullgroup.lados.screens.customer.FilterScreenDraw
 import org.nullgroup.lados.screens.customer.HomeScreen
+import org.nullgroup.lados.screens.customer.MainSearchScreen
 import org.nullgroup.lados.screens.customer.ProductScreen
 
 @Composable
@@ -29,7 +31,7 @@ fun CustomerGraph(
             BottomNavigation {
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentDestination = navBackStackEntry?.destination
-                Screen.Customer.getAllScreens().forEach { screen ->
+                Screen.Customer.getBaseScreens().forEach { screen ->
                     BottomNavigationItem(
                         icon = { screen.icon?.let { Icon(it, contentDescription = screen.name) } },
                         label = { screen.name?.let { Text(it) } },
@@ -58,8 +60,16 @@ fun CustomerGraph(
                             ProductScreen(navController = navController, paddingValues = innerPadding)
                         }
 
+                        Screen.Customer.SearchScreen.route -> {
+                            MainSearchScreen(navController = navController, paddingValues = innerPadding)
+                        }
+
                         Screen.Customer.HomeScreen.route -> {
                             HomeScreen(navController = navController, paddingValues = innerPadding)
+                        }
+
+                        Screen.Customer.FilterScreen.route -> {
+                            FilterScreenDraw(navController = navController, paddingValues = innerPadding)
                         }
 
                         Screen.Customer.ChatScreen.route -> {

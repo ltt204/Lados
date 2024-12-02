@@ -56,6 +56,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import org.nullgroup.lados.ui.theme.BlackMaterial
 import org.nullgroup.lados.ui.theme.BrownMaterial
 import org.nullgroup.lados.ui.theme.GrayMaterial
@@ -185,11 +186,12 @@ fun SearchHistory(modifier: Modifier=Modifier){
 }
 
 @Composable
-fun MainSearchScreen(modifier: Modifier=Modifier) {
+fun MainSearchScreen(modifier: Modifier=Modifier, navController: NavController, paddingValues: PaddingValues) {
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .fillMaxHeight(),
+            .fillMaxHeight()
+            .padding(paddingValues),
     ) {
         SearchBarSearchScreen()
         Spacer(Modifier.height(16.dp))
@@ -206,12 +208,12 @@ fun MainSearchScreen(modifier: Modifier=Modifier) {
     }
 }
 
-@Preview(name="Search And Filter Review", showBackground = true, showSystemUi = true)
-@Composable
-fun GreetingPreview2() {
-    LadosTheme {
-        //SearchHeaderSearchScreen()
-        //SearchHistory()
-        MainSearchScreen()
-    }
-}
+//@Preview(name="Search And Filter Review", showBackground = true, showSystemUi = true)
+//@Composable
+//fun GreetingPreview2() {
+//    LadosTheme {
+//        //SearchHeaderSearchScreen()
+//        //SearchHistory()
+//        MainSearchScreen()
+//    }
+//}
