@@ -1,6 +1,9 @@
 package org.nullgroup.lados.data.repositories.implementations
 
+import android.util.Log
+import androidx.compose.ui.geometry.isEmpty
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FirebaseFirestoreException
 import kotlinx.coroutines.tasks.await
 import org.nullgroup.lados.data.models.Category
 import org.nullgroup.lados.data.repositories.interfaces.CategoryRepository
@@ -11,15 +14,14 @@ class CategoryRepositoryImplement(
 
     override suspend fun getAllCategoriesFromFireStore(): Result<List<Category>> {
         return try {
-            val categoryList = firestore.collection("categories")
-                .get()
-                .await()
-                .documents
-                .mapNotNull { document ->
-                    document.toObject(Category::class.java)
-                }
+            val snapshots = firestore.collection("categories").get().await()
+            val categoryList = if (snapshots.isEmpty) {
+                emptyList()
+            } else {
+                snapshots.documents.mapNotNull { it.toObject(Category::class.java) }
+            }
             Result.success(categoryList)
-        } catch (e: Exception) {
+        } catch (e: FirebaseFirestoreException) {
             Result.failure(e)
         }
     }

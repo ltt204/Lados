@@ -47,9 +47,10 @@ sealed class Screen(
         data object ChatScreen : Customer("Chat", "customer_chat", Icons.Default.MailOutline)
         data object Order : Customer("Order", "customer_order", Icons.Filled.ShoppingCart)
         data object Profile : Customer("Profile", "customer_profile", Icons.Default.AccountCircle)
+        data object Home: Customer("Home", "customer_home", Icons.Default.Home)
 
         companion object {
-            fun getAllScreens() = listOf(HomeScreen, ChatScreen, Order, Profile)
+            fun getAllScreens() = listOf(HomeScreen, ChatScreen, Order, Profile, Home)
         }
     }
 

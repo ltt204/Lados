@@ -7,9 +7,11 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import org.nullgroup.lados.data.repositories.implementations.CategoryRepositoryImplement
 import org.nullgroup.lados.data.repositories.implementations.ImageRepositoryImplement
 import org.nullgroup.lados.data.repositories.implementations.ProductRepositoryImplement
 import org.nullgroup.lados.data.repositories.implementations.UserRepositoryImplement
+import org.nullgroup.lados.data.repositories.interfaces.CategoryRepository
 import org.nullgroup.lados.data.repositories.interfaces.ImageRepository
 import org.nullgroup.lados.data.repositories.interfaces.ProductRepository
 import org.nullgroup.lados.data.repositories.interfaces.UserRepository
@@ -43,4 +45,13 @@ object DataModule {
     ): ImageRepository {
         return ImageRepositoryImplement(firebaseStorage)
     }
+
+    @Singleton
+    @Provides
+    fun provideCategoryRepository(
+        firestore: FirebaseFirestore
+    ): CategoryRepository {
+        return CategoryRepositoryImplement(firestore)
+    }
+
 }

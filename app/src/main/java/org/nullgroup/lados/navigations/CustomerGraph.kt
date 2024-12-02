@@ -16,6 +16,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.screens.customer.HomeScreen
+import org.nullgroup.lados.screens.customer.ProductScreen
 
 @Composable
 fun CustomerGraph(
@@ -53,6 +54,10 @@ fun CustomerGraph(
             Screen.Customer.getAllScreens().forEach { screen ->
                 composable(screen.route) {
                     when (screen.route) {
+                        Screen.Customer.Home.route -> {
+                            ProductScreen(navController = navController, paddingValues = innerPadding)
+                        }
+
                         Screen.Customer.HomeScreen.route -> {
                             HomeScreen(navController = navController, paddingValues = innerPadding)
                         }

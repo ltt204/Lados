@@ -2,6 +2,7 @@ package org.nullgroup.lados.screens.customer
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -28,6 +29,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -35,6 +37,7 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -45,6 +48,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -65,6 +69,10 @@ import androidx.compose.ui.text.withLink
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.HorizontalPagerIndicator
@@ -77,6 +85,7 @@ import org.nullgroup.lados.ui.theme.BrownMaterial
 import org.nullgroup.lados.ui.theme.GrayMaterial
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.ui.theme.WhiteMaterial
+import org.nullgroup.lados.viewmodels.HomeViewModel
 
 @Composable
 fun SearchAndFilter(modifier: Modifier=Modifier) {
@@ -181,18 +190,24 @@ fun CategoryTextRow(modifier: Modifier=Modifier) {
 }
 
 @Composable
-fun Category(modifier: Modifier=Modifier){
+fun Category(modifier: Modifier=Modifier) {
+
+    val homeViewModel: HomeViewModel = hiltViewModel()
+
+    val categories = homeViewModel.categories.collectAsStateWithLifecycle()
+    Log.d("CategoryRepositoryImplement", "getAllCategoriesFromFireStore: $categories")
+
     LazyRow(
-        modifier=modifier,
+        modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(2.dp),
-        contentPadding= PaddingValues(8.dp),
+        contentPadding = PaddingValues(8.dp),
     ) {
-        items(20)
-        {
-                item ->
-            CategoryItem(image = R.drawable.ic_launcher_background, lable=item.toString())
+        items(categories.value)
+        { category ->
+            CategoryItem(image = R.drawable.ic_launcher_background, label = category.categoryName)
         }
     }
+
 }
 
 @Composable
@@ -212,14 +227,14 @@ fun LinkText(content: String? = null, url: String, color: Color, style: SpanStyl
 }
 
 @Composable
-fun CategoryItem(modifier: Modifier=Modifier, @DrawableRes image: Int, lable: String) {
+fun CategoryItem(modifier: Modifier=Modifier, @DrawableRes image: Int, label: String) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
     ) {
         CategoryCircle(image = image)
         Spacer(Modifier.height(8.dp))
-        Text(text = lable, color = BlackMaterial)
+        Text(text = label, color = BlackMaterial)
     }
 }
 
@@ -451,7 +466,10 @@ fun BannerSlider() {
 
 
 @Composable
-fun ProductScreen(modifier: Modifier=Modifier) {
+fun ProductScreen(modifier: Modifier = Modifier,
+                  paddingValues: PaddingValues = PaddingValues(0.dp),
+                  navController: NavController
+) {
     Column(
         modifier = modifier
             .padding(horizontal = 16.dp, vertical = 12.dp)
@@ -514,12 +532,12 @@ fun GreetingPreview2() {
 }
 */
 
-@Preview(name="Summary", showBackground = true, showSystemUi = true)
-@Composable
-fun Summary()
-{
-    LadosTheme {
-        ProductScreen()
-    }
-}
+//@Preview(name="Summary", showBackground = true, showSystemUi = true)
+//@Composable
+//fun Summary()
+//{
+//    LadosTheme {
+//        ProductScreen()
+//    }
+//}
 
