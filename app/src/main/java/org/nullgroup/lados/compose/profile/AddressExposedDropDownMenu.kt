@@ -13,8 +13,9 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MenuItemColors
 import androidx.compose.material3.OutlinedTextField
@@ -33,7 +34,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.nullgroup.lados.viewmodels.customer.MenuItemsUIState
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
 fun AddressExposedDropDownMenu(
     modifier: Modifier = Modifier,
@@ -83,9 +84,8 @@ fun AddressExposedDropDownMenu(
             when (itemsUiState) {
                 is MenuItemsUIState.Default -> {
                     DropdownMenuItem(
-                        text = { Text(text = "No items") },
+                        text = { Text(text = "No items", color = Color.Black) },
                         onClick = { /* No action */ },
-                        contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
                     )
                 }
 
@@ -110,39 +110,35 @@ fun AddressExposedDropDownMenu(
 
                 is MenuItemsUIState.Failed -> LoadOnError()
                 is MenuItemsUIState.Success -> {
-                    if (itemsUiState.data.isEmpty()) {
-                        Text(text = "No items")
-                    } else {
-                        menuHeight = (itemsUiState.data.size * 48).coerceAtMost(192)
-                        LazyColumn(
-                            modifier = Modifier
-                                .width(400.dp)
-                                .height(300.dp)
-                        ) {
-                            itemsIndexed(itemsUiState.data) { index, value ->
-                                val isSelected = value == selectedItem
-                                DropdownMenuItem(
-                                    modifier = Modifier
-                                        .background(
-                                            if (isSelected) Color.Gray.copy(alpha = 0.1f) else Color.Transparent
-                                        )
-                                        .fillMaxWidth(),
-                                    text = { Text(text = value) },
-                                    onClick = {
-                                        onItemSelected(value, index)
-                                        isExpanded = false
-                                    },
-                                    contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
-                                    colors = MenuItemColors(
-                                        textColor = Color.Black,
-                                        leadingIconColor = Color.Black,
-                                        trailingIconColor = Color.Black,
-                                        disabledTextColor = Color.Gray,
-                                        disabledLeadingIconColor = Color.Gray,
-                                        disabledTrailingIconColor = Color.Gray,
+                    menuHeight = (itemsUiState.data.size * 48).coerceAtMost(192)
+                    LazyColumn(
+                        modifier = Modifier
+                            .width(400.dp)
+                            .height(300.dp)
+                    ) {
+                        itemsIndexed(itemsUiState.data) { index, value ->
+                            val isSelected = value == selectedItem
+                            DropdownMenuItem(
+                                modifier = Modifier
+                                    .background(
+                                        if (isSelected) Color.Gray.copy(alpha = 0.1f) else Color.Transparent
                                     )
+                                    .fillMaxWidth(),
+                                text = { Text(text = value) },
+                                onClick = {
+                                    onItemSelected(value, index)
+                                    isExpanded = false
+                                },
+                                contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
+                                colors = MenuItemColors(
+                                    textColor = Color.Black,
+                                    leadingIconColor = Color.Black,
+                                    trailingIconColor = Color.Black,
+                                    disabledTextColor = Color.Gray,
+                                    disabledLeadingIconColor = Color.Gray,
+                                    disabledTrailingIconColor = Color.Gray,
                                 )
-                            }
+                            )
                         }
                     }
                 }

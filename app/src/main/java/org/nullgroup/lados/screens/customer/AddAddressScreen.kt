@@ -1,6 +1,7 @@
 package org.nullgroup.lados.screens.customer
 
 import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -36,20 +37,25 @@ fun AddAddressScreen(
     navController: NavController? = null
 ) {
     var saveConfirmation by remember { mutableStateOf(false) }
-    val userAddress = viewModel.userAddress.collectAsState()
-    Log.d("AddAddressScreen", "User address: ${userAddress.value}")
+    var cancelConfirmation by remember { mutableStateOf(false) }
 
+    val userAddress = viewModel.userAddress.collectAsState()
     val provincesUiState = viewModel.provincesUiState
     val districtsUiState = viewModel.districtsUiState
     val wardsUiState = viewModel.wardsUiState
 
-    Log.d("AddAddressScreen", "Province list: $provincesUiState")
+    BackHandler {
+        cancelConfirmation = true
+    }
+
     Scaffold(
         modifier = modifier
             .fillMaxSize()
             .padding(vertical = paddingValues.calculateTopPadding()),
         topBar = {
-            ProfileTopAppBar(onBackClick = { navController?.navigateUp() }, content = "Address")
+            ProfileTopAppBar(onBackClick = {
+                cancelConfirmation = true
+            }, content = "Address")
         }
     ) { innerPadding ->
         Column(
@@ -108,5 +114,23 @@ fun AddAddressScreen(
                 viewModel.saveAddress()
             }
         )
+    }
+
+
+    if (cancelConfirmation && viewModel.isInfoChanged.value) {
+        ConfirmDialog(
+            title = { Text(text = "Confirm Cancel") },
+            message = { Text(text = "Are you sure you want to cancel?") },
+            onDismissRequest = { cancelConfirmation = false },
+            confirmButton = {
+                cancelConfirmation = false
+                navController?.navigateUp()
+            },
+            primaryButtonText = "Exit",
+            secondaryButtonText = "Continue"
+        )
+    } else if (cancelConfirmation) {
+        cancelConfirmation = false
+        navController?.navigateUp()
     }
 }

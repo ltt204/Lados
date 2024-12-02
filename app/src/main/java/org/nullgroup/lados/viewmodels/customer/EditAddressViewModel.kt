@@ -32,6 +32,9 @@ class EditAddressViewModel @Inject constructor(
     private var cacheDistricts = MutableStateFlow<List<District>>(emptyList())
     private var cacheWards = MutableStateFlow<List<Ward>>(emptyList())
 
+    var isInfoChanged = mutableStateOf(false)
+        private set
+
     var provincesUiState: MenuItemsUIState by mutableStateOf(MenuItemsUIState.Default())
         private set
     var districtsUiState: MenuItemsUIState by mutableStateOf(MenuItemsUIState.Default())
@@ -70,6 +73,7 @@ class EditAddressViewModel @Inject constructor(
                                 ward = ""
                             )
                         )
+                        isInfoChanged.value = true
                     }
                     loadDistricts(provinceName)
                 }
@@ -91,6 +95,7 @@ class EditAddressViewModel @Inject constructor(
                                 ward = ""
                             )
                         )
+                        isInfoChanged.value = true
                     }
                     loadWards(districtName)
                 }
@@ -111,6 +116,7 @@ class EditAddressViewModel @Inject constructor(
                                 ward = ward
                             )
                         )
+                        isInfoChanged.value = true
                     }
                 }
 
@@ -123,6 +129,7 @@ class EditAddressViewModel @Inject constructor(
         viewModelScope.launch {
             delay(500)
             userAddress.value.detail = street
+            isInfoChanged.value = true
         }
     }
 

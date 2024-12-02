@@ -32,6 +32,9 @@ class AddAddressViewModel @Inject constructor(
         )
     }
 
+    var isInfoChanged = mutableStateOf(false)
+        private set
+
     var provincesUiState: MenuItemsUIState by mutableStateOf(MenuItemsUIState.Loading)
         private set
     var districtsUiState: MenuItemsUIState by mutableStateOf(MenuItemsUIState.Loading)
@@ -45,8 +48,6 @@ class AddAddressViewModel @Inject constructor(
 
     var userAddress = MutableStateFlow(Address(userId = currentUser!!.id))
         private set
-
-    var streetDetail = MutableStateFlow("")
 
     init {
         loadProvinces()
@@ -68,6 +69,7 @@ class AddAddressViewModel @Inject constructor(
                                 ward = ""
                             )
                         )
+                        isInfoChanged.value = true
                     }
                     loadDistrict(provinceName)
                 }
@@ -89,6 +91,7 @@ class AddAddressViewModel @Inject constructor(
                                 ward = ""
                             )
                         )
+                        isInfoChanged.value = true
                     }
                     loadWards(districtName)
                 }
@@ -109,9 +112,9 @@ class AddAddressViewModel @Inject constructor(
                                 ward = ward
                             )
                         )
+                        isInfoChanged.value = true
                     }
                 }
-
                 else -> return
             }
         }
@@ -121,6 +124,7 @@ class AddAddressViewModel @Inject constructor(
         viewModelScope.launch {
             delay(500)
             userAddress.value.detail = street
+            isInfoChanged.value = true
         }
     }
 

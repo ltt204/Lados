@@ -109,7 +109,8 @@ fun EditProfileScreen(
                     )
                 },
                 onNameChanged = { viewModel.onNameChanged(it) },
-                onPhoneChanged = { viewModel.onPhoneChanged(it) }
+                onPhoneChanged = { viewModel.onPhoneChanged(it) },
+                isInfoChanged = viewModel.isInfoChanged.value
             )
 
             is UserUiState.Error -> ErrorContent(userInfo.message)
@@ -152,7 +153,7 @@ fun EditProfileScreen(
             }
         }
 
-        if (cancelConfirmation) {
+        if (cancelConfirmation && viewModel.isInfoChanged.value) {
             ConfirmDialog(
                 title = { Text(text = "Cancel editing") },
                 message = { Text(text = "Are you sure you want to cancel editing?") },
@@ -166,6 +167,9 @@ fun EditProfileScreen(
                     navController?.navigateUp()
                 }
             )
+        } else if (cancelConfirmation) {
+            cancelConfirmation = false
+            navController?.navigateUp()
         }
     }
 }
@@ -191,6 +195,7 @@ fun SuccessContent(
     onEditImage: () -> Unit,
     onNameChanged: (String) -> Unit,
     onPhoneChanged: (String) -> Unit,
+    isInfoChanged: Boolean
 ) {
     val userName = remember { mutableStateOf(userInfo.user.name) }
     val userPhone = remember { mutableStateOf(userInfo.user.phoneNumber) }
@@ -261,7 +266,8 @@ fun SuccessContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
-            onClick = onSaveClick
+            onClick = onSaveClick,
+            enabled = isInfoChanged
         ) {
             Text(text = "Save")
         }
@@ -373,7 +379,8 @@ fun SuccessContentPreview() {
             onSaveClick = {},
             onEditImage = {},
             onNameChanged = {},
-            onPhoneChanged = {}
+            onPhoneChanged = {},
+            isInfoChanged = false
         )
     }
 }

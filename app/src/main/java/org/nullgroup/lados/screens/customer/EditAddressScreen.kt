@@ -1,5 +1,6 @@
 package org.nullgroup.lados.screens.customer
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -34,6 +35,7 @@ fun EditAddressScreen(
     viewModel: EditAddressViewModel = hiltViewModel(),
 ) {
     var saveConfirmation by remember { mutableStateOf(false) }
+    var cancelConfirmation by remember { mutableStateOf(false) }
 
     val userAddress = viewModel.userAddress.collectAsState()
 
@@ -41,13 +43,19 @@ fun EditAddressScreen(
     val districtsUiState = viewModel.districtsUiState
     val wardsUiState = viewModel.wardsUiState
 
+    BackHandler {
+        cancelConfirmation = true
+    }
+
     Scaffold(
         modifier = modifier
             .fillMaxSize()
             .padding(vertical = paddingValues.calculateTopPadding()),
         topBar = {
             ProfileTopAppBar(
-                onBackClick = { navController?.navigateUp() },
+                onBackClick = {
+                    cancelConfirmation = true
+                },
                 content = "Edit Address"
             )
         }
@@ -85,7 +93,8 @@ fun EditAddressScreen(
                     .height(56.dp),
                 onClick = {
                     saveConfirmation = true
-                }) {
+                },
+                enabled = viewModel.isInfoChanged.value) {
                 Text(text = "Save")
             }
         }
@@ -102,5 +111,22 @@ fun EditAddressScreen(
                 viewModel.saveAddress()
             }
         )
+    }
+
+    if (cancelConfirmation && viewModel.isInfoChanged.value) {
+        ConfirmDialog(
+            title = { Text(text = "Confirm Cancel") },
+            message = { Text(text = "Are you sure you want to cancel?") },
+            onDismissRequest = { cancelConfirmation = false },
+            confirmButton = {
+                cancelConfirmation = false
+                navController?.navigateUp()
+            },
+            primaryButtonText = "Exit",
+            secondaryButtonText = "Continue"
+        )
+    } else if(cancelConfirmation) {
+        cancelConfirmation = false
+        navController?.navigateUp()
     }
 }

@@ -30,10 +30,10 @@ fun LoginScreen(
     val authScreenViewModel: AuthScreenViewModel = hiltViewModel()
 
     val userName = remember {
-        mutableStateOf("customer@test.com")
+        mutableStateOf("")
     }
     val password = remember {
-        mutableStateOf("customer123")
+        mutableStateOf("")
     }
 
     Column(modifier = modifier) {
