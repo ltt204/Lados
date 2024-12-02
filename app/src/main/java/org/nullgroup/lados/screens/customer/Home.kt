@@ -1,11 +1,6 @@
 package org.nullgroup.lados.screens.customer
 
-import android.annotation.SuppressLint
-import android.os.Bundle
 import android.util.Log
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -17,14 +12,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -32,32 +25,32 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
@@ -65,13 +58,13 @@ import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.withLink
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
@@ -83,9 +76,9 @@ import org.nullgroup.lados.R
 import org.nullgroup.lados.ui.theme.BlackMaterial
 import org.nullgroup.lados.ui.theme.BrownMaterial
 import org.nullgroup.lados.ui.theme.GrayMaterial
-import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.ui.theme.WhiteMaterial
 import org.nullgroup.lados.viewmodels.HomeViewModel
+import java.util.Calendar
 
 @Composable
 fun SearchAndFilter(modifier: Modifier=Modifier) {
@@ -97,28 +90,41 @@ fun SearchAndFilter(modifier: Modifier=Modifier) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {
-        SearchBar()
-        Spacer(Modifier.width(10.dp))
-        FilterButton()
+        SearchBar(Modifier.weight(0.6f), onSearch = {})
+        Spacer(Modifier.weight(0.025f))
+        FilterButton(Modifier.weight(0.3f))
     }
 
 }
 
 @Composable
-fun SearchBar(modifier: Modifier=Modifier) {
+fun SearchBar(modifier: Modifier=Modifier, onSearch: (String) -> Unit) {
+    var searchText by remember { mutableStateOf("") }
+    val focusManager = LocalFocusManager.current
     OutlinedTextField(
-        value = "", // Set initial value to empty for placeholder to be visible
-        onValueChange = {},
+        value = searchText,
+        onValueChange = { searchContent -> searchText = searchContent },
         modifier = Modifier
-            .clip(RoundedCornerShape(16.dp)),
+            .clip(RoundedCornerShape(16.dp))
+            ,
         singleLine = true,
-        placeholder = { Text("Search") }, // Add placeholder
+        placeholder = { Text("Search") },
         leadingIcon = {
             Icon(
-                imageVector = Icons.Filled.Search, // Replace with your desired icon
+                imageVector = Icons.Filled.Search,
                 contentDescription = "Search"
             )
         },
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Text,
+            imeAction = ImeAction.Search
+        ),
+        keyboardActions = KeyboardActions(
+            onSearch = {
+                onSearch(searchText)
+                focusManager.clearFocus() // Hide the keyboard
+            }
+        ),
         shape = RoundedCornerShape(16.dp),
         colors = OutlinedTextFieldDefaults.colors(
             focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
@@ -139,8 +145,7 @@ fun FilterButton(modifier: Modifier=Modifier/*, onClick: () -> Unit*/) {
             BrownMaterial
         ),
         modifier = modifier
-            .size(48.dp)
-        ,
+            .size(48.dp),
         shape = RoundedCornerShape(8.dp),
     )
     {
@@ -153,17 +158,13 @@ fun FilterButton(modifier: Modifier=Modifier/*, onClick: () -> Unit*/) {
 }
 
 @Composable
-fun HeaderBanner(modifier: Modifier=Modifier){
-    Image(painter = painterResource(R.drawable.ic_launcher_background), contentDescription = null)
-}
-
-@Composable
 fun CategoryCircle(modifier: Modifier=Modifier, @DrawableRes image: Int) {
-    Box(modifier
-        .clip(CircleShape)
-        .background(BrownMaterial.copy(alpha = 0.2f))
-        .padding(0.dp)
-        .size(64.dp)
+    Box(
+        modifier
+            .clip(CircleShape)
+            .background(BrownMaterial.copy(alpha = 0.2f))
+            .padding(0.dp)
+            .size(64.dp)
     ){
         Image(
             painter = painterResource(image), contentDescription = null,
@@ -199,7 +200,7 @@ fun Category(modifier: Modifier=Modifier) {
 
     LazyRow(
         modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(2.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
         contentPadding = PaddingValues(8.dp),
     ) {
         items(categories.value)
@@ -250,7 +251,6 @@ fun FlashSaleTitle(modifier: Modifier=Modifier) {
             style = TextStyle(
                 fontSize = 24.sp,
                 color = BlackMaterial,
-
                 )
         )
         Spacer(Modifier.weight(1f))
@@ -262,7 +262,7 @@ fun FlashSaleTitle(modifier: Modifier=Modifier) {
                 fontWeight = FontWeight.Thin,
             ),
         )
-        ComboTimeBox(hh=12,mm=4,ss=3)
+        ComboTimeBox()
     }
 }
 
@@ -288,7 +288,20 @@ fun TimerBox(modifier: Modifier=Modifier, content: String) {
 }
 
 @Composable
-fun ComboTimeBox(modifier: Modifier=Modifier, hh: Int, mm: Int, ss: Int) {
+fun ComboTimeBox(modifier: Modifier=Modifier) {
+    val coroutineScope = rememberCoroutineScope()
+    var currentTime by remember { mutableStateOf(Calendar.getInstance()) }
+
+    LaunchedEffect(Unit) {
+        while (true) {
+            currentTime = Calendar.getInstance()
+            delay(1000)
+        }
+    }
+
+    val hh = currentTime.get(Calendar.HOUR_OF_DAY)
+    val mm = currentTime.get(Calendar.MINUTE)
+    val ss = currentTime.get(Calendar.SECOND)
 
     val hhStr = hh.toString().padStart(2, '0')
     val mmStr = mm.toString().padStart(2, '0')
@@ -312,33 +325,15 @@ fun ComboTimeBox(modifier: Modifier=Modifier, hh: Int, mm: Int, ss: Int) {
         TimerBox(content = ssStr)
     }
 }
-@Composable
-fun NormalTextField(
-    label: String,
-    modifier: Modifier = Modifier,
-    Icon: @Composable (() -> Unit)
-) {
-    val (text, setText) = mutableStateOf("")
-    TextField(
-        leadingIcon = Icon,
-        value = text,
-        colors = TextFieldDefaults.colors(unfocusedContainerColor = Color.Transparent),
-        onValueChange = setText,
-        label = { Text(text = label, color = GrayMaterial)},
-        modifier = modifier
-
-    )
-}
 
 @Composable
 fun CategoryFilter(modifier: Modifier=Modifier){
     LazyRow(
         modifier=modifier,
-
-        horizontalArrangement = Arrangement.spacedBy(2.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
         contentPadding= PaddingValues(4.dp),
     ){
-        items(20)
+        items(5)
         {
                 item ->
             CategoryBox(content="Category $item")
@@ -349,7 +344,6 @@ fun CategoryFilter(modifier: Modifier=Modifier){
 
 @Composable
 fun CategoryFilterItem(modifier: Modifier=Modifier, content: String) {
-
     LazyVerticalGrid(
         modifier = modifier
             .heightIn(max=1000.dp),
@@ -402,12 +396,10 @@ fun CategoryBox(modifier: Modifier=Modifier, content: String) {
 @Composable
 fun AutoSlidingImageSlider(images: List<Int>, modifier: Modifier = Modifier) {
     val pagerState = rememberPagerState()
-
-    // Automatically slide to the next page
     LaunchedEffect(pagerState) {
         while (true) {
-            yield() // Allow Compose to stay responsive
-            delay(3000L) // Delay for 3 seconds
+            yield()
+            delay(3000L)
             val nextPage = (pagerState.currentPage + 1) % images.size
             pagerState.animateScrollToPage(nextPage)
         }
@@ -416,9 +408,8 @@ fun AutoSlidingImageSlider(images: List<Int>, modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(200.dp) // Slider height
+            .height(200.dp)
     ) {
-        // Pager for sliding images
         HorizontalPager(
             count = images.size,
             state = pagerState,
@@ -427,12 +418,13 @@ fun AutoSlidingImageSlider(images: List<Int>, modifier: Modifier = Modifier) {
             Image(
                 painter = painterResource(id = images[page]),
                 contentDescription = "Image $page",
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop // Adjust image scaling
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(RoundedCornerShape(16.dp)),
+                contentScale = ContentScale.Crop
             )
         }
 
-        // Dots Indicator
         HorizontalPagerIndicator(
             pagerState = pagerState,
             modifier = Modifier
@@ -477,7 +469,6 @@ fun ProductScreen(modifier: Modifier = Modifier,
         LazyColumn(
             modifier = modifier,
             verticalArrangement = Arrangement.spacedBy(16.dp),
-
             ) {
             item {
                 SearchAndFilter()
@@ -498,16 +489,11 @@ fun ProductScreen(modifier: Modifier = Modifier,
                 CategoryFilter()
                 Spacer(Modifier.height(8.dp))
             }
-
             item {
-
                 CategoryFilterItem(content = "ABC")
-
             }
 
         }
-
-
     }
 }
 
@@ -537,7 +523,7 @@ fun GreetingPreview2() {
 //fun Summary()
 //{
 //    LadosTheme {
-//        ProductScreen()
+//        ProductScreen(navController = NavController(LocalContext.current))
 //    }
 //}
 
