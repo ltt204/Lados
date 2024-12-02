@@ -23,7 +23,7 @@ fun TwoColsItem(
     Card(modifier = modifier
         .fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = androidx.compose.material3.MaterialTheme.colorScheme.surfaceBright,
+            containerColor = androidx.compose.material3.MaterialTheme.colorScheme.surfaceDim,
         ),
         onClick = { onClick() }
     ) {

@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -20,6 +19,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
@@ -62,7 +62,7 @@ fun ProfileScreen(
         topBar = {
             CenterAlignedTopAppBar(title = { Text(text = "Profile", fontWeight = FontWeight.Bold) })
         },
-        backgroundColor = Color.Transparent.copy(alpha = 0.1f)
+        backgroundColor = Color.Transparent
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -104,15 +104,38 @@ fun ProfileScreen(
                         contentDescription = "Profile Picture"
                     )
                 }
-                Detail(
+                TwoColsItem(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 32.dp),
-                    currentUser = currentUser.value,
-                    onEditProfileClicked = {
-                        navController?.navigate(Screen.Customer.EditProfile.route)
-                    }
-                )
+                    content = {
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Text(
+                                modifier = Modifier, text = currentUser.value.name,
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.SemiBold,
+                            )
+                            Text(
+                                modifier = Modifier, text = currentUser.value.email,
+                                color = Color.Gray,
+                                fontSize = 16.sp
+                            )
+                            Text(
+                                modifier = Modifier, text = currentUser.value.phoneNumber,
+                                color = Color.Gray,
+                                fontSize = 16.sp
+                            )
+                        }
+
+                    },
+                    trailingAction = {
+                        TextButton(onClick = {
+                            navController?.navigate(Screen.Customer.EditProfile.route)
+                        }) {
+                            Text(text = "Edit", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+                        }
+                    }, onClick = {
+                    })
 
                 Column(
                     modifier = Modifier
@@ -257,34 +280,7 @@ fun Detail(
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(
-                    modifier = Modifier
-                        .weight(1f), text = currentUser.name,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    modifier = Modifier
-                        .weight(1f), text = currentUser.email,
-                    color = Color.Gray,
-                    fontSize = 16.sp
-                )
-                Text(
-                    modifier = Modifier
-                        .weight(1f), text = currentUser.phoneNumber,
-                    color = Color.Gray,
-                    fontSize = 16.sp
-                )
-            }
-            TextButton(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .height(20.dp),
-                onClick = { onEditProfileClicked() }
-            ) {
-                Text(text = "Edit", fontSize = 16.sp, fontWeight = FontWeight.Bold)
-            }
+
         }
     }
 }

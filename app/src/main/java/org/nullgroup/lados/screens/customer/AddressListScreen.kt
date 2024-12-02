@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -30,6 +29,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import org.nullgroup.lados.compose.profile.ProfileTopAppBar
+import org.nullgroup.lados.compose.profile.SwipeToDeleteContainer
 import org.nullgroup.lados.compose.profile.TwoColsItem
 import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.viewmodels.customer.AddressListViewModel
@@ -74,36 +74,46 @@ fun AddressList(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     items(items = addressList.value, key = { it.id }) { address ->
-                        TwoColsItem(
+                        SwipeToDeleteContainer(
                             modifier = Modifier
                                 .padding(vertical = 8.dp)
                                 .height(80.dp),
-                            content = {
-                                Log.d("AddressList", "Address: $address")
-                                Text(
-                                    modifier = Modifier.weight(1f),
-                                    text = address.toString(),
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-                                    fontSize = 16.sp
-                                )
+                            item = address,
+                            onDelete = {
+                                viewModel.deleteAddress(it.id)
                             },
-                            trailingAction = {
-                                TextButton(
-                                    modifier = Modifier
-                                        .fillMaxHeight()
-                                        .height(20.dp),
-                                    onClick = {
-                                        Log.d(
-                                            "AddressList",
-                                            "Route: ${Screen.Customer.Address.EditAddress.route}/${address.id}"
-                                        )
-                                        navController?.navigate("${Screen.Customer.Address.EditAddress.route}/${address.id}")
-                                    }) {
-                                    Text(text = "Edit")
+                        ) {
+                            TwoColsItem(
+                                modifier = Modifier
+                                    .padding(vertical = 8.dp)
+                                    .height(80.dp),
+                                content = {
+                                    Log.d("AddressList", "Address: $address")
+                                    Text(
+                                        modifier = Modifier.weight(1f),
+                                        text = address.toString(),
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        fontSize = 16.sp
+                                    )
+                                },
+                                trailingAction = {
+                                    TextButton(
+                                        modifier = Modifier
+                                            .fillMaxHeight()
+                                            .height(20.dp),
+                                        onClick = {
+                                            Log.d(
+                                                "AddressList",
+                                                "Route: ${Screen.Customer.Address.EditAddress.route}/${address.id}"
+                                            )
+                                            navController?.navigate("${Screen.Customer.Address.EditAddress.route}/${address.id}")
+                                        }) {
+                                        Text(text = "Edit")
+                                    }
                                 }
-                            }
-                        )
+                            )
+                        }
                     }
                 }
             }

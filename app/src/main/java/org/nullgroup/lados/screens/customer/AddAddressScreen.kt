@@ -95,6 +95,7 @@ fun AddAddressScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
+                enabled = viewModel.isInfoChanged.value,
                 onClick = {
                     saveConfirmation = true
                 }) {
@@ -115,7 +116,6 @@ fun AddAddressScreen(
             }
         )
     }
-
 
     if (cancelConfirmation && viewModel.isInfoChanged.value) {
         ConfirmDialog(

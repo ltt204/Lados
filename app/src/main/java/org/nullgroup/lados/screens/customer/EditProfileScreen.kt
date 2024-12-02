@@ -95,7 +95,7 @@ fun EditProfileScreen(
                 content = "Edit profile"
             )
         },
-        backgroundColor = Color.Transparent.copy(alpha = 0.1f)
+        backgroundColor = Color.Transparent
     ) { innerPadding ->
         when (userInfo) {
             is UserUiState.Loading -> LoadingContent()

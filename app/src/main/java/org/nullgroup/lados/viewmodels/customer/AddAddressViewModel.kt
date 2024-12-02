@@ -1,5 +1,6 @@
 package org.nullgroup.lados.viewmodels.customer
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -115,6 +116,7 @@ class AddAddressViewModel @Inject constructor(
                         isInfoChanged.value = true
                     }
                 }
+
                 else -> return
             }
         }
@@ -130,7 +132,12 @@ class AddAddressViewModel @Inject constructor(
 
     fun saveAddress() {
         viewModelScope.launch {
-            userAddressRepository.saveAddress(userAddress.value)
+            try {
+                Log.d("AddAddressViewModel", "saveAddress: ${userAddress.value}")
+                userAddressRepository.saveAddress(userAddress.value)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 

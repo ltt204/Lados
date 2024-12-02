@@ -10,7 +10,8 @@ data class User(
     val email: String = "",
     val role: String = "",
     val phoneNumber: String = "",
-    var avatarUri: String = ""
+    var avatarUri: String = "",
+    val addresses: List<Address> = emptyList()
 )
 
 data class UserProfilePicture(

@@ -75,14 +75,21 @@ class UserAddressRepository(
     }
 
     override suspend fun saveAddress(address: Address) {
-        if (address.id.isEmpty()) addAddressToCollection(address)
-        val addressRef = firestore
-            .collection("users")
-            .document(firebaseAuth.currentUser?.email!!)
-            .collection("addresses")
-            .document(address.id)
-        Log.d("UserAddressRepository", "Address: $address")
-        addressRef.set(address).await()
+        try {
+            if (address.id.isEmpty()) addAddressToCollection(address)
+
+            Log.d("UserAddressRepository", "Address: $address")
+            val addressRef = firestore
+                .collection("users")
+                .document(firebaseAuth.currentUser?.email!!)
+                .collection("addresses")
+                .document(address.id)
+            addressRef.set(address).await()
+            Log.d("UserAddressRepository", "Address: $address")
+        } catch (e: Exception) {
+            Log.d("UserAddressRepository", "Failed to save address")
+            throw Exception("Failed to save address")
+        }
     }
 
     override suspend fun addAddress(address: Address) {
@@ -94,24 +101,31 @@ class UserAddressRepository(
     }
 
     override suspend fun deleteAddress(addressId: String) {
-        val addressRef = firestore
+        val addressRef = firestore.collection("addresses").document(addressId)
+        val userAddressRef = firestore
             .collection("users")
             .document(firebaseAuth.currentUser?.email!!)
             .collection("addresses")
             .document(addressId)
 
-        addressRef.delete().addOnFailureListener {
-            throw Exception("Failed to delete address")
-        }.addOnSuccessListener {
+        try {
+            userAddressRef.delete().await()
+            addressRef.delete().await()
             Log.d("AddressRepository", "Address deleted")
+        } catch (e: Exception) {
+            throw Exception("Failed to delete address")
         }
     }
 
     private suspend fun addAddressToCollection(address: Address) {
         val addressCol = firestore.collection("addresses")
-        val task = addressCol.add(address)
-        task.addOnSuccessListener {
-            address.id = it.id
-        }.await()
+        try {
+            val task = addressCol.add(address).await()
+            address.id = task.id
+            Log.d("UserAddressRepository", "$address")
+        } catch (e: Exception) {
+            Log.d("UserAddressRepository", e.message.toString())
+            throw Exception("Failed to add address to collection")
+        }
     }
 }
