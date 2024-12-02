@@ -10,13 +10,34 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withTimeout
 import org.nullgroup.lados.data.models.User
+import org.nullgroup.lados.data.repositories.interfaces.ImageRepository
 import org.nullgroup.lados.data.repositories.interfaces.UserRepository
 
 
 class UserRepositoryImplement(
     private val firestore: FirebaseFirestore,
-    private val firebaseAuth: FirebaseAuth
+    private val firebaseAuth: FirebaseAuth,
+    private val imageRepository: ImageRepository
 ) : UserRepository {
+    override fun getCurrentUserFlow(): Flow<User> = callbackFlow {
+        val userRef = firestore.collection("users").document(firebaseAuth.currentUser?.email!!)
+
+
+        val subscription = userRef.addSnapshotListener { snapshot, error ->
+            if (error!=null) {
+                close(error)
+                return@addSnapshotListener
+            }
+
+            if (snapshot != null) {
+                val user = snapshot.toObject(User::class.java) ?: User()
+                trySend(user).isSuccess
+            }
+        }
+
+        awaitClose { subscription.remove() }
+    }
+
     override suspend fun login(email: String, password: String): Result<Boolean> {
         return try {
             firebaseAuth.signInWithEmailAndPassword(email, password).await()
@@ -40,6 +61,15 @@ class UserRepositoryImplement(
     }
 
     override suspend fun saveUserToFirestore(user: User) {
+        user.avatarUri =
+            user.avatarUri.ifEmpty {
+                imageRepository.getImageUrl(
+                    "users",
+                    "default_avatar",
+                    "jpg"
+                )
+            }
+
         firestore.collection("users").document(user.email).set(user).await()
     }
 
@@ -113,6 +143,14 @@ class UserRepositoryImplement(
 
     override suspend fun updateUser(user: User): Result<Boolean> {
         return try {
+            user.avatarUri =
+                user.avatarUri.ifEmpty {
+                    imageRepository.getImageUrl(
+                        "users",
+                        "default_avatar",
+                        "jpg"
+                    )
+                }
             firestore.collection("users").document(user.email).set(user).await()
             Result.success(true)
         } catch (e: Exception) {
@@ -122,14 +160,11 @@ class UserRepositoryImplement(
 
     override suspend fun getCurrentUser(): User {
         val firebaseUser = firebaseAuth.currentUser
-        val profileUri = firebaseUser?.photoUrl?.toString()
-
         val userRef = firestore.collection("users").document(firebaseUser?.email!!)
 
         val user = userRef.get().await().toObject(User::class.java) ?: User()
 
-        user.avatarUri =
-            profileUri ?: "" // TODO: set the default avatar uri for this user's profile picture
-        return userRef.get().await().toObject(User::class.java)!!
+        Log.d("UserRepositoryImplement", "User profile picture: ${user.avatarUri}")
+        return user
     }
 }

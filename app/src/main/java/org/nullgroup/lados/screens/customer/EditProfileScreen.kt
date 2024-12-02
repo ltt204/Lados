@@ -1,13 +1,15 @@
 package org.nullgroup.lados.screens.customer
 
+import android.util.Log
+import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -37,18 +39,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import org.nullgroup.lados.R
+import coil.compose.SubcomposeAsyncImage
+import coil.request.ImageRequest
 import org.nullgroup.lados.compose.profile.ConfirmDialog
 import org.nullgroup.lados.compose.profile.CustomTextField
 import org.nullgroup.lados.compose.profile.LoadOnProgress
 import org.nullgroup.lados.compose.profile.ProfileTopAppBar
 import org.nullgroup.lados.ui.theme.Typography
+import org.nullgroup.lados.utilities.toByteArray
+import org.nullgroup.lados.utilities.toDrawable
 import org.nullgroup.lados.viewmodels.customer.EditProfileViewModel
+import org.nullgroup.lados.viewmodels.customer.ProfilePictureUiState
 import org.nullgroup.lados.viewmodels.customer.UserUiState
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -60,27 +66,50 @@ fun EditProfileScreen(
     viewModel: EditProfileViewModel = hiltViewModel(),
 ) {
     var saveConfirmation by remember { mutableStateOf(false) }
-    val userInfo = viewModel.userUisState.value
+    var cancelConfirmation by remember { mutableStateOf(false) }
+    val userInfo = viewModel.userUiState.value
+    val profilePictureUiState = viewModel.profilePictureUiState.value
+    var isSaveClick by remember {
+        mutableStateOf(false)
+    }
+    val context = LocalContext.current
+
+    val singlePicturePicker =
+        rememberLauncherForActivityResult(contract = ActivityResultContracts.PickVisualMedia()) { uri ->
+            uri?.toDrawable(context)?.toByteArray()?.let {
+                viewModel.onProfilePictureChanged(
+                    uri = uri.toString(),
+                    image = it
+                )
+            }
+        }
+    BackHandler {
+        cancelConfirmation = true
+    }
 
     Scaffold(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(top = paddingValues.calculateTopPadding()),
+        modifier = modifier.padding(top = paddingValues.calculateTopPadding()),
         topBar = {
             ProfileTopAppBar(
-                onBackClick = { navController?.navigateUp() },
+                onBackClick = { cancelConfirmation = true },
                 content = "Edit profile"
             )
-        }) { innerPadding ->
+        },
+        backgroundColor = Color.Transparent.copy(alpha = 0.1f)
+    ) { innerPadding ->
         when (userInfo) {
             is UserUiState.Loading -> LoadingContent()
             is UserUiState.Success -> SuccessContent(
                 modifier = Modifier.padding(top = innerPadding.calculateTopPadding()),
                 userInfo = userInfo,
-                saveConfirmation = saveConfirmation,
                 onSaveClick = { saveConfirmation = true },
-                onDismissRequest = { saveConfirmation = false },
-                navController = navController
+                onEditImage = { /*TODO: call ACTION_PICK with Mime type is image to upload image from gallery*/
+                    singlePicturePicker.launch(
+                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                    )
+                },
+                onNameChanged = { viewModel.onNameChanged(it) },
+                onPhoneChanged = { viewModel.onPhoneChanged(it) }
             )
 
             is UserUiState.Error -> ErrorContent(userInfo.message)
@@ -89,10 +118,51 @@ fun EditProfileScreen(
         if (saveConfirmation) {
             ConfirmDialog(
                 title = { Text(text = "Confirm information") },
-                message = { Text(text = "userInfo.value.toString()") },
+                message = { Text(text = "Are you sure you want to save new information?") },
                 onDismissRequest = { saveConfirmation = false },
                 confirmButton = {
                     saveConfirmation = false
+                    isSaveClick = true
+                    viewModel.onSaveClicked()
+                }
+            )
+        }
+
+        if (isSaveClick) {
+            when (profilePictureUiState) {
+                is ProfilePictureUiState.Loading,
+                is ProfilePictureUiState.Initial -> {
+                    Log.d("EditProfileScreen", "ProfilePictureUiState.Loading")
+//                    LoadOnProgress {
+//                        CircularProgressIndicator(modifier = Modifier.size(48.dp))
+//                        Spacer(modifier = Modifier.padding(top = 16.dp))
+//                        Text(text = "Saving...")
+//                    }
+                }
+
+                is ProfilePictureUiState.Error -> {
+                    ErrorContent(profilePictureUiState.message)
+                }
+
+                is ProfilePictureUiState.Success -> {
+                    Log.d("EditProfileScreen", "ProfilePictureUiState.Success")
+                    isSaveClick = false
+                    navController?.navigateUp()
+                }
+            }
+        }
+
+        if (cancelConfirmation) {
+            ConfirmDialog(
+                title = { Text(text = "Cancel editing") },
+                message = { Text(text = "Are you sure you want to cancel editing?") },
+                primaryButtonText = "Exit",
+                onDismissRequest = {
+                    cancelConfirmation = false
+                },
+                secondaryButtonText = "Continue",
+                confirmButton = {
+                    cancelConfirmation = false
                     navController?.navigateUp()
                 }
             )
@@ -117,10 +187,10 @@ fun LoadingContent(
 fun SuccessContent(
     modifier: Modifier = Modifier,
     userInfo: UserUiState.Success,
-    saveConfirmation: Boolean,
     onSaveClick: () -> Unit,
-    onDismissRequest: () -> Unit,
-    navController: NavController?
+    onEditImage: () -> Unit,
+    onNameChanged: (String) -> Unit,
+    onPhoneChanged: (String) -> Unit,
 ) {
     val userName = remember { mutableStateOf(userInfo.user.name) }
     val userPhone = remember { mutableStateOf(userInfo.user.phoneNumber) }
@@ -130,8 +200,15 @@ fun SuccessContent(
             .fillMaxSize()
             .padding(horizontal = 16.dp, vertical = 16.dp)
     ) {
-        Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally ) {
-            ProfileImage()
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            ProfileImage(
+                modifier = Modifier,
+                imageUri = userInfo.user.avatarUri,
+                onEditImage = onEditImage
+            )
             Text(
                 modifier = Modifier.padding(bottom = 32.dp),
                 text = userInfo.user.email,
@@ -141,7 +218,10 @@ fun SuccessContent(
         CustomTextField(
             modifier = Modifier.fillMaxWidth(),
             value = userName.value,
-            onValueChange = { userName.value = it },
+            onValueChange = {
+                userName.value = it
+                onNameChanged(it)
+            },
             header = "Name",
             placeHolder = "Name",
             trailingIcon = {
@@ -158,11 +238,16 @@ fun SuccessContent(
         CustomTextField(
             modifier = Modifier.fillMaxWidth(),
             value = userPhone.value,
-            onValueChange = { userPhone.value = it },
+            onValueChange = {
+                userPhone.value = it
+                onPhoneChanged(it)
+            },
             header = "Phone number",
             placeHolder = "Phone number",
             trailingIcon = {
-                IconButton(onClick = { userPhone.value = "" }) {
+                IconButton(onClick = {
+                    userPhone.value = ""
+                }) {
                     Icon(
                         imageVector = Icons.Default.Clear,
                         contentDescription = null,
@@ -181,35 +266,42 @@ fun SuccessContent(
             Text(text = "Save")
         }
     }
-
-    if (saveConfirmation) {
-        ConfirmDialog(
-            title = { Text(text = "Confirm information") },
-            message = { Text(text = userInfo.user.toString()) },
-            onDismissRequest = onDismissRequest,
-            confirmButton = {
-                onDismissRequest()
-                navController?.navigateUp()
-            }
-        )
-    }
 }
 
 @Composable
 fun ProfileImage(
-    modifier : Modifier = Modifier
+    modifier: Modifier = Modifier,
+    imageUri: String,
+    onEditImage: () -> Unit = {}
 ) {
     Box(
         modifier = modifier
             .padding(bottom = 16.dp),
         contentAlignment = Alignment.Center
     ) {
-        Image(
-            modifier = Modifier.clip(CircleShape),
+        SubcomposeAsyncImage(
+            modifier = Modifier
+                .size(100.dp)
+                .clip(CircleShape),
             contentScale = ContentScale.Crop,
-            painter = painterResource(R.drawable.ic_launcher_background),
+            alignment = Alignment.Center,
+            loading = {
+                LoadOnProgress(
+                    modifier = Modifier
+                        .clip(CircleShape)
+                ) {
+                    CircularProgressIndicator(modifier = Modifier.size(48.dp))
+                    Spacer(modifier = Modifier.padding(top = 16.dp))
+                }
+            },
+            model = ImageRequest
+                .Builder(context = LocalContext.current)
+                .data(imageUri)
+                .crossfade(true)
+                .build(),
             contentDescription = "Profile Picture"
         )
+
         OutlinedIconButton(
             modifier = Modifier
                 .clip(CircleShape)
@@ -220,7 +312,10 @@ fun ProfileImage(
                 containerColor = Color(0xFF8E6CEF)
             ),
             border = BorderStroke(2.dp, Color.White),
-            onClick = { /*TODO: call ACTION_PICK with Mime type is image to upload image from gallery*/ }
+            onClick = {
+                /*TODO: call ACTION_PICK with Mime type is image to upload image from gallery*/
+                onEditImage()
+            }
         ) {
             Icon(
                 modifier = Modifier.size(16.dp),
@@ -249,6 +344,36 @@ fun ErrorContent(message: String) {
 
 @Preview(showBackground = true)
 @Composable
-fun EditProfileScreenPreview() {
-    EditProfileScreen()
+fun ProfileImagePreview() {
+    ProfileImage(imageUri = "https://firebasestorage.googleapis.com/v0/b/lados-8509b.firebasestorage.app/o/images%2Fusers%2Fdefault_avatar.jpg?alt=media&token=5549abef-cbbd-4ff2-8332-f83fb79026ac")
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Preview(showBackground = true)
+@Composable
+fun SuccessContentPreview() {
+    Scaffold(
+        topBar = {
+            ProfileTopAppBar(
+                onBackClick = {},
+                content = "Edit profile"
+            )
+        }
+    ) { innerPadding ->
+        SuccessContent(
+            modifier = Modifier.padding(top = innerPadding.calculateTopPadding()),
+            userInfo = UserUiState.Success(
+                user = org.nullgroup.lados.data.models.User(
+                    name = "John Doe",
+                    email = "",
+                    phoneNumber = "",
+                    avatarUri = "https://firebasestorage.googleapis.com/v0/b/lados-8509b.firebasestorage.app/o/images%2Fusers%2Fdefault_avatar.jpg?alt=media&token=5549abef-cbbd-4ff2-8332-f83fb79026ac"
+                )
+            ),
+            onSaveClick = {},
+            onEditImage = {},
+            onNameChanged = {},
+            onPhoneChanged = {}
+        )
+    }
 }

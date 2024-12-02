@@ -14,7 +14,7 @@ import androidx.compose.ui.graphics.Color
 @Composable
 fun LoadOnProgress(
     modifier: Modifier = Modifier,
-    content: @Composable (() -> Unit) = { Text(text = "Loading...") }
+    content: @Composable (() -> Unit) = {  }
 ) {
     Box(
         modifier

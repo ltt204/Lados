@@ -4,6 +4,8 @@ import kotlinx.coroutines.flow.Flow
 import org.nullgroup.lados.data.models.User
 
 interface UserRepository {
+    fun getCurrentUserFlow(): Flow<User>
+
     suspend fun login(email: String, password: String): Result<Boolean>
     suspend fun signUp(fullName: String, email: String, password: String): Result<Boolean>
     suspend fun saveUserToFirestore(user: User)

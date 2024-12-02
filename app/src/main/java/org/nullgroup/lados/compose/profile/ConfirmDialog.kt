@@ -9,6 +9,8 @@ import androidx.compose.runtime.Composable
 fun ConfirmDialog(
     title: @Composable (() -> Unit) = {},
     message: @Composable (() -> Unit) = {},
+    primaryButtonText: String = "Save",
+    secondaryButtonText: String = "Cancel",
     onDismissRequest: () -> Unit = {},
     confirmButton: () -> Unit = {}
 ) {
@@ -18,12 +20,12 @@ fun ConfirmDialog(
         onDismissRequest = { onDismissRequest() },
         confirmButton = {
             TextButton(onClick = { confirmButton() }) {
-                Text(text = "Save")
+                Text(text = primaryButtonText)
             }
         },
         dismissButton = {
             TextButton(onClick = { onDismissRequest() }) {
-                Text(text = "Cancel")
+                Text(text = secondaryButtonText)
             }
         })
 }

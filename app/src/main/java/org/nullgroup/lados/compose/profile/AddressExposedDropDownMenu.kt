@@ -11,12 +11,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ExposedDropdownMenuBox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.MenuItemColors
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -25,17 +25,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.CoroutineScope
 import org.nullgroup.lados.viewmodels.customer.MenuItemsUIState
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddressExposedDropDownMenu(
     modifier: Modifier = Modifier,
@@ -43,8 +41,7 @@ fun AddressExposedDropDownMenu(
     scrollState: ScrollState = rememberScrollState(),
     placeHolder: String = "",
     onItemSelected: (String, Int) -> Unit = { _, _ -> },
-    currentItem: String = "",
-    scope: CoroutineScope = rememberCoroutineScope()
+    currentItem: String = ""
 ) {
     var menuHeight by remember { mutableIntStateOf(62) }
 
@@ -126,35 +123,27 @@ fun AddressExposedDropDownMenu(
                                 val isSelected = value == selectedItem
                                 DropdownMenuItem(
                                     modifier = Modifier
-                                        .fillMaxWidth()
                                         .background(
                                             if (isSelected) Color.Gray.copy(alpha = 0.1f) else Color.Transparent
-                                        ),
+                                        )
+                                        .fillMaxWidth(),
                                     text = { Text(text = value) },
                                     onClick = {
                                         onItemSelected(value, index)
                                         isExpanded = false
                                     },
-                                    contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                                    contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
+                                    colors = MenuItemColors(
+                                        textColor = Color.Black,
+                                        leadingIconColor = Color.Black,
+                                        trailingIconColor = Color.Black,
+                                        disabledTextColor = Color.Gray,
+                                        disabledLeadingIconColor = Color.Gray,
+                                        disabledTrailingIconColor = Color.Gray,
+                                    )
                                 )
                             }
                         }
-//                        itemsUiState.data.forEachIndexed { index, value ->
-//                            val isSelected = value == selectedItem
-//                            DropdownMenuItem(
-//                                modifier = Modifier
-//                                    .fillMaxWidth()
-//                                    .background(
-//                                        if (isSelected) Color.Gray.copy(alpha = 0.1f) else Color.Transparent
-//                                    ),
-//                                text = { Text(text = value) },
-//                                onClick = {
-//                                    onItemSelected(value, index)
-//                                    isExpanded = false
-//                                },
-//                                contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
-//                            )
-//                        }
                     }
                 }
             }

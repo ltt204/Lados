@@ -3,7 +3,6 @@ package org.nullgroup.lados.navigations
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.background
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material3.Icon
@@ -15,7 +14,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -30,6 +28,7 @@ import org.nullgroup.lados.screens.customer.AddressList
 import org.nullgroup.lados.screens.customer.EditAddressScreen
 import org.nullgroup.lados.screens.customer.EditProfileScreen
 import org.nullgroup.lados.screens.customer.HomeScreen
+import org.nullgroup.lados.screens.customer.ProfileScreen
 
 @Composable
 fun CustomerGraph(
@@ -91,6 +90,7 @@ fun CustomerGraph(
             composable(route = Screen.Customer.Profile.route) {
                 isVisibility = true
                 ProfileScreen(
+                    modifier = Modifier,
                     paddingValues = innerPadding,
                     navController = navController
                 )

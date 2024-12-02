@@ -1,58 +1,68 @@
 package org.nullgroup.lados.screens.customer
 
-import androidx.compose.foundation.Image
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import org.nullgroup.lados.R
+import coil.compose.SubcomposeAsyncImage
+import coil.request.ImageRequest
+import org.nullgroup.lados.compose.profile.LoadOnProgress
 import org.nullgroup.lados.compose.profile.TwoColsItem
+import org.nullgroup.lados.data.models.User
 import org.nullgroup.lados.screens.Screen
+import org.nullgroup.lados.viewmodels.customer.ProfileViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
     modifier: Modifier = Modifier,
     navController: NavController? = null,
+    viewModel: ProfileViewModel = hiltViewModel(),
     paddingValues: PaddingValues = PaddingValues(0.dp)
 ) {
+    val currentUser = viewModel.currentUser.collectAsState()
     Scaffold(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(vertical = paddingValues.calculateTopPadding()),
+        modifier = modifier.padding(vertical = paddingValues.calculateTopPadding()),
         topBar = {
             CenterAlignedTopAppBar(title = { Text(text = "Profile", fontWeight = FontWeight.Bold) })
-        }
+        },
+        backgroundColor = Color.Transparent.copy(alpha = 0.1f)
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -67,15 +77,30 @@ fun ProfileScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 32.dp),
+                        .padding(top = 16.dp, bottom = 32.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    Image(
+                    Log.d("ProfileScreen", "ProfileScreen: ${currentUser.value}")
+                    SubcomposeAsyncImage(
                         modifier = Modifier
+                            .size(100.dp)
                             .clip(CircleShape),
                         contentScale = ContentScale.Crop,
                         alignment = Alignment.Center,
-                        painter = painterResource(R.drawable.ic_launcher_background),
+                        loading = {
+                            LoadOnProgress(
+                                modifier = Modifier
+                                    .size(12.dp)
+                                    .clip(CircleShape)
+                            ) {
+                                CircularProgressIndicator(modifier = Modifier.size(48.dp))
+                            }
+                        },
+                        model = ImageRequest
+                            .Builder(context = LocalContext.current)
+                            .data(currentUser.value.avatarUri)
+                            .crossfade(true)
+                            .build(),
                         contentDescription = "Profile Picture"
                     )
                 }
@@ -83,6 +108,7 @@ fun ProfileScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 32.dp),
+                    currentUser = currentUser.value,
                     onEditProfileClicked = {
                         navController?.navigate(Screen.Customer.EditProfile.route)
                     }
@@ -131,7 +157,7 @@ fun ProfileScreen(
                                 contentDescription = "Arrow",
                             )
                         }, onClick = {
-                            navController?.navigate(Screen.Customer.Address.AddressList.route)
+//                            navController?.navigate(Screen.Customer.Address.AddressList.route)
                         })
                     TwoColsItem(
                         modifier = Modifier.height(56.dp),
@@ -151,7 +177,7 @@ fun ProfileScreen(
                                 contentDescription = "Arrow",
                             )
                         }, onClick = {
-                            navController?.navigate(Screen.Customer.Address.AddressList.route)
+//                            navController?.navigate(Screen.Customer.Address.AddressList.route)
                         })
                     TwoColsItem(
                         modifier = Modifier.height(56.dp),
@@ -171,7 +197,7 @@ fun ProfileScreen(
                                 contentDescription = "Arrow",
                             )
                         }, onClick = {
-                            navController?.navigate(Screen.Customer.Address.AddressList.route)
+//                            navController?.navigate(Screen.Customer.Address.AddressList.route)
                         })
                     TwoColsItem(
                         modifier = Modifier.height(56.dp),
@@ -191,7 +217,7 @@ fun ProfileScreen(
                                 contentDescription = "Arrow",
                             )
                         }, onClick = {
-                            navController?.navigate(Screen.Customer.Address.AddressList.route)
+//                            navController?.navigate(Screen.Customer.Address.AddressList.route)
                         })
                 }
             }
@@ -212,15 +238,17 @@ fun ProfileScreen(
 @Composable
 fun Detail(
     modifier: Modifier = Modifier,
-    userName: String = "User Name",
-    email: String = "example@gamil.com",
-    phoneNumber: String = "+91 1234567890",
+    currentUser: User,
     onEditProfileClicked: () -> Unit = {}
 ) {
+
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .height(112.dp)
+            .height(112.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = androidx.compose.material3.MaterialTheme.colorScheme.surfaceBright,
+        ),
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -232,19 +260,19 @@ fun Detail(
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
                     modifier = Modifier
-                        .weight(1f), text = userName,
+                        .weight(1f), text = currentUser.name,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
                     modifier = Modifier
-                        .weight(1f), text = email,
+                        .weight(1f), text = currentUser.email,
                     color = Color.Gray,
                     fontSize = 16.sp
                 )
                 Text(
                     modifier = Modifier
-                        .weight(1f), text = phoneNumber,
+                        .weight(1f), text = currentUser.phoneNumber,
                     color = Color.Gray,
                     fontSize = 16.sp
                 )
@@ -260,6 +288,7 @@ fun Detail(
         }
     }
 }
+
 
 @Preview
 @Composable
