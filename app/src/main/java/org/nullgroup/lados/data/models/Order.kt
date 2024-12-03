@@ -23,7 +23,10 @@ data class Order(
     val orderStatusLog: Map<OrderStatus, Long> = mapOf(
         OrderStatus.CREATED to System.currentTimeMillis()
     ),
-    val orderProducts: List<OrderProduct> = listOf()
+    val orderProducts: List<OrderProduct> = listOf(),
+    val orderTotal: Double = orderProducts.sumOf { it.totalPrice },
+        // Maybe different that the total of individual products
+        // If discount is applied
 ) {
     companion object {
         const val COLLECTION_PATH = "orders"
@@ -42,9 +45,11 @@ data class Order(
                             orderId = orderProductData["orderId"] as String,
                             productId = orderProductData["productId"] as String,
                             variantId = orderProductData["variantId"] as String,
-                            amount = (orderProductData["amount"] as Number).toInt()
+                            amount = (orderProductData["amount"] as Number).toInt(),
+                            totalPrice = orderProductData["totalPrice"] as Double,
                         )
-                    }
+                    },
+                orderTotal = (map["orderTotal"] as Double),
             )
         }
     }
@@ -54,7 +59,8 @@ data class Order(
             "orderId" to orderId,
             "customerId" to customerId,
             "orderStatusLog" to orderStatusLog.mapKeys { it.key.name },
-            "orderProducts" to orderProducts.map { it.toMap() }
+            "orderProducts" to orderProducts.map { it.toMap() },
+            "orderTotal" to orderTotal,
         )
     }
 }
@@ -65,7 +71,10 @@ data class OrderProduct(
     val orderId: String,
     val productId: String,
     val variantId: String,
-    val amount: Int
+    val amount: Int,
+    val totalPrice: Double,
+        // Maybe different that the total of individual products
+        // If discount is applied
 ) {
     fun toMap(): Map<String, Any> {
         return mapOf(
@@ -73,7 +82,8 @@ data class OrderProduct(
             "orderId" to orderId,
             "productId" to productId,
             "variantId" to variantId,
-            "amount" to amount
+            "amount" to amount,
+            "totalPrice" to totalPrice
         )
     }
 }
