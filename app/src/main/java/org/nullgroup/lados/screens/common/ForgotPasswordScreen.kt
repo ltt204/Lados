@@ -40,6 +40,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
@@ -47,6 +48,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import org.nullgroup.lados.compose.SignIn.ButtonSubmit
+import org.nullgroup.lados.compose.SignIn.CustomTextField
+import org.nullgroup.lados.compose.SignIn.Headline
+import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.viewmodels.ForgotPasswordScreenViewModel
 import org.nullgroup.lados.viewmodels.events.ForgotPasswordScreenEvent
 import org.nullgroup.lados.viewmodels.events.LoginScreenEvent
@@ -91,33 +96,39 @@ fun ForgotPasswordScreen(
 fun ForgotPasswordInputScreen(modifier: Modifier = Modifier) {
     var email by remember { mutableStateOf("") }
     val forgotPasswordViewModel = hiltViewModel<ForgotPasswordScreenViewModel>()
-    val forgotPasswordState by forgotPasswordViewModel.forgotPasswordState.collectAsState()
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
-            .background(Color.White)
             .padding(horizontal = 24.dp)
     ) {
-        Text(
-            text = "Forgot Password",
-            style = MaterialTheme.typography.headlineMedium.copy(
-                fontWeight = FontWeight.Bold
-            ),
-            modifier = Modifier.padding(top = 24.dp, bottom = 32.dp)
+        Spacer(modifier = Modifier.height(70.dp))
+
+        Headline(
+            text = "Forgot password",
         )
 
+        Spacer(modifier = Modifier.height(16.dp))
+
         CustomTextField(
-            value = email,
-            onValueChange = { email = it },
             label = "Email Address",
+            text = email,
+            onValueChange = { email = it },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-            modifier = Modifier.fillMaxWidth()
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Default.Email,
+                    contentDescription = "forgot password email",
+                    tint = LadosTheme.colorScheme.onBackground,
+                )
+            },
+            modifier = Modifier.fillMaxWidth(),
         )
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        Button(
+        ButtonSubmit(
+            text = "Continue",
             onClick = {
                 forgotPasswordViewModel.handleEvent(
                     ForgotPasswordScreenEvent.HandleResetPassword(
@@ -125,47 +136,8 @@ fun ForgotPasswordInputScreen(modifier: Modifier = Modifier) {
                     )
                 )
             },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF7C4DFF)
-            ),
-            shape = RoundedCornerShape(8.dp)
-        ) {
-            Text(
-                text = "Continue",
-                color = Color.White
-            )
-        }
+        )
     }
-}
-
-@Composable
-private fun CustomTextField(
-    value: String,
-    onValueChange: (String) -> Unit,
-    label: String,
-    modifier: Modifier = Modifier,
-    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
-    visualTransformation: VisualTransformation = VisualTransformation.None
-) {
-    OutlinedTextField(
-        value = value,
-        onValueChange = onValueChange,
-        label = { Text(label) },
-        modifier = modifier,
-        colors = OutlinedTextFieldDefaults.colors(
-            focusedContainerColor = Color(0xFFF7F7F7),
-            unfocusedContainerColor = Color(0xFFF7F7F7),
-            unfocusedBorderColor = Color.Transparent,
-            focusedBorderColor = Color.White
-        ),
-        shape = RoundedCornerShape(8.dp),
-        keyboardOptions = keyboardOptions,
-        visualTransformation = visualTransformation,
-        singleLine = true,
-    )
 }
 
 @Composable
@@ -227,15 +199,16 @@ fun PasswordResetConfirmationScreen(
         Spacer(modifier = Modifier.height(24.dp))
 
         Text(
-            text = "We Sent you an Email to reset\nyour password.",
+            text = "We Sent you an Email to reset your password.",
             textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.bodyLarge,
-            color = Color.Black
+            style = LadosTheme.typography.headlineSmall,
+            color = LadosTheme.colorScheme.onBackground,
         )
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        Button(
+        ButtonSubmit(
+            text = "Return to Login",
             onClick = {
                 forgotPasswordViewModel.handleEvent(
                     ForgotPasswordScreenEvent.HandleReturnToLogin(
@@ -243,18 +216,6 @@ fun PasswordResetConfirmationScreen(
                     )
                 )
             },
-            modifier = Modifier
-                .height(48.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF7C4DFF)
-            ),
-            shape = RoundedCornerShape(8.dp)
-        ) {
-            Text(
-                text = "Return to Login",
-                color = Color.White,
-                style = MaterialTheme.typography.bodyMedium
-            )
-        }
+        )
     }
 }

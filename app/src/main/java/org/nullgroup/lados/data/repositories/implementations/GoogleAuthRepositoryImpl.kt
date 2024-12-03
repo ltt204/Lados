@@ -92,17 +92,21 @@ class GoogleAuthRepositoryImpl(
 
             var user: User? = null
             authResult.user?.let {
+                val provider =
+                    if (it.providerData.size >= 2) it.providerData[1].providerId else it.providerId
+
                 user = User(
                     name = it.displayName ?: "",
                     email = it.email ?: "",
                     role = UserRole.CUSTOMER.name,
                     phoneNumber = it.phoneNumber ?: "",
                     photoUrl = it.photoUrl.toString(),
-                    provider = it.providerId,
+                    provider = provider,
                 )
+
                 val token = it.getIdToken(true).await()?.token
                 if (token != null) {
-                    sharedPreferences.saveData(it.providerId, token)
+                    sharedPreferences.saveData(provider, token)
                 }
             }
 

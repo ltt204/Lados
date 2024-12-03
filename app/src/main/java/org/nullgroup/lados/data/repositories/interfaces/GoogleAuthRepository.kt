@@ -3,7 +3,6 @@ package org.nullgroup.lados.data.repositories.interfaces
 import android.content.Intent
 import android.content.IntentSender
 import dagger.Module
-import org.nullgroup.lados.data.models.SignInResult
 import org.nullgroup.lados.data.models.User
 import org.nullgroup.lados.viewmodels.states.ResourceState
 

@@ -44,6 +44,7 @@ class EmailAuthRepositoryImpl(
                 return ResourceState.Error("Failed to create user")
             }
             val user = User(
+                id = result.user?.uid ?: "",
                 email = email,
                 name = fullName,
                 role = UserRole.CUSTOMER.name,
@@ -51,11 +52,12 @@ class EmailAuthRepositoryImpl(
                 photoUrl = result.user?.photoUrl.toString(),
                 provider = result.user?.providerId ?: "",
             )
-            val token =result.user?.getIdToken(true)?.await()?.token
+            val token = result.user?.getIdToken(true)?.await()?.token
             if (token != null) {
                 sharedPreferences.saveData(result.user?.providerId!!, token)
             }
-            userRepository.addUserToFirestore(user)
+
+            userRepository.saveUserToFirestore(user)
             ResourceState.Success(user)
         } catch (e: Exception) {
             ResourceState.Error(e.message)

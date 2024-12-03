@@ -8,8 +8,5 @@ sealed class RegisterScreenEvent {
         val lastName: String,
         val email: String,
         val password: String,
-        val navController: NavController
     ) : RegisterScreenEvent()
-
-    data object HandleBackStack : RegisterScreenEvent()
 }

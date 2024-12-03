@@ -45,8 +45,11 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import org.nullgroup.lados.compose.SignIn.ButtonSubmit
 import org.nullgroup.lados.compose.SignIn.CustomTextField
 import org.nullgroup.lados.compose.SignIn.Headline
+import org.nullgroup.lados.compose.SignIn.TextClickable
+import org.nullgroup.lados.compose.SignIn.TextNormal
 import org.nullgroup.lados.data.models.UserRole
 import org.nullgroup.lados.navigations.AdminGraph
 import org.nullgroup.lados.navigations.CustomerGraph
@@ -63,7 +66,7 @@ import org.nullgroup.lados.viewmodels.states.ResourceState
 @Composable
 fun RegisterScreen(
     navController: NavController,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val registerViewModel = hiltViewModel<RegisterScreenViewModel>()
     val registerState by registerViewModel.registerState.collectAsState()
@@ -115,23 +118,22 @@ fun RegisterInputScreen(navController: NavController, modifier: Modifier = Modif
     val registerViewModel = hiltViewModel<RegisterScreenViewModel>()
     val loginViewModel = hiltViewModel<LoginScreenViewModel>()
 
-    val registerState by registerViewModel.registerState.collectAsState()
-    val loginState by loginViewModel.loginState.collectAsState()
-
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
-            .background(Color.White)
-            .padding(horizontal = 24.dp)
+            .padding(horizontal = 24.dp),
     ) {
+
         Spacer(modifier = Modifier.height(70.dp))
 
         Headline(text = "Create Account")
+
+        Spacer(modifier = Modifier.height(16.dp))
 
         CustomTextField(
             label = "First Name",
@@ -143,7 +145,7 @@ fun RegisterInputScreen(navController: NavController, modifier: Modifier = Modif
         Spacer(modifier = Modifier.height(16.dp))
 
         CustomTextField(
-            label = "Lastname",
+            label = "Last Name",
             text = lastName,
             onValueChange = { lastName = it },
             modifier = Modifier.fillMaxWidth()
@@ -172,7 +174,8 @@ fun RegisterInputScreen(navController: NavController, modifier: Modifier = Modif
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        Button(
+        ButtonSubmit(
+            text = "Register",
             onClick = {
                 registerViewModel.handleEvent(
                     RegisterScreenEvent.HandleSignUp(
@@ -180,25 +183,12 @@ fun RegisterInputScreen(navController: NavController, modifier: Modifier = Modif
                         lastName,
                         email,
                         password,
-                        navController
                     )
                 )
                 loginViewModel.handleLoginEvent(LoginScreenEvent.HandleEnterEmail(email))
                 loginViewModel.handleLoginEvent(LoginScreenEvent.HandleEnterPassword(password))
             },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color.Black
-            ),
-            shape = RoundedCornerShape(8.dp)
-        ) {
-            Text(
-                text = "Continue",
-                color = Color.White
-            )
-        }
+        )
 
         Row(
             modifier = Modifier
@@ -206,15 +196,14 @@ fun RegisterInputScreen(navController: NavController, modifier: Modifier = Modif
                 .padding(top = 16.dp),
             horizontalArrangement = Arrangement.Center
         ) {
-            Text(
-                text = "Forgot Password? ",
-                color = Color.Gray
+            TextNormal(
+                text = "Forgot password? "
             )
-            Text(
+            TextClickable(
                 text = "Reset",
-                color = Color.White,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.clickable { navController.navigate("forgot_password") }
+                onClick = {
+                    navController.navigate("forgot_password")
+                },
             )
         }
     }

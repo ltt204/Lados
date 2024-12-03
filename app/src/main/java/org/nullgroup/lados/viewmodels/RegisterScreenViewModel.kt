@@ -54,7 +54,6 @@ class RegisterScreenViewModel @Inject constructor(
                 handleSignUp(event.firstName, event.lastName, event.email, event.password)
             }
 
-            RegisterScreenEvent.HandleBackStack -> {}
         }
     }
 }
