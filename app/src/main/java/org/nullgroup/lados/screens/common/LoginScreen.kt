@@ -1,6 +1,7 @@
 package org.nullgroup.lados.screens.common
 
 import android.app.Activity
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
@@ -68,24 +69,6 @@ fun EmailScreen(
         mutableStateOf(null)
     }
 
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartIntentSenderForResult(),
-        onResult = { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                when (val signInResult = loginScreenViewModel.onGoogleSignInResult(result)) {
-                    is ResourceState.Error -> {}
-                    ResourceState.Idle -> {}
-                    ResourceState.Loading -> {}
-                    is ResourceState.Success -> {
-                        user = signInResult.data!!
-                    }
-
-                    null -> {}
-                }
-            }
-        }
-    )
-
     var email by remember {
         mutableStateOf("")
     }
@@ -93,6 +76,16 @@ fun EmailScreen(
     var isError by remember {
         mutableStateOf(false)
     }
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartIntentSenderForResult(),
+        onResult = { result ->
+
+            if (result.resultCode == Activity.RESULT_OK) {
+                loginScreenViewModel.onGoogleSignInResult(result)
+            }
+        }
+    )
 
     val context = LocalContext.current
 
@@ -109,7 +102,10 @@ fun EmailScreen(
         CustomTextField(
             label = "Email Address",
             text = email,
-            onValueChange = { email = it },
+            onValueChange = {
+                email = it
+                isError = false
+            },
             modifier = Modifier.fillMaxWidth(),
             leadingIcon = {
                 Icon(
@@ -132,8 +128,8 @@ fun EmailScreen(
                     loginScreenViewModel.handleLoginEvent(LoginScreenEvent.HandleEnterEmail(email))
                     isError = false
                 } else {
-                    isError = true
                     Toast.makeText(context, "Invalid Email", Toast.LENGTH_SHORT).show()
+                    isError = true
                 }
             },
         )
@@ -194,7 +190,7 @@ fun EmailScreen(
 @Composable
 fun PasswordScreen(
     navController: NavHostController,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val loginScreenViewModel = hiltViewModel<LoginScreenViewModel>()
     val loginState by loginScreenViewModel.loginState.collectAsState()
@@ -221,7 +217,10 @@ fun PasswordScreen(
         CustomTextField(
             label = "Password",
             text = password,
-            onValueChange = { password = it },
+            onValueChange = {
+                password = it
+                isError = false
+            },
             modifier = Modifier.fillMaxWidth(),
             leadingIcon = {
                 Icon(
