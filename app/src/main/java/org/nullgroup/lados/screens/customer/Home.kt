@@ -29,6 +29,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Favorite
+import androidx.compose.material.icons.sharp.FavoriteBorder
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -75,6 +76,7 @@ import org.nullgroup.lados.ui.theme.BlackMaterial
 import org.nullgroup.lados.ui.theme.BrownMaterial
 import org.nullgroup.lados.ui.theme.GrayMaterial
 import org.nullgroup.lados.ui.theme.LadosTheme
+import org.nullgroup.lados.ui.theme.MagentaMaterial
 import org.nullgroup.lados.ui.theme.WhiteMaterial
 import java.util.Calendar
 
@@ -177,6 +179,7 @@ fun TitleTextRow(modifier: Modifier=Modifier, content: String, color: Color = Bl
         Text(text=content,
             style = TextStyle(
                 fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
                 color = color,
             )
         )
@@ -464,7 +467,7 @@ fun ProductItem(modifier: Modifier = Modifier, name: String, salePrice: String, 
             contentScale = ContentScale.Crop
         )
         Icon(
-            Icons.Outlined.Favorite,
+            Icons.Sharp.FavoriteBorder,
             contentDescription = "Favorite",
             modifier = Modifier
                 .align(Alignment.TopEnd).padding(8.dp)
@@ -554,7 +557,7 @@ fun ProductScreen(modifier: Modifier = Modifier,
                 ProductRow()
             }
             item {
-                TitleTextRow(content="New In", color=Color.Cyan)
+                TitleTextRow(content="New In", color= MagentaMaterial)
             }
             item {
                 ProductRow()

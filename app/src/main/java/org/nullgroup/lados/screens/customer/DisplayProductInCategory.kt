@@ -79,17 +79,17 @@ import org.nullgroup.lados.ui.theme.WhiteMaterial
 import java.util.Calendar
 
 @Composable
-fun DrawProductInCategoryScreen(modifier: Modifier=Modifier, navController: NavController) {
-    Column (
+fun DrawProductInCategoryScreen(modifier: Modifier=Modifier, navController: NavController, content: String, textStyle: TextStyle=TextStyle(fontSize = 20.sp, fontWeight = FontWeight.Bold)) {
+    Column(
         verticalArrangement = Arrangement.spacedBy(24.dp)
-    ){
-        Title(content = "Hoodies (240)", textStyle = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.Bold))
+    ) {
+        Title(content = content, textStyle = textStyle)
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            items(20) { item ->
+            items(10) { item ->
                 Box() {
                     ProductItem(
                         modifier = modifier.fillMaxWidth(),
@@ -107,6 +107,6 @@ fun DrawProductInCategoryScreen(modifier: Modifier=Modifier, navController: NavC
 @Composable
 fun ReviewProductInCategoryScreen() {
     LadosTheme {
-        DrawProductInCategoryScreen(navController = NavController(LocalContext.current))
+        DrawProductInCategoryScreen(navController = NavController(LocalContext.current),content="Hoodies (230)")
     }
 }

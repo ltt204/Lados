@@ -2,30 +2,41 @@ package org.nullgroup.lados.screens.customer
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Build
+import androidx.compose.material.icons.outlined.Done
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.Slider
@@ -54,6 +65,7 @@ import org.nullgroup.lados.ui.theme.BlackMaterial
 import org.nullgroup.lados.ui.theme.BrownMaterial
 import org.nullgroup.lados.ui.theme.GrayMaterial
 import org.nullgroup.lados.ui.theme.LadosTheme
+import org.nullgroup.lados.ui.theme.MagentaMaterial
 import org.nullgroup.lados.ui.theme.WhiteMaterial
 import org.nullgroup.lados.ui.theme.YellowMaterial
 import org.nullgroup.lados.viewmodels.HomeViewModel
@@ -313,8 +325,8 @@ fun HeaderButton(modifier: Modifier=Modifier) {
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         Button(onClick = {},
-            modifier = Modifier.wrapContentWidth(),
-            contentPadding = PaddingValues(4.dp)
+            contentPadding = PaddingValues(4.dp),
+            colors = ButtonDefaults.buttonColors(MagentaMaterial)
         )
         {
             Icon(
@@ -326,14 +338,16 @@ fun HeaderButton(modifier: Modifier=Modifier) {
         }
 
         Button(onClick = {},
-            contentPadding = PaddingValues(4.dp)
+            contentPadding = PaddingValues(4.dp),
+            colors = ButtonDefaults.buttonColors(MagentaMaterial)
         ) {
             Text(text = "On Sale")
 
         }
 
         Button(onClick = {},
-            contentPadding = PaddingValues(4.dp)
+            contentPadding = PaddingValues(4.dp),
+            colors = ButtonDefaults.buttonColors(MagentaMaterial)
         ) {
             Text(text = "Price")
             Spacer(modifier = Modifier.width(4.dp))
@@ -344,7 +358,8 @@ fun HeaderButton(modifier: Modifier=Modifier) {
         }
 
         Button(onClick = {},
-            contentPadding = PaddingValues(4.dp)
+            contentPadding = PaddingValues(4.dp),
+            colors = ButtonDefaults.buttonColors(MagentaMaterial)
         ) {
             Text(text = "Sort by")
             Spacer(modifier = Modifier.width(4.dp))
@@ -355,7 +370,8 @@ fun HeaderButton(modifier: Modifier=Modifier) {
         }
 
         Button(onClick = {},
-            contentPadding = PaddingValues(4.dp)
+            contentPadding = PaddingValues(4.dp),
+            colors = ButtonDefaults.buttonColors(MagentaMaterial)
         ) {
             Text(text = "Men")
             Spacer(modifier = Modifier.width(4.dp))
@@ -369,9 +385,80 @@ fun HeaderButton(modifier: Modifier=Modifier) {
 
 @Composable
 fun FilterScreenDraw(modifier: Modifier=Modifier, navController: NavController, paddingValues: PaddingValues) {
-    HeaderButton()
+    Column(
+        modifier = modifier
+            .padding(paddingValues),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        HeaderButton()
+        DrawProductInCategoryScreen(navController = navController, content = "63 Results Found", textStyle = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.SemiBold))
+        //FilterMenuSelection(title = "Test", options = listOf("Option 1", "Option 2", "Option 3"), onSelectionChanged = {})
+    }
 }
 
+@Composable
+fun FilterMenuSelection(
+    modifier: Modifier = Modifier,
+    title: String,
+    options: List<String>, // Renamed 'content' to 'options' for clarity
+    onSelectionChanged: (String) -> Unit // Changed event to a callback with the selected item
+) {
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(16.dp))
+            .background(GrayMaterial.copy(alpha=0.2f))
+            .padding(vertical = 24.dp, horizontal = 16.dp)
+    ) {
+        Column(
+            modifier = modifier,
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+
+                ) {
+                Text(text = "Clear")
+
+                Text(text = title, style = MaterialTheme.typography.headlineMedium)
+                Text(text = "    X")
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            options.forEach { option ->
+                Button(
+                    onClick = {},
+                    modifier = Modifier
+                        // i want width the content button align left
+
+
+                        .fillMaxWidth(0.95f)
+                        .height(48.dp),
+                    colors = ButtonDefaults.buttonColors(MagentaMaterial)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(0.95f),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = option,
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                        Icon(
+                            Icons.Outlined.Done,
+                            contentDescription = null
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun GreetingPreview() {
