@@ -127,6 +127,9 @@ fun EmailScreen(
                     isError = true
                 }
             },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp),
         )
 
         Row(
@@ -161,7 +164,8 @@ fun EmailScreen(
                             launcher,
                         )
                     )
-                }
+                },
+                modifier = Modifier.fillMaxWidth()
             )
 
             OutlineButton(
@@ -173,7 +177,8 @@ fun EmailScreen(
                             context as ComponentActivity
                         )
                     )
-                }
+                },
+                modifier = Modifier.fillMaxWidth()
             )
         }
     }
@@ -252,6 +257,9 @@ fun PasswordScreen(
                     )
                 )
             },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp),
         )
 
         Row(

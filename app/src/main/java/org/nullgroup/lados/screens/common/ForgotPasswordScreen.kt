@@ -148,6 +148,9 @@ fun ForgotPasswordInputScreen(modifier: Modifier = Modifier) {
                     )
                 }
             },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp)
         )
     }
 }

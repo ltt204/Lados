@@ -327,6 +327,9 @@ fun RegisterInputScreen(navController: NavController, modifier: Modifier = Modif
                     )
                 )
             },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp)
         )
 
         Row(

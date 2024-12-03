@@ -27,7 +27,7 @@ import org.nullgroup.lados.ui.theme.lightColorScheme
 fun RoleBasedNavigation(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
-    startDestination: String = Screen.Common.Test.route,
+    startDestination: String = Screen.Common.LoginScreen.route,
 ) {
     val darkTheme = isSystemInDarkTheme()
     val view = LocalView.current
@@ -56,10 +56,6 @@ fun RoleBasedNavigation(
 
                     Screen.Common.ForgotPasswordScreen.route -> {
                         ForgotPasswordScreen(navController, modifier)
-                    }
-
-                    Screen.Common.Test.route -> {
-                        UserSetUpScreen(navController, modifier)
                     }
                 }
             }
