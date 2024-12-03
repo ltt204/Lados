@@ -9,14 +9,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.runBlocking
-import org.nullgroup.lados.data.remote.ApiService.VietnamProvinceApiInterface
 import org.nullgroup.lados.navigations.RoleBasedNavigation
 import org.nullgroup.lados.ui.theme.LadosTheme
-import org.nullgroup.lados.utilities.VIETNAM_PROVINCE_BASE_URL
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
-import java.io.File
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
