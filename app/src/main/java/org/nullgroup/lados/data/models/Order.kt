@@ -1,5 +1,6 @@
 package org.nullgroup.lados.data.models
 
+import com.google.firebase.firestore.DocumentId
 import java.util.UUID
 
 // Enum for order status
@@ -18,7 +19,7 @@ enum class OrderStatus {
 
 // Order data class
 data class Order(
-    val orderId: String = UUID.randomUUID().toString(),
+    @DocumentId val orderId: String,
     val customerId: String,
     val orderStatusLog: Map<OrderStatus, Long> = mapOf(
         OrderStatus.CREATED to System.currentTimeMillis()
@@ -67,7 +68,7 @@ data class Order(
 
 // OrderProduct data class
 data class OrderProduct(
-    val id: String = UUID.randomUUID().toString(),
+    @DocumentId val id: String,
     val orderId: String,
     val productId: String,
     val variantId: String,
