@@ -4,21 +4,25 @@ import java.util.UUID
 
 // Enum for order status
 enum class OrderStatus {
-    PENDING,
-    PROCESSING,
-    SHIPPING,
+    CREATED,
+    CONFIRMED,
+    SHIPPED,
     DELIVERED,
     CANCELLED,
-    RETURNED
+        // Optional feature: Customer can cancel the order
+    RETURNED,
+        // Optional feature: Customer can return the products after delivery
+        // if they are not satisfied
+        // Maybe unused
 }
 
 // Order data class
 data class Order(
     val orderId: String = UUID.randomUUID().toString(),
     val customerId: String,
-    val status: OrderStatus = OrderStatus.PENDING,
-    val createdAt: Long = System.currentTimeMillis(),
-    val updatedAt: Long = System.currentTimeMillis(),
+    val orderStatusLog: Map<OrderStatus, Long> = mapOf(
+        OrderStatus.CREATED to System.currentTimeMillis()
+    ),
     val orderProducts: List<OrderProduct> = listOf()
 ) {
     companion object {
@@ -29,9 +33,8 @@ data class Order(
             return Order(
                 orderId = map["orderId"] as String,
                 customerId = map["customerId"] as String,
-                status = OrderStatus.valueOf(map["status"] as String),
-                createdAt = (map["createdAt"] as Number).toLong(),
-                updatedAt = (map["updatedAt"] as Number).toLong(),
+                orderStatusLog = (map["orderStatusLog"] as Map<String, Long>)
+                    .mapKeys { OrderStatus.valueOf(it.key) },
                 orderProducts = (map["orderProducts"] as List<Map<String, Any>>)
                     .map { orderProductData ->
                         OrderProduct(
@@ -50,9 +53,7 @@ data class Order(
         return mapOf(
             "orderId" to orderId,
             "customerId" to customerId,
-            "status" to status.name,
-            "createdAt" to createdAt,
-            "updatedAt" to updatedAt,
+            "orderStatusLog" to orderStatusLog.mapKeys { it.key.name },
             "orderProducts" to orderProducts.map { it.toMap() }
         )
     }
