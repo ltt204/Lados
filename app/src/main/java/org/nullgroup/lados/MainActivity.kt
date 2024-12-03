@@ -34,17 +34,3 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
-fun main() {
-    var retrofit =
-        Retrofit.Builder().baseUrl("$VIETNAM_PROVINCE_BASE_URL")
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-    var service = retrofit.create(VietnamProvinceApiInterface::class.java)
-    var response: String
-    runBlocking {
-        response = service.getProvinces().toString()
-    }
-
-    File("output.json").writeText(response)
-}
