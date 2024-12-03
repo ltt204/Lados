@@ -1,13 +1,11 @@
-package org.nullgroup.lados.viewmodels
+package org.nullgroup.lados.viewmodels.common
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import org.nullgroup.lados.data.models.User
 import org.nullgroup.lados.data.repositories.interfaces.UserRepository
 import javax.inject.Inject
 
@@ -15,7 +13,7 @@ import javax.inject.Inject
 class AuthScreenViewModel @Inject constructor(
     private val userRepository: UserRepository
 ): ViewModel() {
-    var result = MutableStateFlow<Result<Boolean>>(Result.success(false))
+    var result = MutableStateFlow(Result.success(false))
         private set
 
     var user = MutableStateFlow<String?>(null)

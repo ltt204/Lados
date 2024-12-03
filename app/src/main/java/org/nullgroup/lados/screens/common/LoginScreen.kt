@@ -21,7 +21,7 @@ import org.nullgroup.lados.data.models.UserRole
 import org.nullgroup.lados.navigations.AdminGraph
 import org.nullgroup.lados.navigations.CustomerGraph
 import org.nullgroup.lados.navigations.StaffGraph
-import org.nullgroup.lados.viewmodels.AuthScreenViewModel
+import org.nullgroup.lados.viewmodels.common.AuthScreenViewModel
 
 @Composable
 fun LoginScreen(
