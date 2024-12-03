@@ -8,8 +8,9 @@ data class Product(
     var id: String = "",
     val categoryId: String = "",
     val name: String = "",
-    val productDescription: String = "",
-    val variants: List<ProductVariant> = emptyList()
+    val description: String = "",
+    var variants: List<ProductVariant> = emptyList(),
+    var engagements: List<UserEngagement> = emptyList()
 )
 
 data class ProductVariant(
@@ -20,7 +21,7 @@ data class ProductVariant(
     val quantityInStock: Int = 0,
     val originalPrice: Double = 0.0,
     val salePrice: Double= 0.0,
-    val images: List<Image> = emptyList()
+    var images: List<Image> = emptyList()
 )
 
 
@@ -40,7 +41,16 @@ data class Image(
     val id: String = "", // UUID
     val productVariantId: String = "", // UUID
     val link: String = "",
-    val imageFileName: String = ""
+    val fileName: String = ""
+)
+
+data class UserEngagement(
+    val id: String = "",
+    val userId: String = "",
+    val productId: String = "",
+    val ratings: Int = 1,
+    val reviews: String = "",
+    val createdAt: String = ""
 )
 
 data class ProductAttribute(
