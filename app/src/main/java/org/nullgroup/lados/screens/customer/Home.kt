@@ -1,6 +1,5 @@
 package org.nullgroup.lados.screens.customer
 
-import android.util.Log
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -24,14 +23,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -50,6 +47,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.LinkAnnotation
@@ -57,14 +55,13 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withLink
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
@@ -77,8 +74,8 @@ import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.ui.theme.BlackMaterial
 import org.nullgroup.lados.ui.theme.BrownMaterial
 import org.nullgroup.lados.ui.theme.GrayMaterial
+import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.ui.theme.WhiteMaterial
-import org.nullgroup.lados.viewmodels.HomeViewModel
 import java.util.Calendar
 
 @Composable
@@ -87,13 +84,12 @@ fun SearchAndFilter(modifier: Modifier=Modifier, navController: NavController) {
         modifier = modifier
             .padding(horizontal = 4.dp)
             .height(56.dp)
+            .fillMaxWidth()
         ,
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {
-        SearchBar(Modifier.weight(0.7f), navController = navController, onSearch = {})
-        Spacer(Modifier.weight(0.025f))
-        FilterButton(Modifier.weight(0.1f), navController = navController)
+        SearchBar(navController = navController, onSearch = {})
     }
 
 }
@@ -108,7 +104,9 @@ fun SearchBar(modifier: Modifier=Modifier, navController: NavController, onSearc
             value = searchText,
             onValueChange = {},
             enabled = false,
-            modifier = modifier,
+            modifier = modifier
+                .fillMaxWidth()
+            ,
             singleLine = true,
             placeholder = { Text("Search") },
             leadingIcon = {
@@ -118,7 +116,7 @@ fun SearchBar(modifier: Modifier=Modifier, navController: NavController, onSearc
                 )
             },
 
-            shape = RoundedCornerShape(16.dp),
+            shape = RoundedCornerShape(50),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                 unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
@@ -172,14 +170,14 @@ fun CategoryCircle(modifier: Modifier=Modifier, @DrawableRes image: Int) {
 }
 
 @Composable
-fun CategoryTextRow(modifier: Modifier=Modifier) {
+fun TitleTextRow(modifier: Modifier=Modifier, content: String, color: Color = BlackMaterial) {
     Row(
         modifier = modifier
     ) {
-        Text(text="Categogy",
+        Text(text=content,
             style = TextStyle(
-                fontSize = 24.sp,
-                color = BlackMaterial,
+                fontSize = 20.sp,
+                color = color,
             )
         )
         Spacer(Modifier.weight(1f))
@@ -189,20 +187,20 @@ fun CategoryTextRow(modifier: Modifier=Modifier) {
 
 @Composable
 fun Category(modifier: Modifier=Modifier) {
-
+/*
     val homeViewModel: HomeViewModel = hiltViewModel()
 
     val categories = homeViewModel.categories.collectAsStateWithLifecycle()
     Log.d("CategoryRepositoryImplement", "getAllCategoriesFromFireStore: $categories")
-
+*/
     LazyRow(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         contentPadding = PaddingValues(8.dp),
     ) {
-        items(categories.value)
+        items(20)
         { category ->
-            CategoryItem(image = R.drawable.ic_launcher_background, label = category.categoryName)
+            CategoryItem(image = R.drawable.ic_launcher_background, label = category.toString())
         }
     }
 
@@ -453,6 +451,78 @@ fun BannerSlider() {
     }
 }
 
+@Composable
+fun ProductItem(modifier: Modifier = Modifier, name: String, salePrice: String, initialledPrice: String?) {
+    Box(modifier = modifier) {
+        Image(
+            painter = painterResource(R.drawable.ic_launcher_background),
+            contentDescription = "Image",
+            modifier = modifier
+                .width(160.dp)
+                .height(240.dp)
+                .clip(RoundedCornerShape(8.dp)),
+            contentScale = ContentScale.Crop
+        )
+        Icon(
+            Icons.Outlined.Favorite,
+            contentDescription = "Favorite",
+            modifier = Modifier
+                .align(Alignment.TopEnd).padding(8.dp)
+        )
+        Column(
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .padding(8.dp)
+            ,
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            
+            Text(
+                text = name,
+                style = TextStyle(
+                    fontSize = 16.sp,
+                    color = BlackMaterial,
+                )
+            )
+            Row (
+
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ){
+                Text(
+                    text = "$$salePrice",
+                    style = TextStyle(
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = BlackMaterial,
+                    )
+                )
+                Text(
+                    text = "$$initialledPrice",
+                    style = TextStyle(
+                        fontSize = 16.sp,
+                        color = Color.Gray,
+                        textDecoration = TextDecoration.LineThrough
+                    )
+                )
+            }
+
+        }
+    }
+}
+
+@Composable
+fun ProductRow(modifier: Modifier = Modifier){
+    LazyRow(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        contentPadding = PaddingValues(8.dp),
+    ) {
+        items(20)
+        { item ->
+            ProductItem(name="Pant", salePrice="123", initialledPrice = null)
+        }
+    }
+}
 
 @Composable
 fun ProductScreen(modifier: Modifier = Modifier,
@@ -461,7 +531,8 @@ fun ProductScreen(modifier: Modifier = Modifier,
 ) {
     Column(
         modifier = modifier
-            .padding(paddingValues)
+            .padding(paddingValues),
+        verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         LazyColumn(
             modifier = modifier,
@@ -471,23 +542,22 @@ fun ProductScreen(modifier: Modifier = Modifier,
                 SearchAndFilter(navController = navController)
             }
             item {
-                BannerSlider()
-            }
-            item {
-                CategoryTextRow()
+                TitleTextRow(content="Categories")
             }
             item {
                 Category()
             }
-            item {
-                FlashSaleTitle()
+            item{
+                TitleTextRow(content="Top Selling")
             }
             item {
-                CategoryFilter()
-                Spacer(Modifier.height(8.dp))
+                ProductRow()
             }
             item {
-                CategoryFilterItem(content = "ABC")
+                TitleTextRow(content="New In", color=Color.Cyan)
+            }
+            item {
+                ProductRow()
             }
 
         }
@@ -515,12 +585,12 @@ fun GreetingPreview2() {
 }
 */
 
-//@Preview(name="Summary", showBackground = true, showSystemUi = true)
-//@Composable
-//fun Summary()
-//{
-//    LadosTheme {
-//        ProductScreen(navController = NavController(LocalContext.current))
-//    }
-//}
+@Preview(name="Summary", showBackground = true, showSystemUi = true)
+@Composable
+fun Summary()
+{
+    LadosTheme {
+        ProductScreen(navController = NavController(LocalContext.current))
+    }
+}
 

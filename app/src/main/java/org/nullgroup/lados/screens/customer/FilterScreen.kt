@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -19,6 +20,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.Build
+import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -38,8 +41,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -48,6 +53,7 @@ import androidx.navigation.NavController
 import org.nullgroup.lados.ui.theme.BlackMaterial
 import org.nullgroup.lados.ui.theme.BrownMaterial
 import org.nullgroup.lados.ui.theme.GrayMaterial
+import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.ui.theme.WhiteMaterial
 import org.nullgroup.lados.ui.theme.YellowMaterial
 import org.nullgroup.lados.viewmodels.HomeViewModel
@@ -302,72 +308,74 @@ fun FilterScreenBottom(
 
 
 @Composable
-fun FilterScreenDraw(modifier: Modifier=Modifier, navController: NavController, paddingValues: PaddingValues) {
-    val homeViewModel: HomeViewModel = hiltViewModel()
-    val categories = homeViewModel.categories.collectAsStateWithLifecycle()
+fun HeaderButton(modifier: Modifier=Modifier) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Button(onClick = {},
+            modifier = Modifier.wrapContentWidth(),
+            contentPadding = PaddingValues(4.dp)
+        )
+        {
+            Icon(
+                Icons.Outlined.Build,
+                contentDescription = null,
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(text = "2")
+        }
 
-    LazyColumn(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(paddingValues),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-
+        Button(onClick = {},
+            contentPadding = PaddingValues(4.dp)
         ) {
-        item {
-            Header(content = "Brands")
+            Text(text = "On Sale")
+
         }
 
-        item {
-            FilterCateRow(content = categories.value.map { it.categoryName })
-        }
-        item {
-            Header(content = "Gender")
-        }
-
-        item {
-            FilterCateRow(content = listOf("All", "Men", "Women"))
-        }
-        item {
-            Header(content = "Sort by")
-        }
-
-        item {
-            FilterCateRow(content = listOf("Most Recent", "Popular", "Price High"))
-        }
-
-        item {
-            Header(content = "Pricing Range")
-        }
-        item {
-            CustomSlider()
-        }
-        item {
-            Header(content = "Reviews")
-        }
-        item {
-            RadioButtonGroupDraw(
-                content = listOf(
-                    "4.5 and above",
-                    "4.0 to 4.5",
-                    "3.5 to 4.0",
-                    "3.0 to 3.5",
-                    "2.5 to 3.0",
-                    "2.0 to 2.5",
-                    "1.5 to 2.0",
-                    "1.0 to 1.5"
-                )
+        Button(onClick = {},
+            contentPadding = PaddingValues(4.dp)
+        ) {
+            Text(text = "Price")
+            Spacer(modifier = Modifier.width(4.dp))
+            Icon(
+                Icons.Outlined.KeyboardArrowDown,
+                contentDescription = null,
             )
         }
-        item{
-            FilterScreenBottom({},{})
+
+        Button(onClick = {},
+            contentPadding = PaddingValues(4.dp)
+        ) {
+            Text(text = "Sort by")
+            Spacer(modifier = Modifier.width(4.dp))
+            Icon(
+                Icons.Outlined.KeyboardArrowDown,
+                contentDescription = null,
+            )
+        }
+
+        Button(onClick = {},
+            contentPadding = PaddingValues(4.dp)
+        ) {
+            Text(text = "Men")
+            Spacer(modifier = Modifier.width(4.dp))
+            Icon(
+                Icons.Outlined.KeyboardArrowDown,
+                contentDescription = null,
+            )
         }
     }
 }
 
-//@Preview(showBackground = true)
-//@Composable
-//fun GreetingPreview() {
-//    LadosTheme {
-//        FilterScreenDraw()
-//    }
-//}
+@Composable
+fun FilterScreenDraw(modifier: Modifier=Modifier, navController: NavController, paddingValues: PaddingValues) {
+    HeaderButton()
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun GreetingPreview() {
+    LadosTheme {
+        FilterScreenDraw(navController = NavController(LocalContext.current), paddingValues = PaddingValues())
+    }
+}
