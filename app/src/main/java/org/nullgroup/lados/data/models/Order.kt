@@ -19,7 +19,7 @@ enum class OrderStatus {
 
 // Order data class
 data class Order(
-    @DocumentId val orderId: String,
+    @DocumentId val orderId: String = "",
     val customerId: String,
     val orderStatusLog: Map<OrderStatus, Long> = mapOf(
         OrderStatus.CREATED to System.currentTimeMillis()
