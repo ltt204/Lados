@@ -28,7 +28,7 @@ import javax.inject.Inject
 class LoginScreenViewModel @Inject constructor(
     private val emailAuth: EmailAuthRepository,
     private val googleAuth: GoogleAuthRepository,
-    private val facebookAuth: FacebookAuthRepository
+    private val facebookAuth: FacebookAuthRepository,
 ) : ViewModel() {
 
     var loginStep = MutableStateFlow<LoginScreenStepState>(LoginScreenStepState.Email())
@@ -116,7 +116,6 @@ class LoginScreenViewModel @Inject constructor(
 
     private fun handleLogInWithGoogle(
         launcher: ActivityResultLauncher<IntentSenderRequest>,
-        user: User
     ) {
         viewModelScope.launch {
             val signInIntentSender = googleAuth.signIn()
@@ -124,10 +123,7 @@ class LoginScreenViewModel @Inject constructor(
                 IntentSenderRequest.Builder(
                     signInIntentSender ?: return@launch
                 ).build()
-            ).also {
-                loginState.value = ResourceState.Success(user)
-                loginStep.value = LoginScreenStepState.Home(user)
-            }
+            )
         }
     }
 
@@ -141,16 +137,24 @@ class LoginScreenViewModel @Inject constructor(
         loginState.value = ResourceState.Idle
     }
 
-    fun onGoogleSignInResult(result: ActivityResult): ResourceState<User>? {
-        var signInResult: ResourceState<User>? = null
+    fun onGoogleSignInResult(result: ActivityResult) {
 
         viewModelScope.launch {
-            signInResult = googleAuth.signInWithIntent(
+            loginState.value = googleAuth.signInWithIntent(
                 intent = result.data ?: return@launch
             )
-        }
 
-        return signInResult
+            when (val state = loginState.value) {
+                is ResourceState.Error -> {}
+                ResourceState.Idle -> {}
+                ResourceState.Loading -> {}
+                is ResourceState.Success -> {
+                    if (state.data != null) {
+                        loginStep.value = LoginScreenStepState.Home(state.data)
+                    }
+                }
+            }
+        }
     }
 
     fun handleLoginEvent(event: LoginScreenEvent) {
@@ -174,7 +178,7 @@ class LoginScreenViewModel @Inject constructor(
             }
 
             is LoginScreenEvent.HandleLogInWithGoogle -> {
-                handleLogInWithGoogle(event.launcher, event.user)
+                handleLogInWithGoogle(event.launcher)
             }
 
             is LoginScreenEvent.HandleSignUp -> {

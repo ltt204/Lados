@@ -65,10 +65,6 @@ fun EmailScreen(
 ) {
     val loginScreenViewModel = hiltViewModel<LoginScreenViewModel>()
 
-    var user: User? by remember {
-        mutableStateOf(null)
-    }
-
     var email by remember {
         mutableStateOf("")
     }
@@ -161,14 +157,11 @@ fun EmailScreen(
                 text = "Continue With Google",
                 icon = R.drawable.ic_google,
                 onClick = {
-                    user?.let {
-                        loginScreenViewModel.handleLoginEvent(
-                            LoginScreenEvent.HandleLogInWithGoogle(
-                                launcher,
-                                it,
-                            )
+                    loginScreenViewModel.handleLoginEvent(
+                        LoginScreenEvent.HandleLogInWithGoogle(
+                            launcher,
                         )
-                    }
+                    )
                 }
             )
 
@@ -333,7 +326,7 @@ fun LoginScreen(
         }
 
         is ResourceState.Success -> {
-
+            Toast.makeText(LocalContext.current, "Login Success", Toast.LENGTH_SHORT).show()
         }
     }
 
