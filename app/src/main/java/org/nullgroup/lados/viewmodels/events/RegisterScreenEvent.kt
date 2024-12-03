@@ -9,4 +9,8 @@ sealed class RegisterScreenEvent {
         val email: String,
         val password: String,
     ) : RegisterScreenEvent()
+    data class HandleLogin(
+        val email: String,
+        val password: String,
+    ) : RegisterScreenEvent()
 }

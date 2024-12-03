@@ -28,6 +28,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -72,7 +73,6 @@ fun RegisterScreen(
     val registerState by registerViewModel.registerState.collectAsState()
     val context = LocalContext.current
 
-
     when (val state = registerState) {
         is ResourceState.Error -> {
             RegisterInputScreen(navController, modifier)
@@ -109,7 +109,6 @@ fun RegisterScreen(
         }
     }
 
-
 }
 
 @Composable
@@ -122,6 +121,11 @@ fun RegisterInputScreen(navController: NavController, modifier: Modifier = Modif
     var lastName by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+
+    var firstNameError by remember { mutableStateOf(false) }
+    var lastNameError by remember { mutableStateOf(false) }
+    var emailError by remember { mutableStateOf(false) }
+    var passwordError by remember { mutableStateOf(false) }
 
     Column(
         modifier = modifier
@@ -140,6 +144,7 @@ fun RegisterInputScreen(navController: NavController, modifier: Modifier = Modif
             text = firstName,
             onValueChange = { firstName = it },
             modifier = Modifier.fillMaxWidth(),
+            isError = firstNameError,
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -148,7 +153,8 @@ fun RegisterInputScreen(navController: NavController, modifier: Modifier = Modif
             label = "Last Name",
             text = lastName,
             onValueChange = { lastName = it },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            isError = lastNameError,
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -158,7 +164,8 @@ fun RegisterInputScreen(navController: NavController, modifier: Modifier = Modif
             text = email,
             onValueChange = { email = it },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            isError = emailError,
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -169,7 +176,8 @@ fun RegisterInputScreen(navController: NavController, modifier: Modifier = Modif
             onValueChange = { password = it },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            isError = passwordError,
         )
 
         Spacer(modifier = Modifier.height(32.dp))
