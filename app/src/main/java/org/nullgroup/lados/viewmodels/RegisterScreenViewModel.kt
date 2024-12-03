@@ -34,11 +34,6 @@ class RegisterScreenViewModel @Inject constructor(
         return validator.validate()
     }
 
-    fun validatePhone(phone: String): Boolean {
-        val validator = PhoneNumberValidator(phone)
-        return validator.validate()
-    }
-
     fun validatePassword(password: String): Boolean {
         val validator = PasswordValidator(password)
         return validator.validate()
@@ -64,20 +59,15 @@ class RegisterScreenViewModel @Inject constructor(
         email: String,
         password: String,
     ) {
+        if (!validateAll(firstName, lastName, email, password)) {
+            registerState.value = ResourceState.Error("Please fill all fields and correct")
+            return
+        }
+
         viewModelScope.launch {
             try {
                 emailAuth.signUp("$firstName $lastName", email, password).let {
-                    when (it) {
-                        is ResourceState.Error -> {
-                            registerState.value = ResourceState.Error(it.message)
-                        }
-
-                        ResourceState.Idle -> {}
-                        ResourceState.Loading -> {}
-                        is ResourceState.Success -> {
-                            registerState.value = ResourceState.Success(it.data)
-                        }
-                    }
+                    registerState.value = it
                 }
             } catch (e: Exception) {
                 registerState.value = ResourceState.Error(e.message)
@@ -87,7 +77,13 @@ class RegisterScreenViewModel @Inject constructor(
 
     private fun handleLogin(email: String, password: String) {
         viewModelScope.launch {
-            registerState.value = emailAuth.signIn(email, password)
+            try {
+                emailAuth.signIn(email, password).let {
+                    registerState.value = it
+                }
+            } catch (e: Exception) {
+                registerState.value = ResourceState.Error(e.message)
+            }
         }
     }
 

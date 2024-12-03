@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -37,9 +38,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -115,7 +120,7 @@ fun RegisterScreen(
 fun RegisterInputScreen(navController: NavController, modifier: Modifier = Modifier) {
 
     val registerViewModel = hiltViewModel<RegisterScreenViewModel>()
-    val loginViewModel = hiltViewModel<LoginScreenViewModel>()
+    val registerState by registerViewModel.registerState.collectAsState()
 
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
@@ -126,6 +131,30 @@ fun RegisterInputScreen(navController: NavController, modifier: Modifier = Modif
     var lastNameError by remember { mutableStateOf(false) }
     var emailError by remember { mutableStateOf(false) }
     var passwordError by remember { mutableStateOf(false) }
+
+    var firstNameTouched by remember { mutableStateOf(false) }
+    var lastNameTouched by remember { mutableStateOf(false) }
+    var emailTouched by remember { mutableStateOf(false) }
+    var passwordTouched by remember { mutableStateOf(false) }
+
+    val focusManager = LocalFocusManager.current
+
+
+    LaunchedEffect(registerState) {
+        when (registerState) {
+            is ResourceState.Error -> {}
+            ResourceState.Idle -> {}
+            ResourceState.Loading -> {}
+            is ResourceState.Success -> {
+                registerViewModel.handleEvent(
+                    RegisterScreenEvent.HandleLogin(
+                        email,
+                        password,
+                    )
+                )
+            }
+        }
+    }
 
     Column(
         modifier = modifier
@@ -142,9 +171,35 @@ fun RegisterInputScreen(navController: NavController, modifier: Modifier = Modif
         CustomTextField(
             label = "First Name",
             text = firstName,
-            onValueChange = { firstName = it },
-            modifier = Modifier.fillMaxWidth(),
+            onValueChange = {
+                firstName = it
+                firstNameTouched = true
+                if (firstNameError && registerViewModel.validateNotEmpty(firstName)) {
+                    firstNameError = false
+                }
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .onFocusChanged {
+                    if (!firstNameTouched) return@onFocusChanged
+                    if (!it.isFocused) {
+                        firstNameError = !registerViewModel.validateNotEmpty(firstName)
+                    }
+                },
             isError = firstNameError,
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Next,
+            ),
+            keyboardActions = KeyboardActions(
+                onNext = {
+                    if (!registerViewModel.validateNotEmpty(firstName)) {
+                        firstNameError = true
+                    } else {
+                        firstNameError = false
+                    }
+                    focusManager.moveFocus(FocusDirection.Down)
+                }
+            )
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -152,9 +207,35 @@ fun RegisterInputScreen(navController: NavController, modifier: Modifier = Modif
         CustomTextField(
             label = "Last Name",
             text = lastName,
-            onValueChange = { lastName = it },
-            modifier = Modifier.fillMaxWidth(),
+            onValueChange = {
+                lastName = it
+                lastNameTouched = true
+                if (lastNameError && registerViewModel.validateNotEmpty(it)) {
+                    lastNameError = false
+                }
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .onFocusChanged {
+                    if (!lastNameTouched) return@onFocusChanged
+                    if (!it.isFocused) {
+                        lastNameError = !registerViewModel.validateNotEmpty(lastName)
+                    }
+                },
             isError = lastNameError,
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Next
+            ),
+            keyboardActions = KeyboardActions(
+                onNext = {
+                    if (!registerViewModel.validateEmail(lastName)) {
+                        lastNameError = true
+                    } else {
+                        lastNameError = false
+                    }
+                    focusManager.moveFocus(FocusDirection.Down)
+                }
+            )
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -162,9 +243,35 @@ fun RegisterInputScreen(navController: NavController, modifier: Modifier = Modif
         CustomTextField(
             label = "Email Address",
             text = email,
-            onValueChange = { email = it },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-            modifier = Modifier.fillMaxWidth(),
+            onValueChange = {
+                email = it
+                emailTouched = true
+                if (emailError && registerViewModel.validateEmail(it)) {
+                    emailError = false
+                }
+            },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Email,
+                imeAction = ImeAction.Next,
+            ),
+            keyboardActions = KeyboardActions(
+                onNext = {
+                    if (!registerViewModel.validateEmail(email)) {
+                        emailError = true
+                    } else {
+                        emailError = false
+                    }
+                    focusManager.moveFocus(FocusDirection.Down)
+                }
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .onFocusChanged {
+                    if (!emailTouched) return@onFocusChanged
+                    if (!it.isFocused) {
+                        emailError = !registerViewModel.validateEmail(email)
+                    }
+                },
             isError = emailError,
         )
 
@@ -173,10 +280,36 @@ fun RegisterInputScreen(navController: NavController, modifier: Modifier = Modif
         CustomTextField(
             label = "Password",
             text = password,
-            onValueChange = { password = it },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            onValueChange = {
+                password = it
+                passwordTouched = true
+                if (passwordError && registerViewModel.validatePassword(it)) {
+                    passwordError = false
+                }
+            },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Password,
+                imeAction = ImeAction.Done,
+            ),
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    focusManager.clearFocus()
+                    if (!registerViewModel.validatePassword(password)) {
+                        passwordError = true
+                    } else {
+                        passwordError = false
+                    }
+                }
+            ),
             visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .onFocusChanged {
+                    if (!passwordTouched) return@onFocusChanged
+                    if (!it.isFocused) {
+                        passwordError = !registerViewModel.validatePassword(password)
+                    }
+                },
             isError = passwordError,
         )
 
@@ -193,8 +326,6 @@ fun RegisterInputScreen(navController: NavController, modifier: Modifier = Modif
                         password,
                     )
                 )
-                loginViewModel.handleLoginEvent(LoginScreenEvent.HandleEnterEmail(email))
-                loginViewModel.handleLoginEvent(LoginScreenEvent.HandleEnterPassword(password))
             },
         )
 

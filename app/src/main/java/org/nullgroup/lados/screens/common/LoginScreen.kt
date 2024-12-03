@@ -76,7 +76,6 @@ fun EmailScreen(
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartIntentSenderForResult(),
         onResult = { result ->
-
             if (result.resultCode == Activity.RESULT_OK) {
                 loginScreenViewModel.onGoogleSignInResult(result)
             }

@@ -25,6 +25,7 @@ sealed class Screen(
         data object LoginScreen : Common(route = "login")
         data object RegisterScreen : Common(route = "register")
         data object ForgotPasswordScreen : Common(route = "forgot_password")
+        data object Test: Common(route = "test")
 
         companion object {
             fun getAllScreens(): List<Common> {
@@ -32,6 +33,7 @@ sealed class Screen(
                     LoginScreen,
                     RegisterScreen,
                     ForgotPasswordScreen,
+                    Test,
                 )
             }
         }

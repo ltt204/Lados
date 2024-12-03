@@ -30,9 +30,7 @@ fun OutlineButton(
 ) {
     OutlinedButton(
         onClick = onClick,
-        modifier = modifier
-            .fillMaxWidth()
-            .height(50.dp),
+        modifier = modifier,
         colors = ButtonDefaults.outlinedButtonColors(
             containerColor = LadosTheme.colorScheme.surfaceContainerHighest,
             contentColor = LadosTheme.colorScheme.onBackground,

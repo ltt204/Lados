@@ -1,5 +1,6 @@
 package org.nullgroup.lados.viewmodels
 
+import android.util.Patterns.EMAIL_ADDRESS
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
@@ -14,11 +15,15 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ForgotPasswordScreenViewModel @Inject constructor(
-    private val emailAuth: EmailAuthRepository
+    private val emailAuth: EmailAuthRepository,
 ) : ViewModel() {
     var forgotPasswordState =
         MutableStateFlow<ResourceState<Boolean>>(ResourceState.Idle)
         private set
+
+    fun isValidateEmail(email: String): Boolean {
+        return EMAIL_ADDRESS.matcher(email).matches()
+    }
 
     private fun handleResetPassword(email: String) {
         viewModelScope.launch {
@@ -26,7 +31,6 @@ class ForgotPasswordScreenViewModel @Inject constructor(
                 emailAuth.resetPassword(email).let {
                     forgotPasswordState.value = it
                 }
-                forgotPasswordState.value = ResourceState.Success(true)
             } catch (e: Exception) {
                 forgotPasswordState.value = ResourceState.Error(e.message)
             }
@@ -43,7 +47,6 @@ class ForgotPasswordScreenViewModel @Inject constructor(
         when (event) {
             is ForgotPasswordScreenEvent.HandleResetPassword -> {
                 handleResetPassword(event.email)
-                forgotPasswordState.value = ResourceState.Success(true)
             }
 
             is ForgotPasswordScreenEvent.HandleReturnToLogin -> {

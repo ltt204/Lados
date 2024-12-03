@@ -96,6 +96,7 @@ fun ForgotPasswordScreen(
 fun ForgotPasswordInputScreen(modifier: Modifier = Modifier) {
     var email by remember { mutableStateOf("") }
     val forgotPasswordViewModel = hiltViewModel<ForgotPasswordScreenViewModel>()
+    var isError by remember { mutableStateOf(false) }
 
     Column(
         modifier = modifier
@@ -113,7 +114,12 @@ fun ForgotPasswordInputScreen(modifier: Modifier = Modifier) {
         CustomTextField(
             label = "Email Address",
             text = email,
-            onValueChange = { email = it },
+            onValueChange = {
+                email = it
+                if (isError && forgotPasswordViewModel.isValidateEmail(email)) {
+                    isError = false
+                }
+            },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
             leadingIcon = {
                 Icon(
@@ -123,6 +129,7 @@ fun ForgotPasswordInputScreen(modifier: Modifier = Modifier) {
                 )
             },
             modifier = Modifier.fillMaxWidth(),
+            isError = isError,
         )
 
         Spacer(modifier = Modifier.height(32.dp))
@@ -130,11 +137,16 @@ fun ForgotPasswordInputScreen(modifier: Modifier = Modifier) {
         ButtonSubmit(
             text = "Continue",
             onClick = {
-                forgotPasswordViewModel.handleEvent(
-                    ForgotPasswordScreenEvent.HandleResetPassword(
-                        email
+                if (!forgotPasswordViewModel.isValidateEmail(email)) {
+                    isError = true
+                } else {
+                    isError = false
+                    forgotPasswordViewModel.handleEvent(
+                        ForgotPasswordScreenEvent.HandleResetPassword(
+                            email
+                        )
                     )
-                )
+                }
             },
         )
     }
