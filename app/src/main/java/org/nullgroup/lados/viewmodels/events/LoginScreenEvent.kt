@@ -15,6 +15,4 @@ sealed class LoginScreenEvent {
         val launcher: ActivityResultLauncher<IntentSenderRequest>,
     ) :
         LoginScreenEvent()
-
-    data class HandleLogInWithFacebook(val activity: ComponentActivity) : LoginScreenEvent()
 }

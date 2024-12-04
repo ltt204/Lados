@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -39,6 +40,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import dagger.hilt.android.qualifiers.ApplicationContext
 import org.nullgroup.lados.R
 import org.nullgroup.lados.compose.SignIn.ButtonSubmit
 import org.nullgroup.lados.compose.SignIn.CustomTextField
@@ -54,7 +56,6 @@ import org.nullgroup.lados.navigations.StaffGraph
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.viewmodels.LoginScreenViewModel
 import org.nullgroup.lados.viewmodels.events.LoginScreenEvent
-import org.nullgroup.lados.viewmodels.states.LoginScreenState
 import org.nullgroup.lados.viewmodels.states.LoginScreenStepState
 import org.nullgroup.lados.viewmodels.states.ResourceState
 
@@ -94,27 +95,41 @@ fun EmailScreen(
 
         Headline("Sign in")
 
-        CustomTextField(
-            label = "Email Address",
-            text = email,
-            onValueChange = {
-                email = it
-                isError = false
-            },
-            modifier = Modifier.fillMaxWidth(),
-            leadingIcon = {
-                Icon(
-                    Icons.Default.Email,
-                    contentDescription = "email",
-                    tint = LadosTheme.colorScheme.onBackground
+        Column(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            CustomTextField(
+                label = "Email Address",
+                text = email,
+                onValueChange = {
+                    email = it
+                    if (loginScreenViewModel.isValidateEmail(it)) {
+                        isError = false
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                leadingIcon = {
+                    Icon(
+                        Icons.Default.Email,
+                        contentDescription = "email",
+                        tint = LadosTheme.colorScheme.onBackground
+                    )
+                },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Email,
+                    imeAction = ImeAction.Done
+                ),
+                isError = isError
+            )
+
+            if (isError) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Email invalid",
+                    color = LadosTheme.colorScheme.error,
                 )
-            },
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Email,
-                imeAction = ImeAction.Done
-            ),
-            isError = isError
-        )
+            }
+        }
 
         ButtonSubmit(
             text = "Continue",
@@ -167,19 +182,6 @@ fun EmailScreen(
                 },
                 modifier = Modifier.fillMaxWidth()
             )
-
-            OutlineButton(
-                text = "Continue With Facebook",
-                icon = R.drawable.ic_facebook,
-                onClick = {
-                    loginScreenViewModel.handleLoginEvent(
-                        LoginScreenEvent.HandleLogInWithFacebook(
-                            context as ComponentActivity
-                        )
-                    )
-                },
-                modifier = Modifier.fillMaxWidth()
-            )
         }
     }
 }
@@ -211,51 +213,70 @@ fun PasswordScreen(
 
         Headline("Sign in")
 
-        CustomTextField(
-            label = "Password",
-            text = password,
-            onValueChange = {
-                password = it
-                isError = false
-            },
+        Column(
             modifier = Modifier.fillMaxWidth(),
-            leadingIcon = {
-                Icon(
-                    Icons.Default.Lock, contentDescription = "Password",
-                    tint = LadosTheme.colorScheme.onBackground
-                )
-            },
-            trailingIcon = {
-                val image = if (passwordVisible)
-                    Icons.Filled.Visibility
-                else Icons.Filled.VisibilityOff
-
-                val description = if (passwordVisible) "Hide password" else "Show password"
-
-                IconButton(onClick = { passwordVisible = !passwordVisible }) {
+        ) {
+            CustomTextField(
+                label = "Password",
+                text = password,
+                onValueChange = {
+                    password = it
+                    if (password.length >= 8) {
+                        isError = false
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                leadingIcon = {
                     Icon(
-                        imageVector = image,
-                        contentDescription = description,
+                        Icons.Default.Lock, contentDescription = "Password",
                         tint = LadosTheme.colorScheme.onBackground
                     )
-                }
-            },
-            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Password,
-                imeAction = ImeAction.Done
-            ),
-            isError = isError,
-        )
+                },
+                trailingIcon = {
+                    val image = if (passwordVisible)
+                        Icons.Filled.Visibility
+                    else Icons.Filled.VisibilityOff
+
+                    val description = if (passwordVisible) "Hide password" else "Show password"
+
+                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                        Icon(
+                            imageVector = image,
+                            contentDescription = description,
+                            tint = LadosTheme.colorScheme.onBackground
+                        )
+                    }
+                },
+                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Password,
+                    imeAction = ImeAction.Done
+                ),
+                isError = isError,
+            )
+
+            if (isError) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Password must be at least 8 characters",
+                    color = LadosTheme.colorScheme.error,
+                )
+            }
+        }
 
         ButtonSubmit(
             text = "Sign in",
             onClick = {
-                loginScreenViewModel.handleLoginEvent(
-                    LoginScreenEvent.HandleEnterPassword(
-                        password
+                if (password.length >= 8) {
+                    loginScreenViewModel.handleLoginEvent(
+                        LoginScreenEvent.HandleEnterPassword(
+                            password
+                        )
                     )
-                )
+                    isError = false
+                } else {
+                    isError = true
+                }
             },
             modifier = Modifier
                 .fillMaxWidth()

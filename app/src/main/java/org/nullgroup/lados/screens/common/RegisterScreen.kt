@@ -60,12 +60,11 @@ import org.nullgroup.lados.data.models.UserRole
 import org.nullgroup.lados.navigations.AdminGraph
 import org.nullgroup.lados.navigations.CustomerGraph
 import org.nullgroup.lados.navigations.StaffGraph
+import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.viewmodels.LoginScreenViewModel
 import org.nullgroup.lados.viewmodels.RegisterScreenViewModel
 import org.nullgroup.lados.viewmodels.events.LoginScreenEvent
 import org.nullgroup.lados.viewmodels.events.RegisterScreenEvent
-import org.nullgroup.lados.viewmodels.states.LoginScreenState
-import org.nullgroup.lados.viewmodels.states.RegisterScreenState
 import org.nullgroup.lados.viewmodels.states.ResourceState
 
 
@@ -202,6 +201,14 @@ fun RegisterInputScreen(navController: NavController, modifier: Modifier = Modif
             )
         )
 
+        if (firstNameError) {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "First Name is required",
+                color = LadosTheme.colorScheme.error,
+            )
+        }
+
         Spacer(modifier = Modifier.height(16.dp))
 
         CustomTextField(
@@ -237,6 +244,14 @@ fun RegisterInputScreen(navController: NavController, modifier: Modifier = Modif
                 }
             )
         )
+
+        if (lastNameError) {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Last Name is required",
+                color = LadosTheme.colorScheme.error,
+            )
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -274,6 +289,14 @@ fun RegisterInputScreen(navController: NavController, modifier: Modifier = Modif
                 },
             isError = emailError,
         )
+
+        if (emailError) {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Email invalid",
+                color = LadosTheme.colorScheme.error,
+            )
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -313,19 +336,35 @@ fun RegisterInputScreen(navController: NavController, modifier: Modifier = Modif
             isError = passwordError,
         )
 
+
+        if (passwordError) {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Password must be at least 8 characters long",
+                color = LadosTheme.colorScheme.error,
+            )
+        }
+
         Spacer(modifier = Modifier.height(32.dp))
 
         ButtonSubmit(
             text = "Register",
             onClick = {
-                registerViewModel.handleEvent(
-                    RegisterScreenEvent.HandleSignUp(
-                        firstName,
-                        lastName,
-                        email,
-                        password,
+                if (!registerViewModel.validateEmail(email)) emailError = true
+                if (!registerViewModel.validatePassword(password)) passwordError = true
+                if (!registerViewModel.validateNotEmpty(firstName)) firstNameError = true
+                if (!registerViewModel.validateNotEmpty(lastName)) lastNameError = true
+
+                if (!firstNameError && !lastNameError && !emailError && !passwordError) {
+                    registerViewModel.handleEvent(
+                        RegisterScreenEvent.HandleSignUp(
+                            firstName,
+                            lastName,
+                            email,
+                            password,
+                        )
                     )
-                )
+                }
             },
             modifier = Modifier
                 .fillMaxWidth()

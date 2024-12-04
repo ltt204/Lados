@@ -55,7 +55,6 @@ import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.viewmodels.ForgotPasswordScreenViewModel
 import org.nullgroup.lados.viewmodels.events.ForgotPasswordScreenEvent
 import org.nullgroup.lados.viewmodels.events.LoginScreenEvent
-import org.nullgroup.lados.viewmodels.states.ForgotPasswordScreenState
 import org.nullgroup.lados.viewmodels.states.ResourceState
 
 @Composable
@@ -131,6 +130,14 @@ fun ForgotPasswordInputScreen(modifier: Modifier = Modifier) {
             modifier = Modifier.fillMaxWidth(),
             isError = isError,
         )
+
+        if (isError) {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Email invalid",
+                color = LadosTheme.colorScheme.error,
+            )
+        }
 
         Spacer(modifier = Modifier.height(32.dp))
 

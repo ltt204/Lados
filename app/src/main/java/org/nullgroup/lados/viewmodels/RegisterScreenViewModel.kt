@@ -13,7 +13,6 @@ import org.nullgroup.lados.utilities.NotEmptyValidator
 import org.nullgroup.lados.utilities.PasswordValidator
 import org.nullgroup.lados.utilities.PhoneNumberValidator
 import org.nullgroup.lados.viewmodels.events.RegisterScreenEvent
-import org.nullgroup.lados.viewmodels.states.RegisterScreenState
 import org.nullgroup.lados.viewmodels.states.ResourceState
 import javax.inject.Inject
 

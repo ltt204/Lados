@@ -15,11 +15,9 @@ import kotlinx.coroutines.launch
 import org.nullgroup.lados.data.models.User
 import org.nullgroup.lados.data.models.UserRole
 import org.nullgroup.lados.data.repositories.interfaces.EmailAuthRepository
-import org.nullgroup.lados.data.repositories.interfaces.FacebookAuthRepository
 import org.nullgroup.lados.data.repositories.interfaces.GoogleAuthRepository
 import org.nullgroup.lados.data.repositories.interfaces.UserRepository
 import org.nullgroup.lados.viewmodels.events.LoginScreenEvent
-import org.nullgroup.lados.viewmodels.states.LoginScreenState
 import org.nullgroup.lados.viewmodels.states.LoginScreenStepState
 import org.nullgroup.lados.viewmodels.states.ResourceState
 import javax.inject.Inject
@@ -28,7 +26,6 @@ import javax.inject.Inject
 class LoginScreenViewModel @Inject constructor(
     private val emailAuth: EmailAuthRepository,
     private val googleAuth: GoogleAuthRepository,
-    private val facebookAuth: FacebookAuthRepository,
 ) : ViewModel() {
 
     var loginStep = MutableStateFlow<LoginScreenStepState>(LoginScreenStepState.Email())
@@ -92,28 +89,6 @@ class LoginScreenViewModel @Inject constructor(
         }
     }
 
-    private fun handleLogInWithFacebook(activity: ComponentActivity) {
-        try {
-            viewModelScope.launch {
-                when (val result = facebookAuth.signIn(activity)) {
-                    is ResourceState.Error -> {
-                        loginState.value = ResourceState.Error(result.message)
-                    }
-
-                    ResourceState.Idle -> TODO()
-                    ResourceState.Loading -> TODO()
-                    is ResourceState.Success -> {
-                        loginState.value = ResourceState.Success(result.data)
-                        loginStep.value = LoginScreenStepState.Home(result.data!!)
-                    }
-                }
-            }
-        } catch (e: Exception) {
-            ResourceState.Error(e.message)
-        }
-
-    }
-
     private fun handleLogInWithGoogle(
         launcher: ActivityResultLauncher<IntentSenderRequest>,
     ) {
@@ -171,10 +146,6 @@ class LoginScreenViewModel @Inject constructor(
 
             is LoginScreenEvent.HandleForgotPassword -> {
                 handleForgotPassword(event.navController)
-            }
-
-            is LoginScreenEvent.HandleLogInWithFacebook -> {
-                handleLogInWithFacebook(event.activity)
             }
 
             is LoginScreenEvent.HandleLogInWithGoogle -> {

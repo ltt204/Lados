@@ -17,11 +17,9 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import org.nullgroup.lados.R
 import org.nullgroup.lados.data.repositories.implementations.EmailAuthRepositoryImpl
-import org.nullgroup.lados.data.repositories.implementations.FacebookAuthRepositoryImpl
 import org.nullgroup.lados.data.repositories.implementations.GoogleAuthRepositoryImpl
 import org.nullgroup.lados.data.repositories.implementations.SharedPreferencesImpl
 import org.nullgroup.lados.data.repositories.interfaces.EmailAuthRepository
-import org.nullgroup.lados.data.repositories.interfaces.FacebookAuthRepository
 import org.nullgroup.lados.data.repositories.interfaces.GoogleAuthRepository
 import org.nullgroup.lados.data.repositories.interfaces.SharedPreferencesRepository
 import org.nullgroup.lados.data.repositories.interfaces.UserRepository
@@ -69,24 +67,6 @@ object AuthenticationModule {
 
     @Provides
     @Singleton
-    fun provideFacebookAuthRepository(
-        firebaseAuth: FirebaseAuth,
-        loginManager: LoginManager,
-        callbackManager: CallbackManager,
-        userRepository: UserRepository,
-        sharedPreferences: SharedPreferencesRepository,
-    ): FacebookAuthRepository {
-        return FacebookAuthRepositoryImpl(
-            auth = firebaseAuth,
-            loginManager = loginManager,
-            callbackManager = callbackManager,
-            userRepository = userRepository,
-            sharedPreferences = sharedPreferences,
-        )
-    }
-
-    @Provides
-    @Singleton
     fun provideSignInClient(@ApplicationContext context: Context): SignInClient {
         return Identity.getSignInClient(context)
     }
@@ -99,17 +79,5 @@ object AuthenticationModule {
             .requestEmail()
             .build()
         return GoogleSignIn.getClient(context, gso)
-    }
-
-    @Provides
-    @Singleton
-    fun provideFacebookLoginManager(): LoginManager {
-        return LoginManager.getInstance()
-    }
-
-    @Provides
-    @Singleton
-    fun provideCallbackManager(): CallbackManager {
-        return CallbackManager.Factory.create()
     }
 }
