@@ -1,10 +1,8 @@
 package org.nullgroup.lados.viewmodels.events
 
-import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
 import androidx.navigation.NavController
-import org.nullgroup.lados.data.models.User
 
 sealed class LoginScreenEvent {
     data class HandleEnterEmail(val email: String) : LoginScreenEvent()

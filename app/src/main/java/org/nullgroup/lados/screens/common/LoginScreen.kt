@@ -1,9 +1,7 @@
 package org.nullgroup.lados.screens.common
 
 import android.app.Activity
-import android.util.Log
 import android.widget.Toast
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -40,7 +38,6 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import dagger.hilt.android.qualifiers.ApplicationContext
 import org.nullgroup.lados.R
 import org.nullgroup.lados.compose.SignIn.ButtonSubmit
 import org.nullgroup.lados.compose.SignIn.CustomTextField
@@ -48,7 +45,6 @@ import org.nullgroup.lados.compose.SignIn.Headline
 import org.nullgroup.lados.compose.SignIn.OutlineButton
 import org.nullgroup.lados.compose.SignIn.TextClickable
 import org.nullgroup.lados.compose.SignIn.TextNormal
-import org.nullgroup.lados.data.models.User
 import org.nullgroup.lados.data.models.UserRole
 import org.nullgroup.lados.navigations.AdminGraph
 import org.nullgroup.lados.navigations.CustomerGraph

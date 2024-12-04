@@ -4,28 +4,111 @@ import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withTimeout
 import org.nullgroup.lados.data.models.User
-import org.nullgroup.lados.data.models.UserRole
+import org.nullgroup.lados.data.repositories.interfaces.ImageRepository
 import org.nullgroup.lados.data.repositories.interfaces.UserRepository
+
 
 class UserRepositoryImplement(
     private val firestore: FirebaseFirestore,
+    private val firebaseAuth: FirebaseAuth,
+    private val imageRepository: ImageRepository,
 ) : UserRepository {
+
+    override fun getCurrentUserFlow(): Flow<User> = callbackFlow {
+        val userRef = firestore.collection("users").document(firebaseAuth.currentUser?.uid!!)
+
+
+        val subscription = userRef.addSnapshotListener { snapshot, error ->
+            if (error != null) {
+                close(error)
+                return@addSnapshotListener
+            }
+
+            if (snapshot != null) {
+                val user = snapshot.toObject(User::class.java) ?: User()
+                trySend(user).isSuccess
+            }
+        }
+
+        awaitClose { subscription.remove() }
+    }
 
     override suspend fun addUserToFirestore(user: User) {
         firestore.collection("users").add(user).await()
     }
 
     override suspend fun saveUserToFirestore(user: User) {
+        user.photoUrl =
+            user.photoUrl.ifEmpty {
+                imageRepository.getImageUrl(
+                    "users",
+                    "default_avatar",
+                    "jpg"
+                )
+            }
+
         firestore.collection("users").document(user.id).set(user).await()
+    }
+
+    override suspend fun deleteUser(id: String): Result<Boolean> {
+        return try {
+            firestore.collection("users").document(id).delete().await()
+            Result.success(true)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+
+    }
+
+    override suspend fun updateUser(user: User): Result<Boolean> {
+        return try {
+            user.photoUrl =
+                user.photoUrl.ifEmpty {
+                    imageRepository.getImageUrl(
+                        "users",
+                        "default_avatar",
+                        "jpg"
+                    )
+                }
+            firestore.collection("users").document(user.id).set(user).await()
+            Result.success(true)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun updateUserRole(email: String, role: String): Result<Boolean> {
+        return try {
+            firestore.collection("users").document(email).update("role", role).await()
+            Result.success(true)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+
+    override suspend fun getCurrentUser(): User {
+        val firebaseUser = firebaseAuth.currentUser
+        val userRef = firestore.collection("users").document(firebaseUser?.uid!!)
+
+        val user = userRef.get().await().toObject(User::class.java) ?: User()
+
+        Log.d("UserRepositoryImplement", "User profile picture: ${user.photoUrl}")
+        return user
+
     }
 
     override suspend fun getUserFromFirestore(id: String): Result<User> {
         return try {
             val user =
-                firestore.collection("users").document(id).get().await().toObject(User::class.java)
+                firestore.collection("users").document(id).get().await()
+                    .toObject(User::class.java)
             Result.success(user!!)
         } catch (e: Exception) {
             Result.failure(e)
@@ -72,21 +155,13 @@ class UserRepositoryImplement(
         }
     }
 
-    override suspend fun updateUserRole(id: String, role: String): Result<Boolean> {
+    override suspend fun logout(): Result<Boolean> {
         return try {
-            firestore.collection("users").document(id).update("role", role).await()
+            firebaseAuth.signOut()
             Result.success(true)
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 
-    override suspend fun deleteUser(id: String): Result<Boolean> {
-        return try {
-            firestore.collection("users").document(id).delete().await()
-            Result.success(true)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
 }

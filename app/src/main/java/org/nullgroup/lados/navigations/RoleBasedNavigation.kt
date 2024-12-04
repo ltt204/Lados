@@ -8,7 +8,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
-import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -17,8 +16,6 @@ import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.screens.common.ForgotPasswordScreen
 import org.nullgroup.lados.screens.common.LoginScreen
 import org.nullgroup.lados.screens.common.RegisterScreen
-import org.nullgroup.lados.screens.common.UserSetUpScreen
-import org.nullgroup.lados.screens.customer.HomeScreen
 import org.nullgroup.lados.ui.theme.darkColorScheme
 import org.nullgroup.lados.ui.theme.lightColorScheme
 

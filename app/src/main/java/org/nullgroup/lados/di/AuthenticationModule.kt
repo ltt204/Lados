@@ -1,8 +1,6 @@
 package org.nullgroup.lados.di
 
 import android.content.Context
-import com.facebook.CallbackManager
-import com.facebook.login.LoginManager
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.auth.api.identity.SignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -18,7 +16,6 @@ import dagger.hilt.components.SingletonComponent
 import org.nullgroup.lados.R
 import org.nullgroup.lados.data.repositories.implementations.EmailAuthRepositoryImpl
 import org.nullgroup.lados.data.repositories.implementations.GoogleAuthRepositoryImpl
-import org.nullgroup.lados.data.repositories.implementations.SharedPreferencesImpl
 import org.nullgroup.lados.data.repositories.interfaces.EmailAuthRepository
 import org.nullgroup.lados.data.repositories.interfaces.GoogleAuthRepository
 import org.nullgroup.lados.data.repositories.interfaces.SharedPreferencesRepository

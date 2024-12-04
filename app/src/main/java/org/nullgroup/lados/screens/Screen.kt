@@ -13,10 +13,6 @@ sealed class Screen(
     val route: String,
     val icon: ImageVector? = null
 ) {
-
-    /**
-     * Define common screens
-     */
     sealed class Common(
         name: String? = null,
         route: String,
@@ -49,6 +45,28 @@ sealed class Screen(
         data object ChatScreen : Customer("Chat", "customer_chat", Icons.Default.MailOutline)
         data object Order : Customer("Order", "customer_order", Icons.Filled.ShoppingCart)
         data object Profile : Customer("Profile", "customer_profile", Icons.Default.AccountCircle)
+        data object EditProfile : Customer("Edit Profile", "customer_edit_profile", Icons.Default.AccountCircle)
+
+        sealed class Address(
+            name: String,
+            route: String,
+            icon: ImageVector
+        ) : Customer(name, route, icon) {
+            data object AddressList :
+                Address("Address List", "customer_address_list", Icons.Default.AccountCircle)
+
+            data object AddAddress :
+                Address("Add Address", "customer_add_address", Icons.Default.AccountCircle)
+
+            data object EditAddress : Address(
+                "Edit Address",
+                "customer_edit_address",
+                Icons.Default.AccountCircle
+            ) {
+                const val ID_ARG = "address_id"
+                const val ROUTE_WITH_ARG = "customer_edit_address/{$ID_ARG}"
+            }
+        }
 
         companion object {
             fun getAllScreens() = listOf(HomeScreen, ChatScreen, Order, Profile)

@@ -2,7 +2,6 @@ package org.nullgroup.lados.viewmodels
 
 import android.util.Log
 import android.util.Patterns.*
-import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
@@ -13,10 +12,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import org.nullgroup.lados.data.models.User
-import org.nullgroup.lados.data.models.UserRole
 import org.nullgroup.lados.data.repositories.interfaces.EmailAuthRepository
 import org.nullgroup.lados.data.repositories.interfaces.GoogleAuthRepository
-import org.nullgroup.lados.data.repositories.interfaces.UserRepository
 import org.nullgroup.lados.viewmodels.events.LoginScreenEvent
 import org.nullgroup.lados.viewmodels.states.LoginScreenStepState
 import org.nullgroup.lados.viewmodels.states.ResourceState
