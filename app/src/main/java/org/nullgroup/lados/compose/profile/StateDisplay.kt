@@ -19,7 +19,6 @@ fun LoadOnProgress(
     Box(
         modifier
             .fillMaxSize()
-            .background(Color.Transparent.copy(alpha = 0.2f)),
     ) {
         Column(
             modifier = Modifier
@@ -35,9 +34,9 @@ fun LoadOnProgress(
 @Composable
 fun LoadOnError(
     modifier: Modifier = Modifier,
-    content: @Composable (() -> Unit) = { Text(text = "Failed to load data.") }
+    content: @Composable () -> Unit = { Text(text = "Failed to load data.") }
 ) {
-    Text(text = "Failed to load data.")
+    content()
 }
 
 @Composable

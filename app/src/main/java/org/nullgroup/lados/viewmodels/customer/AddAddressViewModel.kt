@@ -1,13 +1,12 @@
 package org.nullgroup.lados.viewmodels.customer
 
 import android.util.Log
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,40 +16,48 @@ import org.nullgroup.lados.data.models.District
 import org.nullgroup.lados.data.models.Province
 import org.nullgroup.lados.data.models.Ward
 import org.nullgroup.lados.data.repositories.interfaces.IUserAddressRepository
+import org.nullgroup.lados.data.repositories.interfaces.UserRepository
 import org.nullgroup.lados.data.repositories.interfaces.VietnamProvinceService
 import javax.inject.Inject
 
 @HiltViewModel
 class AddAddressViewModel @Inject constructor(
-    firebaseAuth: FirebaseAuth,
-    private val firestore: FirebaseFirestore,
+    userRepository: UserRepository,
     private val provinceService: VietnamProvinceService,
     private val userAddressRepository: IUserAddressRepository
 ) : ViewModel() {
-    private val currentUser = firebaseAuth.currentUser!!.email?.let {
-        firestore.collection("users").document(
-            it
-        )
-    }
-
     var isInfoChanged = mutableStateOf(false)
         private set
 
     var provincesUiState: MenuItemsUIState by mutableStateOf(MenuItemsUIState.Loading)
         private set
-    var districtsUiState: MenuItemsUIState by mutableStateOf(MenuItemsUIState.Loading)
+    var districtsUiState: MenuItemsUIState by mutableStateOf(MenuItemsUIState.Default())
         private set
-    var wardsUiState: MenuItemsUIState by mutableStateOf(MenuItemsUIState.Loading)
+    var wardsUiState: MenuItemsUIState by mutableStateOf(MenuItemsUIState.Default())
         private set
 
     private var cacheDistricts = MutableStateFlow<List<District>>(emptyList())
     private var cacheProvinces = MutableStateFlow<List<Province>>(emptyList())
     private var cacheWards = MutableStateFlow<List<Ward>>(emptyList())
 
-    var userAddress = MutableStateFlow(Address(userId = currentUser!!.id))
+    var userAddress = MutableStateFlow(Address())
+        private set
+
+    var savingResult = mutableStateOf<SavingResult>(SavingResult.Loading)
         private set
 
     init {
+        viewModelScope.launch {
+            val currentUser = userRepository.getCurrentUser()
+            userAddress = MutableStateFlow(
+                Address(
+                    userId = currentUser.id,
+                    province = "",
+                    district = "",
+                    ward = ""
+                )
+            )
+        }
         loadProvinces()
     }
 
@@ -60,7 +67,7 @@ class AddAddressViewModel @Inject constructor(
                 is MenuItemsUIState.Success -> {
                     val provinceName = it.data[index]
                     districtsUiState = MenuItemsUIState.Loading
-                    wardsUiState = MenuItemsUIState.Loading
+                    wardsUiState = MenuItemsUIState.Default()
 
                     viewModelScope.launch {
                         userAddress.emit(
@@ -70,7 +77,6 @@ class AddAddressViewModel @Inject constructor(
                                 ward = ""
                             )
                         )
-                        isInfoChanged.value = true
                     }
                     loadDistrict(provinceName)
                 }
@@ -85,6 +91,7 @@ class AddAddressViewModel @Inject constructor(
             when (it) {
                 is MenuItemsUIState.Success -> {
                     val districtName = it.data[index]
+                    wardsUiState = MenuItemsUIState.Loading
                     viewModelScope.launch {
                         userAddress.emit(
                             userAddress.value.copy(
@@ -92,7 +99,6 @@ class AddAddressViewModel @Inject constructor(
                                 ward = ""
                             )
                         )
-                        isInfoChanged.value = true
                     }
                     loadWards(districtName)
                 }
@@ -135,14 +141,17 @@ class AddAddressViewModel @Inject constructor(
             try {
                 Log.d("AddAddressViewModel", "saveAddress: ${userAddress.value}")
                 userAddressRepository.saveAddress(userAddress.value)
+                savingResult.value = SavingResult.Success
             } catch (e: Exception) {
-                e.printStackTrace()
+                savingResult.value = SavingResult.Failed(e.message!!)
+                Log.d("AddAddressViewModel", "Failed to save address")
             }
         }
     }
 
     private fun loadProvinces() {
         viewModelScope.launch {
+            delay(500)
             if (cacheProvinces.value.isNotEmpty()) {
                 provincesUiState =
                     MenuItemsUIState.Success(cacheProvinces.value.map { it.full_name })
@@ -155,18 +164,14 @@ class AddAddressViewModel @Inject constructor(
                     cacheProvinces.emit(it)
                 }
             } catch (e: Exception) {
-                provincesUiState = MenuItemsUIState.Failed
+                provincesUiState = MenuItemsUIState.Failed(e.message!!)
             }
         }
     }
 
     private fun loadDistrict(provinceName: String) {
         viewModelScope.launch {
-            if (cacheDistricts.value.isNotEmpty()) {
-                districtsUiState =
-                    MenuItemsUIState.Success(cacheDistricts.value.map { it.full_name })
-                return@launch
-            }
+            delay(500)
             val provinceId = cacheProvinces.value.first { it.full_name == provinceName }.id
             try {
                 provinceService.getDistricts(provinceId).let {
@@ -174,17 +179,14 @@ class AddAddressViewModel @Inject constructor(
                     cacheDistricts.emit(it)
                 }
             } catch (e: Exception) {
-                districtsUiState = MenuItemsUIState.Failed
+                districtsUiState = MenuItemsUIState.Failed(e.message!!)
             }
         }
     }
 
     private fun loadWards(districtName: String) {
         viewModelScope.launch {
-            if (cacheWards.value.isNotEmpty()) {
-                wardsUiState = MenuItemsUIState.Success(cacheWards.value.map { it.full_name })
-                return@launch
-            }
+            delay(500)
             val districtId = cacheDistricts.value.first { it.full_name == districtName }.id
             try {
                 provinceService.getWards(districtId).let {
@@ -192,8 +194,14 @@ class AddAddressViewModel @Inject constructor(
                     cacheWards.emit(it)
                 }
             } catch (e: Exception) {
-                wardsUiState = MenuItemsUIState.Failed
+                wardsUiState = MenuItemsUIState.Failed(e.message!!)
             }
         }
     }
+}
+
+sealed class SavingResult {
+    data object Success : SavingResult()
+    data object Loading : SavingResult()
+    data class Failed(val message: String) : SavingResult()
 }

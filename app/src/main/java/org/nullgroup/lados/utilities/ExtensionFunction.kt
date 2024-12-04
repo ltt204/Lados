@@ -10,9 +10,10 @@ import java.io.ByteArrayOutputStream
 
 fun Drawable.toByteArray(
     format: Bitmap.CompressFormat = Bitmap.CompressFormat.JPEG,
-    quality: Int = 100
+    quality: Int = 25
 ): ByteArray {
     val bitmap = (this as BitmapDrawable).bitmap
+
     val stream = ByteArrayOutputStream()
     bitmap.compress(format, quality, stream)
 
