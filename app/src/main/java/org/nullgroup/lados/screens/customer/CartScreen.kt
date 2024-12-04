@@ -23,9 +23,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,8 +38,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import org.nullgroup.lados.compose.CartRelated.CartItemBar
-import org.nullgroup.lados.compose.CartRelated.PricingDetails
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
+import org.nullgroup.lados.compose.cartRelated.CartItemBar
+import org.nullgroup.lados.compose.cartRelated.PricingDetails
 import org.nullgroup.lados.data.models.CartItem
 import org.nullgroup.lados.viewmodels.CartViewModel
 
@@ -47,52 +54,24 @@ fun CartScreen(
 ) {
     val cartViewModel: CartViewModel = hiltViewModel()
 
+    val snackBarHostState = remember { mutableStateOf(SnackbarHostState()) }
+
     val cartItems = cartViewModel.cartItems.collectAsStateWithLifecycle()
     val cartItemInformation = cartViewModel.cartItemInformation.collectAsStateWithLifecycle()
-    val cartItemSelection = cartViewModel.cartItemSelection.collectAsStateWithLifecycle().value
+    val selectedItems = cartViewModel.selectedCartItems.collectAsStateWithLifecycle().value
+    val isAnyItemSelected = cartViewModel.isAnyCartItemSelected()
+    val checkoutDetail = cartViewModel.checkoutDetail
+    val scope = cartViewModel.viewModelScope
 
-    val cartItemIds = cartItems.value.map { it.id }
-    val selectedItemIds = cartItemSelection
-        .filter { it.key in cartItemIds }
-        .map { if (it.value) it.key else null }
-        .filterNotNull()
-    val selectedItems = cartItems.value.filter { it.id in selectedItemIds }
-    val isAnyItemSelected = selectedItems.isNotEmpty()
-
-    val checkoutDetail: () -> Triple<String, String, String> = {
-        // val validVariantIds = cartItemInformation.value.values.map { it.second?.id }.filterNotNull()
-//        val validItems = selectedItems.filter {
-//            val itemInformation = cartItemInformation.value[it.id]
-//            val variantInformation = itemInformation?.second
-//            return@filter(
-//                // Id of the cartItem must be in cartItemInformation
-//                cartItemInformation.value.containsKey(it.id) &&
-//                // productVariant of the cartItem must be in the cartItemInformation
-//                // validVariantIds.contains(cartItemInformation.value[it.id]?.second?.id)
-//                cartItemInformation.value[it.id]?.second != null
-//            )
-//        }
-//
-//        val total = validItems.sumOf {
-//            (cartItemInformation.value[it.id]?.second?.salePrice ?: 0.0) * it.amount
-//        }
-//        val subtotal = validItems.sumOf {
-//            (cartItemInformation.value[it.id]?.second?.originalPrice ?: 0.0) * it.amount
-//        }
-//        val discount = subtotal - total
-
-        var subtotal = 0.0
-        var total = 0.0
-        selectedItems.forEach { cartItem ->
-            val productVariant = cartItemInformation.value[cartItem.id]?.second
-            if (productVariant != null) {
-                subtotal += productVariant.originalPrice * cartItem.amount
-                total += productVariant.salePrice * cartItem.amount
-            }
+    val onRefreshCompleted: (String) -> Unit = { message ->
+        scope.launch {
+            snackBarHostState.value.showSnackbar(
+                message = message,
+                duration = SnackbarDuration.Short
+            )
         }
-        val discount = subtotal - total
-        Triple(subtotal.toString(), discount.toString(), total.toString())
     }
+    cartViewModel.onRefreshComplete = onRefreshCompleted
 
     val onItemSelected = { cartItem: CartItem ->
         if (cartItem in selectedItems) {
@@ -103,12 +82,53 @@ fun CartScreen(
     }
 
     val onItemAmountChanged = { cartItem: CartItem, amountDelta: Int ->
-        cartViewModel.updateCartItemAmount(cartItem.id, amountDelta)
+        cartViewModel.updateCartItemAmountLocally(cartItem.id, amountDelta)
     }
 
-    val onItemRemoving = { cartItem: CartItem ->
-        cartViewModel.removeCartItem(cartItem.id)
+    val onSelectedItemsRemoved = {
+        cartViewModel.removeSelectedCartItemLocally()
     }
+
+    // TODO: Remove the snackBar when the user navigates back
+    val onNavigateBack = {
+        scope.launch {
+            var result = scope.async {
+                cartViewModel.commitChangesToDatabase()
+            }.await()
+            if (result.isFailure) {
+                snackBarHostState.value.showSnackbar(
+                    message = result.exceptionOrNull()!!.message.toString(),
+                    duration = SnackbarDuration.Short
+                )
+            } else {
+                snackBarHostState.value.showSnackbar(
+                    message = "Successfully saved change(s) to the database",
+                    duration = SnackbarDuration.Short
+                )
+            }
+        }
+    }
+
+    val onCheckoutFailure: (String) -> Unit = { errorString ->
+        scope.launch {
+            snackBarHostState.value.showSnackbar(
+                message = errorString,
+                duration = SnackbarDuration.Short
+            )
+        }
+    }
+    val onSuccessfulCheckout: () -> Unit = {
+        scope.launch {
+            snackBarHostState.value.showSnackbar(
+                message = "Checkout successful",
+                duration = SnackbarDuration.Short
+            )
+        }
+    }
+    val onCheckout = cartViewModel.checkoutHandler(
+        onCheckoutFailure,
+        onSuccessfulCheckout
+    )
 
     val defaultImageUrl = "https://placehold.co/600x400"
     val defaultTitle = "Unknown Product"
@@ -122,7 +142,7 @@ fun CartScreen(
                     Text("Cart", textAlign = TextAlign.Center)
                 },
                 navigationIcon = {
-                    IconButton(onClick = { /* TODO */ }) {
+                    IconButton(onClick = { onNavigateBack() }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Default.KeyboardArrowLeft,
                             contentDescription = "Back"
@@ -132,10 +152,11 @@ fun CartScreen(
             )
         },
         bottomBar = {
-            val (subtotal, discount, total) = checkoutDetail()
+            val (subtotal, productDiscount, orderDiscount, total) = checkoutDetail()
             CartBottomBar(
-                "$$subtotal", "$$discount", "$$total",
+                "$$subtotal", "$$productDiscount", "$$orderDiscount", "$$total",
                 isEnabled = isAnyItemSelected,
+                onCheckout = onCheckout,
                 modifier = Modifier.padding(horizontal = 20.dp)
             )
         },
@@ -143,9 +164,7 @@ fun CartScreen(
             if (isAnyItemSelected) {
                 OutlinedButton(
                     onClick = {
-                        selectedItems.forEach {
-                            onItemRemoving(it)
-                        }
+                        onSelectedItemsRemoved()
                     },
                     modifier = Modifier.padding(bottom = 8.dp)
                 ) {
@@ -162,10 +181,12 @@ fun CartScreen(
                     .padding(horizontal = 20.dp)
                     .fillMaxSize()
             ) {
-                itemsIndexed(cartItems.value) { index, cartItem ->
+                itemsIndexed(cartItems.value) { _, cartItem ->
+                    if (cartItem.amount <= 0) {
+                        return@itemsIndexed
+                    }
                     val (product, productVariant) =
                         cartItemInformation.value[cartItem.id] ?: Pair(null, null)
-
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -202,15 +223,16 @@ fun CartScreen(
 
                 }
             }
-        }
-
+        },
+        snackbarHost = { SnackbarHost(snackBarHostState.value) }
     )
 }
 
 @Composable
 fun CartBottomBar(
-    subtotal: String, discount: String, total: String,
+    subtotal: String, productDiscount: String, orderDiscount: String?, total: String,
     isEnabled: Boolean = true,
+    onCheckout: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -220,14 +242,15 @@ fun CartBottomBar(
         if (isEnabled) {
             PricingDetails(
                 subtotal = subtotal,
-                discount = discount,
+                productDiscount = productDiscount,
+                orderDiscount = orderDiscount,
                 total = total
             )
             Spacer(modifier = Modifier.height(8.dp))
         }
 
         OutlinedButton(
-            onClick = { /* TODO */ },
+            onClick = { onCheckout() },
             enabled = isEnabled,
             modifier = Modifier.fillMaxWidth()
         ) {

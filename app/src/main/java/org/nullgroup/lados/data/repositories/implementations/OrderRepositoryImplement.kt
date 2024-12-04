@@ -8,6 +8,7 @@ import com.google.firebase.firestore.QuerySnapshot
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.tasks.await
 import org.nullgroup.lados.data.models.Order
 import org.nullgroup.lados.data.models.OrderProduct
 import org.nullgroup.lados.data.models.OrderStatus
@@ -15,18 +16,33 @@ import org.nullgroup.lados.data.repositories.interfaces.OrderRepository
 
 // Firebase-specific repository example
 class OrderRepositoryImplement(
-    private val db: FirebaseFirestore,
+    private val firestore: FirebaseFirestore,
     private val firebaseAuth: FirebaseAuth
 ): OrderRepository {
     // Create a new order
-    override fun createOrder(customerId: String, orderProducts: List<OrderProduct>): Result<Boolean> {
-        val order = Order(
-            customerId = customerId,
-            orderProducts = orderProducts
-        )
-
+    override suspend fun createOrder(
+        customerId: String,
+        order: Order,
+        ): Result<Boolean> {
         return try {
-            db.collection("orders").add(order.toMap())
+            val userOrdersRef = firestore
+                .collection("users").document(customerId)
+                .collection(Order.COLLECTION_NAME).document()
+            val staffManagedOrdersRef = firestore
+                .collection(Order.COLLECTION_NAME).document(userOrdersRef.id)
+            val batch = firestore.batch()
+            // Don't know why firestore still stores @Exclude fields
+            batch.set(userOrdersRef, order.copy(orderProducts = listOf()))
+            batch.set(staffManagedOrdersRef, order.copy(orderProducts = listOf()))
+            order.orderProducts.forEach { orderProduct ->
+                val userOrderProductRef = userOrdersRef
+                    .collection(OrderProduct.COLLECTION_NAME).document()
+                batch.set(userOrderProductRef, orderProduct)
+                val staffManagedOrderProductRef = staffManagedOrdersRef
+                    .collection(OrderProduct.COLLECTION_NAME).document(userOrderProductRef.id)
+                batch.set(staffManagedOrderProductRef, orderProduct)
+            }
+            batch.commit().await()
             Result.success(true)
         } catch (e: Exception) {
             Result.failure(e)
@@ -34,14 +50,22 @@ class OrderRepositoryImplement(
     }
 
     // Update order status
-    override fun updateOrderStatus(orderId: String, newStatus: OrderStatus): Result<Boolean> {
+    override suspend fun updateOrderStatus(orderId: String, newStatus: OrderStatus): Result<Boolean> {
+        // TODO: Check later if this is the correct way to update the order status
         try {
-            db.collection("orders")
-                .document(orderId)
-                .update(mapOf(
-                    "status" to newStatus.name,
-                    "updatedAt" to System.currentTimeMillis()
-                ))
+            val orderRef = firestore.collection("orders").document(orderId)
+            firestore.runTransaction { transaction ->
+                val snapshot = transaction.get(orderRef)
+                if (!snapshot.exists()) {
+                    throw Exception("Order not found")
+                }
+                val firebaseStatusLog = snapshot.toObject(Order::class.java)?.orderStatusLog
+                    ?: mapOf()
+                val statusLog = firebaseStatusLog.mapKeys { OrderStatus.valueOf(it.key) }.toMutableMap()
+                statusLog[newStatus] = System.currentTimeMillis()
+                val newStatusLog = statusLog.mapKeys { it.key.name }
+                transaction.update(orderRef, newStatusLog)
+            }.await()
             return Result.success(true)
         } catch (e: Exception) {
             return Result.failure(e)
@@ -50,7 +74,7 @@ class OrderRepositoryImplement(
 
     override fun getOrders(): Flow<List<Order>> = callbackFlow {
         val userEmail = firebaseAuth.currentUser?.email!!
-        val orderRef = db.collection("users").document(userEmail).collection("orders")
+        val orderRef = firestore.collection("users").document(userEmail).collection("orders")
 
         val subscription = orderRef.addSnapshotListener { snapshot, e ->
             if (e != null) {
@@ -69,7 +93,7 @@ class OrderRepositoryImplement(
 
     override fun getOrderById(orderId: String): Flow<Order> = callbackFlow  {
         val userEmail = firebaseAuth.currentUser?.email!!
-        val orderRef = db.collection("users").document(userEmail).collection("orders")
+        val orderRef = firestore.collection("users").document(userEmail).collection("orders")
 
         val subscription = orderRef.addSnapshotListener { snapshot, e ->
             if (e != null) {

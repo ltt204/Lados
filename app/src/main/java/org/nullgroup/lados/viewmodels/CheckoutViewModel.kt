@@ -12,6 +12,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CheckoutViewModel @Inject constructor(
+    // private val userRepository: UserRepository,
     private val orderRepository: OrderRepository
 ): ViewModel() {
     // Hardcode
