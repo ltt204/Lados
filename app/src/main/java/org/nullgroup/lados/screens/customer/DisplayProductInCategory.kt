@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -26,14 +27,17 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -79,10 +83,15 @@ import org.nullgroup.lados.ui.theme.WhiteMaterial
 import java.util.Calendar
 
 @Composable
-fun DrawProductInCategoryScreen(modifier: Modifier=Modifier, navController: NavController, content: String, textStyle: TextStyle=TextStyle(fontSize = 20.sp, fontWeight = FontWeight.Bold)) {
+fun DrawProductInCategoryScreenContent(modifier: Modifier=Modifier, navController: NavController, content: String, textStyle: TextStyle=TextStyle(fontSize = 20.sp, fontWeight = FontWeight.Bold), paddingValues: PaddingValues) {
     Column(
+        modifier = modifier.padding(
+            horizontal = 8.dp,
+            vertical = paddingValues.calculateTopPadding()
+        ),
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
+        HeaderButton()
         Title(content = content, textStyle = textStyle)
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
@@ -90,16 +99,51 @@ fun DrawProductInCategoryScreen(modifier: Modifier=Modifier, navController: NavC
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             items(10) { item ->
-                Box() {
-                    ProductItem(
-                        modifier = modifier.fillMaxWidth(),
-                        name = "Product $item",
-                        salePrice = "$100",
-                        initialledPrice = "$200"
+                ProductItem(
+
+                    name = "Product $item",
+                    salePrice = "100",
+                    initialledPrice = "200"
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun ProductInCategoryScreen(modifier: Modifier=Modifier, navController: NavController, content: String, paddingValues: PaddingValues= PaddingValues(horizontal = 16.dp, vertical = 8.dp)){
+    Scaffold(
+        modifier = modifier,
+        topBar = {
+            Row(
+                modifier=Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight()
+                    .padding(vertical = 16.dp, horizontal = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                IconButton(
+                    onClick = {},
+                    modifier = Modifier.clip(CircleShape)
+                        .background(GrayMaterial.copy(alpha = 0.2f))
+                ) {
+                    Icon(
+                        Icons.Filled.ArrowBack,
+                        contentDescription = "Search",
+                        tint = BlackMaterial
+
                     )
                 }
             }
         }
+    ) {
+        DrawProductInCategoryScreenContent(
+            modifier = modifier,
+            paddingValues = it,
+            navController = navController,
+            content = content
+        )
     }
 }
 
@@ -107,6 +151,6 @@ fun DrawProductInCategoryScreen(modifier: Modifier=Modifier, navController: NavC
 @Composable
 fun ReviewProductInCategoryScreen() {
     LadosTheme {
-        DrawProductInCategoryScreen(navController = NavController(LocalContext.current),content="Hoodies (230)")
+        ProductInCategoryScreen(navController = NavController(LocalContext.current),content="Hoodies (230)")
     }
 }

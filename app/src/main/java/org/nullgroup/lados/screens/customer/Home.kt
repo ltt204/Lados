@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,22 +20,28 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.outlined.Favorite
-import androidx.compose.material.icons.sharp.FavoriteBorder
+import androidx.compose.material.icons.outlined.KeyboardArrowDown
+import androidx.compose.material.icons.outlined.ShoppingCart
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -56,7 +63,6 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withLink
@@ -81,7 +87,7 @@ import org.nullgroup.lados.ui.theme.WhiteMaterial
 import java.util.Calendar
 
 @Composable
-fun SearchAndFilter(modifier: Modifier=Modifier, navController: NavController) {
+fun SearchBarRow(modifier: Modifier=Modifier, navController: NavController) {
     Row(
         modifier = modifier
             .padding(horizontal = 4.dp)
@@ -101,20 +107,32 @@ fun SearchBar(modifier: Modifier=Modifier, navController: NavController, onSearc
     var searchText by remember { mutableStateOf("") }
     val focusManager = LocalFocusManager.current
 
-    Box(modifier = Modifier.clickable { navController.navigate(Screen.Customer.SearchScreen.route) }) {
+    Box(modifier = modifier.fillMaxWidth()
+        .clickable { navController.navigate(Screen.Customer.SearchScreen.route) },
+        contentAlignment = Alignment.Center
+    ) {
         OutlinedTextField(
             value = searchText,
             onValueChange = {},
             enabled = false,
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxWidth()
+                .border(
+                    1.dp,
+                    BlackMaterial,
+                    shape = RoundedCornerShape(50)
+                )
+                .align(Alignment.Center)
+
             ,
+
             singleLine = true,
             placeholder = { Text("Search") },
             leadingIcon = {
-                Icon(
-                    imageVector = Icons.Filled.Search,
-                    contentDescription = "Search"
+                Image(
+                    painter = painterResource(R.drawable.searchicon),
+                    contentDescription = "Search",
+                    modifier = Modifier.size(20.dp)
                 )
             },
 
@@ -144,7 +162,7 @@ fun FilterButton(modifier: Modifier=Modifier, navController: NavController/*, on
     {
         Icon(
             Icons.Filled.Menu,
-            modifier=Modifier
+            modifier= Modifier
                 .fillMaxSize()
                 .padding(8.dp)
             ,
@@ -184,7 +202,7 @@ fun TitleTextRow(modifier: Modifier=Modifier, content: String, color: Color = Bl
             )
         )
         Spacer(Modifier.weight(1f))
-        LinkText("See all", "https://google.com", BrownMaterial, SpanStyle(color= BrownMaterial))
+        LinkText("See all", "https://google.com", BrownMaterial, SpanStyle(color= BrownMaterial, fontSize = 20.sp))
     }
 }
 
@@ -456,30 +474,36 @@ fun BannerSlider() {
 
 @Composable
 fun ProductItem(modifier: Modifier = Modifier, name: String, salePrice: String, initialledPrice: String?) {
-    Box(modifier = modifier) {
+    Box(modifier = modifier
+        .width(160.dp)
+        .height(280.dp)
+        .clip(RoundedCornerShape(8.dp))
+        .background(GrayMaterial.copy(alpha = 0.2f))
+        .padding(bottom = 8.dp)
+    ) {
         Image(
             painter = painterResource(R.drawable.ic_launcher_background),
             contentDescription = "Image",
             modifier = modifier
-                .width(160.dp)
-                .height(240.dp)
-                .clip(RoundedCornerShape(8.dp)),
+                .fillMaxWidth()
+                .height(220.dp),
             contentScale = ContentScale.Crop
         )
-        Icon(
-            Icons.Sharp.FavoriteBorder,
-            contentDescription = "Favorite",
+        Image(
+            painter = painterResource(R.drawable.favicon),
+            contentDescription = "Image",
             modifier = Modifier
-                .align(Alignment.TopEnd).padding(8.dp)
+                .align(Alignment.TopEnd)
+                .padding(8.dp)
         )
+
         Column(
             modifier = Modifier
                 .align(Alignment.BottomStart)
-                .padding(8.dp)
+                .padding(8.dp, top = 16.dp)
             ,
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            
             Text(
                 text = name,
                 style = TextStyle(
@@ -528,21 +552,23 @@ fun ProductRow(modifier: Modifier = Modifier){
 }
 
 @Composable
-fun ProductScreen(modifier: Modifier = Modifier,
-                  paddingValues: PaddingValues = PaddingValues(0.dp),
+fun DrawProductScreenContent(modifier: Modifier = Modifier,
+                  paddingValues: PaddingValues,
                   navController: NavController
 ) {
     Column(
         modifier = modifier
-            .padding(paddingValues),
+            .padding(horizontal = 8.dp, vertical = paddingValues.calculateTopPadding()),
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         LazyColumn(
-            modifier = modifier,
+            modifier = modifier
+                .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
             item {
-                SearchAndFilter(navController = navController)
+                SearchBarRow(navController = navController)
+                Spacer(modifier = Modifier.height(4.dp))
             }
             item {
                 TitleTextRow(content="Categories")
@@ -567,27 +593,67 @@ fun ProductScreen(modifier: Modifier = Modifier,
     }
 }
 
-/*
-@Preview(name="Search And Filter Review", showBackground = true, showSystemUi = true)
 @Composable
-fun GreetingPreview2() {
-    LadosTheme {
-        //SearchAndFilter()
-        //HeaderBanner()
-        //CategoryItem(image=R.drawable.ic_launcher_background, lable="Test")
-        //CategoryTextRow()
-        //Category()
-        //LinkText("ABC", "https://google.com", BrownMaterial, SpanStyle(color= BrownMaterial, textDecoration = TextDecoration.Underline))
-        //TimerBox(content="12")
-        //FlashSaleTitle()
-        //CategoryBox(content="Man")
-        //CategoryFilter()
-        //CategoryFilterItem(content="ABC")
-        //BannerSlider()
+fun ProductScreen(modifier: Modifier = Modifier, navController: NavController, paddingValues: PaddingValues  = PaddingValues(horizontal = 16.dp, vertical = 8.dp)) {
+    Scaffold(
+        modifier = modifier,
+        topBar = {
+            Row(
+                modifier=Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight()
+                    .padding(vertical = 16.dp, horizontal = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                IconButton(onClick = {}) {
+                    Image(
+                        painter = painterResource(R.drawable.ic_launcher_background),
+                        contentDescription = "Back",
+                        modifier = Modifier.clip(CircleShape).size(48.dp)
+                    )
+                }
+
+                Button(
+                    onClick = {},
+                    contentPadding = PaddingValues(horizontal = 8.dp),
+                    colors = ButtonDefaults.buttonColors(MagentaMaterial)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Text(text = "Men", fontWeight = FontWeight.Bold)
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Icon(
+                            Icons.Outlined.KeyboardArrowDown,
+                            contentDescription = null,
+                        )
+                    }
+                }
+
+                IconButton(
+                    onClick = {},
+                    modifier = Modifier.clip(CircleShape).background(MagentaMaterial)
+                        ,
+                ) {
+                    Icon(
+                        Icons.Outlined.ShoppingCart,
+                        contentDescription = "Cart",
+                        tint = WhiteMaterial
+                    )
+                }
+            }
+        }
+    ) {
+        DrawProductScreenContent(
+            modifier = modifier,
+            paddingValues = it,
+            navController = navController
+        )
     }
 }
-*/
-
 @Preview(name="Summary", showBackground = true, showSystemUi = true)
 @Composable
 fun Summary()

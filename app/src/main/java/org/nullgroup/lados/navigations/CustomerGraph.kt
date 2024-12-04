@@ -15,7 +15,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import org.nullgroup.lados.screens.Screen
-import org.nullgroup.lados.screens.customer.FilterScreenDraw
+import org.nullgroup.lados.screens.customer.FilterScreen
 import org.nullgroup.lados.screens.customer.HomeScreen
 import org.nullgroup.lados.screens.customer.MainSearchScreen
 import org.nullgroup.lados.screens.customer.ProductScreen
@@ -69,7 +69,7 @@ fun CustomerGraph(
                         }
 
                         Screen.Customer.FilterScreen.route -> {
-                            FilterScreenDraw(navController = navController, paddingValues = innerPadding)
+                            FilterScreen(navController = navController, paddingValues = innerPadding)
                         }
 
                         Screen.Customer.ChatScreen.route -> {

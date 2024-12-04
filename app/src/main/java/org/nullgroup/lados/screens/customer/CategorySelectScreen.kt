@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -26,14 +27,20 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Favorite
+import androidx.compose.material.icons.outlined.KeyboardArrowDown
+import androidx.compose.material.icons.outlined.ShoppingCart
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -75,6 +82,7 @@ import org.nullgroup.lados.ui.theme.BlackMaterial
 import org.nullgroup.lados.ui.theme.BrownMaterial
 import org.nullgroup.lados.ui.theme.GrayMaterial
 import org.nullgroup.lados.ui.theme.LadosTheme
+import org.nullgroup.lados.ui.theme.MagentaMaterial
 import org.nullgroup.lados.ui.theme.WhiteMaterial
 import java.util.Calendar
 
@@ -93,11 +101,11 @@ fun Title(modifier: Modifier=Modifier, textStyle: TextStyle=TextStyle(
 @Composable
 fun CategoryItemSelect(modifier: Modifier=Modifier, @DrawableRes image: Int, label: String){
     Box(modifier = modifier
-        .clip(RoundedCornerShape(12.dp))
+        .clip(RoundedCornerShape(8.dp))
         .background(GrayMaterial.copy(alpha=0.2f))
         .fillMaxWidth()
         .height(72.dp)
-        .padding(8.dp),
+        .padding(12.dp),
 
     ){
         Row(
@@ -121,8 +129,10 @@ fun CategoryItemSelect(modifier: Modifier=Modifier, @DrawableRes image: Int, lab
 }
 
 @Composable
-fun DrawCategorySelectScreen(modifier: Modifier=Modifier, navController: NavController) {
+fun DrawCategorySelectScreenContent(modifier: Modifier=Modifier, navController: NavController, paddingValues: PaddingValues) {
     Column (
+        modifier = modifier
+            .padding(horizontal = 8.dp, vertical = paddingValues.calculateTopPadding()),
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ){
         Title(content = "Shop by Categories")
@@ -136,10 +146,46 @@ fun DrawCategorySelectScreen(modifier: Modifier=Modifier, navController: NavCont
     }
 }
 
+@Composable
+fun CategorySelectScreen(modifier: Modifier=Modifier, navController: NavController, paddingValues: PaddingValues= PaddingValues(horizontal = 16.dp, vertical = 8.dp)){
+    Scaffold(
+        modifier = modifier,
+        topBar = {
+            Row(
+                modifier=Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight()
+                    .padding(vertical = 16.dp, horizontal = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                IconButton(
+                    onClick = {},
+                    modifier = Modifier.clip(CircleShape)
+                        .background(GrayMaterial.copy(alpha = 0.2f))
+                ) {
+                    Icon(
+                        Icons.Filled.ArrowBack,
+                        contentDescription = "Search",
+                        tint = BlackMaterial
+
+                    )
+                }
+            }
+        }
+    ) {
+        DrawCategorySelectScreenContent(
+            modifier = modifier,
+            paddingValues = it,
+            navController = navController
+        )
+    }
+}
+
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun Review() {
     LadosTheme {
-        DrawCategorySelectScreen(navController = NavController(LocalContext.current))
+        CategorySelectScreen(navController = NavController(LocalContext.current))
     }
 }

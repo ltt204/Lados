@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
@@ -23,22 +24,26 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Build
 import androidx.compose.material.icons.outlined.Done
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
+import androidx.compose.material.icons.outlined.List
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RangeSlider
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
@@ -52,6 +57,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -320,78 +326,107 @@ fun FilterScreenBottom(
 
 
 @Composable
-fun HeaderButton(modifier: Modifier=Modifier) {
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
+fun HeaderButton(modifier: Modifier = Modifier) {
+    LazyRow(
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        modifier = modifier,
+        contentPadding = PaddingValues(horizontal = 4.dp) // Apply padding here
     ) {
-        Button(onClick = {},
-            contentPadding = PaddingValues(4.dp),
-            colors = ButtonDefaults.buttonColors(MagentaMaterial)
-        )
-        {
-            Icon(
-                Icons.Outlined.Build,
-                contentDescription = null,
-            )
-            Spacer(modifier = Modifier.width(4.dp))
-            Text(text = "2")
-        }
-
-        Button(onClick = {},
-            contentPadding = PaddingValues(4.dp),
-            colors = ButtonDefaults.buttonColors(MagentaMaterial)
-        ) {
-            Text(text = "On Sale")
-
-        }
-
-        Button(onClick = {},
-            contentPadding = PaddingValues(4.dp),
-            colors = ButtonDefaults.buttonColors(MagentaMaterial)
-        ) {
-            Text(text = "Price")
-            Spacer(modifier = Modifier.width(4.dp))
-            Icon(
-                Icons.Outlined.KeyboardArrowDown,
-                contentDescription = null,
-            )
-        }
-
-        Button(onClick = {},
-            contentPadding = PaddingValues(4.dp),
-            colors = ButtonDefaults.buttonColors(MagentaMaterial)
-        ) {
-            Text(text = "Sort by")
-            Spacer(modifier = Modifier.width(4.dp))
-            Icon(
-                Icons.Outlined.KeyboardArrowDown,
-                contentDescription = null,
-            )
-        }
-
-        Button(onClick = {},
-            contentPadding = PaddingValues(4.dp),
-            colors = ButtonDefaults.buttonColors(MagentaMaterial)
-        ) {
-            Text(text = "Men")
-            Spacer(modifier = Modifier.width(4.dp))
-            Icon(
-                Icons.Outlined.KeyboardArrowDown,
-                contentDescription = null,
-            )
+        items(5) { index -> // Use items() for better readability
+            when (index) {
+                0 -> FilterButton(text = "2", icon = Icons.Outlined.List, contentDescription = "Build Filter")
+                1 -> FilterButton(text = "On Sale", contentDescription = "On Sale Filter")
+                2 -> FilterButton(text = "Price", icon = Icons.Outlined.KeyboardArrowDown, contentDescription = "Price Sort")
+                3 -> FilterButton(text = "Sort by", icon = Icons.Outlined.KeyboardArrowDown, contentDescription = "Sort by")
+                4 -> FilterButton(text = "Men", icon = Icons.Outlined.KeyboardArrowDown, contentDescription = "Men's Filter")
+            }
         }
     }
 }
 
 @Composable
-fun FilterScreenDraw(modifier: Modifier=Modifier, navController: NavController, paddingValues: PaddingValues) {
+fun FilterButton(
+    text: String,
+    icon: ImageVector? = null,
+    contentDescription: String? = null,
+    modifier: Modifier = Modifier
+) {
+    Button(
+        onClick = { /* TODO */ },
+        modifier = modifier,
+        colors = ButtonDefaults.buttonColors(
+            MagentaMaterial),
+        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            modifier=Modifier.padding(horizontal = 4.dp)
+        ) {
+            Text(text = text)
+            if (icon != null) {
+                Icon(icon, contentDescription = contentDescription, modifier = Modifier.size(28.dp))
+                Spacer(modifier = Modifier.width(4.dp))
+            }
+        }
+    }
+}
+@Composable
+fun FilterScreen(modifier: Modifier=Modifier, navController: NavController, paddingValues: PaddingValues= PaddingValues(horizontal = 16.dp, vertical = 8.dp)) {
+    Scaffold(
+        modifier = modifier,
+        topBar = {
+            Row(
+                modifier= Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight()
+                    .padding(vertical = 16.dp, horizontal = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                IconButton(
+                    onClick = {},
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .background(GrayMaterial.copy(alpha = 0.2f))
+                ) {
+                    Icon(
+                        Icons.Filled.ArrowBack,
+                        contentDescription = "Search",
+                        tint = BlackMaterial
+
+                    )
+                }
+                Spacer(modifier = Modifier.width(16.dp))
+                SearchBar(modifier=Modifier.fillMaxWidth(), navController=navController, onSearch = {})
+            }
+        }
+    ) {
+        DrawFilterScreenContent(
+            modifier = modifier,
+            paddingValues = it,
+            navController = navController,
+        )
+    }
+}
+
+
+@Composable
+fun DrawFilterScreenContent(modifier: Modifier=Modifier, navController: NavController, paddingValues: PaddingValues) {
     Column(
         modifier = modifier
-            .padding(paddingValues),
+            .padding(
+                horizontal = 8.dp,
+                vertical = paddingValues.calculateTopPadding()
+            ),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        HeaderButton()
-        DrawProductInCategoryScreen(navController = navController, content = "63 Results Found", textStyle = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.SemiBold))
+        DrawProductInCategoryScreenContent(
+            navController = navController,
+            content = "63 Results Found",
+            textStyle = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.SemiBold),
+            paddingValues = PaddingValues(horizontal = 8.dp)
+        )
         //FilterMenuSelection(title = "Test", options = listOf("Option 1", "Option 2", "Option 3"), onSelectionChanged = {})
     }
 }
@@ -406,7 +441,7 @@ fun FilterMenuSelection(
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
-            .background(GrayMaterial.copy(alpha=0.2f))
+            .background(GrayMaterial.copy(alpha = 0.2f))
             .padding(vertical = 24.dp, horizontal = 16.dp)
     ) {
         Column(
@@ -463,6 +498,6 @@ fun FilterMenuSelection(
 @Composable
 fun GreetingPreview() {
     LadosTheme {
-        FilterScreenDraw(navController = NavController(LocalContext.current), paddingValues = PaddingValues())
+        FilterScreen(navController = NavController(LocalContext.current))
     }
 }
