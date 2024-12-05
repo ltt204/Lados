@@ -24,6 +24,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -69,7 +70,10 @@ import androidx.compose.ui.text.withLink
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.HorizontalPagerIndicator
@@ -77,6 +81,7 @@ import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.yield
 import org.nullgroup.lados.R
+import org.nullgroup.lados.data.models.Category
 import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.ui.theme.BlackMaterial
 import org.nullgroup.lados.ui.theme.BrownMaterial
@@ -84,6 +89,7 @@ import org.nullgroup.lados.ui.theme.GrayMaterial
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.ui.theme.MagentaMaterial
 import org.nullgroup.lados.ui.theme.WhiteMaterial
+import org.nullgroup.lados.viewmodels.HomeViewModel
 import java.util.Calendar
 
 @Composable
@@ -99,7 +105,7 @@ fun Title(modifier: Modifier=Modifier, textStyle: TextStyle=TextStyle(
 }
 
 @Composable
-fun CategoryItemSelect(modifier: Modifier=Modifier, @DrawableRes image: Int, label: String){
+fun CategoryItemSelect(modifier: Modifier=Modifier, category: Category){
     Box(modifier = modifier
         .clip(RoundedCornerShape(8.dp))
         .background(GrayMaterial.copy(alpha=0.2f))
@@ -113,11 +119,12 @@ fun CategoryItemSelect(modifier: Modifier=Modifier, @DrawableRes image: Int, lab
             verticalAlignment = Alignment.CenterVertically,
 
         ){
-            Image(
-                painter = painterResource(image), contentDescription = null,
+            AsyncImage(
+                model=category.categoryImage,
+                contentDescription = null,
             )
             Text(
-                text = label,
+                text = category.categoryName,
                 style = TextStyle(
                     fontSize = 16.sp,
                     fontWeight = FontWeight.SemiBold,
@@ -129,18 +136,19 @@ fun CategoryItemSelect(modifier: Modifier=Modifier, @DrawableRes image: Int, lab
 }
 
 @Composable
-fun DrawCategorySelectScreenContent(modifier: Modifier=Modifier, navController: NavController, paddingValues: PaddingValues) {
-    Column (
+fun DrawCategorySelectScreenContent(modifier: Modifier=Modifier, viewModel: HomeViewModel= hiltViewModel(), navController: NavController, paddingValues: PaddingValues) {
+    val categories = viewModel.categories.collectAsStateWithLifecycle()
+    Column(
         modifier = modifier
             .padding(horizontal = 8.dp, vertical = paddingValues.calculateTopPadding()),
         verticalArrangement = Arrangement.spacedBy(24.dp)
-    ){
+    ) {
         Title(content = "Shop by Categories")
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            items(20) { item ->
-                CategoryItemSelect(image = R.drawable.ic_launcher_background, label = "Category $item")
+            items(categories.value) { category ->
+                CategoryItemSelect(category = category)
             }
         }
     }

@@ -66,6 +66,8 @@ import androidx.compose.ui.text.withLink
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
@@ -80,10 +82,18 @@ import org.nullgroup.lados.ui.theme.BrownMaterial
 import org.nullgroup.lados.ui.theme.GrayMaterial
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.ui.theme.WhiteMaterial
+import org.nullgroup.lados.viewmodels.HomeViewModel
 import java.util.Calendar
 
 @Composable
-fun DrawProductInCategoryScreenContent(modifier: Modifier=Modifier, navController: NavController, content: String, textStyle: TextStyle=TextStyle(fontSize = 20.sp, fontWeight = FontWeight.Bold), paddingValues: PaddingValues) {
+fun DrawProductInCategoryScreenContent(
+    modifier: Modifier=Modifier,
+    navController: NavController,
+    content: String,
+    textStyle: TextStyle=TextStyle(fontSize = 20.sp, fontWeight = FontWeight.Bold),
+    paddingValues: PaddingValues, viewModel: HomeViewModel= hiltViewModel()
+) {
+    val products = viewModel.products.collectAsStateWithLifecycle()
     Column(
         modifier = modifier.padding(
             horizontal = 8.dp,
@@ -98,12 +108,9 @@ fun DrawProductInCategoryScreenContent(modifier: Modifier=Modifier, navControlle
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            items(10) { item ->
+            items(products.value.size) { item ->
                 ProductItem(
-
-                    name = "Product $item",
-                    salePrice = "100",
-                    initialledPrice = "200"
+                    product = products.value[item],
                 )
             }
         }
@@ -111,7 +118,7 @@ fun DrawProductInCategoryScreenContent(modifier: Modifier=Modifier, navControlle
 }
 
 @Composable
-fun ProductInCategoryScreen(modifier: Modifier=Modifier, navController: NavController, content: String, paddingValues: PaddingValues= PaddingValues(horizontal = 16.dp, vertical = 8.dp)){
+fun ProductInCategoryScreen(modifier: Modifier=Modifier, navController: NavController, paddingValues: PaddingValues= PaddingValues(horizontal = 16.dp, vertical = 8.dp)){
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -142,7 +149,7 @@ fun ProductInCategoryScreen(modifier: Modifier=Modifier, navController: NavContr
             modifier = modifier,
             paddingValues = it,
             navController = navController,
-            content = content
+            content = "Hoodies (240)"
         )
     }
 }
@@ -151,6 +158,6 @@ fun ProductInCategoryScreen(modifier: Modifier=Modifier, navController: NavContr
 @Composable
 fun ReviewProductInCategoryScreen() {
     LadosTheme {
-        ProductInCategoryScreen(navController = NavController(LocalContext.current),content="Hoodies (230)")
+        ProductInCategoryScreen(navController = NavController(LocalContext.current))
     }
 }

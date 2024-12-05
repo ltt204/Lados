@@ -15,16 +15,19 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import org.nullgroup.lados.screens.Screen
+import org.nullgroup.lados.screens.customer.CategorySelectScreen
+import org.nullgroup.lados.screens.customer.Error_FindNotMatchScreen
 import org.nullgroup.lados.screens.customer.FilterScreen
 import org.nullgroup.lados.screens.customer.HomeScreen
-import org.nullgroup.lados.screens.customer.MainSearchScreen
+import org.nullgroup.lados.screens.customer.ProductInCategoryScreen
 import org.nullgroup.lados.screens.customer.ProductScreen
+import org.nullgroup.lados.screens.customer.SearchScreen
 
 @Composable
 fun CustomerGraph(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
-    startDestination: String = Screen.Customer.HomeScreen.route
+    startDestination: String = Screen.Customer.Home.route
 ) {
     Scaffold(
         bottomBar = {
@@ -56,20 +59,37 @@ fun CustomerGraph(
             Screen.Customer.getAllScreens().forEach { screen ->
                 composable(screen.route) {
                     when (screen.route) {
+                        Screen.Customer.CategorySelectScreen.route -> {
+                            CategorySelectScreen(navController = navController, paddingValues = innerPadding)
+                        }
+
                         Screen.Customer.Home.route -> {
                             ProductScreen(navController = navController, paddingValues = innerPadding)
                         }
 
                         Screen.Customer.SearchScreen.route -> {
-                            MainSearchScreen(navController = navController, paddingValues = innerPadding)
+                            SearchScreen(navController = navController, paddingValues = innerPadding)
                         }
 
                         Screen.Customer.HomeScreen.route -> {
-                            HomeScreen(navController = navController, paddingValues = innerPadding)
+                            HomeScreen(
+                                navController = navController,
+                                paddingValues = innerPadding,
+                            )
                         }
 
                         Screen.Customer.FilterScreen.route -> {
                             FilterScreen(navController = navController, paddingValues = innerPadding)
+                        }
+
+
+
+                        Screen.Customer.DisplayProductInCategory.route -> {
+                            ProductInCategoryScreen(navController = navController, paddingValues = innerPadding)
+                        }
+
+                        Screen.Customer.ErrorFindNotMatched.route -> {
+                            Error_FindNotMatchScreen(navController = navController, paddingValues = innerPadding)
                         }
 
                         Screen.Customer.ChatScreen.route -> {

@@ -8,13 +8,16 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.nullgroup.lados.data.models.Category
+import org.nullgroup.lados.data.models.Product
 import org.nullgroup.lados.data.repositories.interfaces.CategoryRepository
+import org.nullgroup.lados.data.repositories.interfaces.ProductRepository
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val categoryRepository: CategoryRepository
-): ViewModel(){
+    private val categoryRepository: CategoryRepository,
+    private val productRepository: ProductRepository
+): ViewModel() {
     private val _categories = MutableStateFlow<List<Category>>(mutableListOf())
     val categories = _categories.asStateFlow()
 
@@ -24,6 +27,9 @@ class HomeViewModel @Inject constructor(
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
 
+    private val _products = MutableStateFlow<List<Product>>(mutableListOf())
+    val products = _products.asStateFlow()
+
     init {
         viewModelScope.launch {
             fetchCategories()
@@ -31,15 +37,16 @@ class HomeViewModel @Inject constructor(
     }
 
     private suspend fun fetchCategories() {
-        _isLoading.value=true
-        val result=categoryRepository.getAllCategoriesFromFireStore()
-        _isLoading.value=false
+        _isLoading.value = true
+        val getCategoriesResult = categoryRepository.getAllCategoriesFromFireStore()
+        val getProductsResult = productRepository.getAllProductsFromFireStore()
+        _isLoading.value = false
 
-        if (result.isFailure){
-            _error.value=result.exceptionOrNull()?.message
+        if (getCategoriesResult.isFailure) {
+            _error.value = getCategoriesResult.exceptionOrNull()?.message
             return
         }
-        _categories.value=result.getOrNull() ?: emptyList()
-
+        _categories.value = getCategoriesResult.getOrNull() ?: emptyList()
+        _products.value = getProductsResult.getOrNull() ?: emptyList()
     }
 }

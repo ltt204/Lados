@@ -23,11 +23,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Close
@@ -35,11 +37,13 @@ import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -92,18 +96,17 @@ fun SearchBarSearchScreen(modifier: Modifier=Modifier) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {
-
         OutlinedTextField(
-            value = "", // Set initial value to empty for placeholder to be visible
+            value = "",
             onValueChange = {},
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(50)),
             singleLine = true,
-            placeholder = { Text("Search") }, // Add placeholder
+            placeholder = { Text("Search") },
             leadingIcon = {
                 Icon(
-                    imageVector = Icons.Filled.Search, // Replace with your desired icon
+                    imageVector = Icons.Filled.Search,
                     contentDescription = "Search"
                 )
             },
@@ -122,18 +125,12 @@ fun SearchBarSearchScreen(modifier: Modifier=Modifier) {
 fun SearchHeaderSearchScreen(modifier: Modifier=Modifier) {
     Row(
         modifier = modifier
+            .fillMaxWidth()
         ,
-        horizontalArrangement = Arrangement.Center,
+        horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = "Recent", style = TextStyle(
-                fontSize = 24.sp,
-                color = BrownMaterial
-            )
-        )
-        Spacer(Modifier.weight(1f))
-        LinkText("Clear all", "https://google.com", BrownMaterial, SpanStyle(color= BrownMaterial, fontSize = 18.sp))
+        TitleTextRow(contentLeft = "Search", contentRight = "Clear")
     }
 }
 
@@ -186,34 +183,61 @@ fun SearchHistory(modifier: Modifier=Modifier){
 }
 
 @Composable
-fun MainSearchScreen(modifier: Modifier=Modifier, navController: NavController, paddingValues: PaddingValues) {
+fun DrawMainSearchScreenContent(modifier: Modifier=Modifier, navController: NavController, paddingValues: PaddingValues= PaddingValues(horizontal = 16.dp, vertical = 8.dp)) {
     Column(
         modifier = modifier
             .fillMaxWidth()
             .fillMaxHeight()
-            .padding(paddingValues),
+            .padding(
+                horizontal = 8.dp,
+                vertical = paddingValues.calculateTopPadding()
+            ),
     ) {
-        SearchBarSearchScreen()
-        Spacer(Modifier.height(16.dp))
-
         SearchHeaderSearchScreen()
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(4.dp))
         HorizontalDivider(modifier = Modifier
             .fillMaxWidth(),
-
             color=GrayMaterial.copy(alpha=0.3f)
         )
-        Spacer(Modifier.height(16.dp))
         SearchHistory()
     }
 }
 
-//@Preview(name="Search And Filter Review", showBackground = true, showSystemUi = true)
-//@Composable
-//fun GreetingPreview2() {
-//    LadosTheme {
-//        //SearchHeaderSearchScreen()
-//        //SearchHistory()
-//        MainSearchScreen()
-//    }
-//}
+@Composable
+fun SearchScreen(modifier: Modifier = Modifier, navController: NavController, paddingValues: PaddingValues  = PaddingValues(horizontal = 16.dp, vertical = 8.dp)) {
+    Scaffold(
+        modifier = modifier,
+        topBar = {
+            Row(
+                modifier= Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight()
+                    .padding(vertical = 16.dp, horizontal = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                IconButton(
+                    onClick = {},
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .background(GrayMaterial.copy(alpha = 0.2f))
+                ) {
+                    Icon(
+                        Icons.Filled.ArrowBack,
+                        contentDescription = "Search",
+                        tint = BlackMaterial
+
+                    )
+                }
+                Spacer(modifier = Modifier.width(16.dp))
+                SearchBar(modifier=Modifier.fillMaxWidth(), navController=navController, onSearch = {})
+            }
+        }
+    ) {
+        DrawMainSearchScreenContent(
+            modifier = modifier,
+            paddingValues = it,
+            navController = navController,
+        )
+    }
+}
