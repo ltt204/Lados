@@ -29,12 +29,18 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ModalBottomSheetLayout
+import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.TextButton
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.outlined.Done
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.ShoppingCart
+import androidx.compose.material.rememberModalBottomSheetState
+import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -65,6 +71,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withLink
@@ -75,11 +82,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.HorizontalPager
-import com.google.accompanist.pager.HorizontalPagerIndicator
-import com.google.accompanist.pager.rememberPagerState
+
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.yield
 import org.nullgroup.lados.R
 import org.nullgroup.lados.data.models.Category
@@ -92,6 +97,7 @@ import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.ui.theme.MagentaMaterial
 import org.nullgroup.lados.ui.theme.WhiteMaterial
 import org.nullgroup.lados.viewmodels.HomeViewModel
+import org.nullgroup.lados.viewmodels.SharedViewModel
 import java.util.Calendar
 
 @Composable
@@ -201,7 +207,12 @@ fun TitleTextRow(modifier: Modifier=Modifier, contentLeft: String, contentRight:
 }
 
 @Composable
-fun CategoryItems(modifier: Modifier=Modifier, viewModel: HomeViewModel= hiltViewModel()) {
+fun CategoryItems(
+    modifier: Modifier=Modifier,
+    viewModel: HomeViewModel= hiltViewModel(),
+    sharedViewModel: SharedViewModel,
+    navController: NavController
+) {
     val categories = viewModel.categories.collectAsStateWithLifecycle()
     LazyRow(
         modifier = modifier,
@@ -210,26 +221,15 @@ fun CategoryItems(modifier: Modifier=Modifier, viewModel: HomeViewModel= hiltVie
     ) {
         items(categories.value)
         { category ->
-            CategoryItem(category=category)
+            CategoryItem(
+                category=category,
+                modifier=Modifier.clickable {
+                    sharedViewModel.updateComplexData(category)
+                    navController.navigate(Screen.Customer.DisplayProductInCategory.route)
+                })
         }
     }
 
-}
-
-@Composable
-fun LinkText(content: String? = null, url: String, color: Color, style: SpanStyle) {
-    Text(
-        buildAnnotatedString {
-            withLink(
-                LinkAnnotation.Url(
-                    url,
-                    TextLinkStyles(style = style)
-                )
-            ) {
-                append(content)
-            }
-        }
-    )
 }
 
 @Composable
@@ -329,9 +329,11 @@ fun ProductRow(modifier: Modifier = Modifier, viewModel: HomeViewModel = hiltVie
 }
 
 @Composable
-fun DrawProductScreenContent(modifier: Modifier = Modifier,
-                  paddingValues: PaddingValues,
-                  navController: NavController
+fun DrawProductScreenContent(
+    modifier: Modifier = Modifier,
+    paddingValues: PaddingValues,
+    navController: NavController,
+    sharedViewModel: SharedViewModel
 ) {
     Column(
         modifier = modifier
@@ -342,7 +344,7 @@ fun DrawProductScreenContent(modifier: Modifier = Modifier,
             modifier = modifier
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
+        ) {
             item {
                 SearchBarRow(navController = navController)
                 Spacer(modifier = Modifier.height(4.dp))
@@ -359,7 +361,7 @@ fun DrawProductScreenContent(modifier: Modifier = Modifier,
                 )
             }
             item {
-                CategoryItems()
+                CategoryItems(sharedViewModel = sharedViewModel, navController = navController)
             }
             item {
                 TitleTextRow(contentLeft = "Top Selling", contentRight = "See all")
@@ -382,65 +384,172 @@ fun DrawProductScreenContent(modifier: Modifier = Modifier,
     }
 }
 
+
 @Composable
-fun ProductScreen(modifier: Modifier = Modifier, navController: NavController, paddingValues: PaddingValues  = PaddingValues(horizontal = 16.dp, vertical = 8.dp)) {
-    Scaffold(
-        modifier = modifier,
-        topBar = {
+fun BottomSheetContent(modifier: Modifier = Modifier,
+                       title: String,
+                       options: List<String>,
+                       onSelectionChanged: (String) -> Unit ,
+                       paddingValues: PaddingValues,
+                       onCloseClick: () -> Unit) {
+    var selectedButtonIndex by remember { mutableStateOf<Int?>(null) }
+    Box(
+        modifier = Modifier.fillMaxHeight(0.5f)
+            .background(GrayMaterial.copy(alpha = 0.2f))
+            .clip(RoundedCornerShape(16.dp))
+            .padding(start=8.dp, end=8.dp, top=8.dp, bottom = paddingValues.calculateBottomPadding()+8.dp)
+    ) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             Row(
-                modifier=Modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight()
-                    .padding(vertical = 16.dp, horizontal = 8.dp),
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                IconButton(onClick = {}) {
-                    Image(
-                        painter = painterResource(R.drawable.ic_launcher_background),
-                        contentDescription = "Back",
-                        modifier = Modifier.clip(CircleShape).size(48.dp)
-                    )
-                }
 
-                Button(
-                    onClick = {},
-                    contentPadding = PaddingValues(horizontal = 8.dp),
-                    colors = ButtonDefaults.buttonColors(MagentaMaterial)
                 ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        Text(text = "Men", fontWeight = FontWeight.Bold)
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Icon(
-                            Icons.Outlined.KeyboardArrowDown,
-                            contentDescription = null,
-                        )
+                TextButton(
+                    onClick={
+                        selectedButtonIndex=null
                     }
-                }
-
-                IconButton(
-                    onClick = {},
-                    modifier = Modifier.clip(CircleShape).background(MagentaMaterial)
-                        ,
                 ) {
+                    Text("Clear", style = TextStyle(fontSize = 16.sp))
+                }
+                Text(text = title, style = TextStyle(
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold
+                ))
+                IconButton(onClick=onCloseClick) {
                     Icon(
-                        Icons.Outlined.ShoppingCart,
-                        contentDescription = "Cart",
-                        tint = WhiteMaterial
+                        Icons.Filled.Close,
+                        contentDescription = "Close"
                     )
                 }
             }
+            Spacer(modifier = Modifier.height(8.dp))
+            options.forEachIndexed { index, option ->
+                Button(
+                    onClick = {
+                        selectedButtonIndex = index
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth(0.95f)
+                        .height(56.dp),
+                    colors = ButtonDefaults.buttonColors(if (selectedButtonIndex == index) MagentaMaterial else GrayMaterial.copy(alpha=0.3f))
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(0.95f),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = option,
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = if (selectedButtonIndex == index) WhiteMaterial else BlackMaterial
+                        )
+                        if (selectedButtonIndex == index)
+                        Icon(
+                            Icons.Outlined.Done,
+                            contentDescription = null
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+
+@Composable
+fun ProductScreen(modifier: Modifier = Modifier,
+                  navController: NavController,
+                  paddingValues: PaddingValues  = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                  sharedViewModel: SharedViewModel = SharedViewModel()
+) {
+    val sheetState = rememberModalBottomSheetState(
+        initialValue = ModalBottomSheetValue.Hidden
+    )
+    val scope = rememberCoroutineScope()
+
+    ModalBottomSheetLayout(
+        sheetState = sheetState,
+        sheetContent = {
+            BottomSheetContent(
+                title = "Gender",
+                options = listOf("Men", "Women", "kids"),
+                paddingValues = paddingValues,
+                onSelectionChanged = {
+
+                },
+                onCloseClick = {
+                    scope.launch { sheetState.hide() }
+                }
+            )
         }
     ) {
-        DrawProductScreenContent(
+        Scaffold(
             modifier = modifier,
-            paddingValues = it,
-            navController = navController
-        )
+            topBar = {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentHeight()
+                        .padding(vertical = 16.dp, horizontal = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    IconButton(onClick = {}) {
+                        Image(
+                            painter = painterResource(R.drawable.ic_launcher_background),
+                            contentDescription = "Back",
+                            modifier = Modifier.clip(CircleShape).size(48.dp)
+                        )
+                    }
+
+                    Button(
+                        onClick = { scope.launch { sheetState.show() } },
+                        contentPadding = PaddingValues(horizontal = 8.dp),
+                        colors = ButtonDefaults.buttonColors(MagentaMaterial)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Text(text = "Men", fontWeight = FontWeight.Bold)
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Icon(
+                                Icons.Outlined.KeyboardArrowDown,
+                                contentDescription = null,
+                            )
+                        }
+                    }
+
+                    IconButton(
+                        onClick = {},
+                        modifier = Modifier.clip(CircleShape).background(MagentaMaterial),
+                    ) {
+                        Icon(
+                            Icons.Outlined.ShoppingCart,
+                            contentDescription = "Cart",
+                            tint = WhiteMaterial
+                        )
+                    }
+                }
+            }
+        ) {
+            DrawProductScreenContent(
+                modifier = modifier,
+                paddingValues = it,
+                navController = navController,
+                sharedViewModel = sharedViewModel
+            )
+        }
     }
 }
 @Preview(name="Summary", showBackground = true, showSystemUi = true)

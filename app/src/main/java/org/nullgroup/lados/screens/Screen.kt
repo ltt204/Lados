@@ -73,7 +73,7 @@ sealed class Screen(
 
         companion object {
             fun getAllScreens() =
-                listOf(HomeScreen, ChatScreen, Order, Profile, Home, SearchScreen, FilterScreen, CategorySelectScreen, ErrorFindNotMatched, ProductInCategoryScreen)
+                listOf(HomeScreen, ChatScreen, Order, Profile, Home, SearchScreen, FilterScreen, CategorySelectScreen, ErrorFindNotMatched, ProductInCategoryScreen, DisplayProductInCategory)
 
             fun getBaseScreens() = listOf(HomeScreen, ChatScreen, Order, Profile)
         }

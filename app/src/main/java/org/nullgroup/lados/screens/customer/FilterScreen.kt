@@ -75,6 +75,7 @@ import org.nullgroup.lados.ui.theme.MagentaMaterial
 import org.nullgroup.lados.ui.theme.WhiteMaterial
 import org.nullgroup.lados.ui.theme.YellowMaterial
 import org.nullgroup.lados.viewmodels.HomeViewModel
+import org.nullgroup.lados.viewmodels.SharedViewModel
 
 @Composable
 fun Header(modifier: Modifier = Modifier, content: String) {
@@ -211,21 +212,6 @@ fun CustomSlider() {
 }
 
 @Composable
-fun FilterCateRow(modifier: Modifier=Modifier, content: List<String>) {
-    LazyRow(
-        modifier = modifier
-            .fillMaxWidth(),
-        //horizontalArrangement = Arrangement.Absolute.SpaceEvenly,
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-        contentPadding = PaddingValues(4.dp),
-    ) {
-        items(content) { item ->
-            FilterItem(content = item)
-        }
-    }
-}
-
-@Composable
 fun ReviewRow(modifier: Modifier=Modifier, content: String) {
     Row(
         modifier = modifier,
@@ -325,54 +311,10 @@ fun FilterScreenBottom(
 }
 
 
-@Composable
-fun HeaderButton(modifier: Modifier = Modifier) {
-    LazyRow(
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-        modifier = modifier,
-        contentPadding = PaddingValues(horizontal = 4.dp) // Apply padding here
-    ) {
-        items(5) { index -> // Use items() for better readability
-            when (index) {
-                0 -> FilterButton(text = "2", icon = Icons.Outlined.List, contentDescription = "Build Filter")
-                1 -> FilterButton(text = "On Sale", contentDescription = "On Sale Filter")
-                2 -> FilterButton(text = "Price", icon = Icons.Outlined.KeyboardArrowDown, contentDescription = "Price Sort")
-                3 -> FilterButton(text = "Sort by", icon = Icons.Outlined.KeyboardArrowDown, contentDescription = "Sort by")
-                4 -> FilterButton(text = "Men", icon = Icons.Outlined.KeyboardArrowDown, contentDescription = "Men's Filter")
-            }
-        }
-    }
-}
+
 
 @Composable
-fun FilterButton(
-    text: String,
-    icon: ImageVector? = null,
-    contentDescription: String? = null,
-    modifier: Modifier = Modifier
-) {
-    Button(
-        onClick = { /* TODO */ },
-        modifier = modifier,
-        colors = ButtonDefaults.buttonColors(
-            MagentaMaterial),
-        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-            modifier=Modifier.padding(horizontal = 4.dp)
-        ) {
-            Text(text = text)
-            if (icon != null) {
-                Icon(icon, contentDescription = contentDescription, modifier = Modifier.size(28.dp))
-                Spacer(modifier = Modifier.width(4.dp))
-            }
-        }
-    }
-}
-@Composable
-fun FilterScreen(modifier: Modifier=Modifier, navController: NavController, paddingValues: PaddingValues= PaddingValues(horizontal = 16.dp, vertical = 8.dp)) {
+fun FilterScreen(modifier: Modifier=Modifier, navController: NavController, paddingValues: PaddingValues= PaddingValues(horizontal = 16.dp, vertical = 8.dp), sharedViewModel: SharedViewModel = SharedViewModel()) {
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -385,7 +327,7 @@ fun FilterScreen(modifier: Modifier=Modifier, navController: NavController, padd
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 IconButton(
-                    onClick = {},
+                    onClick = { navController.popBackStack() },
                     modifier = Modifier
                         .clip(CircleShape)
                         .background(GrayMaterial.copy(alpha = 0.2f))
@@ -423,9 +365,9 @@ fun DrawFilterScreenContent(modifier: Modifier=Modifier, navController: NavContr
     ) {
         DrawProductInCategoryScreenContent(
             navController = navController,
-            content = "63 Results Found",
             textStyle = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.SemiBold),
-            paddingValues = PaddingValues(horizontal = 8.dp)
+            paddingValues = PaddingValues(horizontal = 8.dp),
+            onButtonClick = {}
         )
         //FilterMenuSelection(title = "Test", options = listOf("Option 1", "Option 2", "Option 3"), onSelectionChanged = {})
     }

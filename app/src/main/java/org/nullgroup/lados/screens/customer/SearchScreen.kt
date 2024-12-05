@@ -66,6 +66,7 @@ import org.nullgroup.lados.ui.theme.BrownMaterial
 import org.nullgroup.lados.ui.theme.GrayMaterial
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.ui.theme.WhiteMaterial
+import org.nullgroup.lados.viewmodels.SharedViewModel
 
 @Composable
 fun NormalTextFieldSearchScreen(
@@ -204,7 +205,7 @@ fun DrawMainSearchScreenContent(modifier: Modifier=Modifier, navController: NavC
 }
 
 @Composable
-fun SearchScreen(modifier: Modifier = Modifier, navController: NavController, paddingValues: PaddingValues  = PaddingValues(horizontal = 16.dp, vertical = 8.dp)) {
+fun SearchScreen(modifier: Modifier = Modifier, navController: NavController, paddingValues: PaddingValues  = PaddingValues(horizontal = 16.dp, vertical = 8.dp), sharedViewModel: SharedViewModel = SharedViewModel()) {
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -217,7 +218,7 @@ fun SearchScreen(modifier: Modifier = Modifier, navController: NavController, pa
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 IconButton(
-                    onClick = {},
+                    onClick = { navController.popBackStack() },
                     modifier = Modifier
                         .clip(CircleShape)
                         .background(GrayMaterial.copy(alpha = 0.2f))

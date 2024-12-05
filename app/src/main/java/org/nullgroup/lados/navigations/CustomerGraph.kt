@@ -8,6 +8,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -22,11 +23,13 @@ import org.nullgroup.lados.screens.customer.HomeScreen
 import org.nullgroup.lados.screens.customer.ProductInCategoryScreen
 import org.nullgroup.lados.screens.customer.ProductScreen
 import org.nullgroup.lados.screens.customer.SearchScreen
+import org.nullgroup.lados.viewmodels.SharedViewModel
 
 @Composable
 fun CustomerGraph(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
+    sharedViewModel: SharedViewModel= hiltViewModel(),
     startDestination: String = Screen.Customer.Home.route
 ) {
     Scaffold(
@@ -60,32 +63,30 @@ fun CustomerGraph(
                 composable(screen.route) {
                     when (screen.route) {
                         Screen.Customer.CategorySelectScreen.route -> {
-                            CategorySelectScreen(navController = navController, paddingValues = innerPadding)
+                            CategorySelectScreen(navController = navController, paddingValues = innerPadding, sharedViewModel = sharedViewModel)
                         }
 
                         Screen.Customer.Home.route -> {
-                            ProductScreen(navController = navController, paddingValues = innerPadding)
+                            ProductScreen(navController = navController, paddingValues = innerPadding, sharedViewModel = sharedViewModel)
                         }
 
                         Screen.Customer.SearchScreen.route -> {
-                            SearchScreen(navController = navController, paddingValues = innerPadding)
+                            SearchScreen(navController = navController, paddingValues = innerPadding, sharedViewModel = sharedViewModel)
                         }
 
                         Screen.Customer.HomeScreen.route -> {
                             HomeScreen(
                                 navController = navController,
-                                paddingValues = innerPadding,
+                                paddingValues = innerPadding, sharedViewModel = sharedViewModel
                             )
                         }
 
                         Screen.Customer.FilterScreen.route -> {
-                            FilterScreen(navController = navController, paddingValues = innerPadding)
+                            FilterScreen(navController = navController, paddingValues = innerPadding, sharedViewModel = sharedViewModel)
                         }
 
-
-
                         Screen.Customer.DisplayProductInCategory.route -> {
-                            ProductInCategoryScreen(navController = navController, paddingValues = innerPadding)
+                            ProductInCategoryScreen(navController = navController, paddingValues = innerPadding, sharedViewModel = sharedViewModel)
                         }
 
                         Screen.Customer.ErrorFindNotMatched.route -> {
