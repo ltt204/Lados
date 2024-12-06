@@ -49,8 +49,27 @@ class LoginScreenViewModel @Inject constructor(
 
     private fun handleEnterEmail(email: String) {
         if (isValidateEmail(email ?: "")) {
-            loginStep.value = LoginScreenStepState.Password(email)
-            loginState.value = ResourceState.Idle
+
+            viewModelScope.launch {
+                when (val state = emailAuth.checkEmailExist(email)) {
+                    is ResourceState.Error -> {
+                        loginState.value = ResourceState.Error(state.message)
+                    }
+
+                    ResourceState.Idle -> {
+
+                    }
+
+                    ResourceState.Loading -> {
+
+                    }
+
+                    is ResourceState.Success -> {
+                        loginStep.value = LoginScreenStepState.Password(email)
+                        loginState.value = ResourceState.Idle
+                    }
+                }
+            }
         } else {
             loginState.value = ResourceState.Error("Invalid email")
         }
@@ -97,6 +116,7 @@ class LoginScreenViewModel @Inject constructor(
                 ).build()
             )
         }
+        loginState.value = ResourceState.Idle
     }
 
     private fun handleSignUp(navController: NavController) {
@@ -112,6 +132,7 @@ class LoginScreenViewModel @Inject constructor(
     fun onGoogleSignInResult(result: ActivityResult) {
 
         viewModelScope.launch {
+            loginState.value = ResourceState.Loading
             loginState.value = googleAuth.signInWithIntent(
                 intent = result.data ?: return@launch
             )

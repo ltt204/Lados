@@ -10,7 +10,10 @@ interface EmailAuthRepository {
         fullName: String,
         email: String,
         password: String,
+        phone: String,
     ): ResourceState<User>
+
     suspend fun signOut(): ResourceState<Boolean>
     suspend fun resetPassword(email: String): ResourceState<Boolean>
+    suspend fun checkEmailExist(email: String): ResourceState<Boolean>
 }

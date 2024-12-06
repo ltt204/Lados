@@ -45,15 +45,15 @@ fun SplashScreen(
     ) {
         Row() {
             Text(
-                text = "C",
+                text = "L",
                 style = LadosTheme.typography.displayLarge.copy(
                     fontWeight = FontWeight.Bold,
                 ),
                 color = LadosTheme.colorScheme.onPrimary,
-                modifier = Modifier.offset(x = -10.dp, y = 5.dp)
+                modifier = Modifier.offset(x = -10.dp, y = 0.dp)
             )
             Text(
-                text = "l",
+                text = "a",
                 style = LadosTheme.typography.displayLarge.copy(
                     fontWeight = FontWeight.Bold,
                 ),
@@ -61,20 +61,28 @@ fun SplashScreen(
                 modifier = Modifier.offset(y = -5.dp),
             )
             Text(
+                text = "d",
+                style = LadosTheme.typography.displayLarge.copy(
+                    fontWeight = FontWeight.Bold,
+                ),
+                color = LadosTheme.colorScheme.onPrimary,
+                modifier = Modifier.offset(x = 10.dp, y = 0.dp)
+            )
+            Text(
                 text = "o",
                 style = LadosTheme.typography.displayLarge.copy(
                     fontWeight = FontWeight.Bold,
                 ),
                 color = LadosTheme.colorScheme.onPrimary,
-                modifier = Modifier.offset(x = 10.dp, y = 5.dp)
+                modifier = Modifier.offset(x = 20.dp, y = -5.dp),
             )
             Text(
-                text = "t",
+                text = "s",
                 style = LadosTheme.typography.displayLarge.copy(
                     fontWeight = FontWeight.Bold,
                 ),
                 color = LadosTheme.colorScheme.onPrimary,
-                modifier = Modifier.offset(x = 20.dp, y = -5.dp),
+                modifier = Modifier.offset(x = 30.dp, y = 0.dp),
             )
         }
     }

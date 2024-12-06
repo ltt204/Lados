@@ -10,6 +10,7 @@ import org.nullgroup.lados.data.repositories.interfaces.EmailAuthRepository
 import org.nullgroup.lados.utilities.EmailValidator
 import org.nullgroup.lados.utilities.NotEmptyValidator
 import org.nullgroup.lados.utilities.PasswordValidator
+import org.nullgroup.lados.utilities.PhoneNumberValidator
 import org.nullgroup.lados.viewmodels.events.RegisterScreenEvent
 import org.nullgroup.lados.viewmodels.states.ResourceState
 import javax.inject.Inject
@@ -36,16 +37,23 @@ class RegisterScreenViewModel @Inject constructor(
         return validator.validate()
     }
 
+    fun validatePhoneNumber(phone: String): Boolean {
+        val validator = PhoneNumberValidator(phone)
+        return validator.validate()
+    }
+
     private fun validateAll(
         firstName: String,
         lastName: String,
         email: String,
         password: String,
+        phone: String,
     ): Boolean {
         val firstNameValidator = NotEmptyValidator(firstName)
             .setNext(NotEmptyValidator(lastName))
             .setNext(EmailValidator(email))
             .setNext(PasswordValidator(password))
+            .setNext(PhoneNumberValidator(phone))
 
         return firstNameValidator.validate()
     }
@@ -55,15 +63,16 @@ class RegisterScreenViewModel @Inject constructor(
         lastName: String,
         email: String,
         password: String,
+        phone: String,
     ) {
-        if (!validateAll(firstName, lastName, email, password)) {
+        if (!validateAll(firstName, lastName, email, password, phone)) {
             registerState.value = ResourceState.Error("Please fill all fields and correct")
             return
         }
 
         viewModelScope.launch {
             try {
-                emailAuth.signUp("$firstName $lastName", email, password).let {
+                emailAuth.signUp("$firstName $lastName", email, password, phone).let {
                     registerState.value = it
                 }
             } catch (e: Exception) {
@@ -89,7 +98,13 @@ class RegisterScreenViewModel @Inject constructor(
 
         when (event) {
             is RegisterScreenEvent.HandleSignUp -> {
-                handleSignUp(event.firstName, event.lastName, event.email, event.password)
+                handleSignUp(
+                    event.firstName,
+                    event.lastName,
+                    event.email,
+                    event.password,
+                    event.phone
+                )
             }
 
             is RegisterScreenEvent.HandleLogin -> {

@@ -296,32 +296,6 @@ fun PasswordScreen(
             )
         }
     }
-
-    val context = LocalContext.current
-    LaunchedEffect(loginState) {
-        when (val state = loginState) {
-            is ResourceState.Error -> {
-                isError = true
-                Toast.makeText(
-                    context,
-                    state.message ?: "Login Failed",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-
-            ResourceState.Idle -> {}
-
-            ResourceState.Loading -> {}
-
-            is ResourceState.Success -> {
-                Toast.makeText(
-                    context,
-                    "Login Success",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-        }
-    }
 }
 
 @Composable
@@ -333,24 +307,27 @@ fun LoginScreen(
     val loginStep by loginScreenViewModel.loginStep.collectAsState()
     val loginState by loginScreenViewModel.loginState.collectAsState()
 
+    val context = LocalContext.current
+
     BackHandler(enabled = loginStep is LoginScreenStepState.Password) {
         loginScreenViewModel.onBackPressed()
     }
 
-    when (val state = loginState) {
-        is ResourceState.Error -> {
-            val message = state.message ?: "Login Failed"
-            Toast.makeText(LocalContext.current, message, Toast.LENGTH_SHORT).show()
-        }
+    LaunchedEffect(loginState) {
+        when (val state = loginState) {
+            is ResourceState.Error -> {
+                val message = state.message ?: "Login Failed"
+                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+            }
 
-        ResourceState.Idle -> {}
+            ResourceState.Idle -> {}
 
-        ResourceState.Loading -> {
-            LoadingScreen(modifier)
-        }
+            ResourceState.Loading -> {
+            }
 
-        is ResourceState.Success -> {
-            Toast.makeText(LocalContext.current, "Login Success", Toast.LENGTH_SHORT).show()
+            is ResourceState.Success -> {
+                Toast.makeText(context, "Login Success", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -379,5 +356,9 @@ fun LoginScreen(
                 }
             }
         }
+    }
+
+    if (loginState is ResourceState.Loading) {
+        LoadingScreen(modifier)
     }
 }

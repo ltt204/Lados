@@ -54,40 +54,32 @@ fun RegisterScreen(
     val registerState by registerViewModel.registerState.collectAsState()
     val context = LocalContext.current
 
-    when (val state = registerState) {
-        is ResourceState.Error -> {
-            RegisterInputScreen(navController, modifier)
-            Toast.makeText(context, state.message, Toast.LENGTH_SHORT).show()
-        }
+    LaunchedEffect(registerState) {
+        when (val state = registerState) {
+            is ResourceState.Error -> {
+                Toast.makeText(context, state.message, Toast.LENGTH_SHORT).show()
+            }
 
-        ResourceState.Idle -> {
-            RegisterInputScreen(navController, modifier)
-        }
+            ResourceState.Idle -> {
 
-        ResourceState.Loading -> {
-            RegisterInputScreen(navController, modifier)
-            LoadingScreen(modifier = Modifier.fillMaxSize())
-        }
+            }
 
-        is ResourceState.Success -> {
-            Toast.makeText(context, "You create account successful", Toast.LENGTH_SHORT).show()
+            ResourceState.Loading -> {
 
-            val userRole = (registerState as ResourceState.Success).data?.role
+            }
 
-            when (userRole) {
-                UserRole.CUSTOMER.name -> {
-                    CustomerGraph()
-                }
+            is ResourceState.Success -> {
+                Toast.makeText(context, "You create account successful", Toast.LENGTH_SHORT).show()
 
-                UserRole.ADMIN.name -> {
-                    AdminGraph()
-                }
-
-                UserRole.STAFF.name -> {
-                    StaffGraph()
-                }
+                navController.navigate("login")
             }
         }
+    }
+
+    RegisterInputScreen(navController, modifier)
+
+    if (registerState is ResourceState.Loading) {
+        LoadingScreen(modifier = Modifier.fillMaxSize())
     }
 
 }
@@ -96,41 +88,26 @@ fun RegisterScreen(
 fun RegisterInputScreen(navController: NavController, modifier: Modifier = Modifier) {
 
     val registerViewModel = hiltViewModel<RegisterScreenViewModel>()
-    val registerState by registerViewModel.registerState.collectAsState()
 
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var phone by remember { mutableStateOf("") }
 
     var firstNameError by remember { mutableStateOf(false) }
     var lastNameError by remember { mutableStateOf(false) }
     var emailError by remember { mutableStateOf(false) }
     var passwordError by remember { mutableStateOf(false) }
+    var phoneError by remember { mutableStateOf(false) }
 
     var firstNameTouched by remember { mutableStateOf(false) }
     var lastNameTouched by remember { mutableStateOf(false) }
     var emailTouched by remember { mutableStateOf(false) }
     var passwordTouched by remember { mutableStateOf(false) }
+    var phoneTouched by remember { mutableStateOf(false) }
 
     val focusManager = LocalFocusManager.current
-
-
-    LaunchedEffect(registerState) {
-        when (registerState) {
-            is ResourceState.Error -> {}
-            ResourceState.Idle -> {}
-            ResourceState.Loading -> {}
-            is ResourceState.Success -> {
-                registerViewModel.handleEvent(
-                    RegisterScreenEvent.HandleLogin(
-                        email,
-                        password,
-                    )
-                )
-            }
-        }
-    }
 
     Column(
         modifier = modifier
@@ -322,6 +299,51 @@ fun RegisterInputScreen(navController: NavController, modifier: Modifier = Modif
             )
         }
 
+        Spacer(modifier = Modifier.height(16.dp))
+
+        CustomTextField(
+            label = "Phone number",
+            text = phone,
+            onValueChange = {
+                phone = it
+                phoneTouched = true
+                if (phoneError && registerViewModel.validatePhoneNumber(it)) {
+                    phoneError = false
+                }
+            },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Phone,
+                imeAction = ImeAction.Done,
+            ),
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    focusManager.clearFocus()
+                    if (!registerViewModel.validatePhoneNumber(phone)) {
+                        phoneError = true
+                    } else {
+                        phoneError = false
+                    }
+                }
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .onFocusChanged {
+                    if (!phoneTouched) return@onFocusChanged
+                    if (!it.isFocused) {
+                        phoneError = !registerViewModel.validatePhoneNumber(phone)
+                    }
+                },
+            isError = phoneError,
+        )
+
+        if (phoneError) {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Phone must be number",
+                color = LadosTheme.colorScheme.error,
+            )
+        }
+
         Spacer(modifier = Modifier.height(32.dp))
 
         ButtonSubmit(
@@ -339,6 +361,7 @@ fun RegisterInputScreen(navController: NavController, modifier: Modifier = Modif
                             lastName,
                             email,
                             password,
+                            phone,
                         )
                     )
                 }

@@ -2,6 +2,7 @@ package org.nullgroup.lados.data.repositories.implementations
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import org.nullgroup.lados.data.models.User
 import org.nullgroup.lados.data.models.UserRole
@@ -33,10 +34,30 @@ class EmailAuthRepositoryImpl(
         }
     }
 
+    override suspend fun checkEmailExist(email: String): ResourceState<Boolean> {
+        var result: ResourceState<Boolean> = ResourceState.Loading
+
+        auth.fetchSignInMethodsForEmail(email).addOnCompleteListener {
+            if (it.isSuccessful) {
+                val signInMethods = it.result?.signInMethods
+                if (signInMethods.isNullOrEmpty()) {
+                    result = ResourceState.Error("Email not exist")
+                } else {
+                    result = ResourceState.Success(true)
+                }
+            } else {
+                result = ResourceState.Error(it.exception?.message)
+            }
+        }
+
+        return result
+    }
+
     override suspend fun signUp(
         fullName: String,
         email: String,
         password: String,
+        phone: String,
     ): ResourceState<User> {
         return try {
             val result = auth.createUserWithEmailAndPassword(email, password).await()
@@ -48,8 +69,8 @@ class EmailAuthRepositoryImpl(
                 email = email,
                 name = fullName,
                 role = UserRole.CUSTOMER.name,
-                phoneNumber = result.user?.phoneNumber ?: "",
-                photoUrl = result.user?.photoUrl.toString(),
+                phoneNumber = phone,
+                photoUrl = result.user?.photoUrl?.toString() ?: "",
                 provider = result.user?.providerId ?: "",
             )
             val token = result.user?.getIdToken(true)?.await()?.token

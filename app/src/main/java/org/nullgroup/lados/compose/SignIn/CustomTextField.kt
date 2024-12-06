@@ -36,14 +36,7 @@ fun CustomTextField(
             Text(
                 text = label,
                 style = LadosTheme.typography.bodyLarge,
-                color = LadosTheme.colorScheme.onBackground
-            )
-        },
-        placeholder = {
-            Text(
-                text = label,
-                style = LadosTheme.typography.titleMedium,
-                color = LadosTheme.colorScheme.onBackground
+                color = LadosTheme.colorScheme.onBackground,
             )
         },
         textStyle = LadosTheme.typography.titleMedium,
