@@ -38,6 +38,7 @@ class ForgotPasswordScreenViewModel @Inject constructor(
 
     private fun handleReturnToLogin(navController: NavController) {
         navController.navigate("login")
+        navController.popBackStack()
         forgotPasswordState.value = ResourceState.Idle
     }
 

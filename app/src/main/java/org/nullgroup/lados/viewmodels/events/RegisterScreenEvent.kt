@@ -1,5 +1,7 @@
 package org.nullgroup.lados.viewmodels.events
 
+import androidx.navigation.NavController
+
 
 sealed class RegisterScreenEvent {
     data class HandleSignUp(
@@ -9,8 +11,5 @@ sealed class RegisterScreenEvent {
         val password: String,
         val phone: String,
     ) : RegisterScreenEvent()
-    data class HandleLogin(
-        val email: String,
-        val password: String,
-    ) : RegisterScreenEvent()
+    data class HandleBackLogin(val navController: NavController): RegisterScreenEvent()
 }

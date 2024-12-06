@@ -2,6 +2,7 @@ package org.nullgroup.lados.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavController
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -12,6 +13,7 @@ import org.nullgroup.lados.utilities.NotEmptyValidator
 import org.nullgroup.lados.utilities.PasswordValidator
 import org.nullgroup.lados.utilities.PhoneNumberValidator
 import org.nullgroup.lados.viewmodels.events.RegisterScreenEvent
+import org.nullgroup.lados.viewmodels.states.RegisterScreenStepState
 import org.nullgroup.lados.viewmodels.states.ResourceState
 import javax.inject.Inject
 
@@ -20,6 +22,9 @@ class RegisterScreenViewModel @Inject constructor(
     private val emailAuth: EmailAuthRepository,
 ) : ViewModel() {
     var registerState = MutableStateFlow<ResourceState<User>>(ResourceState.Idle)
+        private set
+    var registerStepState =
+        MutableStateFlow<RegisterScreenStepState>(RegisterScreenStepState.EnterInfo)
         private set
 
     fun validateNotEmpty(data: String): Boolean {
@@ -74,6 +79,14 @@ class RegisterScreenViewModel @Inject constructor(
             try {
                 emailAuth.signUp("$firstName $lastName", email, password, phone).let {
                     registerState.value = it
+                    when (it) {
+                        is ResourceState.Error -> {}
+                        ResourceState.Idle -> {}
+                        ResourceState.Loading -> {}
+                        is ResourceState.Success -> {
+                            registerStepState.value = RegisterScreenStepState.Notification(email)
+                        }
+                    }
                 }
             } catch (e: Exception) {
                 registerState.value = ResourceState.Error(e.message)
@@ -81,16 +94,10 @@ class RegisterScreenViewModel @Inject constructor(
         }
     }
 
-    private fun handleLogin(email: String, password: String) {
-        viewModelScope.launch {
-            try {
-                emailAuth.signIn(email, password).let {
-                    registerState.value = it
-                }
-            } catch (e: Exception) {
-                registerState.value = ResourceState.Error(e.message)
-            }
-        }
+    private fun handleBackLogin(navController: NavController) {
+        registerStepState.value = RegisterScreenStepState.BackLogin
+        navController.popBackStack()
+        navController.navigate("login")
     }
 
     fun handleEvent(event: RegisterScreenEvent) {
@@ -107,8 +114,8 @@ class RegisterScreenViewModel @Inject constructor(
                 )
             }
 
-            is RegisterScreenEvent.HandleLogin -> {
-                handleLogin(event.email, event.password)
+            is RegisterScreenEvent.HandleBackLogin -> {
+                handleBackLogin(event.navController)
             }
         }
     }

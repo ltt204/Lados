@@ -1,8 +1,11 @@
 package org.nullgroup.lados.data.repositories.implementations
 
+import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.tasks.await
 import org.nullgroup.lados.data.models.User
 import org.nullgroup.lados.data.models.UserRole
@@ -10,6 +13,8 @@ import org.nullgroup.lados.data.repositories.interfaces.EmailAuthRepository
 import org.nullgroup.lados.data.repositories.interfaces.SharedPreferencesRepository
 import org.nullgroup.lados.data.repositories.interfaces.UserRepository
 import org.nullgroup.lados.viewmodels.states.ResourceState
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 
 class EmailAuthRepositoryImpl(
@@ -22,6 +27,11 @@ class EmailAuthRepositoryImpl(
     override suspend fun signIn(email: String, password: String): ResourceState<User> {
         return try {
             val result = auth.signInWithEmailAndPassword(email, password).await()
+
+            if (!checkEmailVerify()) {
+                return ResourceState.Error("Email not verified")
+            }
+
             val user = userRepository.getUserFromFirestore(result.user?.uid ?: "").getOrNull()
 
             if (user == null) {
@@ -34,23 +44,20 @@ class EmailAuthRepositoryImpl(
         }
     }
 
-    override suspend fun checkEmailExist(email: String): ResourceState<Boolean> {
-        var result: ResourceState<Boolean> = ResourceState.Loading
+    override suspend fun checkEmailVerify(): Boolean {
+        val user = auth.currentUser
+        user?.reload()
+        return user?.isEmailVerified ?: false
+    }
 
-        auth.fetchSignInMethodsForEmail(email).addOnCompleteListener {
-            if (it.isSuccessful) {
-                val signInMethods = it.result?.signInMethods
-                if (signInMethods.isNullOrEmpty()) {
-                    result = ResourceState.Error("Email not exist")
-                } else {
-                    result = ResourceState.Success(true)
-                }
-            } else {
-                result = ResourceState.Error(it.exception?.message)
+    override suspend fun checkEmailExist(email: String): ResourceState<Boolean> {
+        val snapshot = firestore.collection("users").get().await()
+        for (document in snapshot.documents) {
+            if (email == document.get("email")) {
+                return ResourceState.Success(true)
             }
         }
-
-        return result
+        return ResourceState.Error("Email not exist")
     }
 
     override suspend fun signUp(
@@ -61,9 +68,11 @@ class EmailAuthRepositoryImpl(
     ): ResourceState<User> {
         return try {
             val result = auth.createUserWithEmailAndPassword(email, password).await()
+
             if (result.user == null) {
                 return ResourceState.Error("Failed to create user")
             }
+
             val user = User(
                 id = result.user?.uid ?: "",
                 email = email,
@@ -79,6 +88,9 @@ class EmailAuthRepositoryImpl(
             }
 
             userRepository.saveUserToFirestore(user)
+
+            val sendEmail = auth.currentUser?.sendEmailVerification()?.await()
+
             ResourceState.Success(user)
         } catch (e: Exception) {
             ResourceState.Error(e.message)

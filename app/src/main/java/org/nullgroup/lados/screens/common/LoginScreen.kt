@@ -50,6 +50,7 @@ import org.nullgroup.lados.navigations.AdminGraph
 import org.nullgroup.lados.navigations.CustomerGraph
 import org.nullgroup.lados.navigations.StaffGraph
 import org.nullgroup.lados.ui.theme.LadosTheme
+import org.nullgroup.lados.utilities.PasswordValidator
 import org.nullgroup.lados.viewmodels.LoginScreenViewModel
 import org.nullgroup.lados.viewmodels.events.LoginScreenEvent
 import org.nullgroup.lados.viewmodels.states.LoginScreenStepState
@@ -188,7 +189,6 @@ fun PasswordScreen(
     modifier: Modifier = Modifier,
 ) {
     val loginScreenViewModel = hiltViewModel<LoginScreenViewModel>()
-    val loginState by loginScreenViewModel.loginState.collectAsState()
     var password by remember {
         mutableStateOf("")
     }
@@ -217,7 +217,7 @@ fun PasswordScreen(
                 text = password,
                 onValueChange = {
                     password = it
-                    if (password.length >= 8) {
+                    if (!PasswordValidator(password).validate()) {
                         isError = false
                     }
                 },
@@ -253,10 +253,19 @@ fun PasswordScreen(
 
             if (isError) {
                 Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "Password must be at least 8 characters",
-                    color = LadosTheme.colorScheme.error,
-                )
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(
+                        text = "Password must be at least 8 characters long",
+                        color = LadosTheme.colorScheme.error,
+                    )
+                    Spacer(modifier = Modifier.height(5.dp))
+                    Text(
+                        text = "Password must contain at least one uppercase letter, lowercase letter, number and special character",
+                        color = LadosTheme.colorScheme.error,
+                    )
+                }
             }
         }
 

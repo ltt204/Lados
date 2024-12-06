@@ -16,4 +16,5 @@ interface EmailAuthRepository {
     suspend fun signOut(): ResourceState<Boolean>
     suspend fun resetPassword(email: String): ResourceState<Boolean>
     suspend fun checkEmailExist(email: String): ResourceState<Boolean>
+    suspend fun checkEmailVerify(): Boolean
 }

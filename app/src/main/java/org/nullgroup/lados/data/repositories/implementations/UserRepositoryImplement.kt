@@ -3,6 +3,7 @@ package org.nullgroup.lados.data.repositories.implementations
 import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -163,5 +164,4 @@ class UserRepositoryImplement(
             Result.failure(e)
         }
     }
-
 }

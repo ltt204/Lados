@@ -14,6 +14,7 @@ import kotlinx.coroutines.launch
 import org.nullgroup.lados.data.models.User
 import org.nullgroup.lados.data.repositories.interfaces.EmailAuthRepository
 import org.nullgroup.lados.data.repositories.interfaces.GoogleAuthRepository
+import org.nullgroup.lados.data.repositories.interfaces.UserRepository
 import org.nullgroup.lados.viewmodels.events.LoginScreenEvent
 import org.nullgroup.lados.viewmodels.states.LoginScreenStepState
 import org.nullgroup.lados.viewmodels.states.ResourceState
@@ -23,6 +24,7 @@ import javax.inject.Inject
 class LoginScreenViewModel @Inject constructor(
     private val emailAuth: EmailAuthRepository,
     private val googleAuth: GoogleAuthRepository,
+    private val userRepos: UserRepository,
 ) : ViewModel() {
 
     var loginStep = MutableStateFlow<LoginScreenStepState>(LoginScreenStepState.Email())
@@ -48,9 +50,12 @@ class LoginScreenViewModel @Inject constructor(
     }
 
     private fun handleEnterEmail(email: String) {
+
+
         if (isValidateEmail(email ?: "")) {
 
             viewModelScope.launch {
+
                 when (val state = emailAuth.checkEmailExist(email)) {
                     is ResourceState.Error -> {
                         loginState.value = ResourceState.Error(state.message)
@@ -73,8 +78,6 @@ class LoginScreenViewModel @Inject constructor(
         } else {
             loginState.value = ResourceState.Error("Invalid email")
         }
-
-        Log.d("LoginScreenViewModel", "handleEnterEmail: $email")
     }
 
     private fun handleEnterPassword(password: String) {
@@ -82,6 +85,7 @@ class LoginScreenViewModel @Inject constructor(
             val email = (loginStep.value as LoginScreenStepState.Password).email
 
             viewModelScope.launch {
+
                 emailAuth.signIn(email, password).let { result ->
                     loginState.value = result
 

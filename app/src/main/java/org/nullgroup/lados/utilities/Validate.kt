@@ -18,25 +18,29 @@ abstract class Validator(val data: String) {
     protected abstract fun check(): Boolean
 }
 
-class EmailValidator(data: String): Validator(data) {
+class EmailValidator(data: String) : Validator(data) {
     override fun check(): Boolean {
         return EMAIL_ADDRESS.matcher(this.data).matches()
     }
 }
 
-class PasswordValidator(data: String): Validator(data) {
+class PasswordValidator(data: String) : Validator(data) {
     override fun check(): Boolean {
-        return this.data.length >= 8
+        val passwordRegex = Regex("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=_])(?=\\S+$).{8,}$")
+
+        return passwordRegex.matches(data)
     }
 }
 
-class PhoneNumberValidator(data: String): Validator(data) {
+class PhoneNumberValidator(data: String) : Validator(data) {
     override fun check(): Boolean {
-        return PHONE.matcher(this.data).matches()
+        val phoneRegex = Regex("^(\\+84|0)\\d{9}$")
+
+        return phoneRegex.matches(data)
     }
 }
 
-class NotEmptyValidator(data: String): Validator(data) {
+class NotEmptyValidator(data: String) : Validator(data) {
     override fun check(): Boolean {
         return this.data.isNotEmpty()
     }
