@@ -1,6 +1,9 @@
 package org.nullgroup.lados.data.repositories.implementations
 
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import org.nullgroup.lados.data.models.Image
 import org.nullgroup.lados.data.models.Product
@@ -11,6 +14,23 @@ import org.nullgroup.lados.data.repositories.interfaces.ProductRepository
 class ProductRepositoryImplement (
     private val firestore: FirebaseFirestore
 ) : ProductRepository {
+
+    override fun getProductsFlow(): Flow<List<Product>> = callbackFlow {
+        val subscription = firestore.collection("products")
+            .addSnapshotListener { value, error ->
+                if (error != null) {
+                    throw error
+                }
+
+                val products = value?.documents?.mapNotNull { document ->
+                    document.toObject(Product::class.java)
+                } ?: emptyList()
+
+                trySend(products).isSuccess
+            }
+
+        awaitClose{ subscription.remove() }
+    }
 
     override suspend fun addProductsToFireStore(products: List<Product>): Result<Boolean> {
         return try {
