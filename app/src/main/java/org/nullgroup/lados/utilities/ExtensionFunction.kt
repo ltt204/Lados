@@ -6,7 +6,9 @@ import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.net.Uri
+import com.google.firebase.Timestamp
 import java.io.ByteArrayOutputStream
+import java.util.Date
 
 fun Drawable.toByteArray(
     format: Bitmap.CompressFormat = Bitmap.CompressFormat.JPEG,
@@ -31,4 +33,8 @@ fun Uri.toDrawable(context: Context): Drawable? {
     } catch (e: Exception) {
         null
     }
+}
+
+fun Timestamp.toDate(): Date {
+    return Date(this.seconds * 1000)
 }

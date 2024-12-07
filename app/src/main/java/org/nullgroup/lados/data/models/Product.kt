@@ -1,25 +1,28 @@
 package org.nullgroup.lados.data.models
 
+import com.google.firebase.Timestamp
+import com.google.firebase.firestore.DocumentId
+
 data class Product(
-    var id: String = "",
+    @DocumentId var id: String = "",
     val categoryId: String = "",
     val name: String = "",
     val description: String = "",
+    val createdAt: Timestamp = Timestamp.now(),
     var variants: List<ProductVariant> = emptyList(),
     var engagements: List<UserEngagement> = emptyList()
 )
 
 data class ProductVariant(
-    val id: String= "",
+    @DocumentId val id: String= "",
     val productId: String= "",
     val size: Size = Size(),
     val color: Color = Color(),
     val quantityInStock: Int = 0,
     val originalPrice: Double = 0.0,
-    val salePrice: Double= 0.0,
+    val salePrice: Double? = null,
     var images: List<Image> = emptyList()
 )
-
 
 data class Size(
     val id: Int = 0,
@@ -34,26 +37,26 @@ data class Color(
 )
 
 data class Image(
-    val id: String = "", // UUID
-    val productVariantId: String = "", // UUID
+    @DocumentId val id: String = "",
+    val productVariantId: String = "",
     val link: String = "",
     val fileName: String = ""
 )
 
 data class UserEngagement(
-    val id: String = "",
+    @DocumentId val id: String = "",
     val userId: String = "",
     val productId: String = "",
     val ratings: Int = 1,
     val reviews: String = "",
-    val createdAt: String = ""
+    val createdAt: Timestamp = Timestamp.now()
 )
 
 data class ProductAttribute(
-    val id: String = "", // UUID
+    @DocumentId val id: String = "",
     val type: AttributeType,
     val value: String = "",
-    val createdAt: String = ""// Ngày tạo (ISO-8601 hoặc dạng "yyyy-MM-dd")
+    val createdAt: Timestamp = Timestamp.now()
 )
 
 enum class AttributeType {
