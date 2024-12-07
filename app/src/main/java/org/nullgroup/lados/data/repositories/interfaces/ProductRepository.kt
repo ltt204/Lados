@@ -1,8 +1,10 @@
 package org.nullgroup.lados.data.repositories.interfaces
 
+import kotlinx.coroutines.flow.Flow
 import org.nullgroup.lados.data.models.Product
 
 interface ProductRepository {
+    fun getProductsFlow(): Flow<List<Product>>
     suspend fun addProductsToFireStore(products: List<Product>): Result<Boolean>
     suspend fun getAllProductsFromFireStore(): Result<List<Product>>
     suspend fun addProductToFireStore(product: Product): Result<Boolean>
