@@ -51,10 +51,10 @@ import org.nullgroup.lados.navigations.CustomerGraph
 import org.nullgroup.lados.navigations.StaffGraph
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.utilities.PasswordValidator
-import org.nullgroup.lados.viewmodels.LoginScreenViewModel
-import org.nullgroup.lados.viewmodels.events.LoginScreenEvent
-import org.nullgroup.lados.viewmodels.states.LoginScreenStepState
-import org.nullgroup.lados.viewmodels.states.ResourceState
+import org.nullgroup.lados.viewmodels.common.LoginScreenViewModel
+import org.nullgroup.lados.viewmodels.common.events.LoginScreenEvent
+import org.nullgroup.lados.viewmodels.common.states.LoginScreenStepState
+import org.nullgroup.lados.viewmodels.common.states.ResourceState
 
 @Composable
 fun EmailScreen(

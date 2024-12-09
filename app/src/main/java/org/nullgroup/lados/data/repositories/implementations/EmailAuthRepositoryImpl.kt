@@ -1,20 +1,14 @@
 package org.nullgroup.lados.data.repositories.implementations
 
-import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.tasks.await
 import org.nullgroup.lados.data.models.User
 import org.nullgroup.lados.data.models.UserRole
 import org.nullgroup.lados.data.repositories.interfaces.EmailAuthRepository
 import org.nullgroup.lados.data.repositories.interfaces.SharedPreferencesRepository
 import org.nullgroup.lados.data.repositories.interfaces.UserRepository
-import org.nullgroup.lados.viewmodels.states.ResourceState
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
+import org.nullgroup.lados.viewmodels.common.states.ResourceState
 
 
 class EmailAuthRepositoryImpl(
@@ -36,6 +30,10 @@ class EmailAuthRepositoryImpl(
 
             if (user == null) {
                 return ResourceState.Error("User not found")
+            }
+
+            if (!user.isActive) {
+                return ResourceState.Error("Account is disabled, please check your email for reset password")
             }
 
             ResourceState.Success(user)
@@ -81,6 +79,7 @@ class EmailAuthRepositoryImpl(
                 phoneNumber = phone,
                 photoUrl = result.user?.photoUrl?.toString() ?: "",
                 provider = result.user?.providerId ?: "",
+                isActive = true,
             )
             val token = result.user?.getIdToken(true)?.await()?.token
             if (token != null) {
@@ -89,7 +88,7 @@ class EmailAuthRepositoryImpl(
 
             userRepository.saveUserToFirestore(user)
 
-            val sendEmail = auth.currentUser?.sendEmailVerification()?.await()
+            auth.currentUser?.sendEmailVerification()?.await()
 
             ResourceState.Success(user)
         } catch (e: Exception) {
@@ -109,6 +108,14 @@ class EmailAuthRepositoryImpl(
     override suspend fun resetPassword(email: String): ResourceState<Boolean> {
         return try {
             auth.sendPasswordResetEmail(email).await()
+            val users = userRepository.getAllUsersFromFirestore()
+
+            for (user in users.getOrNull()!!) {
+                if (user.email == email) {
+                    userRepository.updateUser(user.copy(isActive = false))
+                }
+            }
+
             ResourceState.Success(true)
         } catch (e: Exception) {
             ResourceState.Error(e.message)

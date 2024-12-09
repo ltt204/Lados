@@ -12,7 +12,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import org.nullgroup.lados.ui.theme.LadosTheme
-import org.nullgroup.lados.viewmodels.events.LoginScreenEvent
+import org.nullgroup.lados.viewmodels.common.events.LoginScreenEvent
 
 @Composable
 fun ButtonSubmit(

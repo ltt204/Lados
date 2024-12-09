@@ -12,6 +12,7 @@ data class User(
     var phoneNumber: String = "",
     var photoUrl: String = "",
     var provider: String = "",
+    var isActive: Boolean = true,
 )
 
 data class UserProfilePicture(

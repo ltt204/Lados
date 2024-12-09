@@ -1,4 +1,4 @@
-package org.nullgroup.lados.viewmodels.states
+package org.nullgroup.lados.viewmodels.common.states
 
 sealed class RegisterScreenStepState {
     data object EnterInfo: RegisterScreenStepState()

@@ -1,7 +1,7 @@
 package org.nullgroup.lados.data.repositories.interfaces
 
 import org.nullgroup.lados.data.models.User
-import org.nullgroup.lados.viewmodels.states.ResourceState
+import org.nullgroup.lados.viewmodels.common.states.ResourceState
 
 
 interface EmailAuthRepository {

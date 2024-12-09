@@ -28,9 +28,9 @@ import org.nullgroup.lados.compose.SignIn.ButtonSubmit
 import org.nullgroup.lados.compose.SignIn.CustomTextField
 import org.nullgroup.lados.compose.SignIn.Headline
 import org.nullgroup.lados.ui.theme.LadosTheme
-import org.nullgroup.lados.viewmodels.ForgotPasswordScreenViewModel
-import org.nullgroup.lados.viewmodels.events.ForgotPasswordScreenEvent
-import org.nullgroup.lados.viewmodels.states.ResourceState
+import org.nullgroup.lados.viewmodels.common.ForgotPasswordScreenViewModel
+import org.nullgroup.lados.viewmodels.common.events.ForgotPasswordScreenEvent
+import org.nullgroup.lados.viewmodels.common.states.ResourceState
 
 @Composable
 fun ForgotPasswordScreen(

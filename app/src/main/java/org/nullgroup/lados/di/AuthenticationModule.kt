@@ -14,8 +14,6 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import org.nullgroup.lados.R
-import org.nullgroup.lados.data.remote.ApiService.UserApiInterface
-import org.nullgroup.lados.data.remote.ApiService.UserApiService
 import org.nullgroup.lados.data.repositories.implementations.EmailAuthRepositoryImpl
 import org.nullgroup.lados.data.repositories.implementations.GoogleAuthRepositoryImpl
 import org.nullgroup.lados.data.repositories.interfaces.EmailAuthRepository
@@ -78,12 +76,6 @@ object AuthenticationModule {
             .requestEmail()
             .build()
         return GoogleSignIn.getClient(context, gso)
-    }
-
-    @Provides
-    @Singleton
-    fun provideUserApiService(apiService: UserApiInterface): UserApiService {
-        return UserApiService(apiService)
     }
 
 }

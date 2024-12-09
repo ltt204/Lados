@@ -1,4 +1,4 @@
-package org.nullgroup.lados.viewmodels.events
+package org.nullgroup.lados.viewmodels.common.events
 
 import androidx.navigation.NavController
 

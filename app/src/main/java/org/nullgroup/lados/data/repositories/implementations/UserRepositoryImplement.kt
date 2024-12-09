@@ -156,7 +156,7 @@ class UserRepositoryImplement(
         }
     }
 
-    override suspend fun logout(): Result<Boolean> {
+    override suspend fun signOut(): Result<Boolean> {
         return try {
             firebaseAuth.signOut()
             Result.success(true)

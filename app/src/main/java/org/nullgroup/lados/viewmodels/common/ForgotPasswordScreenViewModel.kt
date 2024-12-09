@@ -1,4 +1,4 @@
-package org.nullgroup.lados.viewmodels
+package org.nullgroup.lados.viewmodels.common
 
 import android.util.Patterns.EMAIL_ADDRESS
 import androidx.lifecycle.ViewModel
@@ -8,8 +8,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import org.nullgroup.lados.data.repositories.interfaces.EmailAuthRepository
-import org.nullgroup.lados.viewmodels.events.ForgotPasswordScreenEvent
-import org.nullgroup.lados.viewmodels.states.ResourceState
+import org.nullgroup.lados.viewmodels.common.states.ResourceState
+import org.nullgroup.lados.viewmodels.common.events.ForgotPasswordScreenEvent
 import javax.inject.Inject
 
 @HiltViewModel

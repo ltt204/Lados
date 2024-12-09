@@ -1,4 +1,4 @@
-package org.nullgroup.lados.viewmodels.states
+package org.nullgroup.lados.viewmodels.common.states
 
 import org.nullgroup.lados.data.models.User
 

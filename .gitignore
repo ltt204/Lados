@@ -48,6 +48,9 @@ render.experimental.xml
 # Google Services (e.g. APIs or Firebase)
 google-services.json
 
+# Admin SDK
+admin-sdk.json
+
 # Android Profiling
 *.hprof
 

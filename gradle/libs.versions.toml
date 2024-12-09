@@ -5,6 +5,8 @@ coil = "2.4.0"
 constraintlayoutCompose = "1.0.1"
 converterGson = "2.9.0"
 converterGsonVersion = "2.11.0"
+firebaseAdmin = "9.1.1"
+firebaseAdminVersion = "9.2.0"
 firebaseAuthKtx = "22.3.1"
 firebaseBom = "33.6.0"
 firebaseFirestoreKtx = "24.10.3"
@@ -59,6 +61,8 @@ converter-gson = { module = "com.squareup.retrofit:converter-gson", version.ref 
 coil = { module = "io.coil-kt:coil", version.ref = "coil" }
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
 dagger-hilt-android-testing = { module = "com.google.dagger:hilt-android-testing", version.ref = "hiltAndroidTesting" }
+firebase-admin = { module = "com.google.firebase:firebase-admin", version.ref = "firebaseAdmin" }
+firebase-admin-v920 = { module = "com.google.firebase:firebase-admin", version.ref = "firebaseAdminVersion" }
 firebase-auth-ktx = { module = "com.google.firebase:firebase-auth-ktx", version.ref = "firebaseAuthKtx" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 firebase-firestore-ktx = { module = "com.google.firebase:firebase-firestore-ktx", version.ref = "firebaseFirestoreKtx" }

@@ -6,7 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import org.nullgroup.lados.ui.theme.LadosTheme
-import org.nullgroup.lados.viewmodels.events.LoginScreenEvent
+import org.nullgroup.lados.viewmodels.common.events.LoginScreenEvent
 
 @Composable
 fun TextClickable(

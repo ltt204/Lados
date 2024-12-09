@@ -1,4 +1,4 @@
-package org.nullgroup.lados.viewmodels
+package org.nullgroup.lados.viewmodels.common
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,9 +12,9 @@ import org.nullgroup.lados.utilities.EmailValidator
 import org.nullgroup.lados.utilities.NotEmptyValidator
 import org.nullgroup.lados.utilities.PasswordValidator
 import org.nullgroup.lados.utilities.PhoneNumberValidator
-import org.nullgroup.lados.viewmodels.events.RegisterScreenEvent
-import org.nullgroup.lados.viewmodels.states.RegisterScreenStepState
-import org.nullgroup.lados.viewmodels.states.ResourceState
+import org.nullgroup.lados.viewmodels.common.states.RegisterScreenStepState
+import org.nullgroup.lados.viewmodels.common.states.ResourceState
+import org.nullgroup.lados.viewmodels.common.events.RegisterScreenEvent
 import javax.inject.Inject
 
 @HiltViewModel

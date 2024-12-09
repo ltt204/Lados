@@ -1,6 +1,5 @@
-package org.nullgroup.lados.viewmodels
+package org.nullgroup.lados.viewmodels.common
 
-import android.util.Log
 import android.util.Patterns.*
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
@@ -15,9 +14,9 @@ import org.nullgroup.lados.data.models.User
 import org.nullgroup.lados.data.repositories.interfaces.EmailAuthRepository
 import org.nullgroup.lados.data.repositories.interfaces.GoogleAuthRepository
 import org.nullgroup.lados.data.repositories.interfaces.UserRepository
-import org.nullgroup.lados.viewmodels.events.LoginScreenEvent
-import org.nullgroup.lados.viewmodels.states.LoginScreenStepState
-import org.nullgroup.lados.viewmodels.states.ResourceState
+import org.nullgroup.lados.viewmodels.common.states.LoginScreenStepState
+import org.nullgroup.lados.viewmodels.common.states.ResourceState
+import org.nullgroup.lados.viewmodels.common.events.LoginScreenEvent
 import javax.inject.Inject
 
 @HiltViewModel

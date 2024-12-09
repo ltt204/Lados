@@ -2,9 +2,8 @@ package org.nullgroup.lados.data.repositories.interfaces
 
 import android.content.Intent
 import android.content.IntentSender
-import dagger.Module
 import org.nullgroup.lados.data.models.User
-import org.nullgroup.lados.viewmodels.states.ResourceState
+import org.nullgroup.lados.viewmodels.common.states.ResourceState
 
 interface GoogleAuthRepository {
     suspend fun signIn(): IntentSender?
