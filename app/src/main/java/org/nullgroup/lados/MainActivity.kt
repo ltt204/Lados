@@ -32,10 +32,9 @@ class MainActivity : ComponentActivity() {
         setContent {
             LadosTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-//                    RoleBasedNavigation(
-//                        modifier = Modifier.padding(innerPadding)
-//                    )
-                    CustomerGraph(modifier = Modifier.padding(innerPadding))
+                    RoleBasedNavigation(
+                        modifier = Modifier.padding(innerPadding)
+                    )
                 }
             }
         }
