@@ -76,6 +76,7 @@ dependencies {
     ksp ("com.google.dagger:hilt-android-compiler:2.49")
     implementation("com.google.dagger:hilt-android:2.49")
     implementation ("androidx.hilt:hilt-navigation-compose:1.2.0")
+    implementation(libs.firebase.storage)
 
     //Constraint Layout
     implementation(libs.androidx.constraintlayout.compose)
@@ -91,6 +92,14 @@ dependencies {
     implementation(libs.material3)
     implementation(libs.androidx.material)
     implementation(libs.androidx.compose.material3.material3)
+
+    //Gson converter
+    implementation(libs.retrofit2.converter.gson)
+
+    //Retrofit
+    implementation(libs.retrofit)
+    implementation(libs.okhttp)
+    implementation(libs.coil.compose)
 
     // For Hilt testing
     kaptTest (libs.hilt.android.compiler)

@@ -3,19 +3,40 @@ package org.nullgroup.lados.data.repositories.implementations
 import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import dagger.hilt.android.scopes.ActivityScoped
 import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withTimeout
 import org.nullgroup.lados.data.models.User
+import org.nullgroup.lados.data.repositories.interfaces.ImageRepository
 import org.nullgroup.lados.data.repositories.interfaces.UserRepository
-import javax.inject.Inject
 
 
-class UserRepositoryImplement (
+class UserRepositoryImplement(
     private val firestore: FirebaseFirestore,
-    private val firebaseAuth: FirebaseAuth
+    private val firebaseAuth: FirebaseAuth,
+    private val imageRepository: ImageRepository
 ) : UserRepository {
+    override fun getCurrentUserFlow(): Flow<User> = callbackFlow {
+        val userRef = firestore.collection("users").document(firebaseAuth.currentUser?.email!!)
+
+        val subscription = userRef.addSnapshotListener { snapshot, error ->
+            if (error!=null) {
+                close(error)
+                return@addSnapshotListener
+            }
+
+            if (snapshot != null) {
+                val user = snapshot.toObject(User::class.java) ?: User()
+                trySend(user).isSuccess
+            }
+        }
+
+        awaitClose { subscription.remove() }
+    }
+
     override suspend fun login(email: String, password: String): Result<Boolean> {
         return try {
             firebaseAuth.signInWithEmailAndPassword(email, password).await()
@@ -39,12 +60,22 @@ class UserRepositoryImplement (
     }
 
     override suspend fun saveUserToFirestore(user: User) {
+        user.avatarUri =
+            user.avatarUri.ifEmpty {
+                imageRepository.getImageUrl(
+                    "users",
+                    "default_avatar",
+                    "jpg"
+                )
+            }
+
         firestore.collection("users").document(user.email).set(user).await()
     }
 
     override suspend fun getUserFromFirestore(email: String): Result<User> {
         return try {
-            val user = firestore.collection("users").document(email).get().await().toObject(User::class.java)
+            val user = firestore.collection("users").document(email).get().await()
+                .toObject(User::class.java)
             Result.success(user!!)
         } catch (e: Exception) {
             Result.failure(e)
@@ -107,5 +138,32 @@ class UserRepositoryImplement (
         } catch (e: Exception) {
             Result.failure(e)
         }
+    }
+
+    override suspend fun updateUser(user: User): Result<Boolean> {
+        return try {
+            user.avatarUri =
+                user.avatarUri.ifEmpty {
+                    imageRepository.getImageUrl(
+                        "users",
+                        "default_avatar",
+                        "jpg"
+                    )
+                }
+            firestore.collection("users").document(user.email).set(user).await()
+            Result.success(true)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun getCurrentUser(): User {
+        val firebaseUser = firebaseAuth.currentUser
+        val userRef = firestore.collection("users").document(firebaseUser?.email!!)
+
+        val user = userRef.get().await().toObject(User::class.java) ?: User()
+
+        Log.d("UserRepositoryImplement", "User profile picture: ${user.avatarUri}")
+        return user
     }
 }

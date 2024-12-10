@@ -10,8 +10,13 @@ import dagger.hilt.components.SingletonComponent
 import org.nullgroup.lados.data.repositories.implementations.CategoryRepositoryImplement
 import org.nullgroup.lados.data.repositories.implementations.ImageRepositoryImplement
 import org.nullgroup.lados.data.repositories.implementations.ProductRepositoryImplement
+import org.nullgroup.lados.data.repositories.implementations.UserAddressRepositoryImplement
 import org.nullgroup.lados.data.repositories.implementations.UserRepositoryImplement
+
 import org.nullgroup.lados.data.repositories.interfaces.CategoryRepository
+
+import org.nullgroup.lados.data.repositories.interfaces.IUserAddressRepository
+
 import org.nullgroup.lados.data.repositories.interfaces.ImageRepository
 import org.nullgroup.lados.data.repositories.interfaces.ProductRepository
 import org.nullgroup.lados.data.repositories.interfaces.UserRepository
@@ -25,9 +30,10 @@ object DataModule {
     @Provides
     fun provideUserRepository(
         firestore: FirebaseFirestore,
-        firebaseAuth: FirebaseAuth
+        firebaseAuth: FirebaseAuth,
+        imageRepository: ImageRepository
     ): UserRepository {
-        return UserRepositoryImplement(firestore, firebaseAuth)
+        return UserRepositoryImplement(firestore, firebaseAuth, imageRepository)
     }
 
     @Singleton
@@ -36,6 +42,15 @@ object DataModule {
         firestore: FirebaseFirestore
     ): ProductRepository {
         return ProductRepositoryImplement(firestore)
+    }
+
+    @Singleton
+    @Provides
+    fun provideUserAddressRepository(
+        firestore: FirebaseFirestore,
+        firebaseAuth: FirebaseAuth
+    ): IUserAddressRepository {
+        return UserAddressRepositoryImplement(firestore, firebaseAuth)
     }
 
     @Singleton

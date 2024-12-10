@@ -27,13 +27,10 @@ class ImageRepositoryImplement(
             .child("images")
             .child(child)
             .child("$fileName.$extension")
-        imageRef.putBytes(image).addOnSuccessListener {
-            Log.d("ImageRepositoryImplement", "Upload successful")
-        }.addOnFailureListener {
-            // Will changes to Result sealed class for better handle exception
-            throw Exception("Upload failed")
-        }
-        return imageRef.path
+
+        val imageUrl: String = imageRef.putBytes(image).await().storage.downloadUrl.await().toString()
+
+        return imageUrl
     }
 
     /**
@@ -79,7 +76,6 @@ class ImageRepositoryImplement(
         fileName: String,
         fileExtension: String
     ): String {
-
         val imageRef =
             firebaseStorage.reference.child("images").child(child).child("$fileName.$fileExtension")
         val imageUrl = try {
@@ -89,6 +85,7 @@ class ImageRepositoryImplement(
             throw Exception("Failed to get image URL")
         }
 
+        Log.d("ImageRepositoryImplement", "image URL: $imageUrl")
         return imageUrl
     }
 }
