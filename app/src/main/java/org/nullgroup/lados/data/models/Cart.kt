@@ -18,19 +18,19 @@ data class CartItem(
 }
 
 // Main Cart data class
-data class Cart(
-    val customerId: String = "",  // Reference to customer document ID
-    @Exclude
-    val items: Map<String, CartItem> = mapOf(),
-    val lastUpdatedAt: Long = System.currentTimeMillis(),
-) {
-    // Constructor to create empty cart for a customer
-    constructor(customerId: String) : this(
-        customerId = customerId,
-        items = mapOf()
-    )
-
-    companion object {
-        const val COLLECTION_NAME = "carts"
-    }
-}
+//data class Cart(
+//    val customerId: String = "",  // Reference to customer document ID
+//    @Exclude
+//    val items: Map<String, CartItem> = mapOf(),
+//    val lastUpdatedAt: Long = System.currentTimeMillis(),
+//) {
+//    // Constructor to create empty cart for a customer
+//    constructor(customerId: String) : this(
+//        customerId = customerId,
+//        items = mapOf()
+//    )
+//
+//    companion object {
+//        const val COLLECTION_NAME = "carts"
+//    }
+//}

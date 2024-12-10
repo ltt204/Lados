@@ -1,4 +1,4 @@
-package org.nullgroup.lados.viewmodels
+package org.nullgroup.lados.viewmodels.customer
 
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,10 +18,10 @@ class CheckoutViewModel @Inject constructor(
     // Hardcode
     private val userEmail = "customer@test.com"
 
-    private val _orderItems = MutableStateFlow<List<CartItem>>(mutableListOf())
-    val orderItems = _orderItems.asStateFlow()
+    private val _orderingItems = MutableStateFlow<List<CartItem>>(mutableListOf())
+    val orderingItems = _orderingItems.asStateFlow()
 
-    private val _orderItemInformation =
+    private val _orderingItemInformation =
         MutableStateFlow<Map<String, Pair<Product?, ProductVariant?>>>(mutableMapOf())
-    val orderItemInformation = _orderItemInformation.asStateFlow()
+    val orderingItemInformation = _orderingItemInformation.asStateFlow()
 }

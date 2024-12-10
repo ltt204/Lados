@@ -44,7 +44,7 @@ import kotlinx.coroutines.launch
 import org.nullgroup.lados.compose.cartRelated.CartItemBar
 import org.nullgroup.lados.compose.cartRelated.PricingDetails
 import org.nullgroup.lados.data.models.CartItem
-import org.nullgroup.lados.viewmodels.CartViewModel
+import org.nullgroup.lados.viewmodels.customer.CartViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable

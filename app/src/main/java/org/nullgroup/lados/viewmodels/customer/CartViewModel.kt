@@ -1,10 +1,9 @@
-package org.nullgroup.lados.viewmodels
+package org.nullgroup.lados.viewmodels.customer
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -14,8 +13,6 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import org.nullgroup.lados.data.models.Cart
 import org.nullgroup.lados.data.models.CartItem
 import org.nullgroup.lados.data.models.Order
 import org.nullgroup.lados.data.models.OrderProduct
@@ -33,10 +30,6 @@ class CartViewModel @Inject constructor(
     private val cartItemRepository: CartItemRepository,
     private val orderRepository: OrderRepository,
 ): ViewModel() {
-
-    private var _cart: Cart? = null
-    val cart: Cart? get() = _cart
-
     private val _cartItems = MutableStateFlow<List<CartItem>>(mutableListOf())
     val cartItems = _cartItems.asStateFlow()
 
@@ -63,7 +56,7 @@ class CartViewModel @Inject constructor(
     val isAnyCartItemSelected = { _selectedCartItemIds.value.isNotEmpty() }
 
     // TODO: Hardcode
-    private val userEmail = "customer@test.com"
+    private val customerId = "admin@test.com"
 
     var orderDiscountRate: Double = 0.0
     var orderMaximumDiscount: Double = 0.0
@@ -76,7 +69,7 @@ class CartViewModel @Inject constructor(
             val productVariant = cartItemInformation.value[cartItem.id]?.second
             if (productVariant != null) {
                 subtotal += productVariant.originalPrice * cartItem.amount
-                total += productVariant.salePrice * cartItem.amount
+                total += (productVariant.salePrice ?: productVariant.originalPrice) * cartItem.amount
             }
         }
         val productDiscount = subtotal - total
@@ -98,70 +91,66 @@ class CartViewModel @Inject constructor(
     // This one is rather for errors
     var onRefreshComplete: ((String) -> Unit)? = null
     suspend fun refreshCartInformation() {
-        _cart = viewModelScope.async {
-            val initResult = cartItemRepository.getOrInitializeCart(userEmail)
+//        _cart = viewModelScope.async {
+//            val initResult = cartItemRepository.getOrInitializeCart(userEmail)
+//
+//            if (initResult.isFailure || initResult.getOrNull() == null) {
+//                // Handle error
+//                withContext(Dispatchers.Main) {
+//                    // Show error message
+//                    Log.e(
+//                        "CartViewModel",
+//                        "Error initializing cart: ",
+//                        initResult.exceptionOrNull()
+//                    )
+//                    return@withContext
+//                }
+//                return@async null
+//            }
+//            return@async initResult.getOrNull()
+//        }.await()
 
-            if (initResult.isFailure || initResult.getOrNull() == null) {
-                // Handle error
-                withContext(Dispatchers.Main) {
-                    // Show error message
-                    Log.e(
-                        "CartViewModel",
-                        "Error initializing cart: ",
-                        initResult.exceptionOrNull()
-                    )
-                    return@withContext
-                }
-                return@async null
-            }
-            return@async initResult.getOrNull()
+        // TODO: to be removed
+        viewModelScope.async {
+            addCartItem("BKj3h1PBk1YbIPy2mnOr", "RmQEs0aelFVq1OaDwhjK", 3)
+            addCartItem("BKj3h1PBk1YbIPy2mnOr", "TCwBMf9PKHmfryUfmEgL", 2)
+            addCartItem("Uv9JE2EwULVB6Gsjq5p7", "1aXlLfhkTo3gDZ0yFXbD", 1)
+            addCartItem("Uv9JE2EwULVB6Gsjq5p7", "JkRmSSCkgq2tVgX0fxuZ", 1)
+            addCartItem("bKenEU3vDCwjjKjsMapv", "0zPcXb6MbfszcEswWz4s", 5)
         }.await()
 
-        if (cart != null) {
-            // TODO: to be removed
-            viewModelScope.async {
-                addCartItem("1", "v1", 3)
-                addCartItem("1", "v2", 2)
-                addCartItem("2", "v4", 1)
-                addCartItem("2", "v6", 1)
-                addCartItem("3", "v9", 5)
-            }.await()
-
-            viewModelScope.launch {
-                cartItemRepository.getCartItemsAsFlow(cart!!.customerId)
-                    .onCompletion { cause ->
-                        if (cause == null) {
-                            onRefreshComplete?.invoke("Cart refreshed")
-                        } else {
-                            onRefreshComplete?.invoke("Error refreshing cart: ${cause.message}")
-                        }
+        viewModelScope.launch {
+            cartItemRepository.getCartItemsAsFlow(customerId)
+                .onCompletion { cause ->
+                    if (cause == null) {
+                        onRefreshComplete?.invoke("Cart refreshed")
+                    } else {
+                        onRefreshComplete?.invoke("Error refreshing cart: ${cause.message}")
                     }
-                    .collect { cartItems ->
-                        val newItems = cartItems.filter {
+                }
+                .collect { cartItems ->
+                    val newItems = cartItems.filter {
                             cartItem -> _cartItems.value.none { it.id == cartItem.id }
-                        }.toMutableList()
-                        newItems.forEach { newItem ->
-                            _originalAmount.remove(newItem.id)
-                        }
-                        _cartItems.value = _cartItems.value.map { oldItem ->
-                            // Replacing old items with new items of the same id
-                            newItems.firstOrNull { it.id == oldItem.id }?.also {
-                                newItems.remove(it)
-                            } ?: oldItem
-                        }
-                        _cartItems.value = _cartItems.value.plus(newItems)
+                    }.toMutableList()
+                    newItems.forEach { newItem ->
+                        _originalAmount.remove(newItem.id)
                     }
-            }
+                    _cartItems.value = _cartItems.value.map { oldItem ->
+                        // Replacing old items with new items of the same id
+                        newItems.firstOrNull { it.id == oldItem.id }?.also {
+                            newItems.remove(it)
+                        } ?: oldItem
+                    }
+                    _cartItems.value = _cartItems.value.plus(newItems)
+                }
+        }
 
-            viewModelScope.launch {
-                _cartItems
-                    .filterNotNull()
-                    .collect { cartItems ->
-                        getItemsInformation(cartItems)
-                    }
-            }
-        } else {
-            onRefreshComplete?.invoke("Error initializing cart")
+        viewModelScope.launch {
+            _cartItems
+                .filterNotNull()
+                .collect { cartItems ->
+                    getItemsInformation(cartItems)
+                }
         }
     }
     private fun getItemsInformation(cartItems: List<CartItem>) {
@@ -219,10 +208,6 @@ class CartViewModel @Inject constructor(
     // TODO: Remove this function
     // Use this when adding product to cart in other places
     suspend fun addCartItem(productId: String, variantId: String, amount: Int): Result<Boolean> {
-        if (cart == null) {
-            return Result.failure(Exception("Cart not found"))
-        }
-
         val cartItem = CartItem(
             productId = productId,
             variantId = variantId,
@@ -230,14 +215,14 @@ class CartViewModel @Inject constructor(
         )
 
         return cartItemRepository.addCartItemToCart(
-            cartId = cart!!.customerId,
+            customerId = customerId,
             cartItem = cartItem
         )
 
     }
 
     fun updateCartItemAmountLocally(cartItemId: String, amountDelta: Int) {
-        if (cart == null || amountDelta == 0) {
+        if (amountDelta == 0) {
             return
         }
 
@@ -255,10 +240,6 @@ class CartViewModel @Inject constructor(
     }
 
     fun removeSelectedCartItemLocally() {
-        if (cart == null) {
-            return
-        }
-
         selectedCartItems.value.forEach { cartItem ->
             if (!_originalAmount.containsKey(cartItem.id)) {
                 _originalAmount[cartItem.id] = cartItem.amount
@@ -272,10 +253,6 @@ class CartViewModel @Inject constructor(
     }
 
     fun onCartItemSelectionChanged(cartItemId: String, isSelected: Boolean) {
-        if (cart == null) {
-            return
-        }
-
         _cartItems.value.find { it.id == cartItemId }?.let {
             if (isSelected) {
                 _selectedCartItemIds.value = _selectedCartItemIds.value.plus(it.id)
@@ -286,12 +263,8 @@ class CartViewModel @Inject constructor(
     }
 
     suspend fun commitChangesToDatabase(): Result<Boolean> {
-        if (cart == null) {
-            return Result.failure(Exception("Cart not found"))
-        }
-
         val result = cartItemRepository.updateCartItemsAmount(
-            cartId = cart!!.customerId,
+            customerId = customerId,
             adjustmentInfo = _cartItems.value
                 .filter { it.amount != _originalAmount[it.id] }
                 .map { it.id to it.amount }
@@ -326,10 +299,6 @@ class CartViewModel @Inject constructor(
         onCheckoutFailure: ((reason: String) -> Unit)? = null,
         onSuccessfulCheckout: (() -> Unit)? = null
         ) {
-        if (cart == null) {
-            return
-        }
-
         val selectedItems = selectedCartItems.value
 
         if (selectedItems.isEmpty()) {
@@ -355,7 +324,7 @@ class CartViewModel @Inject constructor(
                     productId = cartItem.productId,
                     variantId = cartItem.variantId,
                     amount = cartItem.amount,
-                    totalPrice = productVariant.salePrice * cartItem.amount
+                    totalPrice = (productVariant.salePrice ?: productVariant.originalPrice) * cartItem.amount
                 )
             } else {
                 null
@@ -364,14 +333,14 @@ class CartViewModel @Inject constructor(
 
         val checkoutDetail = checkoutDetail()
         val newOrder = Order(
-            customerId = cart!!.customerId,
+            customerId = customerId,
             orderProducts = orderProductList,
             orderTotal = checkoutDetail.total
         )
 
         val result = viewModelScope.async {
             orderRepository.createOrder(
-                customerId = cart!!.customerId,
+                customerId = customerId,
                 order = newOrder,
             )
         }.await()
