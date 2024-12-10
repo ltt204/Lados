@@ -14,6 +14,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -34,7 +35,8 @@ import org.nullgroup.lados.screens.customer.ProfileScreen
 fun CustomerGraph(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
-    startDestination: String = Screen.Customer.HomeScreen.route
+    sharedViewModel: SharedViewModel= hiltViewModel(),
+    startDestination: String = Screen.Customer.Home.route
 ) {
     var isVisibility by remember { mutableStateOf(true) }
 
@@ -71,7 +73,69 @@ fun CustomerGraph(
                                     restoreState = true
                                 }
                             }
-                        )
+                        }
+                    )
+                }
+            }
+        }
+    ) { innerPadding ->
+
+        NavHost(navController = navController, startDestination = startDestination) {
+
+            Screen.Customer.getAllScreens().forEach { screen ->
+                composable(screen.route) {
+                    when (screen.route) {
+                        Screen.Customer.CategorySelectScreen.route -> {
+                            CategorySelectScreen(navController = navController, paddingValues = innerPadding, sharedViewModel = sharedViewModel)
+                        }
+
+                        Screen.Customer.Home.route -> {
+                            ProductScreen(navController = navController, paddingValues = innerPadding, sharedViewModel = sharedViewModel)
+                        }
+
+                        Screen.Customer.SearchScreen.route -> {
+                            SearchScreen(navController = navController, paddingValues = innerPadding, sharedViewModel = sharedViewModel)
+                        }
+
+                        Screen.Customer.HomeScreen.route -> {
+                            HomeScreen(
+                                navController = navController,
+                                paddingValues = innerPadding, sharedViewModel = sharedViewModel
+                            )
+                        }
+
+                        Screen.Customer.FilterScreen.route -> {
+                            FilterScreen(navController = navController, paddingValues = innerPadding, sharedViewModel = sharedViewModel)
+                        }
+
+                        Screen.Customer.DisplayProductInCategory.route -> {
+                            ProductInCategoryScreen(navController = navController, paddingValues = innerPadding, sharedViewModel = sharedViewModel)
+                        }
+
+                        Screen.Customer.ErrorFindNotMatched.route -> {
+                            Error_FindNotMatchScreen(navController = navController, paddingValues = innerPadding)
+                        }
+
+                        Screen.Customer.ChatScreen.route -> {
+                            // ChatScreen()
+                        }
+
+                        Screen.Customer.Profile.route -> {
+//                            ProfileScreen(
+//                                modifier = Modifier.padding(
+//                                    vertical = 32.dp,
+//                                    horizontal = 16.dp
+//                                ), paddingValues = innerPadding
+//                            )
+                        }
+
+                        Screen.Customer.Order.route -> {
+                            // Tasks()
+                        }
+
+                        Screen.Customer.ChatScreen.route -> {
+
+                        }
                     }
                 }
             }

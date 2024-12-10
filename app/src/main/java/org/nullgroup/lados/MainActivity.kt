@@ -9,7 +9,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
 import dagger.hilt.android.AndroidEntryPoint
+import org.nullgroup.lados.data.models.UserRole
+import org.nullgroup.lados.navigations.CustomerGraph
 import org.nullgroup.lados.navigations.RoleBasedNavigation
+import org.nullgroup.lados.screens.Screen
+import org.nullgroup.lados.screens.common.LoginScreen
+import org.nullgroup.lados.screens.customer.HomeScreen
 import org.nullgroup.lados.ui.theme.LadosTheme
 
 @AndroidEntryPoint

@@ -85,6 +85,8 @@ dependencies {
     implementation (libs.coil)
     implementation(libs.coil.compose)
 
+    // Image Slider
+    implementation(libs.coil.compose)
 
     //Material 3
     implementation(libs.material3)
