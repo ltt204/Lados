@@ -42,7 +42,8 @@ sealed class Screen(
         route: String,
         icon: ImageVector
     ) : Screen(name, route, icon) {
-        data object HomeScreen : Customer("Home Screen", "customer_home", Icons.Default.Home)
+
+        data object HomeScreen : Customer("Home", "customer_home", Icons.Default.Home)
         data object ChatScreen : Customer("Chat", "customer_chat", Icons.Default.MailOutline)
         data object Order : Customer("Order", "customer_order", Icons.Filled.ShoppingCart)
         data object Profile : Customer("Profile", "customer_profile", Icons.Default.AccountCircle)
@@ -91,14 +92,12 @@ sealed class Screen(
             }
         }
 
-
         companion object {
             fun getAllScreens() =
                 listOf(HomeScreen, ChatScreen, Order, Profile, Home, SearchScreen, FilterScreen, CategorySelectScreen, ErrorFindNotMatched, ProductInCategoryScreen, DisplayProductInCategory)
 
             fun getBaseScreens() = listOf(HomeScreen, ChatScreen, Order, Profile)
         }
-
 
     }
 

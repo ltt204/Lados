@@ -1,13 +1,6 @@
 package org.nullgroup.lados.screens.customer
 
-import android.annotation.SuppressLint
-import android.os.Bundle
-import android.view.textclassifier.TextLinks.TextLink
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -17,7 +10,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -27,14 +19,10 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Close
-import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -43,7 +31,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -52,41 +39,32 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import org.nullgroup.lados.ui.theme.BlackMaterial
 import org.nullgroup.lados.ui.theme.BrownMaterial
 import org.nullgroup.lados.ui.theme.GrayMaterial
-import org.nullgroup.lados.ui.theme.LadosTheme
-import org.nullgroup.lados.ui.theme.WhiteMaterial
 import org.nullgroup.lados.viewmodels.SharedViewModel
 
 @Composable
 fun NormalTextFieldSearchScreen(
     label: String,
     modifier: Modifier = Modifier,
-    Icon: @Composable (() -> Unit)
+    icon: @Composable (() -> Unit)
 ) {
     val (text, setText) = mutableStateOf("")
     TextField(
-        leadingIcon = Icon,
+        leadingIcon = icon,
         value = text,
 
         colors = TextFieldDefaults.colors(unfocusedContainerColor = Color.Transparent),
         onValueChange = setText,
         label = { Text(text = label, color = GrayMaterial, fontSize = 18.sp)},
         modifier = modifier
-
     )
 }
-
 
 @Composable
 fun SearchBarSearchScreen(modifier: Modifier=Modifier) {
@@ -192,10 +170,9 @@ fun DrawMainSearchScreenContent(
         modifier = modifier
             .fillMaxWidth()
             .fillMaxHeight()
-            .padding(
-                horizontal = 8.dp,
-                vertical = paddingValues.calculateTopPadding()
-            ),
+            .padding(horizontal = 8.dp)
+            .padding(top = paddingValues.calculateTopPadding())
+        ,
     ) {
         SearchHeaderSearchScreen()
         Spacer(Modifier.height(4.dp))
@@ -208,7 +185,11 @@ fun DrawMainSearchScreenContent(
 }
 
 @Composable
-fun SearchScreen(modifier: Modifier = Modifier, navController: NavController, paddingValues: PaddingValues  = PaddingValues(horizontal = 16.dp, vertical = 8.dp), sharedViewModel: SharedViewModel = SharedViewModel()) {
+fun SearchScreen(
+    modifier: Modifier = Modifier,
+    navController: NavController,
+    paddingValues: PaddingValues  = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+    sharedViewModel: SharedViewModel = SharedViewModel()) {
     Scaffold(
         modifier = modifier
             .padding(paddingValues)
@@ -237,7 +218,10 @@ fun SearchScreen(modifier: Modifier = Modifier, navController: NavController, pa
                     )
                 }
                 Spacer(modifier = Modifier.width(16.dp))
-                SearchBar(modifier=Modifier.fillMaxWidth(), navController=navController, onSearch = {})
+                SearchBar(
+                    modifier=Modifier.fillMaxWidth(),
+                    navController=navController,
+                    onSearch = {})
             }
         }
     ) {

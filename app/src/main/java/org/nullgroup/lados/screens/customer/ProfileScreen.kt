@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+//noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -248,7 +249,10 @@ fun ProfileScreen(
                 }
             }
 
-            TextButton(modifier = Modifier.fillMaxWidth(), onClick = { /*TODO*/ }) {
+            TextButton(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = { /*TODO*/ }
+            ) {
                 Text(
                     textAlign = TextAlign.Center,
                     text = "Sign out",

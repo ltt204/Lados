@@ -338,7 +338,9 @@ fun DrawProductScreenContent(
 ) {
     Column(
         modifier = modifier
-            .padding(horizontal = 8.dp, vertical = paddingValues.calculateTopPadding()),
+            .padding(horizontal = 8.dp)
+            .padding(top = paddingValues.calculateTopPadding())
+        ,
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         LazyColumn(
@@ -361,15 +363,23 @@ fun DrawProductScreenContent(
                     }
                 )
             }
+
             item {
-                CategoryItems(sharedViewModel = sharedViewModel, navController = navController)
+                CategoryItems(
+                    sharedViewModel = sharedViewModel,
+                    navController = navController)
             }
+
             item {
-                TitleTextRow(contentLeft = "Top Selling", contentRight = "See all")
+                TitleTextRow(
+                    contentLeft = "Top Selling",
+                    contentRight = "See all")
             }
+
             item {
                 ProductRow()
             }
+
             item {
                 TitleTextRow(
                     contentLeft = "New In",
@@ -380,7 +390,6 @@ fun DrawProductScreenContent(
             item {
                 ProductRow()
             }
-
         }
     }
 }
@@ -502,8 +511,7 @@ fun ProductScreen(
         Scaffold(
             modifier = modifier
                 .padding(paddingValues)
-                .padding(horizontal = 16.dp)
-            ,
+                .padding(horizontal = 16.dp),
             topBar = {
                 Row(
                     modifier = Modifier
@@ -542,7 +550,9 @@ fun ProductScreen(
 
                     IconButton(
                         onClick = {},
-                        modifier = Modifier.clip(CircleShape).background(MagentaMaterial),
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background(MagentaMaterial),
                     ) {
                         Icon(
                             Icons.Outlined.ShoppingCart,

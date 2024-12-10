@@ -53,11 +53,13 @@ import org.nullgroup.lados.viewmodels.HomeViewModel
 import org.nullgroup.lados.viewmodels.SharedViewModel
 
 @Composable
-fun Title(modifier: Modifier=Modifier, textStyle: TextStyle=TextStyle(
-    fontSize = 24.sp,
-    fontWeight = FontWeight.Bold,
-    color = BlackMaterial,
-), content: String) {
+fun Title(
+    modifier: Modifier = Modifier, textStyle: TextStyle = TextStyle(
+        fontSize = 24.sp,
+        fontWeight = FontWeight.Bold,
+        color = BlackMaterial,
+    ), content: String
+) {
     Text(
         text = content,
         style = textStyle
@@ -65,7 +67,7 @@ fun Title(modifier: Modifier=Modifier, textStyle: TextStyle=TextStyle(
 }
 
 @Composable
-fun CategoryItemSelect(modifier: Modifier=Modifier, category: Category){
+fun CategoryItemSelect(modifier: Modifier = Modifier, category: Category) {
 
     Box(
         modifier = modifier
@@ -75,15 +77,15 @@ fun CategoryItemSelect(modifier: Modifier=Modifier, category: Category){
             .height(72.dp)
             .padding(12.dp),
 
-        ){
+        ) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(32.dp),
             verticalAlignment = Alignment.CenterVertically,
 
-        ){
+            ) {
             SubcomposeAsyncImage(
                 loading = {
-                        CircularProgressIndicator(modifier = Modifier.size(48.dp))
+                    CircularProgressIndicator(modifier = Modifier.size(48.dp))
                 },
                 model = ImageRequest
                     .Builder(context = LocalContext.current)
@@ -94,7 +96,8 @@ fun CategoryItemSelect(modifier: Modifier=Modifier, category: Category){
                 error = {
                     Image(
                         painter = painterResource(R.drawable.placeholder_error_image),
-                        contentDescription = "Error loading image")
+                        contentDescription = "Error loading image"
+                    )
                 },
             )
             Text(
@@ -111,20 +114,20 @@ fun CategoryItemSelect(modifier: Modifier=Modifier, category: Category){
 
 @Composable
 fun DrawCategorySelectScreenContent(
-    modifier: Modifier=Modifier,
-    viewModel: HomeViewModel= hiltViewModel(),
+    modifier: Modifier = Modifier,
+    viewModel: HomeViewModel = hiltViewModel(),
     navController: NavController,
     paddingValues: PaddingValues,
-    sharedViewModel: SharedViewModel=SharedViewModel()) {
+    sharedViewModel: SharedViewModel = SharedViewModel()
+) {
 
     val categories = viewModel.categories.collectAsStateWithLifecycle()
 
     Column(
         modifier = modifier
-            .padding(
-                horizontal = 8.dp,
-                vertical = paddingValues.calculateTopPadding()
-            ),
+            .padding(horizontal = 8.dp)
+            .padding(top = paddingValues.calculateTopPadding())
+        ,
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
         Title(content = "Shop by Categories")
@@ -144,18 +147,18 @@ fun DrawCategorySelectScreenContent(
 
 @Composable
 fun CategorySelectScreen(
-    modifier: Modifier=Modifier,
+    modifier: Modifier = Modifier,
     navController: NavController,
-    paddingValues: PaddingValues= PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-    sharedViewModel: SharedViewModel=SharedViewModel()
-){
+    paddingValues: PaddingValues = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+    sharedViewModel: SharedViewModel = SharedViewModel()
+) {
     Scaffold(
         modifier = modifier
             .padding(paddingValues)
             .padding(horizontal = 16.dp),
         topBar = {
             Row(
-                modifier= Modifier
+                modifier = Modifier
                     .fillMaxWidth()
                     .wrapContentHeight()
                     .padding(vertical = 16.dp, horizontal = 8.dp),
