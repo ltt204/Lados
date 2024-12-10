@@ -93,7 +93,6 @@ import org.nullgroup.lados.viewmodels.SharedViewModel
 import java.util.Calendar
 
 
-
 @Composable
 fun FilterButton(
     text: String,
@@ -110,17 +109,26 @@ fun FilterButton(
             selectedButton = !selectedButton!!
         },
         modifier = modifier,
-        colors = ButtonDefaults.buttonColors( if (selectedButton == true) MagentaMaterial else GrayMaterial.copy(alpha = 0.2f)),
+        colors = ButtonDefaults.buttonColors(
+            if (selectedButton == true) MagentaMaterial else GrayMaterial.copy(
+                alpha = 0.2f
+            )
+        ),
         contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp),
-            modifier=Modifier.padding(horizontal = 4.dp)
+            modifier = Modifier.padding(horizontal = 4.dp)
         ) {
             Text(text = text, color = if (selectedButton == true) WhiteMaterial else BlackMaterial)
             if (icon != null) {
-                Icon(icon, tint=if (selectedButton == true) WhiteMaterial else BlackMaterial , contentDescription = contentDescription, modifier = Modifier.size(28.dp))
+                Icon(
+                    icon,
+                    tint = if (selectedButton == true) WhiteMaterial else BlackMaterial,
+                    contentDescription = contentDescription,
+                    modifier = Modifier.size(28.dp)
+                )
                 Spacer(modifier = Modifier.width(4.dp))
             }
         }
@@ -129,11 +137,11 @@ fun FilterButton(
 
 @Composable
 fun DrawProductInCategoryScreenContent(
-    modifier: Modifier=Modifier,
+    modifier: Modifier = Modifier,
     navController: NavController,
-    textStyle: TextStyle=TextStyle(fontSize = 20.sp, fontWeight = FontWeight.Bold),
-    paddingValues: PaddingValues, viewModel: HomeViewModel= hiltViewModel(),
-    sharedViewModel: SharedViewModel=SharedViewModel(),
+    textStyle: TextStyle = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.Bold),
+    paddingValues: PaddingValues, viewModel: HomeViewModel = hiltViewModel(),
+    sharedViewModel: SharedViewModel = SharedViewModel(),
     onButtonClick: (String) -> Unit
 ) {
     val products = viewModel.products.collectAsStateWithLifecycle()
@@ -146,16 +154,48 @@ fun DrawProductInCategoryScreenContent(
     ) {
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(4.dp),
-            modifier = modifier,
-            contentPadding = PaddingValues(horizontal = 4.dp) // Apply padding here
+            modifier = modifier // Apply padding here
         ) {
             items(5) { index -> // Use items() for better readability
                 when (index) {
-                    0 -> FilterButton(text = "2", icon = Icons.Outlined.List, contentDescription = "Build Filter", type="Filter", onButtonClick = onButtonClick)
-                    1 -> FilterButton(text = "On Sale", contentDescription = "On Sale Filter", type="Deals", onButtonClick = onButtonClick)
-                    2 -> FilterButton(text = "Price", icon = Icons.Outlined.KeyboardArrowDown, contentDescription = "Price Sort", type="Price", onButtonClick = onButtonClick)
-                    3 -> FilterButton(text = "Sort by", icon = Icons.Outlined.KeyboardArrowDown, contentDescription = "Sort by", type="Sort by",onButtonClick = onButtonClick)
-                    4 -> FilterButton(text = "Men", icon = Icons.Outlined.KeyboardArrowDown, contentDescription = "Men's Filter", type="Gender", onButtonClick = onButtonClick)
+                    0 -> FilterButton(
+                        text = "2",
+                        icon = Icons.Outlined.List,
+                        contentDescription = "Build Filter",
+                        type = "Filter",
+                        onButtonClick = onButtonClick
+                    )
+
+                    1 -> FilterButton(
+                        text = "On Sale",
+                        contentDescription = "On Sale Filter",
+                        type = "Deals",
+                        onButtonClick = onButtonClick
+                    )
+
+                    2 -> FilterButton(
+                        text = "Price",
+                        icon = Icons.Outlined.KeyboardArrowDown,
+                        contentDescription = "Price Sort",
+                        type = "Price",
+                        onButtonClick = onButtonClick
+                    )
+
+                    3 -> FilterButton(
+                        text = "Sort by",
+                        icon = Icons.Outlined.KeyboardArrowDown,
+                        contentDescription = "Sort by",
+                        type = "Sort by",
+                        onButtonClick = onButtonClick
+                    )
+
+                    4 -> FilterButton(
+                        text = "Men",
+                        icon = Icons.Outlined.KeyboardArrowDown,
+                        contentDescription = "Men's Filter",
+                        type = "Gender",
+                        onButtonClick = onButtonClick
+                    )
                 }
             }
         }
@@ -194,8 +234,11 @@ fun ProductInCategoryScreen(
     val sheetState = rememberModalBottomSheetState(
         initialValue = ModalBottomSheetValue.Hidden
     )
+
     val scope = rememberCoroutineScope()
-    var sheetContent by remember { mutableStateOf<@Composable () -> Unit>({}) }
+    var sheetContent by remember {
+        mutableStateOf<@Composable () -> Unit>({})
+    }
 
     val optionsMap = mapOf(
         "Sort by" to listOf(
@@ -210,10 +253,17 @@ fun ProductInCategoryScreen(
     )
     ModalBottomSheetLayout(
         sheetState = sheetState,
+        sheetShape = RoundedCornerShape(
+            topStart = 30.dp,
+            topEnd = 30.dp
+        ),
         sheetContent = { sheetContent() }
     ) {
         Scaffold(
-            modifier = modifier,
+            modifier = modifier
+                .padding(paddingValues)
+                .padding(horizontal = 16.dp)
+            ,
             topBar = {
                 Row(
                     modifier = Modifier
@@ -254,8 +304,11 @@ fun ProductInCategoryScreen(
                             options = option,
                             paddingValues = paddingValues,
                             onSelectionChanged = {},
-                            onCloseClick = { scope.launch { sheetState.hide() } }
-                        )
+                            onCloseClick = {
+                                scope.launch {
+                                    sheetState.hide()
+                                }
+                            })
                     }
                     scope.launch { sheetState.show() }
                 }

@@ -184,7 +184,10 @@ fun SearchHistory(modifier: Modifier=Modifier){
 }
 
 @Composable
-fun DrawMainSearchScreenContent(modifier: Modifier=Modifier, navController: NavController, paddingValues: PaddingValues= PaddingValues(horizontal = 16.dp, vertical = 8.dp)) {
+fun DrawMainSearchScreenContent(
+    modifier: Modifier=Modifier,
+    navController: NavController,
+    paddingValues: PaddingValues= PaddingValues(horizontal = 16.dp, vertical = 8.dp)) {
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -207,7 +210,10 @@ fun DrawMainSearchScreenContent(modifier: Modifier=Modifier, navController: NavC
 @Composable
 fun SearchScreen(modifier: Modifier = Modifier, navController: NavController, paddingValues: PaddingValues  = PaddingValues(horizontal = 16.dp, vertical = 8.dp), sharedViewModel: SharedViewModel = SharedViewModel()) {
     Scaffold(
-        modifier = modifier,
+        modifier = modifier
+            .padding(paddingValues)
+            .padding(horizontal = 16.dp)
+        ,
         topBar = {
             Row(
                 modifier= Modifier

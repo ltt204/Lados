@@ -1,7 +1,5 @@
 package org.nullgroup.lados.screens.customer
 
-import androidx.annotation.DrawableRes
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -13,34 +11,30 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+//noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.ModalBottomSheetLayout
+//noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.ModalBottomSheetValue
+//noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.TextButton
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.outlined.Done
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.ShoppingCart
+//noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.rememberModalBottomSheetState
-import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -49,10 +43,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -66,15 +58,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.LinkAnnotation
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.withLink
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -82,10 +68,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.yield
 import org.nullgroup.lados.R
 import org.nullgroup.lados.data.models.Category
 import org.nullgroup.lados.data.models.Product
@@ -98,10 +81,12 @@ import org.nullgroup.lados.ui.theme.MagentaMaterial
 import org.nullgroup.lados.ui.theme.WhiteMaterial
 import org.nullgroup.lados.viewmodels.HomeViewModel
 import org.nullgroup.lados.viewmodels.SharedViewModel
-import java.util.Calendar
 
 @Composable
-fun SearchBarRow(modifier: Modifier=Modifier, navController: NavController) {
+fun SearchBarRow(
+    modifier: Modifier=Modifier,
+    navController: NavController
+) {
     Row(
         modifier = modifier
             .padding(horizontal = 4.dp)
@@ -117,7 +102,9 @@ fun SearchBarRow(modifier: Modifier=Modifier, navController: NavController) {
 }
 
 @Composable
-fun SearchBar(modifier: Modifier=Modifier, navController: NavController, onSearch: (String) -> Unit) {
+fun SearchBar(
+    modifier: Modifier=Modifier,
+    navController: NavController, onSearch: (String) -> Unit) {
     var searchText by remember { mutableStateOf("") }
     val focusManager = LocalFocusManager.current
 
@@ -162,7 +149,10 @@ fun SearchBar(modifier: Modifier=Modifier, navController: NavController, onSearc
 }
 
 @Composable
-fun CategoryCircle(modifier: Modifier=Modifier, imageUrl: String) {
+fun CategoryCircle(
+    modifier: Modifier=Modifier,
+    imageUrl: String
+) {
     Box(
         modifier
             .clip(CircleShape)
@@ -180,7 +170,12 @@ fun CategoryCircle(modifier: Modifier=Modifier, imageUrl: String) {
 }
 
 @Composable
-fun TitleTextRow(modifier: Modifier=Modifier, contentLeft: String, contentRight: String, color: Color = BlackMaterial, onClick: () -> Unit = {}) {
+fun TitleTextRow(
+    modifier: Modifier=Modifier,
+    contentLeft: String,
+    contentRight: String,
+    color: Color = BlackMaterial,
+    onClick: () -> Unit = {}) {
     Row(
         modifier = modifier
             .fillMaxWidth(),
@@ -233,7 +228,9 @@ fun CategoryItems(
 }
 
 @Composable
-fun CategoryItem(modifier: Modifier=Modifier, category: Category) {
+fun CategoryItem(
+    modifier: Modifier=Modifier,
+    category: Category) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
@@ -246,7 +243,9 @@ fun CategoryItem(modifier: Modifier=Modifier, category: Category) {
 
 
 @Composable
-fun ProductItem(modifier: Modifier = Modifier, product: Product) {
+fun ProductItem(
+    modifier: Modifier = Modifier,
+    product: Product) {
     Box(modifier = modifier
         .width(160.dp)
         .height(280.dp)
@@ -306,13 +305,15 @@ fun ProductItem(modifier: Modifier = Modifier, product: Product) {
                     )
                 )
             }
-
         }
     }
 }
 
 @Composable
-fun ProductRow(modifier: Modifier = Modifier, viewModel: HomeViewModel = hiltViewModel()){
+fun ProductRow(
+    modifier: Modifier = Modifier,
+    viewModel: HomeViewModel = hiltViewModel()
+){
 
     val products = viewModel.products.collectAsStateWithLifecycle()
 
@@ -386,12 +387,13 @@ fun DrawProductScreenContent(
 
 
 @Composable
-fun BottomSheetContent(modifier: Modifier = Modifier,
-                       title: String,
-                       options: List<String>,
-                       onSelectionChanged: (String) -> Unit ,
-                       paddingValues: PaddingValues,
-                       onCloseClick: () -> Unit) {
+fun BottomSheetContent(
+    modifier: Modifier = Modifier,
+    title: String,
+    options: List<String>,
+    onSelectionChanged: (String) -> Unit ,
+    paddingValues: PaddingValues,
+    onCloseClick: () -> Unit) {
     var selectedButtonIndex by remember { mutableStateOf<Int?>(null) }
     Box(
         modifier = Modifier.fillMaxHeight(0.5f)
@@ -466,10 +468,11 @@ fun BottomSheetContent(modifier: Modifier = Modifier,
 
 
 @Composable
-fun ProductScreen(modifier: Modifier = Modifier,
-                  navController: NavController,
-                  paddingValues: PaddingValues  = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                  sharedViewModel: SharedViewModel = SharedViewModel()
+fun ProductScreen(
+    modifier: Modifier = Modifier,
+    navController: NavController,
+    paddingValues: PaddingValues  = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+    sharedViewModel: SharedViewModel = SharedViewModel()
 ) {
     val sheetState = rememberModalBottomSheetState(
         initialValue = ModalBottomSheetValue.Hidden
@@ -478,6 +481,10 @@ fun ProductScreen(modifier: Modifier = Modifier,
 
     ModalBottomSheetLayout(
         sheetState = sheetState,
+        sheetShape = RoundedCornerShape(
+            topStart = 30.dp,
+            topEnd = 30.dp
+        ),
         sheetContent = {
             BottomSheetContent(
                 title = "Gender",
@@ -493,13 +500,16 @@ fun ProductScreen(modifier: Modifier = Modifier,
         }
     ) {
         Scaffold(
-            modifier = modifier,
+            modifier = modifier
+                .padding(paddingValues)
+                .padding(horizontal = 16.dp)
+            ,
             topBar = {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .wrapContentHeight()
-                        .padding(vertical = 16.dp, horizontal = 8.dp),
+                        .padding(vertical = 16.dp, horizontal = 0.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
@@ -552,12 +562,17 @@ fun ProductScreen(modifier: Modifier = Modifier,
         }
     }
 }
-@Preview(name="Summary", showBackground = true, showSystemUi = true)
+@Preview(
+    name="Summary",
+    showBackground = true,
+    showSystemUi = true)
 @Composable
 fun Summary()
 {
     LadosTheme {
-        ProductScreen(navController = NavController(LocalContext.current))
+        ProductScreen(
+            navController = NavController(LocalContext.current)
+        )
     }
 }
 

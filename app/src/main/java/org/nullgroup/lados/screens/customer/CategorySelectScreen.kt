@@ -110,12 +110,21 @@ fun CategoryItemSelect(modifier: Modifier=Modifier, category: Category){
 }
 
 @Composable
-fun DrawCategorySelectScreenContent(modifier: Modifier=Modifier, viewModel: HomeViewModel= hiltViewModel(), navController: NavController, paddingValues: PaddingValues, sharedViewModel: SharedViewModel=SharedViewModel()) {
+fun DrawCategorySelectScreenContent(
+    modifier: Modifier=Modifier,
+    viewModel: HomeViewModel= hiltViewModel(),
+    navController: NavController,
+    paddingValues: PaddingValues,
+    sharedViewModel: SharedViewModel=SharedViewModel()) {
+
     val categories = viewModel.categories.collectAsStateWithLifecycle()
 
     Column(
         modifier = modifier
-            .padding(horizontal = 8.dp, vertical = paddingValues.calculateTopPadding()),
+            .padding(
+                horizontal = 8.dp,
+                vertical = paddingValues.calculateTopPadding()
+            ),
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
         Title(content = "Shop by Categories")
@@ -134,9 +143,16 @@ fun DrawCategorySelectScreenContent(modifier: Modifier=Modifier, viewModel: Home
 }
 
 @Composable
-fun CategorySelectScreen(modifier: Modifier=Modifier, navController: NavController, paddingValues: PaddingValues= PaddingValues(horizontal = 16.dp, vertical = 8.dp), sharedViewModel: SharedViewModel=SharedViewModel()){
+fun CategorySelectScreen(
+    modifier: Modifier=Modifier,
+    navController: NavController,
+    paddingValues: PaddingValues= PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+    sharedViewModel: SharedViewModel=SharedViewModel()
+){
     Scaffold(
-        modifier = modifier,
+        modifier = modifier
+            .padding(paddingValues)
+            .padding(horizontal = 16.dp),
         topBar = {
             Row(
                 modifier= Modifier
@@ -175,6 +191,8 @@ fun CategorySelectScreen(modifier: Modifier=Modifier, navController: NavControll
 @Composable
 fun Review() {
     LadosTheme {
-        CategorySelectScreen(navController = NavController(LocalContext.current))
+        CategorySelectScreen(
+            navController = NavController(LocalContext.current)
+        )
     }
 }
