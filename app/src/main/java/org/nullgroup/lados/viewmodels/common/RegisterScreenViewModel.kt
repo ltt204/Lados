@@ -96,8 +96,7 @@ class RegisterScreenViewModel @Inject constructor(
 
     private fun handleBackLogin(navController: NavController) {
         registerStepState.value = RegisterScreenStepState.BackLogin
-        navController.popBackStack()
-        navController.navigate("login")
+        navController.popBackStack("login", false)
     }
 
     fun handleEvent(event: RegisterScreenEvent) {

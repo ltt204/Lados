@@ -23,6 +23,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import org.nullgroup.lados.screens.Screen
+import org.nullgroup.lados.screens.common.LoginScreen
 import org.nullgroup.lados.screens.customer.AddAddressScreen
 import org.nullgroup.lados.screens.customer.AddressList
 import org.nullgroup.lados.screens.customer.EditAddressScreen
@@ -34,7 +35,7 @@ import org.nullgroup.lados.screens.customer.ProfileScreen
 fun CustomerGraph(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
-    startDestination: String = Screen.Customer.HomeScreen.route
+    startDestination: String = Screen.Customer.HomeScreen.route,
 ) {
     var isVisibility by remember { mutableStateOf(true) }
 
@@ -80,7 +81,11 @@ fun CustomerGraph(
         NavHost(navController = navController, startDestination = startDestination) {
             composable(route = Screen.Customer.HomeScreen.route) {
                 isVisibility = true
-                HomeScreen(navController = navController, paddingValues = innerPadding)
+                HomeScreen(
+                    navController = navController,
+                    paddingValues = innerPadding,
+                    modifier = modifier
+                )
             }
 
             composable(route = Screen.Customer.ChatScreen.route) {
@@ -90,7 +95,7 @@ fun CustomerGraph(
             composable(route = Screen.Customer.Profile.route) {
                 isVisibility = true
                 ProfileScreen(
-                    modifier = Modifier,
+                    modifier = modifier,
                     paddingValues = innerPadding,
                     navController = navController
                 )
@@ -99,7 +104,7 @@ fun CustomerGraph(
             composable(route = Screen.Customer.Address.AddressList.route) {
                 isVisibility = false
                 AddressList(
-                    modifier = Modifier,
+                    modifier = modifier,
                     navController = navController,
                     paddingValues = innerPadding
                 )
@@ -114,7 +119,7 @@ fun CustomerGraph(
             ) {
                 isVisibility = false
                 EditAddressScreen(
-                    modifier = Modifier,
+                    modifier = modifier,
                     navController = navController,
                     paddingValues = innerPadding
                 )
@@ -123,7 +128,7 @@ fun CustomerGraph(
             composable(route = Screen.Customer.Address.AddAddress.route) {
                 isVisibility = false
                 AddAddressScreen(
-                    modifier = Modifier,
+                    modifier = modifier,
                     paddingValues = innerPadding,
                     navController = navController
                 )
@@ -132,10 +137,15 @@ fun CustomerGraph(
             composable(route = Screen.Customer.EditProfile.route) {
                 isVisibility = false
                 EditProfileScreen(
-                    modifier = Modifier,
+                    modifier = modifier,
                     paddingValues = innerPadding,
                     navController = navController
                 )
+            }
+
+            composable(route = Screen.Common.LoginScreen.route) {
+                isVisibility = false
+                LoginScreen(modifier = modifier, navController = navController)
             }
         }
     }

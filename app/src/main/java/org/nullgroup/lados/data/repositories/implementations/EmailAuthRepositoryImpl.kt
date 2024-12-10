@@ -108,13 +108,6 @@ class EmailAuthRepositoryImpl(
     override suspend fun resetPassword(email: String): ResourceState<Boolean> {
         return try {
             auth.sendPasswordResetEmail(email).await()
-            val users = userRepository.getAllUsersFromFirestore()
-
-            for (user in users.getOrNull()!!) {
-                if (user.email == email) {
-                    userRepository.updateUser(user.copy(isActive = false))
-                }
-            }
 
             ResourceState.Success(true)
         } catch (e: Exception) {

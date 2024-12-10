@@ -353,15 +353,15 @@ fun LoginScreen(
             val userRole = (loginStep as LoginScreenStepState.Home).user.role
             when (userRole) {
                 UserRole.CUSTOMER.name -> {
-                    CustomerGraph()
+                    CustomerGraph(modifier = modifier)
                 }
 
                 UserRole.ADMIN.name -> {
-                    AdminGraph()
+                    AdminGraph(modifier = modifier)
                 }
 
                 UserRole.STAFF.name -> {
-                    StaffGraph()
+                    StaffGraph(modifier = modifier)
                 }
             }
         }
