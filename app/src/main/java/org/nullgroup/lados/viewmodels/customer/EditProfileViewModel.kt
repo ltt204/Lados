@@ -43,6 +43,12 @@ class EditProfileViewModel @Inject constructor(
                         profilePictureUiState.value = Loading
 
                         try {
+                            imageRepository.deleteImage(
+                                child = "users",
+                                fileName = user.email,
+                                extension = "jpg"
+                            )
+
                             val firebaseStorageUrl = imageRepository.uploadImage(
                                 userProfilePicture.value.image,
                                 userProfilePicture.value.child,

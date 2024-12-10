@@ -22,7 +22,6 @@ class UserRepositoryImplement(
     override fun getCurrentUserFlow(): Flow<User> = callbackFlow {
         val userRef = firestore.collection("users").document(firebaseAuth.currentUser?.email!!)
 
-
         val subscription = userRef.addSnapshotListener { snapshot, error ->
             if (error!=null) {
                 close(error)

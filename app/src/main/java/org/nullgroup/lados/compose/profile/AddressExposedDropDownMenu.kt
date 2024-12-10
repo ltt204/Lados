@@ -97,8 +97,7 @@ fun AddressExposedDropDownMenu(
                                     .fillMaxWidth(),
                                 content = {
                                     CircularProgressIndicator(
-                                        modifier = Modifier.size(30.dp),
-                                        color = Color.Gray
+                                        modifier = Modifier.size(30.dp)
                                     )
                                 }
                             )
@@ -108,7 +107,18 @@ fun AddressExposedDropDownMenu(
                     )
                 }
 
-                is MenuItemsUIState.Failed -> LoadOnError()
+                is MenuItemsUIState.Failed ->
+                    DropdownMenuItem(
+                        text = {
+                            LoadOnError(
+                                content = {
+                                    Text(text = itemsUiState.message, color = Color.Black)
+                                },
+                            )
+                        },
+                        onClick = { /* No action */ },
+                    )
+
                 is MenuItemsUIState.Success -> {
                     menuHeight = (itemsUiState.data.size * 48).coerceAtMost(192)
                     LazyColumn(
@@ -153,7 +163,7 @@ fun AddressExposedDropDownMenuPreview() {
     Surface(modifier = Modifier.fillMaxSize()) {
         AddressExposedDropDownMenu(
             placeHolder = "Province",
-            itemsUiState = MenuItemsUIState.Success(listOf("Hanoi", "HCM", "Da Nang")),
+            itemsUiState = MenuItemsUIState.Failed("123"),
         )
     }
 }

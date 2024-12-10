@@ -23,11 +23,13 @@ class AuthScreenViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 userRepository.login(email, password).let {
+                    Log.d("AuthScreenViewModel", "Login result: ${it}")
                     result.value = it
                 }
                 if (result.value.isSuccess) {
                     userRepository.getUserRole(email).let {
                         user.value = it.getOrNull()
+                        Log.d("AuthScreenViewModel", "User role result: ${it}")
                     }
                 }
                 Log.d("AuthScreenViewModel", "User role: ${user.value}")
