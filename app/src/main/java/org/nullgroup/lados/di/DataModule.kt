@@ -9,7 +9,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import org.nullgroup.lados.data.repositories.implementations.ImageRepositoryImplement
 import org.nullgroup.lados.data.repositories.implementations.ProductRepositoryImplement
-import org.nullgroup.lados.data.repositories.implementations.UserAddressRepository
+import org.nullgroup.lados.data.repositories.implementations.UserAddressRepositoryImplement
 import org.nullgroup.lados.data.repositories.implementations.UserRepositoryImplement
 import org.nullgroup.lados.data.repositories.interfaces.IUserAddressRepository
 import org.nullgroup.lados.data.repositories.interfaces.ImageRepository
@@ -45,7 +45,7 @@ object DataModule {
         firestore: FirebaseFirestore,
         firebaseAuth: FirebaseAuth
     ): IUserAddressRepository {
-        return UserAddressRepository(firestore, firebaseAuth)
+        return UserAddressRepositoryImplement(firestore, firebaseAuth)
     }
 
     @Singleton

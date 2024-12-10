@@ -1,5 +1,6 @@
 package org.nullgroup.lados.screens.customer
 
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -25,6 +26,7 @@ import org.nullgroup.lados.compose.profile.AddressForm
 import org.nullgroup.lados.compose.profile.ConfirmDialog
 import org.nullgroup.lados.compose.profile.ProfileTopAppBar
 import org.nullgroup.lados.viewmodels.customer.EditAddressViewModel
+import org.nullgroup.lados.viewmodels.customer.SavingResult
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -42,7 +44,9 @@ fun EditAddressScreen(
     val provincesUiState = viewModel.provincesUiState
     val districtsUiState = viewModel.districtsUiState
     val wardsUiState = viewModel.wardsUiState
-
+    var isSaveClick by remember {
+        mutableStateOf(false)
+    }
     BackHandler {
         cancelConfirmation = true
     }
@@ -107,10 +111,31 @@ fun EditAddressScreen(
             onDismissRequest = { saveConfirmation = false },
             confirmButton = {
                 saveConfirmation = false
-                navController?.navigateUp()
                 viewModel.saveAddress()
+                isSaveClick = true
             }
         )
+    }
+
+    if (isSaveClick) {
+        when (viewModel.savingResult.value) {
+            is SavingResult.Loading -> {
+                // Do nothing
+            }
+            is SavingResult.Success -> {
+                isSaveClick = false
+                navController?.navigateUp()
+            }
+
+            is SavingResult.Failed -> {
+                Toast.makeText(
+                    navController?.context,
+                    (viewModel.savingResult.value as SavingResult.Failed).message,
+                    Toast.LENGTH_SHORT
+                ).show()
+                isSaveClick = false
+            }
+        }
     }
 
     if (cancelConfirmation && viewModel.isInfoChanged.value) {

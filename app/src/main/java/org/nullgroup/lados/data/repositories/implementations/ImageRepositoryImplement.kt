@@ -27,13 +27,10 @@ class ImageRepositoryImplement(
             .child("images")
             .child(child)
             .child("$fileName.$extension")
-        imageRef.putBytes(image).addOnSuccessListener {
-            Log.d("ImageRepositoryImplement", "Upload successful")
-        }.addOnFailureListener {
-            // Will changes to Result sealed class for better handle exception
-            throw Exception("Upload failed")
-        }
-        return imageRef.downloadUrl.await().toString()
+
+        val imageUrl: String = imageRef.putBytes(image).await().storage.downloadUrl.await().toString()
+
+        return imageUrl
     }
 
     /**

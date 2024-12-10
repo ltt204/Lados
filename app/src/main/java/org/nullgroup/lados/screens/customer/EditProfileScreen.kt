@@ -134,11 +134,6 @@ fun EditProfileScreen(
                 is ProfilePictureUiState.Loading,
                 is ProfilePictureUiState.Initial -> {
                     Log.d("EditProfileScreen", "ProfilePictureUiState.Loading")
-//                    LoadOnProgress {
-//                        CircularProgressIndicator(modifier = Modifier.size(48.dp))
-//                        Spacer(modifier = Modifier.padding(top = 16.dp))
-//                        Text(text = "Saving...")
-//                    }
                 }
 
                 is ProfilePictureUiState.Error -> {

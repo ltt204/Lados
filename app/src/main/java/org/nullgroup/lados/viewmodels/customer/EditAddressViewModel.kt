@@ -35,16 +35,15 @@ class EditAddressViewModel @Inject constructor(
     var isInfoChanged = mutableStateOf(false)
         private set
 
-    var provincesUiState: MenuItemsUIState by mutableStateOf(MenuItemsUIState.Default())
+    var provincesUiState: MenuItemsUIState by mutableStateOf(MenuItemsUIState.Loading)
         private set
     var districtsUiState: MenuItemsUIState by mutableStateOf(MenuItemsUIState.Default())
         private set
     var wardsUiState: MenuItemsUIState by mutableStateOf(MenuItemsUIState.Default())
         private set
-
     val userAddress = MutableStateFlow(Address())
 
-    var streetDetail = MutableStateFlow("")
+    var savingResult = mutableStateOf<SavingResult>(SavingResult.Loading)
         private set
 
     init {
@@ -88,6 +87,7 @@ class EditAddressViewModel @Inject constructor(
             when (it) {
                 is MenuItemsUIState.Success -> {
                     val districtName = it.data[index]
+                    wardsUiState = MenuItemsUIState.Loading
                     viewModelScope.launch {
                         userAddress.emit(
                             userAddress.value.copy(
@@ -142,12 +142,18 @@ class EditAddressViewModel @Inject constructor(
     fun saveAddress() {
         viewModelScope.launch {
             Log.d("EditAddressViewModel", "saveAddress: ${userAddress.value}")
-            userAddressRepository.saveAddress(userAddress.value)
+            try {
+                userAddressRepository.saveAddress(userAddress.value)
+                savingResult.value = SavingResult.Success
+            } catch (e: Exception) {
+                savingResult.value = SavingResult.Failed(e.message!!)
+            }
         }
     }
 
     private fun loadProvinces() {
         viewModelScope.launch {
+            delay(500)
             if (cacheProvinces.value.isNotEmpty()) {
                 provincesUiState =
                     MenuItemsUIState.Success(cacheProvinces.value.map { it.full_name })
@@ -160,7 +166,7 @@ class EditAddressViewModel @Inject constructor(
                     cacheProvinces.emit(it)
                 }
             } catch (e: Exception) {
-                provincesUiState = MenuItemsUIState.Failed
+                provincesUiState = MenuItemsUIState.Failed(e.message!!)
             }
 
             if (userAddress.value.district.isNotEmpty()) {
@@ -173,11 +179,8 @@ class EditAddressViewModel @Inject constructor(
 
     private fun loadDistricts(provinceName: String) {
         viewModelScope.launch {
-            if (cacheDistricts.value.isNotEmpty()) {
-                districtsUiState =
-                    MenuItemsUIState.Success(cacheDistricts.value.map { it.full_name })
-                return@launch
-            }
+            delay(500)
+
             val provinceId = cacheProvinces.value.first { it.full_name == provinceName }.id
             try {
                 provinceService.getDistricts(provinceId).let {
@@ -185,7 +188,7 @@ class EditAddressViewModel @Inject constructor(
                     cacheDistricts.emit(it)
                 }
             } catch (e: Exception) {
-                districtsUiState = MenuItemsUIState.Failed
+                districtsUiState = MenuItemsUIState.Failed(e.message!!)
             }
 
             if (userAddress.value.ward.isNotEmpty()) {
@@ -198,10 +201,8 @@ class EditAddressViewModel @Inject constructor(
 
     private fun loadWards(districtName: String) {
         viewModelScope.launch {
-            if (cacheWards.value.isNotEmpty()) {
-                wardsUiState = MenuItemsUIState.Success(cacheWards.value.map { it.full_name })
-                return@launch
-            }
+            delay(500)
+
             Log.d("EditAddressViewModel", "loadWards: $districtName")
             val districtId = cacheDistricts.value.first { it.full_name == districtName }.id
             Log.d("EditAddressViewModel", "loadWards: $districtId")
@@ -211,7 +212,7 @@ class EditAddressViewModel @Inject constructor(
                     cacheWards.emit(it)
                 }
             } catch (e: Exception) {
-                wardsUiState = MenuItemsUIState.Failed
+                wardsUiState = MenuItemsUIState.Failed(e.message!!)
             }
         }
     }
@@ -221,5 +222,5 @@ sealed interface MenuItemsUIState {
     data class Default(var data: List<String> = emptyList()) : MenuItemsUIState
     data class Success(var data: List<String>) : MenuItemsUIState
     data object Loading : MenuItemsUIState
-    data object Failed : MenuItemsUIState
+    data class Failed(var message: String) : MenuItemsUIState
 }
