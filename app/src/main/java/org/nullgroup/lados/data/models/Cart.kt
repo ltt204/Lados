@@ -17,6 +17,46 @@ data class CartItem(
     }
 }
 
+data class CheckingOutItem(
+    val cartItem: CartItem = CartItem(),
+    val product: Product = Product(),
+    val variant: ProductVariant = ProductVariant()
+) {
+    companion object {
+        const val COLLECTION_NAME = "lastCheckingOutItems"
+
+//        fun fromMap(map: Map<String, Any>?): CheckingOutItem? {
+//            if (map == null) {
+//                return null
+//            }
+//            return CheckingOutItem(
+//                cartItem = map["cartItem"] as CartItem,
+//                product = map["product"] as Product,
+//                variant = map["variant"] as ProductVariant
+//            )
+//        }
+    }
+
+//    fun toMap(): Map<String, Any> {
+//        return mapOf(
+//            "cartItem" to cartItem,
+//            "product" to product,
+//            "variant" to variant
+//        )
+//    }
+}
+
+data class CheckoutInfo (
+    val subtotal: Double = 0.0,
+    val productDiscount: Double = 0.0,
+    val orderDiscount: Double = 0.0,
+    val total: Double = 0.0,
+) {
+    companion object{
+        const val FIELD_NAME = "lastCheckoutInfo"
+    }
+}
+
 // Main Cart data class
 //data class Cart(
 //    val customerId: String = "",  // Reference to customer document ID

@@ -1,12 +1,17 @@
 package org.nullgroup.lados.data.repositories.implementations
 
 import android.util.Log
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
+import com.google.firebase.firestore.toObject
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import org.nullgroup.lados.data.models.CartItem
+import org.nullgroup.lados.data.models.CheckingOutItem
+import org.nullgroup.lados.data.models.CheckoutInfo
 import org.nullgroup.lados.data.repositories.interfaces.CartItemRepository
 
 class CartItemRepositoryImplement(
@@ -24,17 +29,25 @@ class CartItemRepositoryImplement(
                     return@addSnapshotListener
                 }
 
-                if (snapshot != null) {
-                    val cartItems = snapshot.documents.mapNotNull {
+                if (snapshot == null) {
+                    return@addSnapshotListener
+                }
+
+                val cartItems = snapshot.documents.mapNotNull {
+                    if (it.exists()) {
                         it.toObject(CartItem::class.java)
                     }
-                    trySend(cartItems)
+                    else {
+                        it.toObject(CartItem::class.java)!!.copy(
+                            amount = 0
+                        )
+                    }
                 }
+                trySend(cartItems)
             }
         awaitClose {
             listener.remove()
         }
-
     }
 
     /**
@@ -115,6 +128,120 @@ class CartItemRepositoryImplement(
             Result.success(true)
         } catch (e: Exception) {
             Log.e("CartItemRepositoryImplement", "Error updating cart items amount: ", e)
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun saveCheckingOutItems(
+        customerId: String,
+        checkingOutItems: List<CheckingOutItem>
+    ): Result<Boolean> {
+        return try {
+            val customerRef = firestore.collection(userCollectionName).document(customerId)
+            val batch = firestore.batch()
+            checkingOutItems.forEach { checkingOutItem ->
+                val modifiedItem = checkingOutItem.copy(
+                    product = checkingOutItem.product.copy(
+                        variants = emptyList(),
+                        engagements = emptyList()
+                    )
+                )
+                batch.set(
+                    customerRef
+                        .collection(CheckingOutItem.COLLECTION_NAME)
+                        .document(checkingOutItem.cartItem.id),
+                    modifiedItem
+                )
+            }
+            batch.commit().await()
+            Result.success(true)
+        } catch (e: Exception) {
+            Log.e("CartItemRepositoryImplement", "Error saving checking out items: ", e)
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun getCheckingOutItemsAsFlow(
+        customerId: String
+    ): Flow<List<CheckingOutItem>> = callbackFlow {
+        val listener = firestore.collection(userCollectionName)
+            .document(customerId)
+            .collection(CheckingOutItem.COLLECTION_NAME)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    close(error)
+                    return@addSnapshotListener
+                }
+
+                if (snapshot != null) {
+                    val checkingOutItems = snapshot.documents.mapNotNull {
+                        it.toObject(CheckingOutItem::class.java)
+                    }
+                    trySend(checkingOutItems)
+                }
+            }
+        awaitClose {
+            listener.remove()
+        }
+    }
+
+    override suspend fun clearCheckingOutItems(customerId: String): Result<Boolean> {
+        return try {
+            val customerRef = firestore.collection(userCollectionName).document(customerId)
+            val batch = firestore.batch()
+            val checkingOutItems = customerRef.collection(CheckingOutItem.COLLECTION_NAME).get().await()
+            checkingOutItems.documents.forEach {
+                batch.delete(it.reference)
+            }
+            batch.commit().await()
+            Result.success(true)
+        } catch (e: Exception) {
+            Log.e("CartItemRepositoryImplement", "Error clearing checking out items: ", e)
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun saveCheckoutInfo(
+        customerId: String,
+        checkoutInfo: CheckoutInfo
+    ): Result<Boolean> {
+        return try {
+            val customerRef = firestore.collection(userCollectionName).document(customerId)
+            customerRef
+                .set(
+                    mapOf(CheckoutInfo.FIELD_NAME to checkoutInfo),
+                    SetOptions.merge()
+                )
+                .await()
+            Result.success(true)
+        } catch (e: Exception) {
+            Log.e("CartItemRepositoryImplement", "Error saving checkout info: ", e)
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun getCheckoutInfo(customerId: String): Result<CheckoutInfo?> {
+        return try {
+            val customerRef = firestore.collection(userCollectionName).document(customerId)
+            val checkoutInfo = customerRef
+                .get().await()
+                .get(CheckoutInfo.FIELD_NAME, CheckoutInfo::class.java)
+            Result.success(checkoutInfo)
+        } catch (e: Exception) {
+            Log.e("CartItemRepositoryImplement", "Error getting checkout info: ", e)
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun clearCheckoutInfo(customerId: String): Result<Boolean> {
+        return try {
+            val customerRef = firestore.collection(userCollectionName).document(customerId)
+            customerRef
+                .update(CheckoutInfo.FIELD_NAME, FieldValue.delete())
+                .await()
+            Result.success(true)
+        } catch (e: Exception) {
+            Log.e("CartItemRepositoryImplement", "Error clearing checkout info: ", e)
             Result.failure(e)
         }
     }

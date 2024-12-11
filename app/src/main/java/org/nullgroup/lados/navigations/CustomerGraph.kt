@@ -14,6 +14,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -25,6 +26,8 @@ import androidx.navigation.navArgument
 import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.screens.customer.AddAddressScreen
 import org.nullgroup.lados.screens.customer.AddressList
+import org.nullgroup.lados.screens.customer.CartScreen
+import org.nullgroup.lados.screens.customer.CheckoutScreen
 import org.nullgroup.lados.screens.customer.EditAddressScreen
 import org.nullgroup.lados.screens.customer.EditProfileScreen
 import org.nullgroup.lados.screens.customer.HomeScreen
@@ -135,6 +138,24 @@ fun CustomerGraph(
                     modifier = Modifier,
                     paddingValues = innerPadding,
                     navController = navController
+                )
+            }
+
+            composable(route = Screen.Customer.CartScreen.route) {
+                isVisibility = false
+                CartScreen(
+                    modifier = Modifier,
+                    innerPadding = innerPadding,
+                    navController = navController
+                )
+            }
+
+            composable(route = Screen.Customer.CheckOutScreen.route) {
+                isVisibility = false
+                CheckoutScreen(
+                    modifier = Modifier,
+                    innerPadding = innerPadding,
+                    navController = navController,
                 )
             }
         }
