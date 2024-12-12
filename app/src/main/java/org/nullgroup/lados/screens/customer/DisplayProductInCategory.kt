@@ -50,6 +50,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import kotlinx.coroutines.launch
+import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.ui.theme.BlackMaterial
 import org.nullgroup.lados.ui.theme.GrayMaterial
 import org.nullgroup.lados.ui.theme.LadosTheme
@@ -178,6 +179,11 @@ fun DrawProductInCategoryScreenContent(
             items(products.value.size) { item ->
                 ProductItem(
                     product = products.value[item],
+                    onClick = {id ->
+                        navController.navigate(
+                            Screen.Customer.ProductDetailScreen.route + "/$id"
+                        )
+                    }
                 )
             }
         }

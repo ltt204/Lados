@@ -104,7 +104,8 @@ fun SearchBarRow(
 @Composable
 fun SearchBar(
     modifier: Modifier=Modifier,
-    navController: NavController, onSearch: (String) -> Unit) {
+    navController: NavController,
+    onSearch: (String) -> Unit) {
     var searchText by remember { mutableStateOf("") }
     val focusManager = LocalFocusManager.current
 
@@ -245,13 +246,16 @@ fun CategoryItem(
 @Composable
 fun ProductItem(
     modifier: Modifier = Modifier,
-    product: Product) {
+    product: Product,
+    onClick: (String) -> Unit
+) {
     Box(modifier = modifier
         .width(160.dp)
         .height(280.dp)
         .clip(RoundedCornerShape(8.dp))
         .background(GrayMaterial.copy(alpha = 0.2f))
         .padding(bottom = 8.dp)
+        .clickable { onClick(product.id) }
     ) {
         AsyncImage(
             model=product.variants.first().images.first().link,
@@ -312,6 +316,7 @@ fun ProductItem(
 @Composable
 fun ProductRow(
     modifier: Modifier = Modifier,
+    onProductClick: (String) -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ){
 
@@ -324,7 +329,10 @@ fun ProductRow(
     ) {
         items(products.value)
         { item ->
-            ProductItem(product = item)
+            ProductItem(
+                product = item,
+                onClick = onProductClick
+            )
         }
     }
 }
@@ -334,8 +342,9 @@ fun DrawProductScreenContent(
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues,
     navController: NavController,
-    sharedViewModel: SharedViewModel
-) {
+    sharedViewModel: SharedViewModel,
+    onProductClick: (String) -> Unit
+){
     Column(
         modifier = modifier
             .padding(horizontal = 8.dp)
@@ -377,7 +386,9 @@ fun DrawProductScreenContent(
             }
 
             item {
-                ProductRow()
+                ProductRow(
+                    onProductClick = onProductClick
+                )
             }
 
             item {
@@ -388,7 +399,9 @@ fun DrawProductScreenContent(
                 )
             }
             item {
-                ProductRow()
+                ProductRow(
+                    onProductClick = onProductClick
+                )
             }
         }
     }
@@ -562,12 +575,16 @@ fun ProductScreen(
                     }
                 }
             }
-        ) {
+        ) { it ->
             DrawProductScreenContent(
                 modifier = modifier,
                 paddingValues = it,
                 navController = navController,
-                sharedViewModel = sharedViewModel
+                sharedViewModel = sharedViewModel,
+                onProductClick = {
+                    id->
+                    navController.navigate(Screen.Customer.ProductDetailScreen.route + "/$id")
+                }
             )
         }
     }

@@ -44,6 +44,7 @@ import org.nullgroup.lados.screens.customer.EditProfileScreen
 import org.nullgroup.lados.screens.customer.Error_FindNotMatchScreen
 import org.nullgroup.lados.screens.customer.FilterScreen
 import org.nullgroup.lados.screens.customer.HomeScreen
+import org.nullgroup.lados.screens.customer.ProductDetailScreen
 import org.nullgroup.lados.screens.customer.ProductInCategoryScreen
 import org.nullgroup.lados.screens.customer.ProductScreen
 import org.nullgroup.lados.screens.customer.ProfileScreen
@@ -109,7 +110,7 @@ fun CustomerGraph(
                                         Text(
                                             text = it,
                                             fontWeight = FontWeight.SemiBold,
-                                            color = if(isSelected.value) contentColor else Color.Gray
+                                            color = if (isSelected.value) contentColor else Color.Gray
                                         )
                                     }
                                 },
@@ -253,6 +254,24 @@ fun CustomerGraph(
                     modifier = Modifier,
                     navController = navController,
                     paddingValues = innerPadding
+                )
+            }
+
+            composable(
+                route = Screen.Customer.ProductDetailScreen.ROUTE_WITH_ARG,
+                arguments = listOf(
+                    navArgument(Screen.Customer.ProductDetailScreen.ID_ARG) {
+                        type = NavType.StringType
+                    })
+            ) { backStackEntry ->
+                isVisibility = false
+                val productId =
+                    backStackEntry.arguments?.getString(Screen.Customer.ProductDetailScreen.ID_ARG)
+                        ?: ""
+                ProductDetailScreen(
+                    productId = productId,
+                    onAddToBag = {},
+                    navController = navController,
                 )
             }
         }

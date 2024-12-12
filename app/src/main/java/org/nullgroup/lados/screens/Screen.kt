@@ -8,6 +8,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.ui.graphics.vector.ImageVector
 import org.nullgroup.lados.data.models.UserRole
+import org.nullgroup.lados.screens.Screen.Customer.Address.EditAddress
 import org.nullgroup.lados.screens.customer.Error_FindNotMatchScreen
 import org.nullgroup.lados.screens.customer.ProductInCategoryScreen
 
@@ -65,6 +66,15 @@ sealed class Screen(
             "customer_product_in_category_screen",
             Icons.Default.Search
         )
+
+        data object ProductDetailScreen: Customer(
+            "ProductDetailScreen",
+            "customer_product_detail_screen",
+            Icons.Default.Search
+        ){
+            const val ID_ARG = "product_id"
+            const val ROUTE_WITH_ARG = "customer_product_detail_screen/{$ID_ARG}"
+        }
 
         data object ErrorFindNotMatched :
             Customer("Error_FindNotMatched", "customer_error_find_not_matched", Icons.Default.Search)
