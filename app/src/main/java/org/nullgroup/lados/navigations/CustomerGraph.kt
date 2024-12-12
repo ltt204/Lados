@@ -150,6 +150,7 @@ fun CustomerGraph(
                         }
 
                         Screen.Customer.Home.route -> {
+                            isVisibility = true
                             ProductScreen(
                                 navController = navController,
                                 paddingValues = innerPadding,
