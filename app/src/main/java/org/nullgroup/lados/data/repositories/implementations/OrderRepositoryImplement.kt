@@ -1,29 +1,27 @@
 package org.nullgroup.lados.data.repositories.implementations
 
-import com.google.android.gms.tasks.Task
+import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.QuerySnapshot
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import org.nullgroup.lados.data.models.Order
 import org.nullgroup.lados.data.models.OrderProduct
-import org.nullgroup.lados.data.models.OrderStatus
 import org.nullgroup.lados.data.repositories.interfaces.OrderRepository
+import org.nullgroup.lados.utilities.OrderStatus
 
 // Firebase-specific repository example
 class OrderRepositoryImplement(
     private val firestore: FirebaseFirestore,
     private val firebaseAuth: FirebaseAuth
-): OrderRepository {
+) : OrderRepository {
     // Create a new order
     override suspend fun createOrder(
         customerId: String,
         order: Order,
-        ): Result<Boolean> {
+    ): Result<Boolean> {
         return try {
             val userOrdersRef = firestore
                 .collection("users").document(customerId)
@@ -50,7 +48,10 @@ class OrderRepositoryImplement(
     }
 
     // Update order status
-    override suspend fun updateOrderStatus(orderId: String, newStatus: OrderStatus): Result<Boolean> {
+    override suspend fun updateOrderStatus(
+        orderId: String,
+        newStatus: OrderStatus
+    ): Result<Boolean> {
         // TODO: Check later if this is the correct way to update the order status
         try {
             val orderRef = firestore.collection("orders").document(orderId)
@@ -61,7 +62,8 @@ class OrderRepositoryImplement(
                 }
                 val firebaseStatusLog = snapshot.toObject(Order::class.java)?.orderStatusLog
                     ?: mapOf()
-                val statusLog = firebaseStatusLog.mapKeys { OrderStatus.valueOf(it.key) }.toMutableMap()
+                val statusLog =
+                    firebaseStatusLog.mapKeys { OrderStatus.valueOf(it.key) }.toMutableMap()
                 statusLog[newStatus] = System.currentTimeMillis()
                 val newStatusLog = statusLog.mapKeys { it.key.name }
                 transaction.update(orderRef, newStatusLog)
@@ -73,17 +75,26 @@ class OrderRepositoryImplement(
     }
 
     override fun getOrders(): Flow<List<Order>> = callbackFlow {
-        val userEmail = firebaseAuth.currentUser?.email!!
-        val orderRef = firestore.collection("users").document(userEmail).collection("orders")
+        // TODO: Replace mockUserEmail with the actual user email
+//        val userEmail = firebaseAuth.currentUser?.email!!
+        val mockUserEmail = "customer@test.com"
+//        val orderRef = firestore.collection("users").document(mockUserEmail).collection("orders")
+        Log.d("OrderRepositoryImplement", "getOrders: $mockUserEmail")
+        val orderRef = firestore.collection("orders")
 
         val subscription = orderRef.addSnapshotListener { snapshot, e ->
+            Log.d("OrderRepositoryImplement", "getOrders: $snapshot")
             if (e != null) {
                 close(e)
                 return@addSnapshotListener
             }
 
             if (snapshot != null) {
-                val orders = snapshot.documents.mapNotNull { it.toObject(Order::class.java) }
+                val orders =
+                    snapshot.documents.mapNotNull { it.toObject(Order::class.java) }.filter {
+                        it.customerId == mockUserEmail
+                    }
+                Log.d("OrderRepositoryImplement", "getOrders: $orders")
                 trySend(orders).isSuccess
             }
         }
@@ -91,9 +102,13 @@ class OrderRepositoryImplement(
         awaitClose { subscription.remove() }
     }
 
-    override fun getOrderById(orderId: String): Flow<Order> = callbackFlow  {
-        val userEmail = firebaseAuth.currentUser?.email!!
-        val orderRef = firestore.collection("users").document(userEmail).collection("orders")
+    override fun getOrderById(orderId: String): Flow<Order> = callbackFlow {
+        // TODO: Replace mockUserEmail with the actual user email
+//        val userEmail = firebaseAuth.currentUser?.email!!
+        val mockUserEmail = "customer@test.com"
+//        val orderRef = firestore.collection("users").document(mockUserEmail).collection("orders")
+        Log.d("OrderRepositoryImplement", "getOrderById: $mockUserEmail")
+        val orderRef = firestore.collection("orders")
 
         val subscription = orderRef.addSnapshotListener { snapshot, e ->
             if (e != null) {

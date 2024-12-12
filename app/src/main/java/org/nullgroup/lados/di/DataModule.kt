@@ -9,6 +9,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import org.nullgroup.lados.data.repositories.implementations.CategoryRepositoryImplement
 import org.nullgroup.lados.data.repositories.implementations.ImageRepositoryImplement
+import org.nullgroup.lados.data.repositories.implementations.OrderRepositoryImplement
 import org.nullgroup.lados.data.repositories.implementations.ProductRepositoryImplement
 import org.nullgroup.lados.data.repositories.implementations.UserAddressRepositoryImplement
 import org.nullgroup.lados.data.repositories.implementations.UserRepositoryImplement
@@ -18,6 +19,7 @@ import org.nullgroup.lados.data.repositories.interfaces.CategoryRepository
 import org.nullgroup.lados.data.repositories.interfaces.IUserAddressRepository
 
 import org.nullgroup.lados.data.repositories.interfaces.ImageRepository
+import org.nullgroup.lados.data.repositories.interfaces.OrderRepository
 import org.nullgroup.lados.data.repositories.interfaces.ProductRepository
 import org.nullgroup.lados.data.repositories.interfaces.UserRepository
 import javax.inject.Singleton
@@ -69,4 +71,9 @@ object DataModule {
         return CategoryRepositoryImplement(firestore)
     }
 
+    @Singleton
+    @Provides
+    fun provideOrderRepository(firestore: FirebaseFirestore, fireAuth: FirebaseAuth): OrderRepository {
+        return OrderRepositoryImplement(firestore, fireAuth)
+    }
 }

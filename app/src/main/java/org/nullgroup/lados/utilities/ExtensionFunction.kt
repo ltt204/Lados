@@ -8,7 +8,9 @@ import android.graphics.drawable.Drawable
 import android.net.Uri
 import com.google.firebase.Timestamp
 import java.io.ByteArrayOutputStream
+import java.text.SimpleDateFormat
 import java.util.Date
+import java.util.Locale
 
 fun Drawable.toByteArray(
     format: Bitmap.CompressFormat = Bitmap.CompressFormat.JPEG,
@@ -38,4 +40,29 @@ fun Uri.toDrawable(context: Context): Drawable? {
 
 fun Timestamp.toDate(): Date {
     return Date(this.seconds * 1000)
+}
+
+fun String.capitalizeWords(): String {
+    val words = this.lowercase(Locale.getDefault()).split(" ")
+    return words.joinToString(" ") {
+        it.replaceFirstChar { ch ->
+            if (ch.isLowerCase())
+                ch.titlecase(Locale.ROOT)
+            else
+                ch.toString()
+        }
+    }
+}
+
+fun getFirstFourOrderStatuses(): List<OrderStatus> {
+    return OrderStatus.entries.toTypedArray().take(4)
+}
+
+fun Long.toDateTimeString(
+    formatPattern: String,
+    locale: Locale = Locale.getDefault()
+): String {
+    val date = Date(this)
+    val format = SimpleDateFormat(formatPattern, locale)
+    return format.format(date)
 }

@@ -19,9 +19,3 @@ data class UserProfilePicture(
     val fileName: String = "",
     val extension: String = ""
 )
-
-enum class UserRole {
-    CUSTOMER,
-    STAFF,
-    ADMIN
-}
