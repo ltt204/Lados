@@ -520,11 +520,11 @@ fun ProductReviewSection(
 @Preview(showBackground = true)
 @Composable
 fun ReviewCard(
-    name: String = "dfff",
+    name: String = "",
     maxRatings: Int = 5,
     ratings: Int = 5,
-    reviews: String = "ffff",
-    createAt: String = "ffff"
+    reviews: String = "",
+    createAt: String = ""
 ) {
     Box(
         modifier = Modifier
@@ -579,7 +579,7 @@ fun ReviewCard(
                         Icon(
                             painter = painterResource(R.drawable.star_icon),
                             contentDescription = "Star",
-                            tint = if (index < ratings) ProductTheme.primaryColor else Color.Unspecified,
+                            tint = if (index < ratings) ProductTheme.primaryColor else Color.LightGray,
                             modifier = Modifier.size(18.dp)
                         )
                     }
