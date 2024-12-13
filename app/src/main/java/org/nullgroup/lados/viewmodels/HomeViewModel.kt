@@ -1,5 +1,6 @@
 package org.nullgroup.lados.viewmodels
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,36 +18,60 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     private val categoryRepository: CategoryRepository,
     private val productRepository: ProductRepository
-): ViewModel() {
-    private val _categories = MutableStateFlow<List<Category>>(mutableListOf())
-    val categories = _categories.asStateFlow()
+) : ViewModel() {
+    private val _categoryUiState = MutableStateFlow<CategoryUiState>(CategoryUiState.Loading)
+    val categoryUiState = _categoryUiState.asStateFlow()
+//
+//    private val _isLoading = MutableStateFlow(true)
+//    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+//
+//    private val _error = MutableStateFlow<String?>(null)
+//    val error: StateFlow<String?> = _error.asStateFlow()
 
-    private val _isLoading = MutableStateFlow(true)
-    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
-
-    private val _error = MutableStateFlow<String?>(null)
-    val error: StateFlow<String?> = _error.asStateFlow()
-
-    private val _products = MutableStateFlow<List<Product>>(mutableListOf())
-    val products = _products.asStateFlow()
+    private val _productUiState = MutableStateFlow<ProductUiState>(ProductUiState.Loading)
+    val productUiState = _productUiState.asStateFlow()
 
     init {
+        fetchCategories()
+        fetchProducts()
+    }
+
+    private fun fetchCategories() {
         viewModelScope.launch {
-            fetchCategories()
+            try {
+                val getCategoriesResult = categoryRepository.getAllCategoriesFromFireStore()
+
+                _categoryUiState.value =
+                    CategoryUiState.Success(getCategoriesResult.getOrNull() ?: emptyList())
+            } catch (e: Exception) {
+                Log.d("HomeViewModel", "fetchCategories: ${e.message}")
+                _categoryUiState.value = CategoryUiState.Error(e.message ?: "An error occurred")
+            }
         }
     }
 
-    private suspend fun fetchCategories() {
-        _isLoading.value = true
-        val getCategoriesResult = categoryRepository.getAllCategoriesFromFireStore()
-        val getProductsResult = productRepository.getAllProductsFromFireStore()
-        _isLoading.value = false
-
-        if (getCategoriesResult.isFailure) {
-            _error.value = getCategoriesResult.exceptionOrNull()?.message
-            return
+    private fun fetchProducts() {
+        viewModelScope.launch {
+            try {
+                val getProductsResult = productRepository.getAllProductsFromFireStore()
+                _productUiState.value =
+                    ProductUiState.Success(getProductsResult.getOrNull() ?: emptyList())
+            } catch (e: Exception) {
+                Log.d("HomeViewModel", "fetchProducts: ${e.message}")
+                _productUiState.value = ProductUiState.Error(e.message ?: "An error occurred")
+            }
         }
-        _categories.value = getCategoriesResult.getOrNull() ?: emptyList()
-        _products.value = getProductsResult.getOrNull() ?: emptyList()
     }
+}
+
+sealed class ProductUiState {
+    data object Loading : ProductUiState()
+    data class Success(val products: List<Product>) : ProductUiState()
+    data class Error(val message: String) : ProductUiState()
+}
+
+sealed class CategoryUiState {
+    data object Loading : CategoryUiState()
+    data class Success(val categories: List<Category>) : CategoryUiState()
+    data class Error(val message: String) : CategoryUiState()
 }

@@ -1,4 +1,4 @@
-package org.nullgroup.lados.screens.customer
+package org.nullgroup.lados.screens.customer.profile
 
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
@@ -28,9 +28,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import org.nullgroup.lados.compose.profile.ProfileTopAppBar
+import org.nullgroup.lados.compose.common.ProfileTopAppBar
 import org.nullgroup.lados.compose.profile.SwipeToDeleteContainer
-import org.nullgroup.lados.compose.profile.TwoColsItem
+import org.nullgroup.lados.compose.common.TwoColsItem
 import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.viewmodels.customer.AddressListViewModel
 

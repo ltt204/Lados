@@ -5,7 +5,6 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -36,17 +35,17 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import org.nullgroup.lados.screens.Screen
-import org.nullgroup.lados.screens.customer.AddAddressScreen
-import org.nullgroup.lados.screens.customer.AddressList
-import org.nullgroup.lados.screens.customer.CategorySelectScreen
-import org.nullgroup.lados.screens.customer.EditAddressScreen
-import org.nullgroup.lados.screens.customer.EditProfileScreen
+import org.nullgroup.lados.screens.customer.profile.AddAddressScreen
+import org.nullgroup.lados.screens.customer.profile.AddressList
+import org.nullgroup.lados.screens.customer.product.CategorySelectScreen
+import org.nullgroup.lados.screens.customer.profile.EditAddressScreen
+import org.nullgroup.lados.screens.customer.profile.EditProfileScreen
 import org.nullgroup.lados.screens.customer.Error_FindNotMatchScreen
 import org.nullgroup.lados.screens.customer.FilterScreen
 import org.nullgroup.lados.screens.customer.HomeScreen
-import org.nullgroup.lados.screens.customer.ProductInCategoryScreen
+import org.nullgroup.lados.screens.customer.product.ProductDetailScreen
+import org.nullgroup.lados.screens.customer.product.ProductInCategoryScreen
 import org.nullgroup.lados.screens.customer.ProductScreen
-import org.nullgroup.lados.screens.customer.ProfileScreen
 import org.nullgroup.lados.screens.customer.SearchScreen
 import org.nullgroup.lados.ui.theme.MagentaMaterial
 import org.nullgroup.lados.viewmodels.SharedViewModel
@@ -109,7 +108,7 @@ fun CustomerGraph(
                                         Text(
                                             text = it,
                                             fontWeight = FontWeight.SemiBold,
-                                            color = if(isSelected.value) contentColor else Color.Gray
+                                            color = if (isSelected.value) contentColor else Color.Gray
                                         )
                                     }
                                 },
@@ -149,6 +148,7 @@ fun CustomerGraph(
                         }
 
                         Screen.Customer.Home.route -> {
+                            isVisibility = true
                             ProductScreen(
                                 navController = navController,
                                 paddingValues = innerPadding,
@@ -253,6 +253,24 @@ fun CustomerGraph(
                     modifier = Modifier,
                     navController = navController,
                     paddingValues = innerPadding
+                )
+            }
+
+            composable(
+                route = Screen.Customer.ProductDetailScreen.ROUTE_WITH_ARG,
+                arguments = listOf(
+                    navArgument(Screen.Customer.ProductDetailScreen.ID_ARG) {
+                        type = NavType.StringType
+                    })
+            ) { backStackEntry ->
+                isVisibility = false
+                val productId =
+                    backStackEntry.arguments?.getString(Screen.Customer.ProductDetailScreen.ID_ARG)
+                        ?: ""
+                ProductDetailScreen(
+                    productId = productId,
+                    onAddToBag = {},
+                    navController = navController,
                 )
             }
         }

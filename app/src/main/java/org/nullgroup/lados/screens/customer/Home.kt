@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -37,6 +38,7 @@ import androidx.compose.material.icons.outlined.ShoppingCart
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -70,6 +72,7 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import kotlinx.coroutines.launch
 import org.nullgroup.lados.R
+import org.nullgroup.lados.compose.common.LoadOnProgress
 import org.nullgroup.lados.data.models.Category
 import org.nullgroup.lados.data.models.Product
 import org.nullgroup.lados.screens.Screen
@@ -79,20 +82,21 @@ import org.nullgroup.lados.ui.theme.GrayMaterial
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.ui.theme.MagentaMaterial
 import org.nullgroup.lados.ui.theme.WhiteMaterial
+import org.nullgroup.lados.viewmodels.CategoryUiState
 import org.nullgroup.lados.viewmodels.HomeViewModel
+import org.nullgroup.lados.viewmodels.ProductUiState
 import org.nullgroup.lados.viewmodels.SharedViewModel
 
 @Composable
 fun SearchBarRow(
-    modifier: Modifier=Modifier,
+    modifier: Modifier = Modifier,
     navController: NavController
 ) {
     Row(
         modifier = modifier
             .padding(horizontal = 4.dp)
             .height(56.dp)
-            .fillMaxWidth()
-        ,
+            .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {
@@ -103,13 +107,17 @@ fun SearchBarRow(
 
 @Composable
 fun SearchBar(
-    modifier: Modifier=Modifier,
-    navController: NavController, onSearch: (String) -> Unit) {
+    modifier: Modifier = Modifier,
+    navController: NavController,
+    onSearch: (String) -> Unit
+) {
     var searchText by remember { mutableStateOf("") }
     val focusManager = LocalFocusManager.current
 
-    Box(modifier = modifier.fillMaxWidth()
-        .clickable { navController.navigate(Screen.Customer.SearchScreen.route) },
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable { navController.navigate(Screen.Customer.SearchScreen.route) },
         contentAlignment = Alignment.Center
     ) {
         OutlinedTextField(
@@ -123,9 +131,7 @@ fun SearchBar(
                     BlackMaterial,
                     shape = RoundedCornerShape(50)
                 )
-                .align(Alignment.Center)
-
-            ,
+                .align(Alignment.Center),
 
             singleLine = true,
             placeholder = { Text("Search") },
@@ -150,7 +156,7 @@ fun SearchBar(
 
 @Composable
 fun CategoryCircle(
-    modifier: Modifier=Modifier,
+    modifier: Modifier = Modifier,
     imageUrl: String
 ) {
     Box(
@@ -159,7 +165,7 @@ fun CategoryCircle(
             .background(BrownMaterial.copy(alpha = 0.2f))
             .padding(0.dp)
             .size(64.dp)
-    ){
+    ) {
         AsyncImage(
             model = imageUrl,
             contentDescription = null,
@@ -171,18 +177,20 @@ fun CategoryCircle(
 
 @Composable
 fun TitleTextRow(
-    modifier: Modifier=Modifier,
+    modifier: Modifier = Modifier,
     contentLeft: String,
     contentRight: String,
     color: Color = BlackMaterial,
-    onClick: () -> Unit = {}) {
+    onClick: () -> Unit = {}
+) {
     Row(
         modifier = modifier
             .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(text=contentLeft,
+        Text(
+            text = contentLeft,
             style = TextStyle(
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
@@ -193,44 +201,69 @@ fun TitleTextRow(
         TextButton(
             onClick = onClick
         ) {
-            Text(contentRight, style = TextStyle(
-                fontSize = 20.sp,
-                color = BrownMaterial,
-            ))
+            Text(
+                contentRight, style = TextStyle(
+                    fontSize = 20.sp,
+                    color = BrownMaterial,
+                )
+            )
         }
     }
 }
 
 @Composable
 fun CategoryItems(
-    modifier: Modifier=Modifier,
-    viewModel: HomeViewModel= hiltViewModel(),
+    modifier: Modifier = Modifier,
+    viewModel: HomeViewModel = hiltViewModel(),
     sharedViewModel: SharedViewModel,
     navController: NavController
 ) {
-    val categories = viewModel.categories.collectAsStateWithLifecycle()
-    LazyRow(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
-        contentPadding = PaddingValues(8.dp),
-    ) {
-        items(categories.value)
-        { category ->
-            CategoryItem(
-                category=category,
-                modifier=Modifier.clickable {
-                    sharedViewModel.updateComplexData(category)
-                    navController.navigate(Screen.Customer.DisplayProductInCategory.route)
-                })
+    val categoryUiState = viewModel.categoryUiState.collectAsStateWithLifecycle()
+    when (categoryUiState.value) {
+        is CategoryUiState.Loading -> {
+            LoadOnProgress(
+                modifier = modifier.fillMaxHeight(),
+                content = {
+                    LoadOnProgress(
+                        modifier = Modifier,
+                        content = { CircularProgressIndicator() }
+                    )
+                }
+            )
+        }
+
+        is CategoryUiState.Error -> {
+            Text(text = "Failed to load data")
+        }
+
+        is CategoryUiState.Success -> {
+            val categories = (categoryUiState.value as CategoryUiState.Success).categories
+            LazyRow(
+                modifier = modifier,
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                contentPadding = PaddingValues(8.dp),
+            ) {
+                items(categories)
+                { category ->
+                    CategoryItem(
+                        category = category,
+                        modifier = Modifier.clickable {
+                            sharedViewModel.updateComplexData(category)
+                            navController.navigate(Screen.Customer.DisplayProductInCategory.route)
+                        })
+                }
+            }
         }
     }
+
 
 }
 
 @Composable
 fun CategoryItem(
-    modifier: Modifier=Modifier,
-    category: Category) {
+    modifier: Modifier = Modifier,
+    category: Category
+) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
@@ -245,16 +278,19 @@ fun CategoryItem(
 @Composable
 fun ProductItem(
     modifier: Modifier = Modifier,
-    product: Product) {
+    product: Product,
+    onClick: (String) -> Unit
+) {
     Box(modifier = modifier
         .width(160.dp)
         .height(280.dp)
         .clip(RoundedCornerShape(8.dp))
         .background(GrayMaterial.copy(alpha = 0.2f))
         .padding(bottom = 8.dp)
+        .clickable { onClick(product.id) }
     ) {
         AsyncImage(
-            model=product.variants.first().images.first().link,
+            model = product.variants.first().images.first().link,
             contentDescription = "Image",
             modifier = modifier
                 .fillMaxWidth()
@@ -273,8 +309,7 @@ fun ProductItem(
         Column(
             modifier = Modifier
                 .align(Alignment.BottomStart)
-                .padding(8.dp, top = 16.dp)
-            ,
+                .padding(8.dp, top = 16.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Text(
@@ -284,10 +319,10 @@ fun ProductItem(
                     color = BlackMaterial,
                 )
             )
-            Row (
+            Row(
 
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ){
+            ) {
                 Text(
                     text = "$${product.variants.first().salePrice}",
                     style = TextStyle(
@@ -312,21 +347,45 @@ fun ProductItem(
 @Composable
 fun ProductRow(
     modifier: Modifier = Modifier,
+    onProductClick: (String) -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
-){
+) {
+    val productUiState = viewModel.productUiState.collectAsStateWithLifecycle()
+    when (productUiState.value) {
+        is ProductUiState.Loading -> {
+            LoadOnProgress(
+                modifier = modifier.fillMaxHeight(),
+                content = {
+                    LoadOnProgress(
+                        modifier = Modifier,
+                        content = { CircularProgressIndicator() }
+                    )
+                }
+            )
+        }
 
-    val products = viewModel.products.collectAsStateWithLifecycle()
+        is ProductUiState.Error -> {
+            Text(text = "Failed to load data")
+        }
 
-    LazyRow(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
-        contentPadding = PaddingValues(8.dp),
-    ) {
-        items(products.value)
-        { item ->
-            ProductItem(product = item)
+        is ProductUiState.Success -> {
+            val products = (productUiState.value as ProductUiState.Success).products
+            LazyRow(
+                modifier = modifier.heightIn(min = 280.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                contentPadding = PaddingValues(8.dp),
+            ) {
+                items(items = products, key = { it.id })
+                { item ->
+                    ProductItem(
+                        product = item,
+                        onClick = onProductClick
+                    )
+                }
+            }
         }
     }
+
 }
 
 @Composable
@@ -334,13 +393,13 @@ fun DrawProductScreenContent(
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues,
     navController: NavController,
-    sharedViewModel: SharedViewModel
+    sharedViewModel: SharedViewModel,
+    onProductClick: (String) -> Unit
 ) {
     Column(
         modifier = modifier
             .padding(horizontal = 8.dp)
-            .padding(top = paddingValues.calculateTopPadding())
-        ,
+            .padding(top = paddingValues.calculateTopPadding()),
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         LazyColumn(
@@ -367,17 +426,21 @@ fun DrawProductScreenContent(
             item {
                 CategoryItems(
                     sharedViewModel = sharedViewModel,
-                    navController = navController)
+                    navController = navController
+                )
             }
 
             item {
                 TitleTextRow(
                     contentLeft = "Top Selling",
-                    contentRight = "See all")
+                    contentRight = "See all"
+                )
             }
 
             item {
-                ProductRow()
+                ProductRow(
+                    onProductClick = onProductClick
+                )
             }
 
             item {
@@ -388,7 +451,9 @@ fun DrawProductScreenContent(
                 )
             }
             item {
-                ProductRow()
+                ProductRow(
+                    onProductClick = onProductClick
+                )
             }
         }
     }
@@ -400,15 +465,22 @@ fun BottomSheetContent(
     modifier: Modifier = Modifier,
     title: String,
     options: List<String>,
-    onSelectionChanged: (String) -> Unit ,
+    onSelectionChanged: (String) -> Unit,
     paddingValues: PaddingValues,
-    onCloseClick: () -> Unit) {
+    onCloseClick: () -> Unit
+) {
     var selectedButtonIndex by remember { mutableStateOf<Int?>(null) }
     Box(
-        modifier = Modifier.fillMaxHeight(0.5f)
+        modifier = Modifier
+            .fillMaxHeight(0.5f)
             .background(GrayMaterial.copy(alpha = 0.2f))
             .clip(RoundedCornerShape(16.dp))
-            .padding(start=8.dp, end=8.dp, top=8.dp, bottom = paddingValues.calculateBottomPadding()+8.dp)
+            .padding(
+                start = 8.dp,
+                end = 8.dp,
+                top = 8.dp,
+                bottom = paddingValues.calculateBottomPadding() + 8.dp
+            )
     ) {
         Column(
             verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -422,17 +494,19 @@ fun BottomSheetContent(
 
                 ) {
                 TextButton(
-                    onClick={
-                        selectedButtonIndex=null
+                    onClick = {
+                        selectedButtonIndex = null
                     }
                 ) {
                     Text("Clear", style = TextStyle(fontSize = 16.sp))
                 }
-                Text(text = title, style = TextStyle(
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold
-                ))
-                IconButton(onClick=onCloseClick) {
+                Text(
+                    text = title, style = TextStyle(
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                )
+                IconButton(onClick = onCloseClick) {
                     Icon(
                         Icons.Filled.Close,
                         contentDescription = "Close"
@@ -448,7 +522,11 @@ fun BottomSheetContent(
                     modifier = Modifier
                         .fillMaxWidth(0.95f)
                         .height(56.dp),
-                    colors = ButtonDefaults.buttonColors(if (selectedButtonIndex == index) MagentaMaterial else GrayMaterial.copy(alpha=0.3f))
+                    colors = ButtonDefaults.buttonColors(
+                        if (selectedButtonIndex == index) MagentaMaterial else GrayMaterial.copy(
+                            alpha = 0.3f
+                        )
+                    )
                 ) {
                     Row(
                         modifier = Modifier
@@ -463,10 +541,10 @@ fun BottomSheetContent(
                             color = if (selectedButtonIndex == index) WhiteMaterial else BlackMaterial
                         )
                         if (selectedButtonIndex == index)
-                        Icon(
-                            Icons.Outlined.Done,
-                            contentDescription = null
-                        )
+                            Icon(
+                                Icons.Outlined.Done,
+                                contentDescription = null
+                            )
                     }
                 }
             }
@@ -475,12 +553,11 @@ fun BottomSheetContent(
 }
 
 
-
 @Composable
 fun ProductScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
-    paddingValues: PaddingValues  = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+    paddingValues: PaddingValues = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
     sharedViewModel: SharedViewModel = SharedViewModel()
 ) {
     val sheetState = rememberModalBottomSheetState(
@@ -525,7 +602,9 @@ fun ProductScreen(
                         Image(
                             painter = painterResource(R.drawable.ic_launcher_background),
                             contentDescription = "Back",
-                            modifier = Modifier.clip(CircleShape).size(48.dp)
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .size(48.dp)
                         )
                     }
 
@@ -562,23 +641,27 @@ fun ProductScreen(
                     }
                 }
             }
-        ) {
+        ) { it ->
             DrawProductScreenContent(
                 modifier = modifier,
                 paddingValues = it,
                 navController = navController,
-                sharedViewModel = sharedViewModel
+                sharedViewModel = sharedViewModel,
+                onProductClick = { id ->
+                    navController.navigate(Screen.Customer.ProductDetailScreen.route + "/$id")
+                }
             )
         }
     }
 }
+
 @Preview(
-    name="Summary",
+    name = "Summary",
     showBackground = true,
-    showSystemUi = true)
+    showSystemUi = true
+)
 @Composable
-fun Summary()
-{
+fun Summary() {
     LadosTheme {
         ProductScreen(
             navController = NavController(LocalContext.current)

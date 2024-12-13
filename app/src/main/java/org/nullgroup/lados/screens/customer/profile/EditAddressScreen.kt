@@ -1,6 +1,5 @@
-package org.nullgroup.lados.screens.customer
+package org.nullgroup.lados.screens.customer.profile
 
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Column
@@ -19,29 +18,29 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import org.nullgroup.lados.compose.profile.AddressForm
 import org.nullgroup.lados.compose.profile.ConfirmDialog
-import org.nullgroup.lados.compose.profile.ProfileTopAppBar
-import org.nullgroup.lados.viewmodels.customer.AddAddressViewModel
+import org.nullgroup.lados.compose.common.ProfileTopAppBar
+import org.nullgroup.lados.viewmodels.customer.EditAddressViewModel
 import org.nullgroup.lados.viewmodels.customer.SavingResult
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddAddressScreen(
+fun EditAddressScreen(
     modifier: Modifier = Modifier,
+    navController: NavController? = null,
     paddingValues: PaddingValues = PaddingValues(0.dp),
-    viewModel: AddAddressViewModel = hiltViewModel(),
-    navController: NavController? = null
+    viewModel: EditAddressViewModel = hiltViewModel(),
 ) {
     var saveConfirmation by remember { mutableStateOf(false) }
     var cancelConfirmation by remember { mutableStateOf(false) }
 
     val userAddress = viewModel.userAddress.collectAsState()
+
     val provincesUiState = viewModel.provincesUiState
     val districtsUiState = viewModel.districtsUiState
     val wardsUiState = viewModel.wardsUiState
@@ -57,9 +56,12 @@ fun AddAddressScreen(
             .fillMaxSize()
             .padding(vertical = paddingValues.calculateTopPadding()),
         topBar = {
-            ProfileTopAppBar(onBackClick = {
-                cancelConfirmation = true
-            }, content = "Address")
+            ProfileTopAppBar(
+                onBackClick = {
+                    cancelConfirmation = true
+                },
+                content = "Edit Address"
+            )
         }
     ) { innerPadding ->
         Column(
@@ -68,41 +70,35 @@ fun AddAddressScreen(
                 .padding(horizontal = 8.dp)
                 .padding(top = innerPadding.calculateTopPadding())
         ) {
-            Column(
+            AddressForm(
                 modifier = Modifier
+                    .fillMaxWidth()
                     .weight(1f),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                AddressForm(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f),
-                    provincesUiState = provincesUiState,
-                    districtsUiState = districtsUiState,
-                    wardsUiState = wardsUiState,
-                    onProvinceSelected = {
-                        viewModel.onProvinceSelected(it)
-                    },
-                    onDistrictSelected = {
-                        viewModel.onDistrictSelected(it)
-                    },
-                    onWardSelected = {
-                        viewModel.onWardSelected(it)
-                    },
-                    onDetailChanged = {
-                        viewModel.onStreetDetailChanged(it)
-                    },
-                    address = userAddress.value,
-                )
-            }
+                provincesUiState = provincesUiState,
+                districtsUiState = districtsUiState,
+                wardsUiState = wardsUiState,
+                onProvinceSelected = {
+                    viewModel.onProvinceSelected(it)
+                },
+                onDistrictSelected = {
+                    viewModel.onDistrictSelected(it)
+                },
+                onWardSelected = {
+                    viewModel.onWardSelected(it)
+                },
+                onDetailChanged = {
+                    viewModel.onStreetDetailChanged(it)
+                },
+                address = userAddress.value,
+            )
             Button(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
-                enabled = viewModel.isInfoChanged.value,
                 onClick = {
                     saveConfirmation = true
-                }) {
+                },
+                enabled = viewModel.isInfoChanged.value) {
                 Text(text = "Save")
             }
         }
@@ -154,7 +150,7 @@ fun AddAddressScreen(
             primaryButtonText = "Exit",
             secondaryButtonText = "Continue"
         )
-    } else if (cancelConfirmation) {
+    } else if(cancelConfirmation) {
         cancelConfirmation = false
         navController?.navigateUp()
     }
