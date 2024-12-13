@@ -1,4 +1,4 @@
-package org.nullgroup.lados.screens.customer
+package org.nullgroup.lados.screens.customer.product
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
@@ -51,12 +51,16 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import kotlinx.coroutines.launch
 import org.nullgroup.lados.screens.Screen
+import org.nullgroup.lados.screens.customer.BottomSheetContent
+import org.nullgroup.lados.screens.customer.ProductItem
+import org.nullgroup.lados.screens.customer.SearchBarRow
 import org.nullgroup.lados.ui.theme.BlackMaterial
 import org.nullgroup.lados.ui.theme.GrayMaterial
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.ui.theme.MagentaMaterial
 import org.nullgroup.lados.ui.theme.WhiteMaterial
 import org.nullgroup.lados.viewmodels.HomeViewModel
+import org.nullgroup.lados.viewmodels.ProductUiState
 import org.nullgroup.lados.viewmodels.SharedViewModel
 
 
@@ -111,7 +115,7 @@ fun DrawProductInCategoryScreenContent(
     sharedViewModel: SharedViewModel = SharedViewModel(),
     onButtonClick: (String) -> Unit
 ) {
-    val products = viewModel.products.collectAsStateWithLifecycle()
+    val products = (viewModel.productUiState.collectAsStateWithLifecycle().value as ProductUiState.Success).products
     Column(
         modifier = modifier.padding(horizontal = 8.dp)
             .padding(top = paddingValues.calculateTopPadding())
@@ -176,9 +180,9 @@ fun DrawProductInCategoryScreenContent(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            items(products.value.size) { item ->
+            items(products.size) { item ->
                 ProductItem(
-                    product = products.value[item],
+                    product = products[item],
                     onClick = {id ->
                         navController.navigate(
                             Screen.Customer.ProductDetailScreen.route + "/$id"

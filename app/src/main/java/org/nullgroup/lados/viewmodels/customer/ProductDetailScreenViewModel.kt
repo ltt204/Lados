@@ -13,7 +13,7 @@ import org.nullgroup.lados.data.models.Color
 import org.nullgroup.lados.data.models.Product
 import org.nullgroup.lados.data.models.Size
 import org.nullgroup.lados.data.repositories.interfaces.ProductRepository
-import org.nullgroup.lados.screens.customer.ProductDetailUiState
+import org.nullgroup.lados.screens.customer.product.ProductDetailUiState
 import javax.inject.Inject
 
 

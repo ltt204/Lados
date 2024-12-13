@@ -1,4 +1,4 @@
-package org.nullgroup.lados.compose.profile
+package org.nullgroup.lados.compose.common
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row

@@ -32,6 +32,22 @@ class ProductRepositoryImplement (
         awaitClose{ subscription.remove() }
     }
 
+    override fun getProductByIdFlow(id: String): Flow<Product?> = callbackFlow {
+        val subscription = firestore.collection("products")
+            .document(id)
+            .addSnapshotListener { value, error ->
+                if (error != null) {
+                    throw error
+                }
+
+                val product = value?.toObject(Product::class.java)
+
+                trySend(product).isSuccess
+            }
+
+        awaitClose{ subscription.remove() }
+    }
+
     override suspend fun addProductsToFireStore(products: List<Product>): Result<Boolean> {
         return try {
             val batch = firestore.batch()

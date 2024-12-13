@@ -1,4 +1,4 @@
-package org.nullgroup.lados.screens.customer
+package org.nullgroup.lados.screens.customer.profile
 
 import android.util.Log
 import androidx.activity.compose.BackHandler
@@ -48,8 +48,9 @@ import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import org.nullgroup.lados.compose.profile.ConfirmDialog
 import org.nullgroup.lados.compose.profile.CustomTextField
-import org.nullgroup.lados.compose.profile.LoadOnProgress
-import org.nullgroup.lados.compose.profile.ProfileTopAppBar
+import org.nullgroup.lados.compose.common.LoadOnProgress
+import org.nullgroup.lados.compose.common.ProfileTopAppBar
+import org.nullgroup.lados.data.models.User
 import org.nullgroup.lados.ui.theme.Typography
 import org.nullgroup.lados.utilities.toByteArray
 import org.nullgroup.lados.utilities.toDrawable
@@ -364,7 +365,7 @@ fun SuccessContentPreview() {
         SuccessContent(
             modifier = Modifier.padding(top = innerPadding.calculateTopPadding()),
             userInfo = UserUiState.Success(
-                user = org.nullgroup.lados.data.models.User(
+                user = User(
                     name = "John Doe",
                     email = "",
                     phoneNumber = "",

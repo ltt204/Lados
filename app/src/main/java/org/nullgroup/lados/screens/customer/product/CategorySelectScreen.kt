@@ -1,4 +1,4 @@
-package org.nullgroup.lados.screens.customer
+package org.nullgroup.lados.screens.customer.product
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -37,18 +37,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.SubcomposeAsyncImage
-import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
-import coil.request.SuccessResult
 import org.nullgroup.lados.R
 import org.nullgroup.lados.data.models.Category
 import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.ui.theme.BlackMaterial
 import org.nullgroup.lados.ui.theme.GrayMaterial
 import org.nullgroup.lados.ui.theme.LadosTheme
+import org.nullgroup.lados.viewmodels.CategoryUiState
 import org.nullgroup.lados.viewmodels.HomeViewModel
 import org.nullgroup.lados.viewmodels.SharedViewModel
 
@@ -120,21 +118,20 @@ fun DrawCategorySelectScreenContent(
     paddingValues: PaddingValues,
     sharedViewModel: SharedViewModel = SharedViewModel()
 ) {
-
-    val categories = viewModel.categories.collectAsStateWithLifecycle()
+    val categories =
+        (viewModel.categoryUiState.collectAsStateWithLifecycle() as CategoryUiState.Success).categories
 
     Column(
         modifier = modifier
             .padding(horizontal = 8.dp)
-            .padding(top = paddingValues.calculateTopPadding())
-        ,
+            .padding(top = paddingValues.calculateTopPadding()),
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
         Title(content = "Shop by Categories")
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            items(categories.value) { category ->
+            items(items = categories, key = { it.categoryId }) { category ->
                 CategoryItemSelect(category = category,
                     modifier = Modifier.clickable {
                         sharedViewModel.updateComplexData(category)

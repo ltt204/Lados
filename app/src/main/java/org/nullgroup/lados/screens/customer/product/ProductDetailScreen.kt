@@ -1,4 +1,4 @@
-package org.nullgroup.lados.screens.customer
+package org.nullgroup.lados.screens.customer.product
 
 import android.os.Build
 import android.util.Log
@@ -26,6 +26,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Button
@@ -60,8 +61,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import coil.compose.AsyncImage
+import coil.compose.SubcomposeAsyncImage
 import org.nullgroup.lados.R
+import org.nullgroup.lados.compose.common.LoadOnProgress
 import org.nullgroup.lados.data.models.Image
 import org.nullgroup.lados.data.models.Product
 import org.nullgroup.lados.data.models.Size
@@ -210,6 +212,7 @@ fun ProductDetailScreen(
 fun ProductDetailTopBar(
     onNavigateBack: () -> Unit = {}
 ) {
+    var isFavorite by remember { mutableStateOf(false) }
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
@@ -231,13 +234,13 @@ fun ProductDetailTopBar(
         }
 
         IconButton(
-            onClick = { /* Favorite toggle logic */ },
+            onClick = { isFavorite = isFavorite.not() },
             modifier = Modifier
                 .clip(CircleShape)
                 .background(ProductTheme.backgroundColor)
         ) {
             Icon(
-                imageVector = Icons.Default.FavoriteBorder,
+                imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                 contentDescription = "Favorite"
             )
         }
@@ -252,6 +255,7 @@ fun ProductInformationSection(
     salePrice: Double,
     productImages: List<Image> = emptyList()
 ) {
+    val mockImageUrl = "https://jimmyluxury.in/cdn/shop/files/IMG_9967copy.webp?v=1728367047"
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         modifier = modifier
@@ -262,19 +266,25 @@ fun ProductInformationSection(
         Log.d("Size", productImages.size.toString())
         // Image Carousel
         LazyRow(
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
-            modifier = Modifier.fillMaxWidth()
         ) {
             items(productImages.size) { index ->
-                AsyncImage(
+                SubcomposeAsyncImage(
                     model = coil.request.ImageRequest.Builder(LocalContext.current)
-                        .data(productImages[index].link)
+                        .data(mockImageUrl)
                         .crossfade(true)
                         .build(),
                     contentDescription = "Loaded Image",
+                    loading = {
+                        LoadOnProgress(
+                            modifier = Modifier,
+                            content = { CircularProgressIndicator() }
+                        )
+                    },
                     modifier = Modifier
                         .height(300.dp)
-                        .width(200.dp)
+                        .fillParentMaxWidth()
                         .clip(RoundedCornerShape(10.dp)),
                     contentScale = ContentScale.FillHeight
                 )
