@@ -1,14 +1,21 @@
 package org.nullgroup.lados.viewmodels.customer
 
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.nullgroup.lados.data.models.Address
 import org.nullgroup.lados.data.models.CartItem
 import org.nullgroup.lados.data.models.CheckoutInfo
 import org.nullgroup.lados.data.models.Order
@@ -16,7 +23,9 @@ import org.nullgroup.lados.data.models.OrderProduct
 import org.nullgroup.lados.data.models.Product
 import org.nullgroup.lados.data.models.ProductVariant
 import org.nullgroup.lados.data.repositories.interfaces.CartItemRepository
+import org.nullgroup.lados.data.repositories.interfaces.IUserAddressRepository
 import org.nullgroup.lados.data.repositories.interfaces.OrderRepository
+import org.nullgroup.lados.data.repositories.interfaces.UserRepository
 import javax.inject.Inject
 
 enum class CheckoutError {
@@ -25,7 +34,8 @@ enum class CheckoutError {
 
 @HiltViewModel
 class CheckoutViewModel @Inject constructor(
-    // private val userRepository: UserRepository,
+    private val userRepository: UserRepository,
+    private val userAddressRepository: IUserAddressRepository,
     private val cartItemRepository: CartItemRepository,
     private val orderRepository: OrderRepository
 ): ViewModel() {
@@ -43,31 +53,63 @@ class CheckoutViewModel @Inject constructor(
     val failureRaiser = _failureRaiser.asStateFlow()
 
     // TODO: Hardcoded customer ID
-    private val customerId = "admin@test.com"
+    private lateinit var customerId: String
+
+    private lateinit var _userAddresses: StateFlow<List<Address>>
+    val userAddresses: StateFlow<List<Address>>
+        get() = _userAddresses
+
+    private val _selectedAddress = MutableStateFlow<Address?>(null)
+    val selectedAddress = _selectedAddress.asStateFlow()
+
+    private val _userPhoneNumber = mutableStateOf("???")
+    val userPhoneNumber: State<String> = _userPhoneNumber
 
     init {
         viewModelScope.launch {
-            val checkoutInfoGetResult = cartItemRepository.getCheckoutInfo(customerId)
-            _checkoutInfo.value = checkoutInfoGetResult.getOrNull()
+            // TODO: Return the actual user data
+//            val currentUser = userRepository.getCurrentUser()
+//            customerId = currentUser.id
+            customerId = "admin@test.com"
+//            _userPhoneNumber.value = currentUser.phoneNumber
+            _userPhoneNumber.value = "1234567890"
 
-            if (checkoutInfoGetResult.isFailure) {
-                _failureRaiser.value = CheckoutError.FAILED_TO_GET_CHECKOUT_INFO
-                return@launch
+            viewModelScope.launch {
+                _userAddresses = userAddressRepository.getAddressesFlow()
+                    .stateIn(
+                        scope = viewModelScope,
+                        started = SharingStarted.WhileSubscribed(),
+                        initialValue = emptyList()
+                    )
             }
 
-            cartItemRepository.getCheckingOutItemsAsFlow(customerId).collect {
-                if (it.isNotEmpty()) {
-                    _orderingItems.value = _orderingItems.value.plus(
-                        it.map { it.cartItem }
-                    )
-                    _orderingItemInformation.value = _orderingItemInformation.value.plus(
-                        it.map {
-                            it.cartItem.id to Pair(it.product, it.variant)
-                        }
-                    )
+            viewModelScope.launch {
+                val checkoutInfoGetResult = cartItemRepository.getCheckoutInfo(customerId)
+                _checkoutInfo.value = checkoutInfoGetResult.getOrNull()
+
+                if (checkoutInfoGetResult.isFailure) {
+                    _failureRaiser.value = CheckoutError.FAILED_TO_GET_CHECKOUT_INFO
+                    return@launch
+                }
+
+                cartItemRepository.getCheckingOutItemsAsFlow(customerId).collect {
+                    if (it.isNotEmpty()) {
+                        _orderingItems.value = _orderingItems.value.plus(
+                            it.map { it.cartItem }
+                        )
+                        _orderingItemInformation.value = _orderingItemInformation.value.plus(
+                            it.map {
+                                it.cartItem.id to Pair(it.product, it.variant)
+                            }
+                        )
+                    }
                 }
             }
         }
+    }
+
+    val onAddressChanged = { address: Address ->
+        _selectedAddress.value = address
     }
 
     val checkoutHandler: (
@@ -86,6 +128,11 @@ class CheckoutViewModel @Inject constructor(
         onCheckoutFailure: ((reason: String) -> Unit)? = null,
         onSuccessfulCheckout: (() -> Unit)? = null
     ) {
+        if (selectedAddress.value == null) {
+            onCheckoutFailure?.invoke("Please select an address")
+            return
+        }
+
         val orderProductList = orderingItems.value.map { cartItem ->
             val productVariant = orderingItemInformation.value[cartItem.id]?.second
             if (productVariant != null) {
@@ -104,7 +151,9 @@ class CheckoutViewModel @Inject constructor(
         val newOrder = Order(
             customerId = customerId,
             orderProducts = orderProductList,
-            orderTotal = checkoutDetail.total
+            orderTotal = checkoutDetail.total,
+            deliveryAddress = selectedAddress.value!!.toString(),
+            customerPhoneNumber = userPhoneNumber.value,
         )
 
         val result = viewModelScope.async {

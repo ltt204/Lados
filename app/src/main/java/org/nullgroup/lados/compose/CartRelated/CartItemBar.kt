@@ -42,6 +42,7 @@ fun CartItemBar(
     salePrice: String,
     size: String,
     color: String,
+    clickEnabled: Boolean = true,
     onAddClick: (() -> Unit)? = null,
     quantity: Int = 0,
     onRemoveClick: (() -> Unit)? = null,
@@ -50,6 +51,7 @@ fun CartItemBar(
     if (quantity == 0) {
         return
     }
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
@@ -73,7 +75,7 @@ fun CartItemBar(
         // Product Details
         Column(
             modifier = Modifier
-                .weight(1f)
+//                .weight(2f)
                 .padding(end = 8.dp)
         ) {
             Text(
@@ -89,28 +91,58 @@ fun CartItemBar(
                 color = Color.Black,
                 fontWeight = FontWeight.Bold
             )
-            val annotatedString = buildAnnotatedString {
-                append("Size - ")
-                withStyle(specialStyle) {
-                    append(size)
-                }
-                append("   Color - ")
-                withStyle(specialStyle) {
-                    append(color)
-                }
-            }
+            val normalStyle = MaterialTheme.typography.bodySmall.toSpanStyle().copy(
+                color = Color.Gray
+            )
+//            val annotatedString = buildAnnotatedString {
+//                append("Size - ")
+//                withStyle(specialStyle) {
+//                    append(size)
+//                }
+//                append("   Color - ")
+//                withStyle(specialStyle) {
+//                    append(color)
+//                }
+//            }
+//            Text(
+//                text = annotatedString,
+//                style = MaterialTheme.typography.bodySmall.copy(
+//                    color = Color.Gray
+//                ),
+//                maxLines = 1,
+//                overflow = TextOverflow.Ellipsis
+//            )
             Text(
-                text = annotatedString,
-                style = MaterialTheme.typography.bodySmall.copy(
-                    color = Color.Gray
-                ),
+                text = buildAnnotatedString {
+                    withStyle(normalStyle) {
+                        append("Size - ")
+                    }
+                    withStyle(specialStyle) {
+                        append(size)
+                    }
+                },
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                text = buildAnnotatedString {
+                    withStyle(normalStyle) {
+                        append("Color - ")
+                    }
+                    withStyle(specialStyle) {
+                        append(color)
+                    }
+                },
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
         }
 
         // Price and Actions
-        Column(horizontalAlignment = Alignment.End) {
+        Column(
+            horizontalAlignment = Alignment.End,
+            modifier = Modifier.weight(1f),
+        ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -119,10 +151,10 @@ fun CartItemBar(
                 if (originalPrice != salePrice) {
                     Text(
                         text = originalPrice,
-                        style = MaterialTheme.typography.bodyMedium.copy(
+                        style = MaterialTheme.typography.bodySmall.copy(
                             color = Color.Gray,
                             textDecoration = TextDecoration.LineThrough,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
                         )
                     )
                     Icon(
@@ -133,46 +165,39 @@ fun CartItemBar(
                 }
                 Text(
                     text = salePrice,
-                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                    style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
                 )
             }
-
-
-            Spacer(modifier = Modifier.height(8.dp))
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.align(Alignment.End),
             ) {
                 if (onRemoveClick != null) {
-                    IconButton(onClick = onRemoveClick) {
+                    IconButton(onClick = onRemoveClick, enabled = clickEnabled) {
                         Icon(
                             imageVector = Icons.Default.KeyboardArrowDown,
                             contentDescription = "Remove",
                             tint = Color(0xFF9371FF)
                         )
                     }
-                    Spacer(modifier = Modifier.width(8.dp))
+                    // Spacer(modifier = Modifier.width(4.dp))
                 }
-
 
                 if (onRemoveClick == null && onAddClick == null) {
                     Text(
                         text = "x$quantity",
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = MaterialTheme.typography.bodySmall,
                     )
                 } else {
                     Text(
                         text = quantity.toString(),
-                        style = MaterialTheme.typography.bodyMedium
+                        style = MaterialTheme.typography.bodySmall
                     )
                 }
 
-
-
-
                 if (onAddClick != null) {
-                    Spacer(modifier = Modifier.width(8.dp))
-                    IconButton(onClick = onAddClick) {
+                    // Spacer(modifier = Modifier.width(4.dp))
+                    IconButton(onClick = onAddClick, enabled = clickEnabled) {
                         Icon(
                             imageVector = Icons.Default.KeyboardArrowUp,
                             contentDescription = "Add",

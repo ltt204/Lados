@@ -18,6 +18,8 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -30,6 +32,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -64,12 +67,15 @@ fun CartScreen(
 
     val snackBarHostState = remember { mutableStateOf(SnackbarHostState()) }
     val currentDialogState = remember { mutableStateOf<DialogInfo?>(null) }
+    val (isAllowedInteracting, setIsAllowedInteracting) = remember { mutableStateOf(true) }
 
     val cartItems = cartViewModel.cartItems.collectAsStateWithLifecycle()
     val cartItemInformation = cartViewModel.cartItemInformation.collectAsStateWithLifecycle()
     val selectedItems = cartViewModel.selectedCartItems.collectAsStateWithLifecycle().value
     val validSelectedItems = cartViewModel.validSelectedItems.collectAsStateWithLifecycle().value
-    val isAnyValidItemSelected = { validSelectedItems.isNotEmpty() }
+    val isAnyValidItemSelected = remember(validSelectedItems.size) {
+         derivedStateOf { validSelectedItems.isNotEmpty() }
+    }
     val checkoutDetail = cartViewModel.checkoutDetail
     val scope = cartViewModel.viewModelScope
 
@@ -84,16 +90,24 @@ fun CartScreen(
     cartViewModel.onRefreshComplete = onRefreshCompleted
 
     val onItemSelected = { cartItem: CartItem ->
-        if (cartItem in selectedItems) {
-            cartViewModel.onCartItemSelectionChanged(cartItem.id, false)
-        } else {
-            cartViewModel.onCartItemSelectionChanged(cartItem.id, true)
+        if (isAllowedInteracting) {
+            if (cartItem in selectedItems) {
+                cartViewModel.onCartItemSelectionChanged(cartItem.id, false)
+            } else {
+                cartViewModel.onCartItemSelectionChanged(cartItem.id, true)
+            }
         }
     }
 
     val onItemAmountChanged = { cartItem: CartItem, amountDelta: Int ->
         cartViewModel.updateCartItemAmountLocally(cartItem.id, amountDelta)
     }
+
+    val isAllItemSelected = {
+        cartItems.value.isNotEmpty() && selectedItems.size == cartItems.value.size
+    }
+    val onSelectedAllItems = { cartViewModel.selectAllCartItems() }
+    val onUnselectedAllItems = { cartViewModel.unselectAllCartItems() }
 
     val onSelectedItemsRemoved = {
         currentDialogState.value = DialogInfo(
@@ -112,6 +126,7 @@ fun CartScreen(
 
     // TODO: Remove the snackBar when the user navigates back
     val onNavigateBack = {
+        setIsAllowedInteracting(false)
         scope.launch {
             var result = scope.async {
                 cartViewModel.commitChangesToDatabase()
@@ -127,6 +142,7 @@ fun CartScreen(
                     duration = SnackbarDuration.Short
                 )
             }
+            // TODO: Remove this delay
             delay(100)
             navController.popBackStack()
         }
@@ -153,6 +169,7 @@ fun CartScreen(
                 cartViewModel.reconfirmOnInvalidItems()
             },
             onCancel = {
+                setIsAllowedInteracting(true)
                 currentDialogState.value = null
             }
         )
@@ -170,6 +187,7 @@ fun CartScreen(
     }
 
     val onCheckoutFailure: (String) -> Unit = { errorString ->
+        setIsAllowedInteracting(true)
         scope.launch {
             snackBarHostState.value.showSnackbar(
                 message = "Something wrong happened while checking out: $errorString",
@@ -178,11 +196,14 @@ fun CartScreen(
         }
     }
 
-    val onCheckingOut = cartViewModel.checkingOutHandler(
-        onCheckoutConfirmation,
-        onSuccessfulCheckout,
-        onCheckoutFailure,
-    )
+    val onCheckingOut = {
+        setIsAllowedInteracting(false)
+        cartViewModel.checkingOutHandler(
+            onCheckoutConfirmation,
+            onSuccessfulCheckout,
+            onCheckoutFailure,
+        ).invoke()
+    }
 
 
     val defaultImageUrl = "https://placehold.co/600x400"
@@ -197,7 +218,7 @@ fun CartScreen(
                     Text("Cart", textAlign = TextAlign.Center)
                 },
                 navigationIcon = {
-                    IconButton(onClick = { onNavigateBack() }) {
+                    IconButton(onClick = { onNavigateBack() }, enabled = isAllowedInteracting) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Default.KeyboardArrowLeft,
                             contentDescription = "Back"
@@ -205,6 +226,31 @@ fun CartScreen(
                     }
                 },
                 actions = {
+                    IconButton(
+                        onClick = {
+                            if (isAllItemSelected()) {
+                                onUnselectedAllItems()
+                            } else {
+                                onSelectedAllItems()
+                            }
+                        },
+                        content = {
+                            if (isAllItemSelected()) {
+                                Icon(
+                                    imageVector = Icons.Default.Clear,
+                                    contentDescription = "Unselected all items from cart"
+                                )
+                            } else {
+                                Icon(
+                                    imageVector = Icons.Default.Check,
+                                    contentDescription = "Selected all items from cart"
+                                )
+                            }
+                        },
+                        enabled = cartItems.value.isNotEmpty() && isAllowedInteracting
+                    )
+
+
                     IconButton(
                         onClick = {
                             onSelectedItemsRemoved()
@@ -215,7 +261,7 @@ fun CartScreen(
                                 contentDescription = "Remove selected items from cart"
                             )
                         },
-                        enabled = selectedItems.isNotEmpty()
+                        enabled = selectedItems.isNotEmpty() && isAllowedInteracting
                     )
                 }
             )
@@ -227,8 +273,9 @@ fun CartScreen(
                 productDiscount = productDiscount.ToUSDCurrency(),
                 orderDiscount = orderDiscount.ToUSDCurrency(),
                 total = total.ToUSDCurrency(),
-                isEnabled = isAnyValidItemSelected(),
+                isEnabled = isAnyValidItemSelected.value,
                 onCheckout = onCheckingOut,
+                checkoutEnabled = isAllowedInteracting,
                 modifier = Modifier.padding(horizontal = 20.dp)
             )
         },
@@ -289,10 +336,15 @@ fun CartScreen(
                                 ?: defaultValue).toString(),
                             size = productVariant?.size?.sizeName ?: defaultValue,
                             color = productVariant?.color?.colorName ?: defaultValue,
+                            clickEnabled = isAllowedInteracting,
                             onAddClick = { onItemAmountChanged(cartItem, 1) },
                             quantity = cartItem.amount,
                             onRemoveClick = {
-                                onItemAmountChanged(cartItem, -1)
+                                if (cartItem.amount == 1) {
+                                    onSelectedItemsRemoved()
+                                } else {
+                                    onItemAmountChanged(cartItem, -1)
+                                }
                             },
                             modifier = Modifier.fillMaxWidth()
                         )
@@ -310,6 +362,7 @@ fun CartBottomBar(
     subtotal: String, productDiscount: String, orderDiscount: String?, total: String,
     isEnabled: Boolean = true,
     onCheckout: () -> Unit = {},
+    checkoutEnabled: Boolean = true,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -331,7 +384,7 @@ fun CartBottomBar(
 
         OutlinedButton(
             onClick = { onCheckout() },
-            enabled = isEnabled,
+            enabled = isEnabled && checkoutEnabled,
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Checkout")

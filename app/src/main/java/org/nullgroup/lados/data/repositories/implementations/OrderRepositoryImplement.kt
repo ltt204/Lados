@@ -69,23 +69,35 @@ class OrderRepositoryImplement(
 
 
             if (transactionResult.isSuccess) {
+//                val userOrdersRef = firestore
+//                    .collection("users").document(customerId)
+//                    .collection(Order.COLLECTION_NAME).document()
+//                val staffManagedOrdersRef = firestore
+//                    .collection(Order.COLLECTION_NAME).document(userOrdersRef.id)
+//                val batch = firestore.batch()
+//                // Don't know why firestore still stores @Exclude fields
+//                batch.set(userOrdersRef, order.copy(orderProducts = listOf()))
+//                batch.set(staffManagedOrdersRef, order.copy(orderProducts = listOf()))
+//                order.orderProducts.forEach { orderProduct ->
+//                    val userOrderProductRef = userOrdersRef
+//                        .collection(OrderProduct.COLLECTION_NAME).document()
+//                    batch.set(userOrderProductRef, orderProduct)
+//                    val staffManagedOrderProductRef = staffManagedOrdersRef
+//                        .collection(OrderProduct.COLLECTION_NAME).document(userOrderProductRef.id)
+//                    batch.set(staffManagedOrderProductRef, orderProduct)
+//                }
+//                batch.commit().await()
+//                Result.success(true)
+
+
                 val userOrdersRef = firestore
                     .collection("users").document(customerId)
                     .collection(Order.COLLECTION_NAME).document()
                 val staffManagedOrdersRef = firestore
                     .collection(Order.COLLECTION_NAME).document(userOrdersRef.id)
                 val batch = firestore.batch()
-                // Don't know why firestore still stores @Exclude fields
-                batch.set(userOrdersRef, order.copy(orderProducts = listOf()))
-                batch.set(staffManagedOrdersRef, order.copy(orderProducts = listOf()))
-                order.orderProducts.forEach { orderProduct ->
-                    val userOrderProductRef = userOrdersRef
-                        .collection(OrderProduct.COLLECTION_NAME).document()
-                    batch.set(userOrderProductRef, orderProduct)
-                    val staffManagedOrderProductRef = staffManagedOrdersRef
-                        .collection(OrderProduct.COLLECTION_NAME).document(userOrderProductRef.id)
-                    batch.set(staffManagedOrderProductRef, orderProduct)
-                }
+                batch.set(userOrdersRef, order)
+                batch.set(staffManagedOrdersRef, order)
                 batch.commit().await()
                 Result.success(true)
             }

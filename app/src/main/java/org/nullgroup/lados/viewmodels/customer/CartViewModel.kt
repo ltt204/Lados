@@ -113,8 +113,8 @@ class CartViewModel @Inject constructor(
         viewModelScope.async {
             addCartItem("BKj3h1PBk1YbIPy2mnOr", "RmQEs0aelFVq1OaDwhjK", 3)
             addCartItem("BKj3h1PBk1YbIPy2mnOr", "TCwBMf9PKHmfryUfmEgL", 2)
-            addCartItem("Uv9JE2EwULVB6Gsjq5p7", "1aXlLfhkTo3gDZ0yFXbD", 50)
-            addCartItem("bKenEU3vDCwjjKjsMapv", "0zPcXb6MbfszcEswWz4s", 5000)
+            addCartItem("Uv9JE2EwULVB6Gsjq5p7", "1aXlLfhkTo3gDZ0yFXbD", 15)
+            addCartItem("bKenEU3vDCwjjKjsMapv", "0zPcXb6MbfszcEswWz4s", 500)
             addCartItem("bKenEU3vDCwjjKjsMapv", "WhatIsThisSheet", 6)
             addCartItem("Ola-la", "IDon-tKnowWhatThisHolyGrailIs", 9)
         }.await()
@@ -253,6 +253,14 @@ class CartViewModel @Inject constructor(
                 originalItem.copy(amount = newAmount.coerceAtLeast(0)) +
                 _cartItems.value.subList(itemIndex + 1, _cartItems.value.size)
         }
+    }
+
+    fun selectAllCartItems() {
+        _selectedCartItemIds.value = _cartItems.value.map { it.id }.toSet()
+    }
+
+    fun unselectAllCartItems() {
+        _selectedCartItemIds.value = emptySet()
     }
 
     fun removeSelectedCartItemLocally() {

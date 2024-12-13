@@ -19,10 +19,16 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
@@ -48,6 +54,7 @@ import androidx.navigation.NavController
 import kotlinx.coroutines.launch
 import org.nullgroup.lados.compose.cartRelated.CartItemBar
 import org.nullgroup.lados.compose.cartRelated.PricingDetails
+import org.nullgroup.lados.data.models.Address
 import org.nullgroup.lados.utilities.ToUSDCurrency
 import org.nullgroup.lados.viewmodels.customer.CheckoutViewModel
 
@@ -61,11 +68,16 @@ fun CheckoutScreen(
     val checkoutViewModel: CheckoutViewModel = hiltViewModel()
 
     val snackBarHostState = remember { mutableStateOf(SnackbarHostState()) }
+    val (isAllowedInteracting, setIsAllowedInteracting) = remember { mutableStateOf(true) }
 
     val orderingItems = checkoutViewModel.orderingItems.collectAsStateWithLifecycle()
     val orderingItemInformation = checkoutViewModel.orderingItemInformation.collectAsStateWithLifecycle()
     val checkoutDetail = checkoutViewModel.checkoutInfo.collectAsStateWithLifecycle()
     val scope = checkoutViewModel.viewModelScope
+
+    val userAddress = checkoutViewModel.userAddresses.collectAsStateWithLifecycle()
+    val selectedAddress = checkoutViewModel.selectedAddress.collectAsStateWithLifecycle()
+    val userPhoneNumber = checkoutViewModel.userPhoneNumber
 
 //    val onRefreshCompleted: (String) -> Unit = { message ->
 //        scope.launch {
@@ -79,6 +91,7 @@ fun CheckoutScreen(
 
     // TODO: Remove the snackBar when the user navigates back
     val onNavigateBack = {
+        setIsAllowedInteracting(false)
         scope.launch {
 //            var result = scope.async {
 //                checkoutViewModel.commitChangesToDatabase()
@@ -95,7 +108,6 @@ fun CheckoutScreen(
 //                )
 //            }
         }
-
         navController.popBackStack()
     }
 
@@ -106,6 +118,7 @@ fun CheckoutScreen(
                 duration = SnackbarDuration.Short
             )
         }
+        setIsAllowedInteracting(true)
     }
     val onSuccessfulCheckout: () -> Unit = {
         scope.launch {
@@ -117,10 +130,13 @@ fun CheckoutScreen(
             navController.popBackStack()
         }
     }
-    val onCheckout = checkoutViewModel.checkoutHandler(
-        onCheckoutFailure,
-        onSuccessfulCheckout
-    )
+    val onCheckout = {
+        setIsAllowedInteracting(false)
+        checkoutViewModel.checkoutHandler(
+            onCheckoutFailure,
+            onSuccessfulCheckout
+        ).invoke()
+    }
 
     val defaultImageUrl = "https://placehold.co/600x400"
     val defaultTitle = "Unknown Product"
@@ -134,7 +150,7 @@ fun CheckoutScreen(
                     Text("Checkout", textAlign = TextAlign.Center)
                 },
                 navigationIcon = {
-                    IconButton(onClick = { onNavigateBack() }) {
+                    IconButton(onClick = { onNavigateBack() }, enabled = isAllowedInteracting) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Default.KeyboardArrowLeft,
                             contentDescription = "Back"
@@ -154,53 +170,75 @@ fun CheckoutScreen(
                 orderDiscount = orderDiscount.ToUSDCurrency(),
                 total = total.ToUSDCurrency(),
                 onCheckout = onCheckout,
+                checkoutEnabled = isAllowedInteracting && selectedAddress.value != null,
                 modifier = Modifier.padding(horizontal = 20.dp)
             )
         },
         content = { innerScaffoldPadding ->
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+            Column(
                 modifier = Modifier
                     .padding(innerScaffoldPadding)
                     .padding(horizontal = 20.dp)
                     .fillMaxSize()
             ) {
-                itemsIndexed(orderingItems.value) { _, cartItem ->
-                    if (cartItem.amount <= 0) {
-                        return@itemsIndexed
-                    }
-                    val (product, productVariant) =
-                        orderingItemInformation.value[cartItem.id] ?: Pair(null, null)
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .combinedClickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = null,
-                                onClick = {
-                                    // Prevent click if interacting with child components
-//                                    onItemSelected(cartItem)
-                                }
-                            )
-                            .background(
-                                color = Color.Transparent,
-                                shape = RoundedCornerShape(8.dp)
-                            )
-                    ) {
-                        CartItemBar(
-                            imageUrl = productVariant?.images?.firstOrNull()?.link ?: defaultImageUrl,
-                            title = product?.name ?: defaultTitle,
-                            originalPrice = "$" + (productVariant?.originalPrice ?: defaultValue).toString(),
-                            salePrice = "$" + (productVariant?.salePrice ?: defaultValue).toString(),
-                            size = productVariant?.size?.sizeName ?: defaultValue,
-                            color = productVariant?.color?.colorName ?: defaultValue,
-                            quantity = cartItem.amount,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
+                AddressSelector(
+                    addresses = userAddress.value,
+                    selectionEnabled = isAllowedInteracting,
+                    selectedAddress = selectedAddress.value,
+                    onAddressSelected = { address ->
+                        checkoutViewModel.onAddressChanged(address)
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                )
 
+                Spacer(modifier = Modifier.height(4.dp))
+
+                PhoneNumberCard(
+                    phoneNumber = userPhoneNumber.value,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    itemsIndexed(orderingItems.value) { _, cartItem ->
+                        if (cartItem.amount <= 0) {
+                            return@itemsIndexed
+                        }
+                        val (product, productVariant) =
+                            orderingItemInformation.value[cartItem.id] ?: Pair(null, null)
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .combinedClickable(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = null,
+                                    onClick = {
+                                        // Prevent click if interacting with child components
+//                                    onItemSelected(cartItem)
+                                    }
+                                )
+                                .background(
+                                    color = Color.Transparent,
+                                    shape = RoundedCornerShape(8.dp)
+                                )
+                        ) {
+                            CartItemBar(
+                                imageUrl = productVariant?.images?.firstOrNull()?.link ?: defaultImageUrl,
+                                title = product?.name ?: defaultTitle,
+                                originalPrice = "$" + (productVariant?.originalPrice ?: defaultValue).toString(),
+                                salePrice = "$" + (productVariant?.salePrice ?: defaultValue).toString(),
+                                size = productVariant?.size?.sizeName ?: defaultValue,
+                                color = productVariant?.color?.colorName ?: defaultValue,
+                                quantity = cartItem.amount,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+
+                    }
                 }
             }
+
         },
         snackbarHost = { SnackbarHost(snackBarHostState.value) }
     )
@@ -211,6 +249,7 @@ private fun CheckoutBottomBar(
     subtotal: String, productDiscount: String, orderDiscount: String?, total: String,
     isEnabled: Boolean = true,
     onCheckout: () -> Unit = {},
+    checkoutEnabled: Boolean = true,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -225,11 +264,12 @@ private fun CheckoutBottomBar(
                 orderDiscount = orderDiscount,
                 total = total
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(16.dp))
         }
 
         OutlinedButton(
             onClick = { onCheckout() },
+            enabled = isEnabled && checkoutEnabled,
             modifier = Modifier
                 .fillMaxWidth()
             ,
@@ -237,11 +277,14 @@ private fun CheckoutBottomBar(
                 containerColor = Color(0xFF9C27B0), // Lavender color
                 contentColor = Color.White,
                 disabledContentColor = Color.Gray,
-                disabledContainerColor = Color.Black,
+                disabledContainerColor = Color.LightGray,
             )
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(4.dp)
+                ,
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
@@ -264,6 +307,120 @@ private fun CheckoutBottomBar(
                 )
             }
         }
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(16.dp))
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun AddressSelector(
+    addresses: List<Address>,
+    selectionEnabled: Boolean = true,
+    selectedAddress: Address? = null,
+    onAddressSelected: ((Address) -> Unit)? = null ,
+    modifier: Modifier = Modifier
+) {
+    val (expanded, setExpanded) = remember { mutableStateOf(false) }
+
+    ExposedDropdownMenuBox(
+        modifier = modifier,
+        expanded = expanded,
+        onExpandedChange = { setExpanded(it) }
+    ) {
+        Box(
+            modifier = modifier
+                .padding(8.dp)
+                .background(Color.LightGray, RoundedCornerShape(8.dp))
+                .fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                horizontalAlignment = Alignment.Start
+            ) {
+                Text(
+                    text = "Shipping Address",
+                    color = Color.Gray,
+                    style = MaterialTheme.typography.bodySmall
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = selectedAddress?.toString() ?: "Select Address",
+                    color = Color.Black,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+
+            IconButton(
+                onClick = { setExpanded(!expanded) },
+                enabled = selectionEnabled,
+                modifier = Modifier
+                    .padding(start = 8.dp)
+                    .align(Alignment.CenterEnd)
+                    .menuAnchor(MenuAnchorType.PrimaryNotEditable)
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    contentDescription = "Expand"
+                )
+            }
+        }
+
+//        OutlinedButton(
+//            onClick = { setExpanded(!expanded) },
+//            modifier = Modifier.fillMaxWidth()
+//        ) {
+//            if (selectedAddress != null) {
+//                Text(selectedAddress.toString())
+//            } else {
+//            Text("Select Address")
+//                }
+//        }
+
+        ExposedDropdownMenu(
+            expanded = expanded && selectionEnabled,
+            onDismissRequest = { setExpanded(false) }
+        ) {
+            addresses.forEach { address ->
+                DropdownMenuItem(
+                    onClick = {
+                        onAddressSelected?.invoke(address)
+                        setExpanded(false)
+                    },
+                    text = {
+                        Text(address.toString())
+                    }
+                )
+                HorizontalDivider()
+            }
+        }
+    }
+}
+
+@Composable
+private fun PhoneNumberCard(
+    phoneNumber: String,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .padding(8.dp)
+            .background(Color.LightGray, RoundedCornerShape(8.dp))
+            .fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text(
+                text = "Contact Phone Number",
+                color = Color.Gray,
+                style = MaterialTheme.typography.bodySmall
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = phoneNumber,
+                color = Color.Black,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
     }
 }
