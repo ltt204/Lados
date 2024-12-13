@@ -63,6 +63,15 @@ sealed class Screen(
             Icons.Default.Search
         )
 
+        data object ProductDetailScreen: Customer(
+            "ProductDetailScreen",
+            "customer_product_detail_screen",
+            Icons.Default.Search
+        ){
+            const val ID_ARG = "product_id"
+            const val ROUTE_WITH_ARG = "customer_product_detail_screen/{$ID_ARG}"
+        }
+
         data object ErrorFindNotMatched :
             Customer(
                 "Error_FindNotMatched",

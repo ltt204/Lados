@@ -1,4 +1,4 @@
-package org.nullgroup.lados.compose.Product
+package org.nullgroup.lados.compose.product
 
 import androidx.compose.runtime.Composable
 
