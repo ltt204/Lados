@@ -224,10 +224,7 @@ fun CategoryItems(
             LoadOnProgress(
                 modifier = modifier.fillMaxHeight(),
                 content = {
-                    LoadOnProgress(
-                        modifier = Modifier,
-                        content = { CircularProgressIndicator() }
-                    )
+                    CircularProgressIndicator()
                 }
             )
         }
@@ -354,13 +351,8 @@ fun ProductRow(
     when (productUiState.value) {
         is ProductUiState.Loading -> {
             LoadOnProgress(
-                modifier = modifier.fillMaxHeight(),
-                content = {
-                    LoadOnProgress(
-                        modifier = Modifier,
-                        content = { CircularProgressIndicator() }
-                    )
-                }
+                modifier = Modifier,
+                content = { CircularProgressIndicator() }
             )
         }
 

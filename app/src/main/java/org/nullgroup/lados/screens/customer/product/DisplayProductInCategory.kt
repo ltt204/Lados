@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -26,6 +27,7 @@ import androidx.compose.material.icons.outlined.List
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -50,6 +52,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import kotlinx.coroutines.launch
+import org.nullgroup.lados.compose.common.LoadOnProgress
+import org.nullgroup.lados.data.models.Product
 import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.screens.customer.BottomSheetContent
 import org.nullgroup.lados.screens.customer.ProductItem
@@ -111,15 +115,15 @@ fun DrawProductInCategoryScreenContent(
     modifier: Modifier = Modifier,
     navController: NavController,
     textStyle: TextStyle = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.Bold),
-    paddingValues: PaddingValues, viewModel: HomeViewModel = hiltViewModel(),
+    paddingValues: PaddingValues,
+    products: List<Product> = emptyList(),
     sharedViewModel: SharedViewModel = SharedViewModel(),
     onButtonClick: (String) -> Unit
 ) {
-    val products = (viewModel.productUiState.collectAsStateWithLifecycle().value as ProductUiState.Success).products
     Column(
-        modifier = modifier.padding(horizontal = 8.dp)
-            .padding(top = paddingValues.calculateTopPadding())
-        ,
+        modifier = modifier
+            .padding(horizontal = 8.dp)
+            .padding(top = paddingValues.calculateTopPadding()),
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
         LazyRow(
@@ -183,7 +187,7 @@ fun DrawProductInCategoryScreenContent(
             items(products.size) { item ->
                 ProductItem(
                     product = products[item],
-                    onClick = {id ->
+                    onClick = { id ->
                         navController.navigate(
                             Screen.Customer.ProductDetailScreen.route + "/$id"
                         )
@@ -204,8 +208,11 @@ fun ProductInCategoryScreen(
         horizontal = 16.dp,
         vertical = 8.dp
     ),
-    sharedViewModel: SharedViewModel = SharedViewModel()
+    sharedViewModel: SharedViewModel = SharedViewModel(),
+    viewModel: HomeViewModel = hiltViewModel()
 ) {
+    val productUiState = viewModel.productUiState.collectAsStateWithLifecycle().value
+
     val sheetState = rememberModalBottomSheetState(
         initialValue = ModalBottomSheetValue.Hidden
     )
@@ -237,8 +244,7 @@ fun ProductInCategoryScreen(
         Scaffold(
             modifier = modifier
                 .padding(paddingValues)
-                .padding(horizontal = 16.dp)
-            ,
+                .padding(horizontal = 16.dp),
             topBar = {
                 Row(
                     modifier = Modifier
@@ -266,28 +272,46 @@ fun ProductInCategoryScreen(
                 }
             }
         ) {
-            DrawProductInCategoryScreenContent(
-                modifier = modifier,
-                paddingValues = it,
-                navController = navController,
-                sharedViewModel = sharedViewModel,
-                onButtonClick = { content ->
-                    val option = optionsMap[content] ?: emptyList()
-                    sheetContent = {
-                        BottomSheetContent(
-                            title = content,
-                            options = option,
-                            paddingValues = paddingValues,
-                            onSelectionChanged = {},
-                            onCloseClick = {
-                                scope.launch {
-                                    sheetState.hide()
-                                }
-                            })
-                    }
-                    scope.launch { sheetState.show() }
+            when (productUiState) {
+                is ProductUiState.Loading -> {
+                    LoadOnProgress(
+                        modifier = modifier.fillMaxHeight(),
+                        content = {
+                            CircularProgressIndicator()
+                        }
+                    )
                 }
-            )
+
+                is ProductUiState.Error -> {
+                    // Show error message
+                }
+
+                is ProductUiState.Success -> {
+                    DrawProductInCategoryScreenContent(
+                        modifier = modifier,
+                        paddingValues = it,
+                        navController = navController,
+                        products = productUiState.products,
+                        sharedViewModel = sharedViewModel,
+                        onButtonClick = { content ->
+                            val option = optionsMap[content] ?: emptyList()
+                            sheetContent = {
+                                BottomSheetContent(
+                                    title = content,
+                                    options = option,
+                                    paddingValues = paddingValues,
+                                    onSelectionChanged = {},
+                                    onCloseClick = {
+                                        scope.launch {
+                                            sheetState.hide()
+                                        }
+                                    })
+                            }
+                            scope.launch { sheetState.show() }
+                        }
+                    )
+                }
+            }
         }
     }
 }
