@@ -2,7 +2,9 @@ package org.nullgroup.lados.compose.common
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
 import androidx.compose.material3.Card
@@ -21,7 +23,8 @@ fun TwoColsItem(
     onClick: () -> Unit = {}
 ) {
     Card(modifier = modifier
-        .fillMaxWidth(),
+        .fillMaxWidth()
+        .heightIn(min = 72.dp, max = 128.dp),
         colors = CardDefaults.cardColors(
             containerColor = androidx.compose.material3.MaterialTheme.colorScheme.surfaceDim,
         ),
@@ -45,6 +48,6 @@ fun TwoColsItem(
 fun ProfileItemPreview() {
     TwoColsItem(
         content = { Text(text = "Test") },
-
-        )
+        trailingAction = { Text(modifier = Modifier.fillMaxHeight(), text = "Action") }
+    )
 }

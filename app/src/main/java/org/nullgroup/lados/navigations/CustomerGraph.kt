@@ -43,8 +43,9 @@ import org.nullgroup.lados.screens.customer.profile.EditProfileScreen
 import org.nullgroup.lados.screens.customer.Error_FindNotMatchScreen
 import org.nullgroup.lados.screens.customer.FilterScreen
 import org.nullgroup.lados.screens.customer.HomeScreen
-import org.nullgroup.lados.screens.customer.OrderDetailScreen
-import org.nullgroup.lados.screens.customer.OrderScreen
+import org.nullgroup.lados.screens.customer.order.OrderDetailScreen
+import org.nullgroup.lados.screens.customer.order.OrderProductsViewScreen
+import org.nullgroup.lados.screens.customer.order.OrderScreen
 import org.nullgroup.lados.screens.customer.product.ProductDetailScreen
 import org.nullgroup.lados.screens.customer.product.ProductInCategoryScreen
 import org.nullgroup.lados.screens.customer.ProductScreen
@@ -254,6 +255,21 @@ fun CustomerGraph(
                 isVisibility = false
                 OrderDetailScreen(
                     modifier = Modifier,
+                    navController = navController,
+                    paddingValues = innerPadding
+                )
+            }
+
+            composable(
+                Screen.Customer.Order.OrderProductsView.ROUTE_WITH_ARG,
+                arguments = listOf(
+                    navArgument(Screen.Customer.Order.OrderProductsView.ID_ARG) {
+                        type = NavType.StringType
+                    })
+            ) {
+                isVisibility = false
+                OrderProductsViewScreen(
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                     navController = navController,
                     paddingValues = innerPadding
                 )

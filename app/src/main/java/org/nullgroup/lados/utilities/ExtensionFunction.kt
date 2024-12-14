@@ -8,7 +8,9 @@ import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.navigation.NavController
 import com.google.firebase.Timestamp
+import org.nullgroup.lados.screens.Screen
 import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
 import java.time.Instant
@@ -49,7 +51,10 @@ fun Timestamp.toDate(): Date {
 
 @RequiresApi(Build.VERSION_CODES.O)
 fun formatToRelativeTime(timestamp: Timestamp): String {
-    val parsedTime = Instant.ofEpochSecond(timestamp.seconds, timestamp.nanoseconds.toLong()) // Chuyển Timestamp sang Instant
+    val parsedTime = Instant.ofEpochSecond(
+        timestamp.seconds,
+        timestamp.nanoseconds.toLong()
+    ) // Chuyển Timestamp sang Instant
     val now = Instant.now()
     val seconds = ChronoUnit.SECONDS.between(parsedTime, now)
     val minutes = ChronoUnit.MINUTES.between(parsedTime, now)
@@ -77,4 +82,63 @@ fun getCurrentUTCFormattedTime(): String {
     // Định dạng theo chuẩn ISO 8601 với mili giây và 'Z' để chỉ UTC
     val formatter = DateTimeFormatter.ISO_INSTANT
     return formatter.format(utcInstant)
+}
+
+fun OrderStatus.getActionForButtonOfOrderProduct(): Pair<String?, ((NavController) -> Unit)> {
+    return when (this) {
+        OrderStatus.CREATED, OrderStatus.SHIPPED -> {
+            "Detail" to {
+                /*TODO: Do nothing, disable the button or hide it*/
+            }
+        }
+
+        OrderStatus.DELIVERED -> {
+            "Leave review" to {
+                /*TODO: Navigate to review screen*/
+//                it.navigateToReviewScreen()
+            }
+        }
+
+        OrderStatus.CANCELLED, OrderStatus.RETURNED -> {
+            "Re-order" to {
+                /*TODO: Allow user to re-order, which mean they will be navigated to the checkout screen with current list of product of order.*/
+//                it.navigate(Screen.Customer.Checkout.route)
+            }
+        }
+
+        else -> {
+            null to { /*TODO*/ }
+        }
+    }
+}
+
+fun String.capitalizeWords(): String {
+    val words = this.lowercase(Locale.getDefault()).split(" ")
+    return words.joinToString(" ") {
+        it.replaceFirstChar { ch ->
+            if (ch.isLowerCase())
+                ch.titlecase(Locale.ROOT)
+            else
+                ch.toString()
+        }
+    }
+}
+
+
+fun getFirstFourOrderStatuses(): List<OrderStatus> {
+    return OrderStatus.entries.toTypedArray().take(4)
+}
+
+fun Long.toDateTimeString(
+    formatPattern: String,
+    locale: Locale = Locale.getDefault()
+): String {
+    val date = Date(this)
+    val format = SimpleDateFormat(formatPattern, locale)
+    return format.format(date)
+}
+
+
+fun getStatusByName(name: String) : OrderStatus {
+    return OrderStatus.valueOf(name.uppercase())
 }

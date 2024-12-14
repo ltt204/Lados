@@ -1,4 +1,4 @@
-package org.nullgroup.lados.screens.customer
+package org.nullgroup.lados.screens.customer.order
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -19,6 +19,7 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
@@ -31,9 +32,10 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import org.nullgroup.lados.R
-import org.nullgroup.lados.compose.profile.ProfileTopAppBar
-import org.nullgroup.lados.compose.profile.TwoColsItem
+import org.nullgroup.lados.compose.common.ProfileTopAppBar
+import org.nullgroup.lados.compose.common.TwoColsItem
 import org.nullgroup.lados.data.models.Order
+import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.utilities.OrderStatus
 import org.nullgroup.lados.utilities.capitalizeWords
 import org.nullgroup.lados.utilities.getFirstFourOrderStatuses
@@ -49,7 +51,7 @@ fun OrderDetailScreen(
     viewModel: OrderDetailViewModel = hiltViewModel<OrderDetailViewModel>(),
     paddingValues: PaddingValues = PaddingValues(0.dp)
 ) {
-    val uiState = viewModel.uiState.collectAsState()
+    val uiState = viewModel.orderDetailState.collectAsState()
     Scaffold(
         modifier = modifier.padding(top = paddingValues.calculateTopPadding()),
         topBar = {
@@ -96,7 +98,10 @@ fun OrderDetailScreen(
                         Spacer(modifier = Modifier.padding(bottom = 4.dp))
                         OrderItemsArea(
                             modifier = Modifier,
-                            order = currentOrder
+                            order = currentOrder,
+                            onViewProductsClick = {
+                                navController?.navigate("${Screen.Customer.Order.OrderProductsView.route}/${currentOrder.orderId}")
+                            }
                         )
                     }
                     Spacer(modifier = Modifier.padding(vertical = 24.dp))
@@ -174,7 +179,8 @@ fun OrderStatusItem(
 @Composable
 fun OrderItemsArea(
     modifier: Modifier = Modifier,
-    order: Order
+    order: Order,
+    onViewProductsClick: () -> Unit = {}
 ) {
     TwoColsItem(
         modifier = modifier,
@@ -197,13 +203,15 @@ fun OrderItemsArea(
             }
         },
         trailingAction = {
-            Text(
-                text = "View All",
-                fontWeight = FontWeight.SemiBold
-            )
+            TextButton(onClick = { onViewProductsClick() }) {
+                Text(
+                    text = "View All",
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
         },
         onClick = {
-            // TODO: navigate to order items screen
+            onViewProductsClick()
         }
     )
 }
@@ -213,6 +221,7 @@ fun DeliveryDetailArea(
     modifier: Modifier = Modifier,
     order: Order
 ) {
+    // TODO : Replace with actual delivery address and phone number
     val mockAddress = "123, ABC Street, XYZ City, 123456"
     val mockPhone = "+91 1234567890"
     Card(
@@ -223,8 +232,16 @@ fun DeliveryDetailArea(
             modifier = Modifier.padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Text(text = mockAddress, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
-            Text(text = mockPhone, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
+            Text(
+                text = mockAddress,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.SemiBold
+            )
+            Text(
+                text = mockPhone,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.SemiBold
+            )
         }
     }
 }

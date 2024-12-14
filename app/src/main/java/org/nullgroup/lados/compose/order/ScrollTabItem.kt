@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -29,7 +30,7 @@ fun ScrollTabItem(
         shape = CircleShape,
         onClick = onClick,
         colors = CardDefaults.cardColors(
-            containerColor = if (selected) Color(0xFF8E6CEF) else Color(0xFFF4F4F4)
+            containerColor = if (selected) MaterialTheme.colorScheme.inverseSurface else Color(0xFFF4F4F4)
         )
     ) {
         Text(

@@ -6,7 +6,10 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MailOutline
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material3.Icon
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
+import org.nullgroup.lados.R
 import org.nullgroup.lados.utilities.UserRole
 
 sealed class Screen(
@@ -116,6 +119,17 @@ sealed class Screen(
                 const val ID_ARG = "order_id"
                 const val ROUTE_WITH_ARG = "customer_order_detail/{$ID_ARG}"
             }
+
+            data object OrderProductsView :
+                Order(
+                    "Order Products View",
+                    "customer_order_products_view",
+                    Icons.Default.AccountCircle
+                ) {
+                const
+                val ID_ARG = "order_id"
+                const val ROUTE_WITH_ARG = "customer_order_products_view/{${OrderDetail.ID_ARG}}"
+            }
         }
 
         companion object {
@@ -131,7 +145,8 @@ sealed class Screen(
                     CategorySelectScreen,
                     ErrorFindNotMatched,
                     ProductInCategoryScreen,
-                    DisplayProductInCategory
+                    DisplayProductInCategory,
+                    Order.OrderProductsView
                 )
 
             fun getBaseScreens() = listOf(HomeScreen, ChatScreen, Order.OrderList, Profile)

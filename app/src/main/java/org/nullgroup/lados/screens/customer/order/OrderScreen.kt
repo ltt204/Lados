@@ -1,4 +1,4 @@
-package org.nullgroup.lados.screens.customer
+package org.nullgroup.lados.screens.customer.order
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -15,9 +15,11 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -118,9 +120,7 @@ fun OrderCard(
     onItemClick: (String) -> Unit = {}
 ) {
     Card(
-        modifier = modifier.height(72.dp), colors = CardDefaults.cardColors(
-            containerColor = Color(0xFFF4F4F4)
-        ),
+        modifier = modifier.height(72.dp),
         onClick = { onItemClick(order.orderId) }
     ) {
         Row(

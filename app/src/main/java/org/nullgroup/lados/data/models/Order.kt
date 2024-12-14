@@ -12,7 +12,7 @@ data class Order(
         OrderStatus.CREATED.name to System.currentTimeMillis()
     ),
     @Exclude
-    val orderProducts: List<OrderProduct> = listOf(),
+    var orderProducts: List<OrderProduct> = listOf(),
     val orderTotal: Double = orderProducts.sumOf { it.totalPrice },
     // Maybe different that the total of individual products
     // If discount is applied
