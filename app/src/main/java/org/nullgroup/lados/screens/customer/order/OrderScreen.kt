@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -13,13 +14,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ColorScheme
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -39,9 +38,12 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import org.nullgroup.lados.R
+import org.nullgroup.lados.compose.common.LoadOnProgress
+import org.nullgroup.lados.compose.common.ProfileTopAppBar
 import org.nullgroup.lados.compose.order.OrderScreenTopAppBar
 import org.nullgroup.lados.data.models.Order
 import org.nullgroup.lados.screens.Screen
+import org.nullgroup.lados.ui.theme.Typography
 import org.nullgroup.lados.utilities.OrderStatus
 import org.nullgroup.lados.viewmodels.customer.OrderState
 import org.nullgroup.lados.viewmodels.customer.OrderViewModel
@@ -62,14 +64,7 @@ fun OrderScreen(
         modifier = modifier.padding(top = paddingValues.calculateTopPadding()),
         topBar = {
             Column {
-                CenterAlignedTopAppBar(title = {
-                    Text(
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        text = "Orders",
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.SemiBold,
-                    )
-                })
+                ProfileTopAppBar(onBackClick = { navController?.navigateUp() }, content = "Orders")
                 OrderScreenTopAppBar(
                     modifier = Modifier.padding(start = 16.dp, top = 8.dp, end = 16.dp),
                     selectedTabIndex = tabSelectedIndex,
@@ -83,7 +78,12 @@ fun OrderScreen(
         Column(modifier = Modifier.padding(top = innerPadding.calculateTopPadding())) {
             when (orderUiState) {
                 is OrderState.Loading -> {
-
+                    LoadOnProgress(
+                        modifier = Modifier.fillMaxWidth(),
+                        content = {
+                            CircularProgressIndicator()
+                        }
+                    )
                 }
 
                 is OrderState.Error -> {
@@ -120,12 +120,13 @@ fun OrderCard(
     onItemClick: (String) -> Unit = {}
 ) {
     Card(
-        modifier = modifier.height(72.dp),
+        modifier = modifier.height(84.dp),
         onClick = { onItemClick(order.orderId) }
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .fillMaxHeight()
                 .padding(8.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
@@ -138,13 +139,19 @@ fun OrderCard(
                 contentDescription = "Order Icon"
             )
             Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
+                verticalArrangement = Arrangement.SpaceEvenly
             ) {
-                Text(text = "${order.orderProducts.size} items", fontWeight = FontWeight.SemiBold)
+                Text(
+                    text = "${order.orderProducts.size} items",
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 20.sp
+                )
                 Text(
                     text = "$${order.orderTotal}",
-                    color = Color(0xFF272727).copy(alpha = 0.5f)
+                    color = Color(0xFF272727).copy(alpha = 0.5f), fontSize = 16.sp
                 )
             }
             IconButton(onClick = {

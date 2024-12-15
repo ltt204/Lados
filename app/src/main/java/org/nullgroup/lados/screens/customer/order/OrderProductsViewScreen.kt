@@ -1,7 +1,6 @@
 package org.nullgroup.lados.screens.customer.order
 
 import android.util.Log
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -84,7 +83,7 @@ fun OrderProductsViewScreen(
         backgroundColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
         OrderProductsView(
-            modifier = Modifier.padding(top = innerPadding.calculateTopPadding()),
+            modifier = Modifier.padding(top = innerPadding.calculateTopPadding(), start = 16.dp, end = 16.dp),
             orderProducts = orderProducts,
             navController = navController,
             orderStatus = orderProductsViewModel.orderStatus
@@ -141,7 +140,7 @@ fun OrderProductItem(
     product: Product,
     variant: ProductVariant,
     navController: NavController? = null,
-    buttonAction: Pair<String?, (NavController) -> Unit>
+    buttonAction: Pair<String?, (NavController, String?) -> Unit>
 ) {
     val image = variant.images.firstOrNull()?.link
     Log.d("OrderProductItem", "Image: $image")
@@ -155,7 +154,9 @@ fun OrderProductItem(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     SubcomposeAsyncImage(
-                        modifier = Modifier.size(100.dp).clip(RoundedCornerShape(12.dp)),
+                        modifier = Modifier
+                            .size(100.dp)
+                            .clip(RoundedCornerShape(12.dp)),
                         model = ImageRequest
                             .Builder(LocalContext.current)
                             .crossfade(true)
@@ -167,7 +168,10 @@ fun OrderProductItem(
                             CircularProgressIndicator(modifier = Modifier.size(12.dp))
                         },
                         error = {
-                            Log.d("OrderProductItem", "Image failed to load: ${it.result.throwable.message}")
+                            Log.d(
+                                "OrderProductItem",
+                                "Image failed to load: ${it.result.throwable.message}"
+                            )
                             Text(text = "Image failed to load: ${it.result.throwable.message}")
                         }
                     )
@@ -201,8 +205,8 @@ fun OrderProductItem(
                                     contentDescription = null
                                 )
                                 Text(
-                                    text = " $${variant.salePrice}",
-                                    fontSize = 14.sp,
+                                    text = "$${variant.salePrice}",
+                                    fontSize = 18.sp,
                                     textAlign = TextAlign.Center,
                                     color = androidx.compose.ui.graphics.Color.Red,
                                     fontWeight = FontWeight.SemiBold
@@ -214,7 +218,12 @@ fun OrderProductItem(
             },
             trailingAction = {
                 buttonAction.first?.let {
-                    TextButton(onClick = { buttonAction.second.invoke(navController!!) }) {
+                    TextButton(onClick = {
+                        buttonAction.second.invoke(
+                            navController!!,
+                            product.id
+                        )
+                    }) {
                         Text(
                             text = it,
                             fontSize = 16.sp,
@@ -352,5 +361,10 @@ fun OrderProductItemPreview() {
         )
     )
 
-    OrderProductItem(Modifier, product, variant, buttonAction = Pair("Action", { /*TODO*/ }))
+    OrderProductItem(
+        Modifier,
+        product,
+        variant,
+        buttonAction = Pair("Action") { navController, _ -> /*TODO*/ }
+    )
 }

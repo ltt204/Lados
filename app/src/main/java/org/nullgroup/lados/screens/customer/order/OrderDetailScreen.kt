@@ -5,7 +5,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -88,14 +90,14 @@ fun OrderDetailScreen(
                             .padding(vertical = 16.dp, horizontal = 8.dp),
                         currentOrder = currentOrder
                     )
-                    Spacer(modifier = Modifier.padding(vertical = 24.dp))
+                    Spacer(modifier = Modifier.padding(top = 24.dp))
                     Column {
                         Text(
                             text = "Order Items",
-                            style = MaterialTheme.typography.titleMedium,
+                            style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.SemiBold
                         )
-                        Spacer(modifier = Modifier.padding(bottom = 4.dp))
+                        Spacer(modifier = Modifier.padding(bottom = 8.dp))
                         OrderItemsArea(
                             modifier = Modifier,
                             order = currentOrder,
@@ -104,16 +106,16 @@ fun OrderDetailScreen(
                             }
                         )
                     }
-                    Spacer(modifier = Modifier.padding(vertical = 24.dp))
+                    Spacer(modifier = Modifier.padding(top = 24.dp))
                     Column {
                         Text(
                             text = "Delivery Details",
-                            style = MaterialTheme.typography.titleMedium,
+                            style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.SemiBold
                         )
-                        Spacer(modifier = Modifier.padding(bottom = 4.dp))
+                        Spacer(modifier = Modifier.padding(bottom = 8.dp))
                         DeliveryDetailArea(
-                            modifier = Modifier,
+                            modifier = Modifier.height(100.dp),
                             order = currentOrder
                         )
                     }
@@ -229,17 +231,19 @@ fun DeliveryDetailArea(
         onClick = { /*Do nothing*/ },
     ) {
         Column(
-            modifier = Modifier.padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier
+                .padding(12.dp)
+                .fillMaxHeight(),
+            verticalArrangement = Arrangement.SpaceEvenly,
         ) {
             Text(
                 text = mockAddress,
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.SemiBold
             )
             Text(
                 text = mockPhone,
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.SemiBold
             )
         }

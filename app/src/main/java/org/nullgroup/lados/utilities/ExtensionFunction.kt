@@ -84,30 +84,32 @@ fun getCurrentUTCFormattedTime(): String {
     return formatter.format(utcInstant)
 }
 
-fun OrderStatus.getActionForButtonOfOrderProduct(): Pair<String?, ((NavController) -> Unit)> {
+fun OrderStatus.getActionForButtonOfOrderProduct(): Pair<String?, ((NavController, String?) -> Unit)> {
     return when (this) {
         OrderStatus.CREATED, OrderStatus.SHIPPED -> {
-            "Detail" to {
-                /*TODO: Do nothing, disable the button or hide it*/
+            "Detail" to { navController, productId ->
+                /*TODO: Do nothing, disable the button or hide it */
+                navController.navigate("${Screen.Customer.ProductDetailScreen.route}/$productId")
             }
         }
 
         OrderStatus.DELIVERED -> {
-            "Leave review" to {
+            "Leave review" to { navController, productId ->
                 /*TODO: Navigate to review screen*/
 //                it.navigateToReviewScreen()
             }
         }
 
+        // TODO: Consider designing user flow for these cases
         OrderStatus.CANCELLED, OrderStatus.RETURNED -> {
-            "Re-order" to {
-                /*TODO: Allow user to re-order, which mean they will be navigated to the checkout screen with current list of product of order.*/
+            "Re-order" to { navController, orderId ->
+                /*TODO: Allow user to re-order, which mean they will be navigated to the checkout screen with current list of products of order.*/
 //                it.navigate(Screen.Customer.Checkout.route)
             }
         }
 
         else -> {
-            null to { /*TODO*/ }
+            null to { _, _ -> /*TODO*/ }
         }
     }
 }
@@ -139,6 +141,6 @@ fun Long.toDateTimeString(
 }
 
 
-fun getStatusByName(name: String) : OrderStatus {
+fun getStatusByName(name: String): OrderStatus {
     return OrderStatus.valueOf(name.uppercase())
 }

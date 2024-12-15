@@ -112,7 +112,7 @@ sealed class Screen(
             icon: ImageVector
         ) : Customer(name, route, icon) {
             data object OrderList :
-                Order("Order List", "customer_order_list", Icons.Default.ShoppingCart)
+                Order("Order", "customer_order_list", Icons.Default.ShoppingCart)
 
             data object OrderDetail :
                 Order("Order Detail", "customer_order_detail", Icons.Default.AccountCircle) {

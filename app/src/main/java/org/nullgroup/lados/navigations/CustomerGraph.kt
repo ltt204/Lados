@@ -208,6 +208,7 @@ fun CustomerGraph(
                         }
 
                         Screen.Customer.Order.OrderList.route -> {
+                            isVisibility = true
                             OrderScreen(
                                 modifier = Modifier,
                                 paddingValues = innerPadding,
@@ -269,7 +270,7 @@ fun CustomerGraph(
             ) {
                 isVisibility = false
                 OrderProductsViewScreen(
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    modifier = Modifier,
                     navController = navController,
                     paddingValues = innerPadding
                 )

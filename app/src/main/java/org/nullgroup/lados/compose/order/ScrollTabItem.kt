@@ -38,7 +38,7 @@ fun ScrollTabItem(
                 .fillMaxHeight()
                 .padding(horizontal = 8.dp, vertical = 4.dp),
             text = title,
-            fontSize = 14.sp,
+            fontSize = 16   .sp,
             color = if (selected) Color.White else Color.Black,
             textAlign = TextAlign.Center
         )
