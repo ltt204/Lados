@@ -84,32 +84,32 @@ fun getCurrentUTCFormattedTime(): String {
     return formatter.format(utcInstant)
 }
 
-fun OrderStatus.getActionForButtonOfOrderProduct(): Pair<String?, ((NavController, String?) -> Unit)> {
+fun OrderStatus.getActionForButtonOfOrderProduct(): Pair<String?, ((NavController, String?, String?) -> Unit)> {
     return when (this) {
         OrderStatus.CREATED, OrderStatus.SHIPPED -> {
-            "Detail" to { navController, productId ->
+            "Detail" to { navController, productId, _ ->
                 /*TODO: Do nothing, disable the button or hide it */
                 navController.navigate("${Screen.Customer.ProductDetailScreen.route}/$productId")
             }
         }
 
         OrderStatus.DELIVERED -> {
-            "Leave review" to { navController, productId ->
+            "Leave review" to { navController, productId, variantId ->
                 /*TODO: Navigate to review screen*/
-//                it.navigateToReviewScreen()
+                navController.navigate("${Screen.Customer.ReviewProductScreen.route}/$productId/$variantId")
             }
         }
 
         // TODO: Consider designing user flow for these cases
         OrderStatus.CANCELLED, OrderStatus.RETURNED -> {
-            "Re-order" to { navController, orderId ->
+            "Re-order" to { navController, orderId, _ ->
                 /*TODO: Allow user to re-order, which mean they will be navigated to the checkout screen with current list of products of order.*/
 //                it.navigate(Screen.Customer.Checkout.route)
             }
         }
 
         else -> {
-            null to { _, _ -> /*TODO*/ }
+            null to { _, _, _ -> /*TODO*/ }
         }
     }
 }

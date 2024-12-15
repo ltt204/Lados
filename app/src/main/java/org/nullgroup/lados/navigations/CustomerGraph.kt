@@ -2,6 +2,7 @@ package org.nullgroup.lados.navigations
 
 //noinspection UsingMaterialAndMaterial3Libraries
 //noinspection UsingMaterialAndMaterial3Libraries
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -50,6 +51,7 @@ import org.nullgroup.lados.screens.customer.product.ProductDetailScreen
 import org.nullgroup.lados.screens.customer.product.ProductInCategoryScreen
 import org.nullgroup.lados.screens.customer.ProductScreen
 import org.nullgroup.lados.screens.customer.SearchScreen
+import org.nullgroup.lados.screens.customer.product.ReviewProductScreen
 import org.nullgroup.lados.ui.theme.MagentaMaterial
 import org.nullgroup.lados.viewmodels.SharedViewModel
 
@@ -273,6 +275,34 @@ fun CustomerGraph(
                     modifier = Modifier,
                     navController = navController,
                     paddingValues = innerPadding
+                )
+            }
+
+            composable(
+                route = Screen.Customer.ReviewProductScreen.ROUTE_WITH_ARGS,
+                arguments = listOf(
+                    navArgument(Screen.Customer.ReviewProductScreen.PRODUCT_ID_ARG) {
+                        type = NavType.StringType
+                    },
+
+                    navArgument(Screen.Customer.ReviewProductScreen.VARIANT_ID_ARG) {
+                        type = NavType.StringType
+                    }
+                )
+            ) { backStackEntry ->
+
+                Log.d("Review:", "${Screen.Customer.ReviewProductScreen.ROUTE_WITH_ARGS}")
+
+                val productId =
+                    backStackEntry.arguments?.getString(Screen.Customer.ReviewProductScreen.PRODUCT_ID_ARG)
+                val variantId =
+                    backStackEntry.arguments?.getString(Screen.Customer.ReviewProductScreen.VARIANT_ID_ARG)
+
+                // Sử dụng productId và variantId trong Composable của bạn
+                ReviewProductScreen(
+                    productId = productId.toString(),
+                    variantId = variantId.toString(),
+                    navController = navController
                 )
             }
 

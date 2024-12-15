@@ -36,7 +36,8 @@ class OrderProductsViewModel @Inject constructor(
             started = SharingStarted.Lazily,
             initialValue = Order(),
         )
-    val orderStatus = _currentOrder.value.orderStatusLog.entries.first().key
+
+    var orderStatus = _currentOrder.value.orderStatusLog.entries.first().key
 
     private var _productVariantsState =
         MutableStateFlow<OrderProductsState>(OrderProductsState.Loading)
@@ -52,7 +53,9 @@ class OrderProductsViewModel @Inject constructor(
             orderRepository.getOrderById(orderId)
                 .flowOn(Dispatchers.IO)
                 .collect {
-                    Log.d("OrderProductsViewModel", "Fetching order: $it")
+
+                    orderStatus = it.orderStatusLog.entries.first().key
+
                     it.orderProducts.forEach { orderProduct ->
                         val productId = orderProduct.productId
                         val variantId = orderProduct.variantId

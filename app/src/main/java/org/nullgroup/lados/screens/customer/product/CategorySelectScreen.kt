@@ -118,8 +118,17 @@ fun DrawCategorySelectScreenContent(
     paddingValues: PaddingValues,
     sharedViewModel: SharedViewModel = SharedViewModel()
 ) {
-    val categories =
-        (viewModel.categoryUiState.collectAsStateWithLifecycle() as CategoryUiState.Success).categories
+    val categoryUiState = viewModel.categoryUiState.collectAsStateWithLifecycle().value
+
+    val categories = when (categoryUiState) {
+        is CategoryUiState.Success -> categoryUiState.categories
+        is CategoryUiState.Loading -> {
+            emptyList()
+        }
+        is CategoryUiState.Error -> {
+            emptyList()
+        }
+    }
 
     Column(
         modifier = modifier

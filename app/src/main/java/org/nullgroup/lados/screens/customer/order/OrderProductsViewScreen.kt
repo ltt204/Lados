@@ -53,6 +53,7 @@ import org.nullgroup.lados.data.models.OrderProduct
 import org.nullgroup.lados.data.models.Product
 import org.nullgroup.lados.data.models.ProductVariant
 import org.nullgroup.lados.data.models.Size
+import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.utilities.OrderStatus
 import org.nullgroup.lados.utilities.getActionForButtonOfOrderProduct
 import org.nullgroup.lados.utilities.getStatusByName
@@ -69,6 +70,8 @@ fun OrderProductsViewScreen(
 ) {
     val orderProducts = orderProductsViewModel.productVariantsState.collectAsState()
 
+    Log.d("Status in OrderProductsViewScreen", orderProductsViewModel.orderStatus)
+
     Scaffold(
         modifier = modifier
             .padding(top = paddingValues.calculateTopPadding()),
@@ -83,7 +86,10 @@ fun OrderProductsViewScreen(
         backgroundColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
         OrderProductsView(
-            modifier = Modifier.padding(top = innerPadding.calculateTopPadding(), start = 16.dp, end = 16.dp),
+            modifier = Modifier.padding(
+                top = innerPadding.calculateTopPadding(),
+                start = 16.dp,
+                end = 16.dp),
             orderProducts = orderProducts,
             navController = navController,
             orderStatus = orderProductsViewModel.orderStatus
@@ -115,9 +121,13 @@ fun OrderProductsView(
         is OrderProductsState.Success -> {
             val products = (orderProducts.value as OrderProductsState.Success).orderProducts
 
-            OrderStatus.entries.find { it.name == orderStatus }
+            val result = OrderStatus.entries.find { it.name == orderStatus }
 
-            val buttonAction = getStatusByName(orderStatus).getActionForButtonOfOrderProduct()
+            Log.d("Test Product", "Order Status: $orderStatus - ${result?.name}")
+
+            val buttonAction = getStatusByName(
+                orderStatus
+            ).getActionForButtonOfOrderProduct()
 
             LazyColumn(modifier = modifier) {
                 items(products.keys.toList(), key = { it.id }) { product ->
@@ -140,13 +150,15 @@ fun OrderProductItem(
     product: Product,
     variant: ProductVariant,
     navController: NavController? = null,
-    buttonAction: Pair<String?, (NavController, String?) -> Unit>
+    buttonAction: Pair<String?, (NavController, String?, String?) -> Unit>
 ) {
     val image = variant.images.firstOrNull()?.link
     Log.d("OrderProductItem", "Image: $image")
     Card(
         modifier = modifier,
-        onClick = { /*TODO*/ }) {
+        onClick = {
+        }
+    ) {
         TwoColsItem(
             content = {
                 Row(
@@ -221,7 +233,8 @@ fun OrderProductItem(
                     TextButton(onClick = {
                         buttonAction.second.invoke(
                             navController!!,
-                            product.id
+                            product.id,
+                            variant.id
                         )
                     }) {
                         Text(
@@ -234,7 +247,9 @@ fun OrderProductItem(
                 }
             },
             onClick = {
-                /*TODO: Navigate to product detail*/
+                navController?.navigate(
+                    "${Screen.Customer.ProductDetailScreen.route}/${product.id}"
+                )
             }
         )
     }
@@ -365,6 +380,6 @@ fun OrderProductItemPreview() {
         Modifier,
         product,
         variant,
-        buttonAction = Pair("Action") { navController, _ -> /*TODO*/ }
+        buttonAction = Pair("Action") { navController, _, _ -> /*TODO*/ }
     )
 }

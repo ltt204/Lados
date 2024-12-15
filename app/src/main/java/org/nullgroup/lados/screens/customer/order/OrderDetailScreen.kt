@@ -102,7 +102,9 @@ fun OrderDetailScreen(
                             modifier = Modifier,
                             order = currentOrder,
                             onViewProductsClick = {
-                                navController?.navigate("${Screen.Customer.Order.OrderProductsView.route}/${currentOrder.orderId}")
+                                navController?.navigate(
+                                    "${Screen.Customer.Order.OrderProductsView.route}/${currentOrder.orderId}"
+                                )
                             }
                         )
                     }
@@ -122,7 +124,6 @@ fun OrderDetailScreen(
                 }
             }
         }
-
     }
 }
 
