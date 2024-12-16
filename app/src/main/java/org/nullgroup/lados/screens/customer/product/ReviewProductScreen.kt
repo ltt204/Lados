@@ -1,6 +1,7 @@
 package org.nullgroup.lados.screens.customer.product
 
 import android.os.Build
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -61,6 +62,7 @@ import org.nullgroup.lados.data.models.Product
 import org.nullgroup.lados.data.models.ProductVariant
 import org.nullgroup.lados.data.models.Size
 import org.nullgroup.lados.data.models.UserEngagement
+import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.screens.customer.order.OrderItemsArea
 import org.nullgroup.lados.utilities.getCurrentUTCFormattedTime
 import org.nullgroup.lados.viewmodels.customer.ReviewProductViewModel
@@ -84,7 +86,7 @@ fun ReviewProductScreen(
     }
 
     val uiState = viewModel.productVariantsState.collectAsState()
-
+    val context = LocalContext.current
     Scaffold(
         modifier = Modifier.background(Color.White),
         topBar = {
@@ -122,6 +124,8 @@ fun ReviewProductScreen(
                             createdAt = Timestamp.now()
                         )
                     )
+                    Toast.makeText(context, "Review sent!", Toast.LENGTH_SHORT).show()
+                    navController.navigate("${Screen.Customer.ProductDetailScreen.route}/$productId")
                 },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = ProductTheme.primaryColor,
