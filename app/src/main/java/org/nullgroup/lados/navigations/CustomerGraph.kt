@@ -1,5 +1,8 @@
 package org.nullgroup.lados.navigations
 
+//noinspection UsingMaterialAndMaterial3Libraries
+//noinspection UsingMaterialAndMaterial3Libraries
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -8,9 +11,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-//noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.BottomNavigation
-//noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -43,10 +44,14 @@ import org.nullgroup.lados.screens.customer.profile.EditProfileScreen
 import org.nullgroup.lados.screens.customer.Error_FindNotMatchScreen
 import org.nullgroup.lados.screens.customer.FilterScreen
 import org.nullgroup.lados.screens.customer.HomeScreen
+import org.nullgroup.lados.screens.customer.order.OrderDetailScreen
+import org.nullgroup.lados.screens.customer.order.OrderProductsViewScreen
+import org.nullgroup.lados.screens.customer.order.OrderScreen
 import org.nullgroup.lados.screens.customer.product.ProductDetailScreen
 import org.nullgroup.lados.screens.customer.product.ProductInCategoryScreen
 import org.nullgroup.lados.screens.customer.ProductScreen
 import org.nullgroup.lados.screens.customer.SearchScreen
+import org.nullgroup.lados.screens.customer.product.ReviewProductScreen
 import org.nullgroup.lados.ui.theme.MagentaMaterial
 import org.nullgroup.lados.viewmodels.SharedViewModel
 
@@ -72,18 +77,14 @@ fun CustomerGraph(
                 BottomNavigation(
                     backgroundColor = Color.White,
                 ) {
-
-
                     val navBackStackEntry by navController.currentBackStackEntryAsState()
                     val currentDestination = navBackStackEntry?.destination
                     Screen.Customer.getAllScreens().slice(indices = IntRange(0, 3))
                         .forEach { screen ->
-
                             val isSelected = mutableStateOf(
                                 currentDestination?.hierarchy?.any
                                 { it.route == screen.route } == true
                             )
-
                             val contentColor = MagentaMaterial
 
                             BottomNavigationItem(
@@ -167,7 +168,8 @@ fun CustomerGraph(
                         Screen.Customer.HomeScreen.route -> {
                             HomeScreen(
                                 navController = navController,
-                                paddingValues = innerPadding, sharedViewModel = sharedViewModel
+                                paddingValues = innerPadding,
+                                sharedViewModel = sharedViewModel
                             )
                         }
 
@@ -207,8 +209,13 @@ fun CustomerGraph(
                             )
                         }
 
-                        Screen.Customer.Order.route -> {
-                            // Tasks()
+                        Screen.Customer.Order.OrderList.route -> {
+                            isVisibility = true
+                            OrderScreen(
+                                modifier = Modifier,
+                                paddingValues = innerPadding,
+                                navController = navController
+                            )
                         }
 
                         Screen.Customer.Address.AddressList.route -> {
@@ -239,6 +246,64 @@ fun CustomerGraph(
                         }
                     }
                 }
+            }
+
+            composable(
+                Screen.Customer.Order.OrderDetail.ROUTE_WITH_ARG,
+                arguments = listOf(
+                    navArgument(Screen.Customer.Order.OrderDetail.ID_ARG) {
+                        type = NavType.StringType
+                    })
+            ) {
+                isVisibility = false
+                OrderDetailScreen(
+                    modifier = Modifier,
+                    navController = navController,
+                    paddingValues = innerPadding
+                )
+            }
+
+            composable(
+                Screen.Customer.Order.OrderProductsView.ROUTE_WITH_ARG,
+                arguments = listOf(
+                    navArgument(Screen.Customer.Order.OrderProductsView.ID_ARG) {
+                        type = NavType.StringType
+                    })
+            ) {
+                isVisibility = false
+                OrderProductsViewScreen(
+                    modifier = Modifier,
+                    navController = navController,
+                    paddingValues = innerPadding
+                )
+            }
+
+            composable(
+                route = Screen.Customer.ReviewProductScreen.ROUTE_WITH_ARGS,
+                arguments = listOf(
+                    navArgument(Screen.Customer.ReviewProductScreen.PRODUCT_ID_ARG) {
+                        type = NavType.StringType
+                    },
+
+                    navArgument(Screen.Customer.ReviewProductScreen.VARIANT_ID_ARG) {
+                        type = NavType.StringType
+                    }
+                )
+            ) { backStackEntry ->
+
+                Log.d("Review:", "${Screen.Customer.ReviewProductScreen.ROUTE_WITH_ARGS}")
+
+                val productId =
+                    backStackEntry.arguments?.getString(Screen.Customer.ReviewProductScreen.PRODUCT_ID_ARG)
+                val variantId =
+                    backStackEntry.arguments?.getString(Screen.Customer.ReviewProductScreen.VARIANT_ID_ARG)
+
+                // Sử dụng productId và variantId trong Composable của bạn
+                ReviewProductScreen(
+                    productId = productId.toString(),
+                    variantId = variantId.toString(),
+                    navController = navController
+                )
             }
 
             composable(
