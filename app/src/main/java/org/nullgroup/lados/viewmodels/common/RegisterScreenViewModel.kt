@@ -1,5 +1,6 @@
 package org.nullgroup.lados.viewmodels.common
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
@@ -69,6 +70,7 @@ class RegisterScreenViewModel @Inject constructor(
         email: String,
         password: String,
         phone: String,
+        context: Context,
     ) {
         if (!validateAll(firstName, lastName, email, password, phone)) {
             registerState.value = ResourceState.Error("Please fill all fields and correct")
@@ -77,7 +79,7 @@ class RegisterScreenViewModel @Inject constructor(
 
         viewModelScope.launch {
             try {
-                emailAuth.signUp("$firstName $lastName", email, password, phone).let {
+                emailAuth.signUp("$firstName $lastName", email, password, phone, context).let {
                     registerState.value = it
                     when (it) {
                         is ResourceState.Error -> {}
@@ -109,7 +111,8 @@ class RegisterScreenViewModel @Inject constructor(
                     event.lastName,
                     event.email,
                     event.password,
-                    event.phone
+                    event.phone,
+                    event.context,
                 )
             }
 

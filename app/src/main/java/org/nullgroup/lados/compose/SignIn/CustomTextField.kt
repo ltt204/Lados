@@ -1,5 +1,6 @@
 package org.nullgroup.lados.compose.SignIn
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -16,7 +17,6 @@ import org.nullgroup.lados.ui.theme.LadosTheme
 
 @Composable
 fun CustomTextField(
-    label: String,
     text: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
@@ -27,16 +27,17 @@ fun CustomTextField(
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     isError: Boolean = false,
+    label: String = "",
 ) {
     OutlinedTextField(
         value = text,
         onValueChange = onValueChange,
         shape = shape,
-        label = {
+        placeholder = {
             Text(
                 text = label,
-                style = LadosTheme.typography.bodyLarge,
                 color = LadosTheme.colorScheme.onBackground,
+                style = LadosTheme.typography.bodyMedium
             )
         },
         textStyle = LadosTheme.typography.titleMedium,

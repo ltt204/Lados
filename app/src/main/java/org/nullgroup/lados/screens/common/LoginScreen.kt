@@ -177,7 +177,9 @@ fun EmailScreen(
                         )
                     )
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(55.dp),
             )
         }
     }

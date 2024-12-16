@@ -4,15 +4,19 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.IntentSender
+import android.util.Log
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.BeginSignInRequest.GoogleIdTokenRequestOptions
 import com.google.android.gms.auth.api.identity.SignInClient
 import com.google.android.gms.auth.api.identity.SignInCredential
 import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.AuthCredential
+import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.GoogleAuthProvider
 import kotlinx.coroutines.tasks.await
 import org.nullgroup.lados.R
@@ -67,6 +71,57 @@ class GoogleAuthRepositoryImpl(
             .build()
     }
 
+    private fun handleCollision(exception: FirebaseAuthUserCollisionException) {
+        val credential = exception.updatedCredential
+        if (credential == null) {
+            Log.d("GoogleAuthRepositoryImpl", "Email link failed")
+            return
+        }
+
+        auth.signInWithCredential(credential)
+            .addOnCompleteListener {
+                if (it.isSuccessful) {
+                    Log.d("GoogleAuthRepositoryImpl", "Email link successful")
+                } else {
+                    Log.d("GoogleAuthRepositoryImpl", "Email link failed")
+                }
+            }
+    }
+
+    private fun linkWithEmailPassword(email: String) {
+        val fireAuth = auth.currentUser?.let { user ->
+            val credential = EmailAuthProvider.getCredential(email, "fake_password")
+            user.linkWithCredential(credential)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        Log.d("GoogleAuthRepositoryImpl", "Email link successful")
+                    } else {
+                        if (task.exception is FirebaseAuthUserCollisionException) {
+                            handleCollision(task.exception as FirebaseAuthUserCollisionException)
+                        } else {
+                            Log.d("GoogleAuthRepositoryImpl", "Email link failed")
+                        }
+                    }
+                }
+        }
+    }
+
+    private fun linkWithIfExists(email: String?) {
+        email?.let {
+            auth.fetchSignInMethodsForEmail(it)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        val signInMethods = task.result?.signInMethods
+                        if (signInMethods != null && signInMethods.contains(EmailAuthProvider.EMAIL_PASSWORD_SIGN_IN_METHOD)) {
+                            linkWithEmailPassword(it)
+                        }
+                    } else {
+                        Log.d("GoogleAuthRepositoryImpl", "Error fetching sign in methods")
+                    }
+                }
+        }
+    }
+
     override suspend fun signInWithIntent(intent: Intent): ResourceState<User> {
         return try {
             val credential = try {
@@ -95,6 +150,7 @@ class GoogleAuthRepositoryImpl(
                     if (it.providerData.size >= 2) it.providerData[1].providerId else it.providerId
 
                 user = User(
+                    id = it.uid,
                     name = it.displayName ?: "",
                     email = it.email ?: "",
                     role = UserRole.CUSTOMER.name,
@@ -105,14 +161,15 @@ class GoogleAuthRepositoryImpl(
 
                 val token = it.getIdToken(true).await()?.token
                 if (token != null) {
-                    sharedPreferences.saveData(provider, token)
+                    sharedPreferences.saveData("token", token)
                 }
             }
 
 
             if (authResult.additionalUserInfo!!.isNewUser) {
                 if (user != null) {
-                    userRepository.addUserToFirestore(user!!)
+                    linkWithIfExists(authResult.user?.email!!)
+                    userRepository.saveUserToFirestore(user!!)
                 }
             }
 

@@ -27,7 +27,7 @@ class ProfileViewModel @Inject constructor(
     fun signOut(navController: NavController?) {
         firebaseAuth.signOut()
         navController?.navigate("login") {
-            popUpTo("profile") { inclusive = true }
+            popUpTo(navController.graph.startDestinationId) { inclusive = true }
         }
     }
 }

@@ -123,6 +123,7 @@ fun RegisterInputScreen(navController: NavController, modifier: Modifier = Modif
     var phoneTouched by remember { mutableStateOf(false) }
 
     val focusManager = LocalFocusManager.current
+    val context = LocalContext.current
 
     Column(
         modifier = modifier
@@ -386,6 +387,7 @@ fun RegisterInputScreen(navController: NavController, modifier: Modifier = Modif
                             email,
                             password,
                             phone,
+                            context,
                         )
                     )
                 }

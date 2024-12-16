@@ -1,5 +1,6 @@
 package org.nullgroup.lados.data.repositories.interfaces
 
+import android.content.Context
 import org.nullgroup.lados.data.models.User
 import org.nullgroup.lados.viewmodels.common.states.ResourceState
 
@@ -11,6 +12,7 @@ interface EmailAuthRepository {
         email: String,
         password: String,
         phone: String,
+        context: Context,
     ): ResourceState<User>
 
     suspend fun signOut(): ResourceState<Boolean>

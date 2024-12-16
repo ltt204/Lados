@@ -3,7 +3,6 @@ package org.nullgroup.lados.data.repositories.implementations
 import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -41,18 +40,33 @@ class UserRepositoryImplement(
     }
 
     override suspend fun addUserToFirestore(user: User) {
+        user.photoUrl = if (firebaseAuth.currentUser!!.photoUrl == null) {
+            imageRepository.getImageUrl(
+                "users",
+                "default_avatar",
+                "jpg"
+            )
+        } else {
+            firebaseAuth.currentUser!!.photoUrl.toString()
+        }
+
+        Log.d("UserRepositoryImplementation", user.photoUrl)
+
         firestore.collection("users").add(user).await()
     }
 
     override suspend fun saveUserToFirestore(user: User) {
-        user.photoUrl =
-            user.photoUrl.ifEmpty {
-                imageRepository.getImageUrl(
-                    "users",
-                    "default_avatar",
-                    "jpg"
-                )
-            }
+        user.photoUrl = if (firebaseAuth.currentUser!!.photoUrl == null) {
+            imageRepository.getImageUrl(
+                "users",
+                "default_avatar",
+                "jpg"
+            )
+        } else {
+            firebaseAuth.currentUser!!.photoUrl.toString()
+        }
+
+        Log.d("UserRepositoryImplementation", user.photoUrl)
 
         firestore.collection("users").document(user.id).set(user).await()
     }

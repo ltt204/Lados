@@ -142,6 +142,8 @@ dependencies {
 
     androidTestImplementation(platform(libs.androidx.compose.bom))
 
+    // For JWT
+    implementation(libs.java.jwt)
 }
 
 kapt {

@@ -11,6 +11,7 @@ sealed class LoginScreenEvent {
     data class HandleSignUp(val navController: NavController) : LoginScreenEvent()
     data class HandleLogInWithGoogle(
         val launcher: ActivityResultLauncher<IntentSenderRequest>,
-    ) :
-        LoginScreenEvent()
+    ) : LoginScreenEvent()
+
+    data object HandleCheckTokenSaved : LoginScreenEvent()
 }

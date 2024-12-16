@@ -13,7 +13,9 @@ import kotlinx.coroutines.launch
 import org.nullgroup.lados.data.models.User
 import org.nullgroup.lados.data.repositories.interfaces.EmailAuthRepository
 import org.nullgroup.lados.data.repositories.interfaces.GoogleAuthRepository
+import org.nullgroup.lados.data.repositories.interfaces.SharedPreferencesRepository
 import org.nullgroup.lados.data.repositories.interfaces.UserRepository
+import org.nullgroup.lados.utilities.isTokenExpired
 import org.nullgroup.lados.viewmodels.common.states.LoginScreenStepState
 import org.nullgroup.lados.viewmodels.common.states.ResourceState
 import org.nullgroup.lados.viewmodels.common.events.LoginScreenEvent
@@ -23,7 +25,7 @@ import javax.inject.Inject
 class LoginScreenViewModel @Inject constructor(
     private val emailAuth: EmailAuthRepository,
     private val googleAuth: GoogleAuthRepository,
-    private val userRepos: UserRepository,
+    private val sharedPreferences: SharedPreferencesRepository,
 ) : ViewModel() {
 
     var loginStep = MutableStateFlow<LoginScreenStepState>(LoginScreenStepState.Email())
@@ -153,6 +155,14 @@ class LoginScreenViewModel @Inject constructor(
         }
     }
 
+    private fun handleCheckTokenSaved() {
+        val token = sharedPreferences.getData("token") ?: return
+
+        if (!isTokenExpired(token)) {
+            loginStep.value = LoginScreenStepState.Home(User())
+        }
+    }
+
     fun handleLoginEvent(event: LoginScreenEvent) {
         loginState.value = ResourceState.Loading
 
@@ -175,6 +185,10 @@ class LoginScreenViewModel @Inject constructor(
 
             is LoginScreenEvent.HandleSignUp -> {
                 handleSignUp(event.navController)
+            }
+
+            is LoginScreenEvent.HandleCheckTokenSaved -> {
+                handleCheckTokenSaved()
             }
         }
     }

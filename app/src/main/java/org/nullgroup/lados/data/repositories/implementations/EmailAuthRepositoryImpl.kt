@@ -1,6 +1,11 @@
 package org.nullgroup.lados.data.repositories.implementations
 
+import android.content.Context
+import android.util.Log
+import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthCredential
+import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import org.nullgroup.lados.data.models.User
@@ -36,9 +41,13 @@ class EmailAuthRepositoryImpl(
                 return ResourceState.Error("Account is disabled, please check your email for reset password")
             }
 
+            result.user?.getIdToken(true)?.addOnSuccessListener {
+                sharedPreferences.saveData("token", it?.token!!)
+            }
+
             ResourceState.Success(user)
         } catch (e: Exception) {
-            ResourceState.Error(e.message)
+            ResourceState.Error("Password is incorrect")
         }
     }
 
@@ -63,12 +72,28 @@ class EmailAuthRepositoryImpl(
         email: String,
         password: String,
         phone: String,
+        context: Context,
     ): ResourceState<User> {
         return try {
             val result = auth.createUserWithEmailAndPassword(email, password).await()
 
             if (result.user == null) {
                 return ResourceState.Error("Failed to create user")
+            }
+
+            val credential = GoogleAuthProvider.getCredential(
+                GoogleSignIn.getLastSignedInAccount(context)?.idToken,
+                null
+            )
+
+            Log.d("EmailAuthRepositoryImpl", "credential: ${credential.signInMethod}")
+
+            result.user?.linkWithCredential(credential)?.addOnCompleteListener {
+                if (it.isSuccessful) {
+                    Log.d("EmailAuthRepositoryImpl", "linkWithCredential: success")
+                } else {
+                    Log.d("EmailAuthRepositoryImpl", "linkWithCredential: ${it.exception}")
+                }
             }
 
             val user = User(
@@ -83,7 +108,7 @@ class EmailAuthRepositoryImpl(
             )
             val token = result.user?.getIdToken(true)?.await()?.token
             if (token != null) {
-                sharedPreferences.saveData(result.user?.providerId!!, token)
+                sharedPreferences.saveData("token", token)
             }
 
             userRepository.saveUserToFirestore(user)
@@ -92,7 +117,7 @@ class EmailAuthRepositoryImpl(
 
             ResourceState.Success(user)
         } catch (e: Exception) {
-            ResourceState.Error(e.message)
+            ResourceState.Error("Failed to create account")
         }
     }
 
@@ -111,7 +136,7 @@ class EmailAuthRepositoryImpl(
 
             ResourceState.Success(true)
         } catch (e: Exception) {
-            ResourceState.Error(e.message)
+            ResourceState.Error("Failed to send reset password email")
         }
     }
 }

@@ -40,7 +40,7 @@ fun OutlineButton(
         shape = LadosTheme.shape.extraLarge
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically
         ) {

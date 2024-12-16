@@ -23,7 +23,9 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import org.nullgroup.lados.screens.Screen
+import org.nullgroup.lados.screens.common.ForgotPasswordScreen
 import org.nullgroup.lados.screens.common.LoginScreen
+import org.nullgroup.lados.screens.common.RegisterScreen
 import org.nullgroup.lados.screens.customer.AddAddressScreen
 import org.nullgroup.lados.screens.customer.AddressList
 import org.nullgroup.lados.screens.customer.EditAddressScreen
@@ -146,6 +148,19 @@ fun CustomerGraph(
             composable(route = Screen.Common.LoginScreen.route) {
                 isVisibility = false
                 LoginScreen(modifier = modifier, navController = navController)
+            }
+
+            composable(route = Screen.Common.RegisterScreen.route) {
+                isVisibility = false
+                RegisterScreen(modifier = modifier, navController = navController)
+            }
+
+            composable(route = Screen.Common.ForgotPasswordScreen.route) {
+                isVisibility = false
+                ForgotPasswordScreen(
+                    modifier = modifier,
+                    navController = navController
+                )
             }
         }
     }
