@@ -102,7 +102,7 @@ class EmailAuthRepositoryImpl(
                 name = fullName,
                 role = UserRole.CUSTOMER.name,
                 phoneNumber = phone,
-                photoUrl = result.user?.photoUrl?.toString() ?: "",
+                avatarUri = result.user?.photoUrl?.toString() ?: "",
                 provider = result.user?.providerId ?: "",
                 isActive = true,
             )

@@ -4,9 +4,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MailOutline
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material3.Icon
 import androidx.compose.ui.graphics.vector.ImageVector
-import org.nullgroup.lados.data.models.UserRole
+import androidx.compose.ui.res.painterResource
+import org.nullgroup.lados.R
+import org.nullgroup.lados.utilities.UserRole
 
 sealed class Screen(
     val name: String? = null,
@@ -41,11 +45,57 @@ sealed class Screen(
         route: String,
         icon: ImageVector
     ) : Screen(name, route, icon) {
-        data object HomeScreen : Customer("Home Screen", "customer_home", Icons.Default.Home)
+
+        data object HomeScreen : Customer("Home", "customer_home", Icons.Default.Home)
         data object ChatScreen : Customer("Chat", "customer_chat", Icons.Default.MailOutline)
-        data object Order : Customer("Order", "customer_order", Icons.Filled.ShoppingCart)
         data object Profile : Customer("Profile", "customer_profile", Icons.Default.AccountCircle)
-        data object EditProfile : Customer("Edit Profile", "customer_edit_profile", Icons.Default.AccountCircle)
+
+        data object Home : Customer("Home", "customer_home", Icons.Default.Home)
+        data object SearchScreen : Customer("Search", "customer_search", Icons.Default.Search)
+        data object FilterScreen : Customer("Filter", "customer_filter", Icons.Default.Search)
+        data object CategorySelectScreen :
+            Customer("Category", "customer_category", Icons.Default.Search)
+
+        data object DisplayProductInCategory : Customer(
+            "DisplayProductInCategory",
+            "customer_display_product_in_category",
+            Icons.Default.Search
+        )
+
+        data object ProductInCategoryScreen : Customer(
+            "ProductInCategoryScreen",
+            "customer_product_in_category_screen",
+            Icons.Default.Search
+        )
+
+        data object ProductDetailScreen: Customer(
+            "ProductDetailScreen",
+            "customer_product_detail_screen",
+            Icons.Default.Search
+        ){
+            const val ID_ARG = "product_id"
+            const val ROUTE_WITH_ARG = "customer_product_detail_screen/{$ID_ARG}"
+        }
+
+        data object ReviewProductScreen : Customer(
+            "ReviewProductScreen",
+            "review_product_screen",
+            Icons.Default.Search
+        ) {
+            const val PRODUCT_ID_ARG = "product_id"
+            const val VARIANT_ID_ARG = "variant_id"
+            const val ROUTE_WITH_ARGS = "review_product_screen/{$PRODUCT_ID_ARG}/{$VARIANT_ID_ARG}"
+        }
+
+        data object ErrorFindNotMatched :
+            Customer(
+                "Error_FindNotMatched",
+                "customer_error_find_not_matched",
+                Icons.Default.Search
+            )
+
+        data object EditProfile :
+            Customer("Edit Profile", "customer_edit_profile", Icons.Default.AccountCircle)
 
         sealed class Address(
             name: String,
@@ -68,9 +118,52 @@ sealed class Screen(
             }
         }
 
-        companion object {
-            fun getAllScreens() = listOf(HomeScreen, ChatScreen, Order, Profile)
+        sealed class Order(
+            name: String,
+            route: String,
+            icon: ImageVector
+        ) : Customer(name, route, icon) {
+            data object OrderList :
+                Order("Order", "customer_order_list", Icons.Default.ShoppingCart)
+
+            data object OrderDetail :
+                Order("Order Detail", "customer_order_detail", Icons.Default.AccountCircle) {
+                const val ID_ARG = "order_id"
+                const val ROUTE_WITH_ARG = "customer_order_detail/{$ID_ARG}"
+            }
+
+            data object OrderProductsView :
+                Order(
+                    "Order Products View",
+                    "customer_order_products_view",
+                    Icons.Default.AccountCircle
+                ) {
+                const
+                val ID_ARG = "order_id"
+                const val ROUTE_WITH_ARG = "customer_order_products_view/{${OrderDetail.ID_ARG}}"
+            }
         }
+
+        companion object {
+            fun getAllScreens() =
+                listOf(
+                    HomeScreen,
+                    ChatScreen,
+                    Order.OrderList,
+                    Profile,
+                    Home,
+                    SearchScreen,
+                    FilterScreen,
+                    CategorySelectScreen,
+                    ErrorFindNotMatched,
+                    ProductInCategoryScreen,
+                    DisplayProductInCategory,
+                    Order.OrderProductsView
+                )
+
+            fun getBaseScreens() = listOf(HomeScreen, ChatScreen, Order.OrderList, Profile)
+        }
+
     }
 
     /**

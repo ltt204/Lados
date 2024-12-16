@@ -1,5 +1,6 @@
 package org.nullgroup.lados.viewmodels.customer
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
@@ -22,7 +23,9 @@ class ProfileViewModel @Inject constructor(
             scope = viewModelScope,
             started = SharingStarted.Lazily,
             initialValue = User()
-        )
+        ).also {
+            Log.d("ProfileViewModel", "currentUser: $it")
+        }
 
     fun signOut(navController: NavController?) {
         firebaseAuth.signOut()

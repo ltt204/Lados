@@ -155,7 +155,7 @@ class GoogleAuthRepositoryImpl(
                     email = it.email ?: "",
                     role = UserRole.CUSTOMER.name,
                     phoneNumber = it.phoneNumber ?: "",
-                    photoUrl = it.photoUrl?.toString() ?: "",
+                    avatarUri = it.photoUrl?.toString() ?: "",
                     provider = provider,
                 )
 

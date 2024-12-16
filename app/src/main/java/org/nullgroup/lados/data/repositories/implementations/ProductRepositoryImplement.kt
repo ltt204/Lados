@@ -1,6 +1,12 @@
 package org.nullgroup.lados.data.repositories.implementations
 
+import android.util.Log
+import com.google.android.gms.tasks.Task
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.QuerySnapshot
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import org.nullgroup.lados.data.models.Image
 import org.nullgroup.lados.data.models.Product
@@ -8,29 +14,102 @@ import org.nullgroup.lados.data.models.ProductVariant
 import org.nullgroup.lados.data.models.UserEngagement
 import org.nullgroup.lados.data.repositories.interfaces.ProductRepository
 
-class ProductRepositoryImplement (
+class ProductRepositoryImplement(
     private val firestore: FirebaseFirestore
 ) : ProductRepository {
+    override fun getProductsFlow(): Flow<List<Product>> = callbackFlow {
+        val subscription = firestore.collection("products")
+            .addSnapshotListener { value, error ->
+                if (error != null) {
+                    throw error
+                }
+
+                val products = value?.documents?.mapNotNull { document ->
+                    document.toObject(Product::class.java)
+                } ?: emptyList()
+
+                trySend(products).isSuccess
+            }
+
+        awaitClose { subscription.remove() }
+    }
+
+    override fun getProductsWithRangeOfIdsFlow(ids: List<String>): Flow<List<Product>> =
+        callbackFlow {
+            firestore.collection("products")
+                .whereIn("id", ids)
+                .addSnapshotListener { value, error ->
+                    if (error != null) {
+                        throw error
+                    }
+
+                    val products = value?.documents?.mapNotNull { document ->
+                        document.toObject(Product::class.java)
+                    } ?: emptyList()
+
+                    products.forEach { product ->
+                        getProductVariantsByProductId(product.id).addOnSuccessListener {
+                            val variants = it.documents.mapNotNull { variantDoc ->
+                                variantDoc.toObject(ProductVariant::class.java)
+                            }
+                            product.variants = variants
+                        }
+                    }
+
+                    trySend(products).isSuccess
+                }
+        }
+
+    override fun getProductByIdFlow(id: String): Flow<Product?> = callbackFlow {
+        val productRef = firestore.collection("products")
+            .document(id)
+        val variantRef = firestore.collection("products")
+            .document(id)
+            .collection("variants")
+
+        val product = productRef.get().await().toObject(Product::class.java)
+
+        val variants = variantRef.get().await().documents.mapNotNull { variantDoc ->
+            variantDoc.toObject(ProductVariant::class.java)
+        }
+        for (variant in variants) {
+            val variantImagesRef = firestore.collection("products")
+                .document(id)
+                .collection("variants")
+                .document(variant.id)
+                .collection("images")
+
+            val images = variantImagesRef.get().await().documents.mapNotNull { imageDoc ->
+                imageDoc.toObject(Image::class.java)
+            }
+            variant.images = images
+        }
+
+        product?.variants = variants
+
+        trySend(product).isSuccess
+
+        awaitClose { }
+    }
 
     override suspend fun addProductsToFireStore(products: List<Product>): Result<Boolean> {
         return try {
             val batch = firestore.batch()
             for (product in products) {
+                val productDocRef = firestore.collection("products").document()
 
-                val productDocRef = firestore.collection("products").document(product.id)
                 val productData = hashMapOf(
-                    "id" to product.id,
                     "categoryId" to product.categoryId,
                     "name" to product.name,
-                    "description" to product.description
+                    "description" to product.description,
+                    "createdAt" to product.createdAt
                 )
                 batch.set(productDocRef, productData)
 
                 for (variant in product.variants) {
-                    val variantDocRef = productDocRef.collection("variants").document(variant.id)
+                    val variantDocRef = productDocRef.collection("variants").document()
                     val variantData = hashMapOf(
-                        "id" to variant.id,
-                        "productId" to variant.productId,
+                        "productId" to productDocRef.id,
                         "size" to hashMapOf(
                             "id" to variant.size.id,
                             "sizeName" to variant.size.sizeName,
@@ -48,10 +127,9 @@ class ProductRepositoryImplement (
                     batch.set(variantDocRef, variantData)
 
                     for (image in variant.images) {
-                        val imageDocRef = variantDocRef.collection("images").document(image.id)
+                        val imageDocRef = variantDocRef.collection("images").document()
                         val imageData = hashMapOf(
-                            "id" to image.id,
-                            "productVariantId" to image.productVariantId,
+                            "productVariantId" to variantDocRef.id,
                             "link" to image.link,
                             "fileName" to image.fileName
                         )
@@ -60,11 +138,10 @@ class ProductRepositoryImplement (
                 }
 
                 for (engagement in product.engagements) {
-                    val engagementDocRef = productDocRef.collection("engagements").document(engagement.id)
+                    val engagementDocRef = productDocRef.collection("engagements").document()
                     val engagementData = hashMapOf(
-                        "id" to engagement.id,
                         "userId" to engagement.userId,
-                        "productId" to engagement.productId,
+                        "productId" to productDocRef.id,
                         "ratings" to engagement.ratings,
                         "reviews" to engagement.reviews,
                         "createdAt" to engagement.createdAt
@@ -89,6 +166,7 @@ class ProductRepositoryImplement (
                 .mapNotNull { document ->
                     val product = document.toObject(Product::class.java)
                     product?.let {
+
                         val variants = firestore.collection("products")
                             .document(it.id)
                             .collection("variants")
@@ -98,6 +176,7 @@ class ProductRepositoryImplement (
                             .mapNotNull { variantDoc ->
                                 val variant = variantDoc.toObject(ProductVariant::class.java)
                                 variant?.let { v ->
+
                                     val images = firestore.collection("products")
                                         .document(it.id)
                                         .collection("variants")
@@ -115,6 +194,7 @@ class ProductRepositoryImplement (
                             }
                         it.variants = variants
 
+
                         val engagements = firestore.collection("products")
                             .document(it.id)
                             .collection("engagements")
@@ -131,6 +211,70 @@ class ProductRepositoryImplement (
                 }
 
             Result.success(productList)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun addProductToFireStore(product: Product): Result<Boolean> {
+        return try {
+            val productDocRef = firestore.collection("products").document()
+
+            val productData = hashMapOf(
+                "categoryId" to product.categoryId,
+                "name" to product.name,
+                "description" to product.description,
+                "createdAt" to product.createdAt
+            )
+            productDocRef.set(productData).await()
+
+            for (variant in product.variants) {
+
+                val variantDocRef = productDocRef.collection("variants").document()
+
+                val variantData = hashMapOf(
+                    "productId" to productDocRef.id,
+                    "size" to hashMapOf(
+                        "id" to variant.size.id,
+                        "sizeName" to variant.size.sizeName,
+                        "sortOrder" to variant.size.sortOrder
+                    ),
+                    "color" to hashMapOf(
+                        "id" to variant.color.id,
+                        "colorName" to variant.color.colorName,
+                        "hexCode" to variant.color.hexCode
+                    ),
+                    "quantityInStock" to variant.quantityInStock,
+                    "originalPrice" to variant.originalPrice,
+                    "salePrice" to variant.salePrice
+                )
+                variantDocRef.set(variantData).await()
+
+                for (image in variant.images) {
+                    val imageDocRef = variantDocRef.collection("images").document()
+                    val imageData = hashMapOf(
+                        "productVariantId" to variantDocRef.id,
+                        "link" to image.link,
+                        "fileName" to image.fileName
+                    )
+                    imageDocRef.set(imageData).await()
+                }
+            }
+
+
+            for (engagement in product.engagements) {
+                val engagementDocRef = productDocRef.collection("engagements").document()
+                val engagementData = hashMapOf(
+                    "userId" to engagement.userId,
+                    "productId" to productDocRef.id,
+                    "ratings" to engagement.ratings,
+                    "reviews" to engagement.reviews,
+                    "createdAt" to engagement.createdAt
+                )
+                engagementDocRef.set(engagementData).await()
+            }
+
+            Result.success(true)
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -154,7 +298,6 @@ class ProductRepositoryImplement (
                     .documents
                     .mapNotNull { variantDoc ->
                         val variant = variantDoc.toObject(ProductVariant::class.java)
-
                         variant?.let { v ->
                             val images = firestore.collection("products")
                                 .document(it.id)
@@ -193,7 +336,6 @@ class ProductRepositoryImplement (
 
     override suspend fun deleteProductByIdFromFireStore(id: String): Result<Boolean> {
         return try {
-
             val variants = firestore.collection("products")
                 .document(id)
                 .collection("variants")
@@ -204,14 +346,12 @@ class ProductRepositoryImplement (
 
             for (variantDoc in variants.documents) {
                 val variantId = variantDoc.id
-
                 val variantRef = firestore.collection("products")
                     .document(id)
                     .collection("variants")
                     .document(variantId)
                 batch.delete(variantRef)
 
-                // Xóa images của variant
                 val images = firestore.collection("products")
                     .document(id)
                     .collection("variants")
@@ -231,7 +371,6 @@ class ProductRepositoryImplement (
                 }
             }
 
-            // Xóa engagements của sản phẩm
             val engagements = firestore.collection("products")
                 .document(id)
                 .collection("engagements")
@@ -257,69 +396,35 @@ class ProductRepositoryImplement (
         }
     }
 
-    override suspend fun addProductToFireStore(product: Product): Result<Boolean> {
-        return try {
+    private fun getProductVariantsByProductId(productId: String): Task<QuerySnapshot> {
+        val variants = firestore.collection("products")
+            .document(productId)
+            .collection("variants")
+            .get()
+            .addOnSuccessListener {
+                val variants = it.documents.mapNotNull { variantDoc ->
+                    variantDoc.toObject(ProductVariant::class.java)
+                }
 
-            val productDocRef = firestore.collection("products").document(product.id)
-
-            val productData = hashMapOf(
-                "id" to product.id,
-                "categoryId" to product.categoryId,
-                "name" to product.name,
-                "description" to product.description
-            )
-            productDocRef.set(productData).await()
-
-            for (variant in product.variants) {
-                val variantDocRef = productDocRef.collection("variants").document(variant.id)
-                val variantData = hashMapOf(
-                    "id" to variant.id,
-                    "productId" to variant.productId,
-                    "size" to hashMapOf(
-                        "id" to variant.size.id,
-                        "sizeName" to variant.size.sizeName,
-                        "sortOrder" to variant.size.sortOrder
-                    ),
-                    "color" to hashMapOf(
-                        "id" to variant.color.id,
-                        "colorName" to variant.color.colorName,
-                        "hexCode" to variant.color.hexCode
-                    ),
-                    "quantityInStock" to variant.quantityInStock,
-                    "originalPrice" to variant.originalPrice,
-                    "salePrice" to variant.salePrice
-                )
-                variantDocRef.set(variantData).await()
-
-                for (image in variant.images) {
-                    val imageDocRef = variantDocRef.collection("images").document(image.id)
-                    val imageData = hashMapOf(
-                        "id" to image.id,
-                        "productVariantId" to image.productVariantId,
-                        "link" to image.link,
-                        "fileName" to image.fileName
-                    )
-                    imageDocRef.set(imageData).await()
+                for (variant in variants) {
+                    variant.let { v ->
+                        firestore.collection("products")
+                            .document(productId)
+                            .collection("variants")
+                            .document(v.id)
+                            .collection("images")
+                            .get()
+                            .addOnSuccessListener { img ->
+                                val images = img.documents.mapNotNull { imageDoc ->
+                                    imageDoc.toObject(Image::class.java)
+                                }
+                                v.images = images
+                            }
+                    }
                 }
             }
 
-            for (engagement in product.engagements) {
-                val engagementDocRef = productDocRef.collection("engagements").document(engagement.id)
-                val engagementData = hashMapOf(
-                    "id" to engagement.id,
-                    "userId" to engagement.userId,
-                    "productId" to engagement.productId,
-                    "ratings" to engagement.ratings,
-                    "reviews" to engagement.reviews,
-                    "createdAt" to engagement.createdAt
-                )
-                engagementDocRef.set(engagementData).await()
-            }
-
-            Result.success(true)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+        return variants
     }
 }
 

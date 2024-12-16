@@ -23,7 +23,6 @@ class UserRepositoryImplement(
     override fun getCurrentUserFlow(): Flow<User> = callbackFlow {
         val userRef = firestore.collection("users").document(firebaseAuth.currentUser?.uid!!)
 
-
         val subscription = userRef.addSnapshotListener { snapshot, error ->
             if (error != null) {
                 close(error)
@@ -40,7 +39,7 @@ class UserRepositoryImplement(
     }
 
     override suspend fun addUserToFirestore(user: User) {
-        user.photoUrl = if (firebaseAuth.currentUser!!.photoUrl == null) {
+        user.avatarUri = if (firebaseAuth.currentUser!!.photoUrl == null) {
             imageRepository.getImageUrl(
                 "users",
                 "default_avatar",
@@ -50,13 +49,13 @@ class UserRepositoryImplement(
             firebaseAuth.currentUser!!.photoUrl.toString()
         }
 
-        Log.d("UserRepositoryImplementation", user.photoUrl)
+        Log.d("UserRepositoryImplementation", user.avatarUri)
 
         firestore.collection("users").add(user).await()
     }
 
     override suspend fun saveUserToFirestore(user: User) {
-        user.photoUrl = if (firebaseAuth.currentUser!!.photoUrl == null) {
+        user.avatarUri = if (firebaseAuth.currentUser!!.photoUrl == null) {
             imageRepository.getImageUrl(
                 "users",
                 "default_avatar",
@@ -66,7 +65,7 @@ class UserRepositoryImplement(
             firebaseAuth.currentUser!!.photoUrl.toString()
         }
 
-        Log.d("UserRepositoryImplementation", user.photoUrl)
+        Log.d("UserRepositoryImplementation", user.avatarUri)
 
         firestore.collection("users").document(user.id).set(user).await()
     }
@@ -83,8 +82,8 @@ class UserRepositoryImplement(
 
     override suspend fun updateUser(user: User): Result<Boolean> {
         return try {
-            user.photoUrl =
-                user.photoUrl.ifEmpty {
+            user.avatarUri =
+                user.avatarUri.ifEmpty {
                     imageRepository.getImageUrl(
                         "users",
                         "default_avatar",
@@ -114,7 +113,7 @@ class UserRepositoryImplement(
 
         val user = userRef.get().await().toObject(User::class.java) ?: User()
 
-        Log.d("UserRepositoryImplement", "User profile picture: ${user.photoUrl}")
+        Log.d("UserRepositoryImplement", "User profile picture: ${user.avatarUri}")
         return user
 
     }

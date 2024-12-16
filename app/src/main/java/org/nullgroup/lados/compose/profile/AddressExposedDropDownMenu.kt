@@ -32,6 +32,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import org.nullgroup.lados.compose.common.LoadOnError
+import org.nullgroup.lados.compose.common.LoadOnProgress
 import org.nullgroup.lados.viewmodels.customer.MenuItemsUIState
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
@@ -97,8 +99,7 @@ fun AddressExposedDropDownMenu(
                                     .fillMaxWidth(),
                                 content = {
                                     CircularProgressIndicator(
-                                        modifier = Modifier.size(30.dp),
-                                        color = Color.Gray
+                                        modifier = Modifier.size(30.dp)
                                     )
                                 }
                             )
@@ -108,7 +109,18 @@ fun AddressExposedDropDownMenu(
                     )
                 }
 
-                is MenuItemsUIState.Failed -> LoadOnError()
+                is MenuItemsUIState.Failed ->
+                    DropdownMenuItem(
+                        text = {
+                            LoadOnError(
+                                content = {
+                                    Text(text = itemsUiState.message, color = Color.Black)
+                                },
+                            )
+                        },
+                        onClick = { /* No action */ },
+                    )
+
                 is MenuItemsUIState.Success -> {
                     menuHeight = (itemsUiState.data.size * 48).coerceAtMost(192)
                     LazyColumn(
@@ -153,7 +165,7 @@ fun AddressExposedDropDownMenuPreview() {
     Surface(modifier = Modifier.fillMaxSize()) {
         AddressExposedDropDownMenu(
             placeHolder = "Province",
-            itemsUiState = MenuItemsUIState.Success(listOf("Hanoi", "HCM", "Da Nang")),
+            itemsUiState = MenuItemsUIState.Failed("123"),
         )
     }
 }

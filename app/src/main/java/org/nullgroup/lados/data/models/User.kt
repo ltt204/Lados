@@ -1,16 +1,16 @@
 package org.nullgroup.lados.data.models
 
-import com.google.firebase.firestore.DocumentId
 import android.net.Uri
+import com.google.firebase.firestore.DocumentId
 import java.net.URI
 
 data class User(
     @DocumentId val id: String = "",
-    var name: String = "",
-    var email: String = "",
-    var role: String = "",
-    var phoneNumber: String = "",
-    var photoUrl: String = "",
+    val name: String = "",
+    val email: String = "",
+    val role: String = "",
+    val phoneNumber: String = "",
+    var avatarUri: String = "",
     var provider: String = "",
     var isActive: Boolean = true,
 )

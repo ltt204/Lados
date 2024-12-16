@@ -92,6 +92,8 @@ dependencies {
     implementation (libs.coil)
     implementation(libs.coil.compose)
 
+    // Image Slider
+    implementation(libs.coil.compose)
 
     //Material 3
     implementation(libs.material3)
@@ -135,6 +137,9 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     androidTestImplementation(libs.androidx.junit)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    // For fetching online images
+    implementation("io.coil-kt:coil-compose:2.4.0")
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)

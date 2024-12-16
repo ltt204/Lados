@@ -43,6 +43,12 @@ class EditProfileViewModel @Inject constructor(
                         profilePictureUiState.value = Loading
 
                         try {
+                            imageRepository.deleteImage(
+                                child = "users",
+                                fileName = user.email,
+                                extension = "jpg"
+                            )
+
                             val firebaseStorageUrl = imageRepository.uploadImage(
                                 userProfilePicture.value.image,
                                 userProfilePicture.value.child,
@@ -56,11 +62,11 @@ class EditProfileViewModel @Inject constructor(
                             profilePictureUiState.value = ProfilePictureUiState.Error(e.message ?: "An error occurred")
                         }
 
-                        user.photoUrl = (profilePictureUiState.value as ProfilePictureUiState.Success).uri
+                        user.avatarUri = (profilePictureUiState.value as ProfilePictureUiState.Success).uri
                         userRepository.updateUser(user)
                     } else {
                         userRepository.updateUser(user)
-                        profilePictureUiState.value = ProfilePictureUiState.Success(user.photoUrl)
+                        profilePictureUiState.value = ProfilePictureUiState.Success(user.avatarUri)
                         userUiState.value = UserUiState.Success(user)
                     }
                     Log.d("EditProfileViewModel", "User : $user")
@@ -78,7 +84,7 @@ class EditProfileViewModel @Inject constructor(
         viewModelScope.launch {
             if (userUiState.value is UserUiState.Success) {
                 val user = (userUiState.value as UserUiState.Success).user
-                userUiState.value = UserUiState.Success(user.copy(photoUrl = uri))
+                userUiState.value = UserUiState.Success(user.copy(avatarUri = uri))
 
                 userProfilePicture.value = UserProfilePicture(
                     image = image,
@@ -118,8 +124,8 @@ class EditProfileViewModel @Inject constructor(
             try {
                 val currentUser = userRepository.getCurrentUser()
                 userUiState.value = UserUiState.Success(currentUser)
-                profilePictureUiState.value = ProfilePictureUiState.Initial(currentUser.photoUrl)
-                Log.d("EditProfileViewModel", "User profile picture: ${currentUser.photoUrl}")
+                profilePictureUiState.value = ProfilePictureUiState.Initial(currentUser.avatarUri)
+                Log.d("EditProfileViewModel", "User profile picture: ${currentUser.avatarUri}")
             } catch (e: Exception) {
                 userUiState.value = UserUiState.Error(e.message ?: "An error occurred")
             }
