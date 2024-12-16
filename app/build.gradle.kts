@@ -131,6 +131,7 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     androidTestImplementation(platform(libs.androidx.compose.bom))
 
+    implementation("androidx.datastore:datastore-preferences:1.1.1")
 }
 
 kapt {
