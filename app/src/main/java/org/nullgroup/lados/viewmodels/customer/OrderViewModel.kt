@@ -39,7 +39,6 @@ class OrderViewModel @Inject constructor(
                 }
                 .collect {
                     orders = MutableStateFlow(it)
-                    Log.d("OrderViewModel", "Filtering orders by status: ${orders.value}")
                     _orderState.value = OrderState.Success(
                         it.filter { order ->
                             order.orderStatusLog.entries.last().key == OrderStatus.CREATED.name
@@ -54,7 +53,6 @@ class OrderViewModel @Inject constructor(
             val filteredOrders = orders.value.filter {
                 it.orderStatusLog.entries.last().key == status.name
             }
-            Log.d("OrderViewModel", "Filtering orders by status $status: $filteredOrders")
             _orderState.update { OrderState.Success(filteredOrders) }
         }
     }

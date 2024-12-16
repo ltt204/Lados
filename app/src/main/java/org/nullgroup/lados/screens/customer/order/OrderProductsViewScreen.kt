@@ -65,8 +65,6 @@ fun OrderProductsViewScreen(
 ) {
     val orderProducts = orderProductsViewModel.productVariantsState.collectAsState()
 
-    Log.d("Status in OrderProductsViewScreen", orderProductsViewModel.orderStatus)
-
     Scaffold(
         modifier = modifier
             .padding(top = paddingValues.calculateTopPadding()),
@@ -96,8 +94,6 @@ fun OrderProductsViewScreen(
 
             is OrderProductsState.Success -> {
                 val currentOrder = orderProductsViewModel.currentOrder.collectAsState()
-                Log.d("OrderProductsViewScreen", "Order Products: ${orderProducts.value}")
-                Log.d("OrderProductsViewScreen", "Current Order: ${currentOrder.value}")
                 OrderProductsView(
                     modifier = Modifier.padding(
                         top = innerPadding.calculateTopPadding(),
@@ -148,7 +144,6 @@ fun OrderProductItem(
     buttonAction: Pair<String?, (NavController, String?, String?) -> Unit>
 ) {
     val image = variant.images.firstOrNull()?.link
-    Log.d("OrderProductItem", "Image: $image")
     Card(
         modifier = modifier,
         onClick = {
@@ -175,10 +170,6 @@ fun OrderProductItem(
                             CircularProgressIndicator(modifier = Modifier.size(12.dp))
                         },
                         error = {
-                            Log.d(
-                                "OrderProductItem",
-                                "Image failed to load: ${it.result.throwable.message}"
-                            )
                             Text(text = "Image failed to load: ${it.result.throwable.message}")
                         }
                     )

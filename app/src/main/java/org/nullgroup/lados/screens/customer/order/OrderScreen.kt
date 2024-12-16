@@ -68,7 +68,6 @@ fun OrderScreen(
         topBar = {
             Column {
                 ProfileTopAppBar(onBackClick = { navController?.navigateUp() }, content = "Orders")
-                Log.d("OrderScreen", "OrderUiState: $tabSelectedIndex")
                 OrderScreenTopAppBar(
                     modifier = Modifier.padding(start = 16.dp, top = 8.dp, end = 16.dp),
                     selectedTabIndex = tabSelectedIndex,

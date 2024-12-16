@@ -43,7 +43,6 @@ class OrderDetailViewModel @Inject constructor(
                         OrderDetailState.Error(it.message ?: "An error occurred")
                 }
                 .collect {
-                    Log.d("OrderDetailViewModel", "Order: $it")
                     _orderDetailState.value = OrderDetailState.Success(it)
                 }
         }

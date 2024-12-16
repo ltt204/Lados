@@ -57,17 +57,11 @@ class OrderProductsViewModel @Inject constructor(
                         productRepository.getProductByIdFlow(productId)
                             .flowOn(Dispatchers.IO)
                             .catch {
-                                Log.d("OrderProductsViewModel", "Error fetching product: $it")
                                 _productVariantsState.value =
                                     OrderProductsState.Error(it.message ?: "An error occurred")
                             }
                             .collect { product ->
-                                Log.d("OrderProductsViewModel", "Fetched product: $product")
                                 val variant = product?.variants?.find { it.id == variantId }
-                                Log.d(
-                                    "OrderProductsViewModel",
-                                    "Fetched product: $product with variant: $variant"
-                                )
                                 variant?.let {
                                     val pair = product to variant
                                     val currentList =
