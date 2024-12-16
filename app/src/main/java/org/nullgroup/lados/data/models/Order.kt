@@ -1,7 +1,6 @@
 package org.nullgroup.lados.data.models
 
 import com.google.firebase.firestore.DocumentId
-import com.google.firebase.firestore.Exclude
 
 // Enum for order status
 enum class OrderStatus {
@@ -48,8 +47,4 @@ data class OrderProduct(
     val totalPrice: Double = 0.0,
         // Maybe different that the total of individual products
         // If discount is applied
-) {
-    companion object {
-        const val COLLECTION_NAME = "orderProducts"
-    }
-}
+)

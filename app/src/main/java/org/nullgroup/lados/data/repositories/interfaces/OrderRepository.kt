@@ -20,6 +20,6 @@ interface OrderRepository {
 //        orderProducts: List<OrderProduct>,
 //        orderTotal: Double
 //    ): Result<Boolean>
-    suspend fun createOrder(customerId: String, order: Order): Result<Boolean>
+    suspend fun createOrder(customerId: String, order: Order): Result<Pair<Boolean, Map<OrderProduct, Int>>>
     suspend fun updateOrderStatus(orderId: String, newStatus: OrderStatus): Result<Boolean>
 }

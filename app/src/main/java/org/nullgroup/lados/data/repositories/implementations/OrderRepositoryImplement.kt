@@ -1,12 +1,9 @@
 package org.nullgroup.lados.data.repositories.implementations
 
-import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.QuerySnapshot
-import com.google.firebase.firestore.TransactionOptions
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -26,31 +23,42 @@ class OrderRepositoryImplement(
     override suspend fun createOrder(
         customerId: String,
         order: Order,
-        ): Result<Boolean> {
-        return try {
-            // TODO - Advance: Resolve contention issue
-            // TODO - Using a server-side queue to handle stock update transactions
-            var transactionResult: Result<Boolean> = Result.failure(Exception("Transaction failed"))
+        ): Result<Pair<Boolean, Map<OrderProduct, Int>>> {
+        val insufficientOrderItems = mutableMapOf<OrderProduct, Int>()
+        // TODO - Advance: Resolve contention issue
+        //      Using a server-side queue to handle stock update transactions
+        var transactionResult: Result<Boolean> = Result.failure(Exception("Transaction failed"))
+        try {
             firestore.runTransaction { transaction ->
                 val failReason = mutableListOf<String>()
                 val variantRefs = mutableListOf<DocumentReference>()
                 for (orderProduct in order.orderProducts) {
-                    val productRef = firestore.collection("products").document(orderProduct.productId)
-                    val variantRef = productRef.collection("variants").document(orderProduct.variantId)
+                    val productRef =
+                        firestore.collection("products").document(orderProduct.productId)
+                    val variantRef =
+                        productRef.collection("variants").document(orderProduct.variantId)
                     val snapshot = transaction.get(variantRef)
                     val variant = snapshot.toObject(ProductVariant::class.java)
                     if (variant == null) {
+                        // Kind of "redundant", but just in case
                         failReason.add("Product/Variant not found for order item ${orderProduct.productId}")
                         continue
                     }
                     if (variant.quantityInStock < orderProduct.amount) {
                         failReason.add("Not enough stock for order item ${orderProduct.productId}")
+                        insufficientOrderItems[orderProduct] = variant.quantityInStock
                         continue
                     }
                     variantRefs.add(variantRef)
                 }
 
                 if (failReason.isNotEmpty()) {
+//                    throw FirebaseFirestoreException(
+//                        "Failed to create order",
+//                        FirebaseFirestoreException.Code.ABORTED,
+//                        Exception(failReason.joinToString("\n"))
+//                    )
+
                     throw Exception(failReason.joinToString("\n"))
                 }
 
@@ -66,9 +74,11 @@ class OrderRepositoryImplement(
             }.addOnFailureListener { e ->
                 transactionResult = Result.failure(e)
             }.await()
+        } catch (e: Exception) {
+            transactionResult = Result.failure(e)
+        }
 
-
-            if (transactionResult.isSuccess) {
+        if (transactionResult.isSuccess) {
 //                val userOrdersRef = firestore
 //                    .collection("users").document(customerId)
 //                    .collection(Order.COLLECTION_NAME).document()
@@ -89,7 +99,7 @@ class OrderRepositoryImplement(
 //                batch.commit().await()
 //                Result.success(true)
 
-
+            try {
                 val userOrdersRef = firestore
                     .collection("users").document(customerId)
                     .collection(Order.COLLECTION_NAME).document()
@@ -99,14 +109,18 @@ class OrderRepositoryImplement(
                 batch.set(userOrdersRef, order)
                 batch.set(staffManagedOrdersRef, order)
                 batch.commit().await()
-                Result.success(true)
+                return Result.success(true to mutableMapOf())
+            } catch (e: Exception) {
+                return Result.failure(e)
             }
-            else {
+        }
+        else {
+            // Result.failure(transactionResult.exceptionOrNull()!!)
+            return if (insufficientOrderItems.isEmpty()) {
                 Result.failure(transactionResult.exceptionOrNull()!!)
+            } else {
+                Result.success(false to insufficientOrderItems)
             }
-
-        } catch (e: Exception) {
-            Result.failure(e)
         }
     }
 

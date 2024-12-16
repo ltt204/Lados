@@ -31,6 +31,9 @@ class CartViewModel @Inject constructor(
     private val productRepository: ProductRepository,
     private val cartItemRepository: CartItemRepository,
 ): ViewModel() {
+    private val _isLoading = MutableStateFlow(true)
+    val isLoading = _isLoading.asStateFlow()
+
     private val _cartItems = MutableStateFlow<List<CartItem>>(mutableListOf())
     val cartItems = _cartItems.asStateFlow()
 
@@ -113,7 +116,7 @@ class CartViewModel @Inject constructor(
         viewModelScope.async {
             addCartItem("BKj3h1PBk1YbIPy2mnOr", "RmQEs0aelFVq1OaDwhjK", 3)
             addCartItem("BKj3h1PBk1YbIPy2mnOr", "TCwBMf9PKHmfryUfmEgL", 2)
-            addCartItem("Uv9JE2EwULVB6Gsjq5p7", "1aXlLfhkTo3gDZ0yFXbD", 15)
+            addCartItem("Uv9JE2EwULVB6Gsjq5p7", "1aXlLfhkTo3gDZ0yFXbD", 150)
             addCartItem("bKenEU3vDCwjjKjsMapv", "0zPcXb6MbfszcEswWz4s", 500)
             addCartItem("bKenEU3vDCwjjKjsMapv", "WhatIsThisSheet", 6)
             addCartItem("Ola-la", "IDon-tKnowWhatThisHolyGrailIs", 9)
@@ -123,7 +126,8 @@ class CartViewModel @Inject constructor(
             cartItemRepository.getCartItemsAsFlow(customerId)
                 .onCompletion { cause ->
                     if (cause == null) {
-                        onRefreshComplete?.invoke("Cart refreshed")
+                        // This route will only be called when the flow is unsubscribed
+                        // onRefreshComplete?.invoke("Cart refreshed")
                     } else {
                         onRefreshComplete?.invoke("Error refreshing cart: ${cause.message}")
                     }
@@ -146,6 +150,7 @@ class CartViewModel @Inject constructor(
                     _dataRefreshed = true
                     if (_firstInitialization) {
                         _cartItems.value = cartItems
+                        _isLoading.value = false
                         _firstInitialization = false
                         return@collect
                     }

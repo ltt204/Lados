@@ -2,7 +2,6 @@ package org.nullgroup.lados.compose.cartRelated
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -56,7 +56,7 @@ fun CartItemBar(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
             .fillMaxWidth()
-            .padding(8.dp)
+            .padding(4.dp)
 //            .background(Color.White, shape = RoundedCornerShape(8.dp)),
     ) {
         // Image Section
@@ -64,19 +64,23 @@ fun CartItemBar(
             painter = rememberAsyncImagePainter(imageUrl),
             contentDescription = null,
             modifier = Modifier
+                .padding(4.dp)
                 .size(80.dp)
                 .clip(RoundedCornerShape(8.dp))
-                .background(Color.LightGray),
+                .background(Color.LightGray)
+                .width(80.dp)
+                .height(80.dp)
+            ,
             contentScale = ContentScale.Crop
         )
 
-        Spacer(modifier = Modifier.width(12.dp))
+        Spacer(modifier = Modifier.width(8.dp))
 
         // Product Details
         Column(
             modifier = Modifier
-//                .weight(2f)
-                .padding(end = 8.dp)
+                .weight(1f)
+                .padding(end = 4.dp)
         ) {
             Text(
                 text = title,
@@ -141,11 +145,11 @@ fun CartItemBar(
         // Price and Actions
         Column(
             horizontalAlignment = Alignment.End,
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.wrapContentWidth(),
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
+//                horizontalArrangement = Arrangement.spacedBy(4.dp),
                 modifier = Modifier.align(Alignment.End)
             ) {
                 if (originalPrice != salePrice) {

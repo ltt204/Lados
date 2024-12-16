@@ -2,7 +2,7 @@ package org.nullgroup.lados.utilities
 
 import java.util.Locale
 
-fun Number?.ToUSDCurrency(): String {
+fun Number?.toUSDCurrency(): String {
     if (this == null) {
         return "$0.00"
     }

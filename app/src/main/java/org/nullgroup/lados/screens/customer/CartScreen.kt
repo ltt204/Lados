@@ -1,6 +1,7 @@
 package org.nullgroup.lados.screens.customer
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,9 +23,11 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
@@ -38,6 +42,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -47,13 +53,14 @@ import androidx.navigation.NavController
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.nullgroup.lados.R
 import org.nullgroup.lados.compose.cartRelated.CartItemBar
 import org.nullgroup.lados.compose.cartRelated.ConfirmDialog
 import org.nullgroup.lados.compose.cartRelated.DialogInfo
 import org.nullgroup.lados.compose.cartRelated.PricingDetails
 import org.nullgroup.lados.data.models.CartItem
 import org.nullgroup.lados.screens.Screen
-import org.nullgroup.lados.utilities.ToUSDCurrency
+import org.nullgroup.lados.utilities.toUSDCurrency
 import org.nullgroup.lados.viewmodels.customer.CartViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -69,7 +76,11 @@ fun CartScreen(
     val currentDialogState = remember { mutableStateOf<DialogInfo?>(null) }
     val (isAllowedInteracting, setIsAllowedInteracting) = remember { mutableStateOf(true) }
 
+    val isLoadingItems = cartViewModel.isLoading.collectAsStateWithLifecycle().value
     val cartItems = cartViewModel.cartItems.collectAsStateWithLifecycle()
+    val isAnyItemsExisted = remember {
+        derivedStateOf { cartItems.value.any { it.amount > 0 } }
+    }
     val cartItemInformation = cartViewModel.cartItemInformation.collectAsStateWithLifecycle()
     val selectedItems = cartViewModel.selectedCartItems.collectAsStateWithLifecycle().value
     val validSelectedItems = cartViewModel.validSelectedItems.collectAsStateWithLifecycle().value
@@ -247,7 +258,7 @@ fun CartScreen(
                                 )
                             }
                         },
-                        enabled = cartItems.value.isNotEmpty() && isAllowedInteracting
+                        enabled = isAnyItemsExisted.value && isAllowedInteracting
                     )
 
 
@@ -267,17 +278,19 @@ fun CartScreen(
             )
         },
         bottomBar = {
-            val (subtotal, productDiscount, orderDiscount, total) = checkoutDetail()
-            CartBottomBar(
-                subtotal = subtotal.ToUSDCurrency(),
-                productDiscount = productDiscount.ToUSDCurrency(),
-                orderDiscount = orderDiscount.ToUSDCurrency(),
-                total = total.ToUSDCurrency(),
-                isEnabled = isAnyValidItemSelected.value,
-                onCheckout = onCheckingOut,
-                checkoutEnabled = isAllowedInteracting,
-                modifier = Modifier.padding(horizontal = 20.dp)
-            )
+            if (isAnyItemsExisted.value) {
+                val (subtotal, productDiscount, orderDiscount, total) = checkoutDetail()
+                CartBottomBar(
+                    subtotal = subtotal.toUSDCurrency(),
+                    productDiscount = productDiscount.toUSDCurrency(),
+                    orderDiscount = orderDiscount.toUSDCurrency(),
+                    total = total.toUSDCurrency(),
+                    isEnabled = isAnyValidItemSelected.value,
+                    onCheckout = onCheckingOut,
+                    checkoutEnabled = isAllowedInteracting,
+                    modifier = Modifier.padding(horizontal = 20.dp)
+                )
+            }
         },
 //        floatingActionButton = {
 //            if (isAnyItemSelected) {
@@ -295,63 +308,102 @@ fun CartScreen(
         content = { innerScaffoldPadding ->
             ConfirmDialog(currentDialogState.value)
 
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier
-                    .padding(innerScaffoldPadding)
-                    .padding(horizontal = 20.dp)
-                    .fillMaxSize()
-            ) {
-                itemsIndexed(cartItems.value) { _, cartItem ->
-                    if (cartItem.amount <= 0) {
-                        return@itemsIndexed
-                    }
-                    val (product, productVariant) =
-                        cartItemInformation.value[cartItem.id] ?: Pair(null, null)
-                    Box(
+            if (isLoadingItems) {
+                Box(
+                    modifier = Modifier
+                        .padding(innerScaffoldPadding)
+                        .padding(horizontal = 20.dp)
+                        .fillMaxSize()
+                ) {
+                    CircularProgressIndicator(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .combinedClickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = null,
-                                onClick = {
-                                    // Prevent click if interacting with child components
-                                    onItemSelected(cartItem)
-                                }
-                            )
-                            .background(
-                                if (cartItem !in selectedItems) Color.Transparent
-                                else if (productVariant == null) Color.Red
-                                else Color.LightGray,
-                                shape = RoundedCornerShape(8.dp)
-                            )
-                    ) {
-                        CartItemBar(
-                            imageUrl = productVariant?.images?.firstOrNull()?.link
-                                ?: defaultImageUrl,
-                            title = product?.name ?: defaultTitle,
-                            originalPrice = "$" + (productVariant?.originalPrice
-                                ?: defaultValue).toString(),
-                            salePrice = "$" + (productVariant?.salePrice
-                                ?: defaultValue).toString(),
-                            size = productVariant?.size?.sizeName ?: defaultValue,
-                            color = productVariant?.color?.colorName ?: defaultValue,
-                            clickEnabled = isAllowedInteracting,
-                            onAddClick = { onItemAmountChanged(cartItem, 1) },
-                            quantity = cartItem.amount,
-                            onRemoveClick = {
-                                if (cartItem.amount == 1) {
-                                    onSelectedItemsRemoved()
-                                } else {
-                                    onItemAmountChanged(cartItem, -1)
-                                }
-                            },
-                            modifier = Modifier.fillMaxWidth()
+                            .align(Alignment.Center)
+                            .width(64.dp)
+                    )
+                }
+            // } else if (cartItems.value.isEmpty()) { // Not working
+            } else if (isAnyItemsExisted.value.not()) {
+                Column(
+                    modifier = Modifier
+                        .padding(innerScaffoldPadding)
+                        .padding(horizontal = 20.dp)
+                        .fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.empty_cart_image),
+                        contentDescription = "Empty cart",
+                        modifier = Modifier.width(200.dp)
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = "Your cart is empty",
+                        style = MaterialTheme.typography.displaySmall.copy(
+                            fontWeight = FontWeight.Bold
                         )
-                    }
+                    )
+                }
+            } else {
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier
+                        .padding(innerScaffoldPadding)
+                        .padding(horizontal = 20.dp)
+                        .fillMaxSize()
+                ) {
+                    itemsIndexed(cartItems.value) { _, cartItem ->
+                        if (cartItem.amount <= 0) {
+                            return@itemsIndexed
+                        }
+                        val (product, productVariant) =
+                            cartItemInformation.value[cartItem.id] ?: Pair(null, null)
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .combinedClickable(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = null,
+                                    onClick = {
+                                        // Prevent click if interacting with child components
+                                        onItemSelected(cartItem)
+                                    }
+                                )
+                                .background(
+                                    if (cartItem !in selectedItems) Color.Transparent
+                                    else if (productVariant == null) Color.Red
+                                    else Color.LightGray,
+                                    shape = RoundedCornerShape(8.dp)
+                                )
+                        ) {
+                            CartItemBar(
+                                imageUrl = productVariant?.images?.firstOrNull()?.link
+                                    ?: defaultImageUrl,
+                                title = product?.name ?: defaultTitle,
+                                originalPrice = "$" + (productVariant?.originalPrice
+                                    ?: defaultValue).toString(),
+                                salePrice = "$" + (productVariant?.salePrice
+                                    ?: defaultValue).toString(),
+                                size = productVariant?.size?.sizeName ?: defaultValue,
+                                color = productVariant?.color?.colorName ?: defaultValue,
+                                clickEnabled = isAllowedInteracting,
+                                onAddClick = { onItemAmountChanged(cartItem, 1) },
+                                quantity = cartItem.amount,
+                                onRemoveClick = {
+                                    if (cartItem.amount == 1) {
+                                        onSelectedItemsRemoved()
+                                    } else {
+                                        onItemAmountChanged(cartItem, -1)
+                                    }
+                                },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
 
+                    }
                 }
             }
+
         },
         snackbarHost = { SnackbarHost(snackBarHostState.value) }
     )

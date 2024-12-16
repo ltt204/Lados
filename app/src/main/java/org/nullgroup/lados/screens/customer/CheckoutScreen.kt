@@ -20,6 +20,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -43,8 +44,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -55,8 +59,9 @@ import kotlinx.coroutines.launch
 import org.nullgroup.lados.compose.cartRelated.CartItemBar
 import org.nullgroup.lados.compose.cartRelated.PricingDetails
 import org.nullgroup.lados.data.models.Address
-import org.nullgroup.lados.utilities.ToUSDCurrency
+import org.nullgroup.lados.utilities.toUSDCurrency
 import org.nullgroup.lados.viewmodels.customer.CheckoutViewModel
+import org.nullgroup.lados.viewmodels.customer.InsufficientOrderProductInfo
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -73,6 +78,7 @@ fun CheckoutScreen(
     val orderingItems = checkoutViewModel.orderingItems.collectAsStateWithLifecycle()
     val orderingItemInformation = checkoutViewModel.orderingItemInformation.collectAsStateWithLifecycle()
     val checkoutDetail = checkoutViewModel.checkoutInfo.collectAsStateWithLifecycle()
+    val insufficientOrderItems = checkoutViewModel.insufficientOrderItems.collectAsStateWithLifecycle()
     val scope = checkoutViewModel.viewModelScope
 
     val userAddress = checkoutViewModel.userAddresses.collectAsStateWithLifecycle()
@@ -89,34 +95,19 @@ fun CheckoutScreen(
 //    }
     // checkoutViewModel.onRefreshComplete = onRefreshCompleted
 
-    // TODO: Remove the snackBar when the user navigates back
     val onNavigateBack = {
         setIsAllowedInteracting(false)
-        scope.launch {
-//            var result = scope.async {
-//                checkoutViewModel.commitChangesToDatabase()
-//            }.await()
-//            if (result.isFailure) {
-//                snackBarHostState.value.showSnackbar(
-//                    message = result.exceptionOrNull()!!.message.toString(),
-//                    duration = SnackbarDuration.Short
-//                )
-//            } else {
-//                snackBarHostState.value.showSnackbar(
-//                    message = "Successfully saved change(s) to the database",
-//                    duration = SnackbarDuration.Short
-//                )
-//            }
-        }
         navController.popBackStack()
     }
 
-    val onCheckoutFailure: (String) -> Unit = { errorString ->
-        scope.launch {
-            snackBarHostState.value.showSnackbar(
-                message = errorString,
-                duration = SnackbarDuration.Short
-            )
+    val onCheckoutFailure: (String?) -> Unit = { errorString ->
+        if (errorString != null) {
+            scope.launch {
+                snackBarHostState.value.showSnackbar(
+                    message = errorString,
+                    duration = SnackbarDuration.Short
+                )
+            }
         }
         setIsAllowedInteracting(true)
     }
@@ -165,10 +156,10 @@ fun CheckoutScreen(
             }
             val (subtotal, productDiscount, orderDiscount, total) = checkoutDetail.value!!
             CheckoutBottomBar(
-                subtotal = subtotal.ToUSDCurrency(),
-                productDiscount = productDiscount.ToUSDCurrency(),
-                orderDiscount = orderDiscount.ToUSDCurrency(),
-                total = total.ToUSDCurrency(),
+                subtotal = subtotal.toUSDCurrency(),
+                productDiscount = productDiscount.toUSDCurrency(),
+                orderDiscount = orderDiscount.toUSDCurrency(),
+                total = total.toUSDCurrency(),
                 onCheckout = onCheckout,
                 checkoutEnabled = isAllowedInteracting && selectedAddress.value != null,
                 modifier = Modifier.padding(horizontal = 20.dp)
@@ -236,6 +227,14 @@ fun CheckoutScreen(
                         }
 
                     }
+                } // End of LazyColumn
+                Spacer(modifier = Modifier.height(4.dp))
+
+                if (insufficientOrderItems.value.isNotEmpty()) {
+                    InsufficientStockDialog(
+                        insufficientOrderItems = insufficientOrderItems.value,
+                        onDismiss = { checkoutViewModel.clearInsufficientOrderItems.invoke() }
+                    )
                 }
             }
 
@@ -424,3 +423,151 @@ private fun PhoneNumberCard(
         }
     }
 }
+
+@Composable
+private fun ProductItemWithStockComparison(
+    productInfo: InsufficientOrderProductInfo,
+    modifier: Modifier = Modifier
+) {
+    Column (
+        verticalArrangement = Arrangement.spacedBy(0.dp),
+        modifier = modifier
+            .background(Color.LightGray, RoundedCornerShape(8.dp))
+            .fillMaxWidth()
+    ) {
+        Text(
+            text = productInfo.productName,
+            color = Color.Black,
+            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier
+                .padding(4.dp)
+        )
+
+        Row(
+            modifier = Modifier
+                .padding(4.dp)
+            ,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            val specialStyle = MaterialTheme.typography.bodySmall.toSpanStyle().copy(
+                color = Color.Black,
+                fontWeight = FontWeight.Bold
+            )
+            val normalStyle = MaterialTheme.typography.bodySmall.toSpanStyle().copy(
+                color = Color.Gray
+            )
+
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = 4.dp)
+            ) {
+                Text(
+                    text = buildAnnotatedString {
+                        withStyle(normalStyle) {
+                            append("Size - ")
+                        }
+                        withStyle(specialStyle) {
+                            append(productInfo.productSize)
+                        }
+                    },
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = buildAnnotatedString {
+                        withStyle(normalStyle) {
+                            append("Color - ")
+                        }
+                        withStyle(specialStyle) {
+                            append(productInfo.productColor)
+                        }
+                    },
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+
+            Column (
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = buildAnnotatedString {
+                        withStyle(normalStyle) {
+                            append("Ordered - ")
+                        }
+                        withStyle(specialStyle) {
+                            append(productInfo.orderedAmount.toString())
+                        }
+                    },
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Text(
+                    text = buildAnnotatedString {
+                        withStyle(normalStyle) {
+                            append("Available - ")
+                        }
+                        withStyle(specialStyle) {
+                            append(productInfo.availableStock.toString())
+                        }
+                    },
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+
+        }
+    }
+}
+
+
+@Composable
+private fun InsufficientStockDialog(
+    insufficientOrderItems: List<InsufficientOrderProductInfo>,
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text("Order creation failed!")
+        },
+        text = {
+            Column (
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.padding(8.dp)
+            ) {
+                Text(
+                    text = "The following item(s) have insufficient stock:",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+
+                LazyColumn (
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    itemsIndexed(insufficientOrderItems) { _, productInfo ->
+                        ProductItemWithStockComparison(productInfo)
+                    }
+                }
+
+                Text (
+                    text = "Please adjust the quantity of the item(s) in your cart and try again later",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+
+        },
+        confirmButton = {
+            OutlinedButton(
+                onClick = onDismiss,
+                modifier = Modifier.padding(8.dp)
+            ) {
+                Text("Close")
+            }
+        },
+        modifier = modifier
+    )
+}
+

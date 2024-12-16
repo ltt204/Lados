@@ -1,6 +1,5 @@
 package org.nullgroup.lados.viewmodels.customer
 
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -32,6 +31,14 @@ enum class CheckoutError {
     FAILED_TO_GET_CHECKOUT_INFO,
 }
 
+data class InsufficientOrderProductInfo(
+    val productName: String,
+    val productSize: String,
+    val productColor: String,
+    val orderedAmount: Int,
+    val availableStock: Int,
+)
+
 @HiltViewModel
 class CheckoutViewModel @Inject constructor(
     private val userRepository: UserRepository,
@@ -49,6 +56,12 @@ class CheckoutViewModel @Inject constructor(
     private val _checkoutInfo = MutableStateFlow<CheckoutInfo?>(null)
     val checkoutInfo = _checkoutInfo.asStateFlow()
 
+    // Map cartItem's id to its corresponding product and variant
+    private val _insufficientOrderItems = MutableStateFlow<List<InsufficientOrderProductInfo>>(emptyList())
+    val insufficientOrderItems = _insufficientOrderItems.asStateFlow()
+
+    // TODO: Resolve the case when the view-model can't get the cached checkout info
+    //      Triggered when the checking-out screen is not launched from the cart screen
     private val _failureRaiser = MutableStateFlow<CheckoutError?>(null)
     val failureRaiser = _failureRaiser.asStateFlow()
 
@@ -113,7 +126,7 @@ class CheckoutViewModel @Inject constructor(
     }
 
     val checkoutHandler: (
-        onCheckoutFailure: ((reason: String) -> Unit)?,
+        onCheckoutFailure: ((reason: String?) -> Unit)?,
         onSuccessfulCheckout: (() -> Unit)?
     ) -> (() -> Unit) = { onCheckoutFailure, onSuccessfulCheckout ->
         {
@@ -125,7 +138,7 @@ class CheckoutViewModel @Inject constructor(
 
     /// Should only be triggered if the CheckoutDetail is already shown
     private suspend fun onCheckout(
-        onCheckoutFailure: ((reason: String) -> Unit)? = null,
+        onCheckoutFailure: ((reason: String?) -> Unit)? = null,
         onSuccessfulCheckout: (() -> Unit)? = null
     ) {
         if (selectedAddress.value == null) {
@@ -165,8 +178,39 @@ class CheckoutViewModel @Inject constructor(
         }.await()
 
         if (result.isFailure) {
-            onCheckoutFailure?.invoke("Can't create order for the current items:" +
+            onCheckoutFailure?.invoke("Can't create the order at the moment:" +
                     " ${result.exceptionOrNull()?.message}")
+            return
+        }
+
+        val (isOrderCreated, invalidOrderingItems) = result.getOrNull()!!
+
+        if (!isOrderCreated && invalidOrderingItems.isEmpty()) {
+            // This route should not be reached
+            onCheckoutFailure?.invoke("Can't create the order at the moment!")
+            return
+        } else if (!isOrderCreated) {
+            onCheckoutFailure?.invoke(null)
+            _insufficientOrderItems.value = invalidOrderingItems.mapNotNull { entry ->
+                try { // Extra defense against null pointer exception; although it should not happen
+                    val orderProduct = entry.key
+                    val cartItem = orderingItems.value.find {
+                        it.productId == orderProduct.productId
+                                && it.variantId == orderProduct.variantId
+                    }!!
+                    val product = orderingItemInformation.value[cartItem.id]?.first!!
+                    val productVariant = orderingItemInformation.value[cartItem.id]?.second!!
+                    InsufficientOrderProductInfo(
+                        productName = product.name,
+                        productSize = productVariant.size.sizeName,
+                        productColor = productVariant.color.colorName,
+                        orderedAmount = entry.key.amount,
+                        availableStock = entry.value
+                    )
+                } catch (_: Exception) {
+                    null
+                }
+            }
             return
         }
 
@@ -190,5 +234,9 @@ class CheckoutViewModel @Inject constructor(
         }
 
         onSuccessfulCheckout?.invoke()
+    }
+
+    val clearInsufficientOrderItems = {
+        _insufficientOrderItems.value = emptyList()
     }
 }
