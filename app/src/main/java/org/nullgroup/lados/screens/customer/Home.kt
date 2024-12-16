@@ -71,6 +71,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import kotlinx.coroutines.launch
@@ -352,7 +353,32 @@ fun ProductItem(
 fun ProductRow(
     modifier: Modifier = Modifier,
     onProductClick: (String) -> Unit,
-    viewModel: HomeViewModel = hiltViewModel()
+    viewModel: HomeViewModel = hiltViewModel(),
+    products: List<Product> = emptyList()
+) {
+    LazyRow(
+        modifier = modifier.heightIn(min = 280.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        contentPadding = PaddingValues(8.dp),
+    ) {
+        items(items = products, key = { it.id })
+        { item ->
+            ProductItem(
+                product = item,
+                onClick = onProductClick
+            )
+        }
+    }
+}
+
+@Composable
+fun DrawProductScreenContent(
+    modifier: Modifier = Modifier,
+    paddingValues: PaddingValues,
+    navController: NavController,
+    sharedViewModel: SharedViewModel,
+    onProductClick: (String) -> Unit,
+    viewModel: HomeViewModel
 ) {
     val productUiState = viewModel.productUiState.collectAsStateWithLifecycle()
     when (productUiState.value) {
@@ -368,111 +394,85 @@ fun ProductRow(
         }
 
         is ProductUiState.Success -> {
-            val products = (productUiState.value as ProductUiState.Success).products
-            LazyRow(
-                modifier = modifier.heightIn(min = 280.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                contentPadding = PaddingValues(8.dp),
+            Column(
+                modifier = modifier
+                    .padding(horizontal = 8.dp)
+                    .padding(top = paddingValues.calculateTopPadding()),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                items(items = products, key = { it.id })
-                { item ->
-                    ProductItem(
-                        product = item,
-                        onClick = onProductClick
-                    )
+                LazyColumn(
+                    modifier = modifier
+                        .fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    item {
+                        SearchBarRow(navController = navController, direct = true)
+                        Spacer(modifier = Modifier.height(4.dp))
+                    }
+                    item {
+                        TitleTextRow(
+                            contentLeft = "Categories",
+                            contentRight = "See all",
+                            onClick = {
+                                sharedViewModel.updateTypeScreen("In Category")
+                                navController.navigate(
+                                    Screen.Customer.CategorySelectScreen.route
+                                )
+                            }
+                        )
+                    }
+
+                    item {
+                        CategoryItems(
+                            sharedViewModel = sharedViewModel,
+                            navController = navController
+                        )
+                    }
+
+                    item {
+                        TitleTextRow(
+                            contentLeft = "Top Selling",
+                            contentRight = "See all",
+                            onClick = {
+                                sharedViewModel.updateTypeScreen("Top Selling")
+                                navController.navigate(
+                                    Screen.Customer.DisplayProductInCategory.route
+                                )
+                            }
+                        )
+                    }
+
+                    item {
+                        ProductRow(
+                            onProductClick = onProductClick,
+                            products = (productUiState.value as ProductUiState.Success).products.filter { it.engagements.size >= 2 }.take(5)
+                        )
+                    }
+
+                    item {
+                        TitleTextRow(
+                            contentLeft = "New In",
+                            contentRight = "See all",
+                            color = MagentaMaterial,
+                            onClick = {
+                                sharedViewModel.updateTypeScreen("New In")
+                                navController.navigate(
+                                    Screen.Customer.DisplayProductInCategory.route
+                                )
+                            }
+                        )
+                    }
+                    item {
+                        ProductRow(
+                            onProductClick = onProductClick,
+                            products = (productUiState.value as ProductUiState.Success).products.sortedByDescending { it.createdAt }.take(1)
+                        )
+                    }
                 }
             }
         }
-
-        else -> {}
-    }
-
-}
-
-@Composable
-fun DrawProductScreenContent(
-    modifier: Modifier = Modifier,
-    paddingValues: PaddingValues,
-    navController: NavController,
-    sharedViewModel: SharedViewModel,
-    onProductClick: (String) -> Unit
-) {
-    Column(
-        modifier = modifier
-            .padding(horizontal = 8.dp)
-            .padding(top = paddingValues.calculateTopPadding()),
-        verticalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
-        LazyColumn(
-            modifier = modifier
-                .fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            item {
-                SearchBarRow(navController = navController, direct = true)
-                Spacer(modifier = Modifier.height(4.dp))
-            }
-            item {
-                TitleTextRow(
-                    contentLeft = "Categories",
-                    contentRight = "See all",
-                    onClick = {
-                        sharedViewModel.updateTypeScreen("In Category")
-                        navController.navigate(
-                            Screen.Customer.CategorySelectScreen.route
-                        )
-                    }
-                )
-            }
-
-            item {
-                CategoryItems(
-                    sharedViewModel = sharedViewModel,
-                    navController = navController
-                )
-            }
-
-            item {
-                TitleTextRow(
-                    contentLeft = "Top Selling",
-                    contentRight = "See all",
-                    onClick = {
-                        sharedViewModel.updateTypeScreen("Top Selling")
-                        navController.navigate(
-                            Screen.Customer.DisplayProductInCategory.route
-                        )
-                    }
-                )
-            }
-
-            item {
-                ProductRow(
-                    onProductClick = onProductClick
-                )
-            }
-
-            item {
-                TitleTextRow(
-                    contentLeft = "New In",
-                    contentRight = "See all",
-                    color = MagentaMaterial,
-                    onClick = {
-                        sharedViewModel.updateTypeScreen("New In")
-                        navController.navigate(
-                            Screen.Customer.DisplayProductInCategory.route
-                        )
-                    }
-                )
-            }
-            item {
-                ProductRow(
-                    onProductClick = onProductClick
-                )
-            }
-        }
     }
 }
-
 
 @Composable
 fun BottomSheetContent(
@@ -587,7 +587,8 @@ fun ProductScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
     paddingValues: PaddingValues = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-    sharedViewModel: SharedViewModel = SharedViewModel()
+    sharedViewModel: SharedViewModel = SharedViewModel(),
+    viewModel: HomeViewModel = hiltViewModel()
 ) {
     Scaffold(
         modifier = modifier
@@ -642,7 +643,8 @@ fun ProductScreen(
             sharedViewModel = sharedViewModel,
             onProductClick = { id ->
                 navController.navigate(Screen.Customer.ProductDetailScreen.route + "/$id")
-            }
+            },
+            viewModel = viewModel
         )
     }
 }

@@ -213,14 +213,15 @@ fun DrawProductInCategoryScreenContent(
         }
         ProductsGrid(
             navController = navController,
+
             products = if (inTopSelling)
-                products.sortedByDescending { it.engagements.size }
+                products.filter { it.engagements.size >= 2 }.take(10)
             else if (inNewest)
                 products.sortedByDescending { it.createdAt }
             else if (inCategory)
                 products.filter { it.categoryId == sharedViewModel.sharedData?.categoryId }
             else if (inSearch)
-                products.filter { it.name.contains(sharedViewModel.searchQuery?:"") }
+                products.filter { it.name.contains(sharedViewModel.searchQuery ?: "") }
             else products
         )
     }
@@ -248,8 +249,6 @@ fun ProductInCategoryScreen(
     )
 
     val searchHistoryManager = remember { SearchHistoryManager(context) }
-    val searchHistory = searchHistoryManager.searchHistory.collectAsState(initial = emptySet())
-
 
     val scope = rememberCoroutineScope()
     var sheetContent by remember {
@@ -341,14 +340,15 @@ fun ProductInCategoryScreen(
                         inNewest = typeScreen=="Newest",
                         inSearch = typeScreen=="In Search",
                         onNormalButtonClick = { _ ->
+                            val oldStatus: List<Boolean> = isSelected
                             if (selectedSortOption == "On Sale") {
                                 selectedSortOption = null
                                 viewModel.resetProducts()
-                                isSelected = listOf(false, false, false)
+                                isSelected = listOf(false, oldStatus[1], oldStatus[2])
                             } else {
                                 selectedSortOption = "On Sale"
                                 viewModel.filterSaleProducts()
-                                isSelected = listOf(true, false, false)
+                                isSelected = listOf(true,  oldStatus[1], false)
                             }
                         },
                         onButtonClick = { content ->
