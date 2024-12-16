@@ -1,5 +1,6 @@
 package org.nullgroup.lados.screens.customer.order
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -25,7 +26,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -57,14 +60,15 @@ fun OrderScreen(
     orderViewModel: OrderViewModel = hiltViewModel()
 ) {
     val orderUiState = orderViewModel.orderState.collectAsState().value
-    var tabSelectedIndex by remember {
-        mutableIntStateOf(0)
+    var tabSelectedIndex by rememberSaveable {
+        mutableStateOf(0)
     }
     Scaffold(
         modifier = modifier.padding(top = paddingValues.calculateTopPadding()),
         topBar = {
             Column {
                 ProfileTopAppBar(onBackClick = { navController?.navigateUp() }, content = "Orders")
+                Log.d("OrderScreen", "OrderUiState: $tabSelectedIndex")
                 OrderScreenTopAppBar(
                     modifier = Modifier.padding(start = 16.dp, top = 8.dp, end = 16.dp),
                     selectedTabIndex = tabSelectedIndex,
@@ -91,6 +95,7 @@ fun OrderScreen(
                 }
 
                 is OrderState.Success -> {
+                    orderViewModel.filterOrderByStatus(OrderStatus.entries[tabSelectedIndex])
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxWidth()

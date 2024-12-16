@@ -1,5 +1,6 @@
 package org.nullgroup.lados.viewmodels.customer
 
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -25,12 +26,6 @@ class OrderDetailViewModel @Inject constructor(
 ) : ViewModel() {
     private val orderId =
         checkNotNull(savedStateHandle.get<String>(Screen.Customer.Order.OrderDetail.ID_ARG))
-    private var _currentOrder: StateFlow<Order> = orderRepository.getOrderById(orderId)
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.Lazily,
-            initialValue = Order(),
-        )
 
     private var _orderDetailState = MutableStateFlow<OrderDetailState>(OrderDetailState.Loading)
     val orderDetailState: StateFlow<OrderDetailState> = _orderDetailState.asStateFlow()
@@ -48,7 +43,7 @@ class OrderDetailViewModel @Inject constructor(
                         OrderDetailState.Error(it.message ?: "An error occurred")
                 }
                 .collect {
-                    _currentOrder = MutableStateFlow(it)
+                    Log.d("OrderDetailViewModel", "Order: $it")
                     _orderDetailState.value = OrderDetailState.Success(it)
                 }
         }

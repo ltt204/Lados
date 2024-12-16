@@ -20,6 +20,7 @@ import org.nullgroup.lados.data.models.ProductVariant
 import org.nullgroup.lados.data.repositories.interfaces.OrderRepository
 import org.nullgroup.lados.data.repositories.interfaces.ProductRepository
 import org.nullgroup.lados.screens.Screen
+import org.nullgroup.lados.utilities.OrderStatus
 import javax.inject.Inject
 
 @HiltViewModel
@@ -30,13 +31,9 @@ class OrderProductsViewModel @Inject constructor(
 ) : ViewModel() {
     private val orderId =
         checkNotNull(savedStateHandle.get<String>(Screen.Customer.Order.OrderDetail.ID_ARG))
-    private val _currentOrder: StateFlow<Order> = orderRepository.getOrderById(orderId)
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.Lazily,
-            initialValue = Order(),
-        )
-    val orderStatus = _currentOrder.value.orderStatusLog.entries.first().key
+
+    var currentOrder: MutableStateFlow<Order> = MutableStateFlow(Order())
+        private set
 
     private var _productVariantsState =
         MutableStateFlow<OrderProductsState>(OrderProductsState.Loading)
@@ -49,10 +46,11 @@ class OrderProductsViewModel @Inject constructor(
 
     private fun fetchProducts() {
         viewModelScope.launch {
-            orderRepository.getOrderById(orderId)
+            orderRepository
+                .getOrderById(orderId)
                 .flowOn(Dispatchers.IO)
                 .collect {
-                    Log.d("OrderProductsViewModel", "Fetching order: $it")
+                    currentOrder.value = it
                     it.orderProducts.forEach { orderProduct ->
                         val productId = orderProduct.productId
                         val variantId = orderProduct.variantId
@@ -71,8 +69,13 @@ class OrderProductsViewModel @Inject constructor(
                                     "Fetched product: $product with variant: $variant"
                                 )
                                 variant?.let {
+                                    val pair = product to variant
+                                    val currentList =
+                                        (_productVariantsState.value as? OrderProductsState.Success)?.orderProducts
+                                            ?: mutableListOf()
+                                    currentList.add(pair)
                                     _productVariantsState.value = OrderProductsState.Success(
-                                        mapOf(product to variant)
+                                        orderProducts = currentList
                                     )
                                 }
                             }
@@ -85,6 +88,8 @@ class OrderProductsViewModel @Inject constructor(
 
 sealed class OrderProductsState {
     data object Loading : OrderProductsState()
-    data class Success(val orderProducts: Map<Product, ProductVariant>) : OrderProductsState()
+    data class Success(val orderProducts: MutableList<Pair<Product, ProductVariant>>) :
+        OrderProductsState()
+
     data class Error(val message: String) : OrderProductsState()
 }

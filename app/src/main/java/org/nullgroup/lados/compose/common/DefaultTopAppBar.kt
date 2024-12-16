@@ -20,7 +20,7 @@ fun ProfileTopAppBar(
     content: String
 ) {
     CenterAlignedTopAppBar(
-        title = { Text(text = content, style = Typography.headlineSmall) },
+        title = { Text(text = content, style = Typography.headlineMedium) },
         navigationIcon = {
             IconButton(onClick = { onBackClick() }) {
                 Icon(

@@ -24,10 +24,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -48,8 +45,6 @@ import org.nullgroup.lados.compose.common.ProfileTopAppBar
 import org.nullgroup.lados.compose.common.TwoColsItem
 import org.nullgroup.lados.data.models.Color
 import org.nullgroup.lados.data.models.Image
-import org.nullgroup.lados.data.models.Order
-import org.nullgroup.lados.data.models.OrderProduct
 import org.nullgroup.lados.data.models.Product
 import org.nullgroup.lados.data.models.ProductVariant
 import org.nullgroup.lados.data.models.Size
@@ -82,57 +77,64 @@ fun OrderProductsViewScreen(
         },
         backgroundColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
-        OrderProductsView(
-            modifier = Modifier.padding(top = innerPadding.calculateTopPadding(), start = 16.dp, end = 16.dp),
-            orderProducts = orderProducts,
-            navController = navController,
-            orderStatus = orderProductsViewModel.orderStatus
-        )
+        when (orderProducts.value) {
+            is OrderProductsState.Loading -> {
+                LoadOnProgress(
+                    modifier = modifier.fillMaxSize(),
+                    content = {
+                        CircularProgressIndicator(modifier = Modifier.size(48.dp))
+                    }
+                )
+            }
+
+            is OrderProductsState.Error -> {
+                /*TODO: Handle Error*/
+            }
+
+            is OrderProductsState.Success -> {
+                val currentOrder = orderProductsViewModel.currentOrder.collectAsState()
+                Log.d("OrderProductsViewScreen", "Order Products: ${orderProducts.value}")
+                Log.d("OrderProductsViewScreen", "Current Order: ${currentOrder.value}")
+                OrderProductsView(
+                    modifier = Modifier.padding(
+                        top = innerPadding.calculateTopPadding(),
+                        start = 16.dp,
+                        end = 16.dp
+                    ),
+                    orderProducts = (orderProducts.value as OrderProductsState.Success).orderProducts,
+                    orderStatus = getStatusByName(
+                        currentOrder.value
+                            .orderStatusLog.entries.last().key
+                    ),
+                    navController = navController
+                )
+            }
+        }
     }
 }
 
 @Composable
 fun OrderProductsView(
     modifier: Modifier = Modifier,
-    orderProducts: State<OrderProductsState>,
+    orderProducts: List<Pair<Product, ProductVariant>>,
+    orderStatus: OrderStatus,
     navController: NavController? = null,
-    orderStatus: String
 ) {
-    when (orderProducts.value) {
-        is OrderProductsState.Loading -> {
-            LoadOnProgress(
-                modifier = modifier.fillMaxSize(),
-                content = {
-                    CircularProgressIndicator(modifier = Modifier.size(48.dp))
-                }
+    val buttonAction = orderStatus.getActionForButtonOfOrderProduct()
+
+    LazyColumn(modifier = modifier) {
+        items(items = orderProducts, key = { it.first.id }) { (product, variant) ->
+            OrderProductItem(
+                modifier = Modifier.heightIn(min = 72.dp, max = 128.dp),
+                product = product,
+                variant = variant,
+                navController = navController,
+                buttonAction = buttonAction
             )
-        }
-
-        is OrderProductsState.Error -> {
-            /*TODO: Handle Error*/
-        }
-
-        is OrderProductsState.Success -> {
-            val products = (orderProducts.value as OrderProductsState.Success).orderProducts
-
-            OrderStatus.entries.find { it.name == orderStatus }
-
-            val buttonAction = getStatusByName(orderStatus).getActionForButtonOfOrderProduct()
-
-            LazyColumn(modifier = modifier) {
-                items(products.keys.toList(), key = { it.id }) { product ->
-                    OrderProductItem(
-                        modifier = Modifier.heightIn(min = 72.dp, max = 128.dp),
-                        product = product,
-                        variant = products[product]!!,
-                        navController = navController,
-                        buttonAction = buttonAction
-                    )
-                }
-            }
         }
     }
 }
+
 
 @Composable
 fun OrderProductItem(
@@ -243,87 +245,93 @@ fun OrderProductItem(
 @Preview
 @Composable
 fun OrderProductsViewScreenPreview() {
-    // Sample test data
-    val testOrder = Order(
-        orderId = "order123",
-        customerId = "customer@test.com",
-        orderStatusLog = mapOf(
-            OrderStatus.CREATED.name to System.currentTimeMillis() - 500000,
-            OrderStatus.CONFIRMED.name to System.currentTimeMillis() - 400000,
-            OrderStatus.SHIPPED.name to System.currentTimeMillis() - 300000,
-            OrderStatus.DELIVERED.name to System.currentTimeMillis() - 200000
-        ),
-        orderProducts = listOf(
-            OrderProduct(
-                id = "orderProduct1",
-                productId = "product1",
-                variantId = "variant1",
-                amount = 2,
-                totalPrice = 59.98
-            ),
-            OrderProduct(
-                id = "orderProduct2",
-                productId = "product2",
-                variantId = "variant2",
-                amount = 1,
-                totalPrice = 29.99
-            ),
-            OrderProduct(
-                id = "orderProduct3",
-                productId = "product3",
-                variantId = "variant3",
-                amount = 3,
-                totalPrice = 89.97
-            )
-        ),
-        orderTotal = 179.94,
-        deliveryAddress = "123 Test Street, Test City",
-        customerPhone = "1234567890"
-    )
-    val orderProducts = remember {
-        mutableStateOf<OrderProductsState>(
-            OrderProductsState.Success(
-                mapOf(
-                    Product(
-                        id = "product1",
-                        name = "Test Product 1",
-                        variants = listOf(
-                            ProductVariant(
-                                id = "variant1",
-                                size = Size(1, "Skibidi"),
-                                color = Color(1, "Red", "#FF0000"),
-                                originalPrice = 29.99,
-                                salePrice = 19.99,
-                                images = listOf(
-                                    Image(
-                                        id = "image1",
-                                        link = "https://via.placeholder.com/150"
-                                    )
-                                )
-                            )
-                        )
-                    ) to ProductVariant(
-                        id = "variant1",
-                        size = Size(1, "Small"),
-                        color = Color(1, "Red", "#FF0000"),
-                        originalPrice = 29.99,
-                        salePrice = 19.99,
-                        images = listOf(
-                            Image(
-                                id = "image1",
-                                link = "https://jimmyluxury.in/products/fabric-lucas-double-clothe-cream-full-sleeve-shirt"
-                            )
-                        )
-                    )
-                )
-            )
-        )
-    }
-
-    OrderProductsView(
-        orderProducts = orderProducts,
-        orderStatus = OrderStatus.CREATED.name
-    )
+//    // Sample test data
+//    val testOrder = Order(
+//        orderId = "order123",
+//        customerId = "customer@test.com",
+//        orderStatusLog = mapOf(
+//            OrderStatus.CREATED.name to System.currentTimeMillis() - 500000,
+//            OrderStatus.CONFIRMED.name to System.currentTimeMillis() - 400000,
+//            OrderStatus.SHIPPED.name to System.currentTimeMillis() - 300000,
+//            OrderStatus.DELIVERED.name to System.currentTimeMillis() - 200000
+//        ),
+//        orderProducts = listOf(
+//            OrderProduct(
+//                id = "orderProduct1",
+//                productId = "product1",
+//                variantId = "variant1",
+//                amount = 2,
+//                totalPrice = 59.98
+//            ),
+//            OrderProduct(
+//                id = "orderProduct2",
+//                productId = "product2",
+//                variantId = "variant2",
+//                amount = 1,
+//                totalPrice = 29.99
+//            ),
+//            OrderProduct(
+//                id = "orderProduct3",
+//                productId = "product3",
+//                variantId = "variant3",
+//                amount = 3,
+//                totalPrice = 89.97
+//            )
+//        ),
+//        orderTotal = 179.94,
+//        deliveryAddress = "123 Test Street, Test City",
+//        customerPhone = "1234567890"
+//    )
+//    val orderProducts = remember {
+//        mutableStateOf<OrderProductsState>(
+//            OrderProductsState.Success(
+//                mutableListOf(
+//                    Pair(
+//                        Product(
+//                            id = "product1",
+//                            name = "Test Product 1",
+//                            variants = listOf(
+//                                ProductVariant(
+//                                    id = "variant1",
+//                                    size = Size(1, "Skibidi"),
+//                                    color = Color(1, "Red", "#FF0000"),
+//                                    originalPrice = 29.99,
+//                                    salePrice = 19.99,
+//                                    images = listOf(
+//                                        Image(
+//                                            id = "image1",
+//                                            link = "https://via.placeholder.com/150"
+//                                        )
+//                                    )
+//                                )
+//                            )
+//                        ) to ProductVariant(
+//                            id = "variant1",
+//                            size = Size(1, "Small"),
+//                            color = Color(1, "Red", "#FF0000"),
+//                            originalPrice = 29.99,
+//                            salePrice = 19.99,
+//                            images = listOf(
+//                                Image(
+//                                    id = "image1",
+//                                    link = "https://jimmyluxury.in/products/fabric-lucas-double-clothe-cream-full-sleeve-shirt"
+//                                )
+//                            )
+//                        )
+//                    ),
+//                )
+//            )
+//        )
+//    }
+//
+//    val currentOrder = remember {
+//        mutableStateOf(testOrder)
+//    }
+//
+//    OrderProductsView(
+//        orderProducts = orderProducts,
+//        currentOrder = currentOrder,
+//    )
 }
 
 @Preview
