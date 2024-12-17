@@ -19,6 +19,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -31,10 +32,10 @@ fun AddressForm(
     provincesUiState: MenuItemsUIState,
     districtsUiState: MenuItemsUIState,
     wardsUiState: MenuItemsUIState,
-    onProvinceSelected: (Int) -> Unit,
-    onDistrictSelected: (Int) -> Unit,
-    onWardSelected: (Int) -> Unit,
-    onDetailChanged: (String) -> Unit,
+    onProvinceSelected: (Int) -> Unit = {},
+    onDistrictSelected: (Int) -> Unit = {},
+    onWardSelected: (Int) -> Unit = {},
+    onDetailChanged: (String) -> Unit = {},
     address: Address,
     scope: CoroutineScope = rememberCoroutineScope()
 ) {
@@ -76,15 +77,26 @@ fun AddressForm(
             )
         }
         Spacer(modifier = Modifier.height(16.dp))
-        OutlinedTextField(
+        CustomTextField(
             modifier = Modifier
                 .fillMaxWidth(),
             value = streetDetail,
-            placeholder = { Text(text = "Street", color = Color.Gray) },
             onValueChange = {
                 onDetailChanged(it)
-                streetDetail = it
-            },
+                streetDetail = it },
+            header = "Street",
+            placeHolder = "Street"
         )
     }
+}
+
+@Preview
+@Composable
+fun AddressFormPreview() {
+    AddressForm(
+        provincesUiState = MenuItemsUIState.Loading,
+        districtsUiState = MenuItemsUIState.Loading,
+        wardsUiState = MenuItemsUIState.Loading,
+        address = Address()
+    )
 }

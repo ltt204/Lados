@@ -11,6 +11,7 @@ import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -34,6 +35,8 @@ fun CustomTextField(
     onValueChange: (String) -> Unit = {},
     header: String = "",
     placeHolder: String = "",
+    readOnly: Boolean = false,
+    singleLine: Boolean = true,
     trailingIcon: @Composable (() -> Unit)? = null
 ) {
     var isFocused by remember { mutableStateOf(false) }
@@ -52,13 +55,13 @@ fun CustomTextField(
             modifier = Modifier
                 .fillMaxWidth()
                 .onFocusChanged { isFocused = it.isFocused },
-            singleLine = true,
+            singleLine = singleLine,
+            readOnly = readOnly,
             value = value,
             placeholder = {
                 Text(text = placeHolder)
             },
             colors = TextFieldDefaults.textFieldColors(
-                cursorColor = Color.Transparent,
                 textColor = Color.Black,
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent,

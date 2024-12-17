@@ -27,7 +27,8 @@ class EditProfileViewModel @Inject constructor(
 
     private var userProfilePicture = mutableStateOf(UserProfilePicture())
 
-    var profilePictureUiState: MutableState<ProfilePictureUiState> = mutableStateOf(ProfilePictureUiState.Initial(""))
+    var profilePictureUiState: MutableState<ProfilePictureUiState> =
+        mutableStateOf(ProfilePictureUiState.Initial(""))
 
     init {
         loadUser()
@@ -43,11 +44,15 @@ class EditProfileViewModel @Inject constructor(
                         profilePictureUiState.value = Loading
 
                         try {
-                            imageRepository.deleteImage(
-                                child = "users",
-                                fileName = user.email,
-                                extension = "jpg"
-                            )
+                            try {
+                                imageRepository.deleteImage(
+                                    child = "users",
+                                    fileName = user.email,
+                                    extension = "jpg"
+                                )
+                            } catch (e: Exception) {
+                                // Ignore
+                            }
 
                             val firebaseStorageUrl = imageRepository.uploadImage(
                                 userProfilePicture.value.image,
@@ -57,12 +62,15 @@ class EditProfileViewModel @Inject constructor(
                             )
 
                             delay(500)
-                            profilePictureUiState.value = ProfilePictureUiState.Success(firebaseStorageUrl)
+                            profilePictureUiState.value =
+                                ProfilePictureUiState.Success(firebaseStorageUrl)
                         } catch (e: Exception) {
-                            profilePictureUiState.value = ProfilePictureUiState.Error(e.message ?: "An error occurred")
+                            profilePictureUiState.value =
+                                ProfilePictureUiState.Error(e.message ?: "An error occurred")
                         }
 
-                        user.avatarUri = (profilePictureUiState.value as ProfilePictureUiState.Success).uri
+                        user.avatarUri =
+                            (profilePictureUiState.value as ProfilePictureUiState.Success).uri
                         userRepository.updateUser(user)
                     } else {
                         userRepository.updateUser(user)

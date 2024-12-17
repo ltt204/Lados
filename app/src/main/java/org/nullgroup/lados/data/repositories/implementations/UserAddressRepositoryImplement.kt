@@ -19,7 +19,7 @@ class UserAddressRepositoryImplement(
     override fun getAddressesFlow(): Flow<List<Address>> = callbackFlow {
         val addressRef = firestore
             .collection("users")
-            .document(firebaseAuth.currentUser?.email!!)
+            .document(firebaseAuth.currentUser?.uid!!)
             .collection("addresses")
 
         val subscription = addressRef.addSnapshotListener { snapshot, error ->
@@ -32,7 +32,7 @@ class UserAddressRepositoryImplement(
                 val addresses = snapshot.documents.mapNotNull {
                     it.toObject(Address::class.java)
                 }
-                trySend(addresses)
+                trySend(addresses).isSuccess
             }
         }
 
@@ -42,8 +42,9 @@ class UserAddressRepositoryImplement(
     override fun getSingleAddressFlow(addressId: String): Flow<Address> = callbackFlow {
         val addressRef = firestore
             .collection("users")
-            .document(firebaseAuth.currentUser?.email!!)
+            .document(firebaseAuth.currentUser?.uid!!)
             .collection("addresses")
+            .document(addressId)
 
         val subscription = addressRef.addSnapshotListener { snapshot, error ->
             if (error != null) {
@@ -52,13 +53,8 @@ class UserAddressRepositoryImplement(
             }
 
             if (snapshot != null) {
-                val addresses = snapshot.documents.mapNotNull {
-                    it.toObject(Address::class.java)
-                }.filter {
-                    it.userId == firebaseAuth.currentUser?.email
-                }
-                val address = addresses.first { it.id == addressId }
-                trySend(address)
+                val address = snapshot.toObject(Address::class.java)
+                trySend(address!!).isSuccess
             }
         }
 
@@ -68,7 +64,7 @@ class UserAddressRepositoryImplement(
     override suspend fun getSingleAddress(addressId: String): Address {
         val addressRef = firestore
             .collection("users")
-            .document(firebaseAuth.currentUser?.email!!)
+            .document(firebaseAuth.currentUser?.uid!!)
             .collection("addresses")
             .document(addressId)
 
@@ -87,7 +83,7 @@ class UserAddressRepositoryImplement(
 
             val addressRef = firestore
                 .collection("users")
-                .document(firebaseAuth.currentUser?.email!!)
+                .document(firebaseAuth.currentUser?.uid!!)
                 .collection("addresses")
                 .document(addedAddress.id)
             Log.d("UserAddressRepository", "Address: $addressRef")
@@ -102,7 +98,7 @@ class UserAddressRepositoryImplement(
     override suspend fun addAddress(address: Address) {
         val addressRef = firestore
             .collection("users")
-            .document(firebaseAuth.currentUser?.email!!)
+            .document(firebaseAuth.currentUser?.uid!!)
             .collection("addresses")
             .document(address.id)
     }
@@ -111,7 +107,7 @@ class UserAddressRepositoryImplement(
         val addressRef = firestore.collection("addresses").document(addressId)
         val userAddressRef = firestore
             .collection("users")
-            .document(firebaseAuth.currentUser?.email!!)
+            .document(firebaseAuth.currentUser?.uid!!)
             .collection("addresses")
             .document(addressId)
 
@@ -136,7 +132,8 @@ class UserAddressRepositoryImplement(
             .get()
             .await()
 
-        if (existingAddress!=null) {
+        Log.d("UserAddressRepository", "Existing Address: $existingAddress")
+        if (!existingAddress.isEmpty) {
             throw Exception("Address already exists")
         }
 
