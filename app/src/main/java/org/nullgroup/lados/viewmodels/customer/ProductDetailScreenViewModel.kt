@@ -9,9 +9,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.nullgroup.lados.data.models.CartItem
 import org.nullgroup.lados.data.models.Color
 import org.nullgroup.lados.data.models.Product
 import org.nullgroup.lados.data.models.Size
+import org.nullgroup.lados.data.repositories.interfaces.CartItemRepository
 import org.nullgroup.lados.data.repositories.interfaces.ProductRepository
 import org.nullgroup.lados.screens.customer.product.ProductDetailUiState
 import javax.inject.Inject
@@ -19,7 +21,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ProductDetailScreenViewModel @Inject constructor(
-    private val productRepository: ProductRepository
+    private val productRepository: ProductRepository,
+    private val cartItemRepository: CartItemRepository,
 ) : ViewModel() {
 
     // Sealed class for different product-related states
@@ -125,5 +128,56 @@ class ProductDetailScreenViewModel @Inject constructor(
             .map { it.size }
             .distinctBy { it.id }
             .sortedBy { it.sizeName }
+    }
+
+    // TODO: Adjust logic as you wish
+    val onAddToCartClicked: (
+        onAddedDone: (() -> Unit)?
+    )-> (() -> Unit) = { onAddedDone ->
+        {
+            viewModelScope.launch{
+                onAddItemToCart(onAddedDone)
+            }
+        }
+    }
+    val onAddItemToCart: (
+        onAddedDone: (() -> Unit)?
+    )-> Unit = { onAddedDone ->
+        viewModelScope.launch {
+            val product = uiState.value.product
+            val selectedColor = uiState.value.selectedColor
+            val selectedSize = uiState.value.selectedSize
+            // TODO: Update quantity based on user input
+            val quantity = 1
+            // TODO: Delete later
+            //       Cart will implement with user authentication later
+            //       when user authentication is completed
+            val currentUserId = "admin@test.com"
+
+            val correspondingVariant =
+                if (selectedColor != null && selectedSize != null)
+                    product.variants.find {
+                        it.color.id == selectedColor.id && it.size.id == selectedSize.id
+                    }
+                else null
+
+            if (correspondingVariant != null) {
+                val cartItem = CartItem(
+                    productId = product.id,
+                    variantId = correspondingVariant.id,
+                    amount = quantity
+                )
+                cartItemRepository.addCartItemToCart(currentUserId, cartItem)
+                // TODO: Change to this in the future
+                // cartItemRepository.addCartItemToCart(cartItem)
+
+                // TODO: Notify user that product is added to cart
+                //      Temporary solution
+                onAddedDone?.invoke()
+
+            } else{
+                // TODO: Notify user to select color and size
+            }
+        }
     }
 }

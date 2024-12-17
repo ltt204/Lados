@@ -1,7 +1,5 @@
 package org.nullgroup.lados.navigations
 
-//noinspection UsingMaterialAndMaterial3Libraries
-//noinspection UsingMaterialAndMaterial3Libraries
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
@@ -11,7 +9,9 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+//noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.BottomNavigation
+//noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -36,8 +36,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import org.nullgroup.lados.screens.Screen
-import org.nullgroup.lados.screens.customer.CartScreen
-import org.nullgroup.lados.screens.customer.CheckoutScreen
+import org.nullgroup.lados.screens.customer.cartAndCheckout.CartScreen
+import org.nullgroup.lados.screens.customer.cartAndCheckout.CheckoutScreen
 import org.nullgroup.lados.screens.customer.profile.AddAddressScreen
 import org.nullgroup.lados.screens.customer.profile.AddressList
 import org.nullgroup.lados.screens.customer.product.CategorySelectScreen
@@ -54,6 +54,7 @@ import org.nullgroup.lados.screens.customer.product.ProductInCategoryScreen
 import org.nullgroup.lados.screens.customer.ProductScreen
 import org.nullgroup.lados.screens.customer.SearchScreen
 import org.nullgroup.lados.screens.customer.product.ReviewProductScreen
+import org.nullgroup.lados.screens.customer.profile.ProfileScreen
 import org.nullgroup.lados.ui.theme.MagentaMaterial
 import org.nullgroup.lados.viewmodels.SharedViewModel
 
@@ -204,10 +205,15 @@ fun CustomerGraph(
 
                         Screen.Customer.Profile.route -> {
                             isVisibility = false
-                            AddressList(
+//                            AddressList(
+//                                modifier = Modifier,
+//                                navController = navController,
+//                                paddingValues = innerPadding
+//                            )
+                            ProfileScreen(
                                 modifier = Modifier,
-                                navController = navController,
-                                paddingValues = innerPadding
+                                paddingValues = innerPadding,
+                                navController = navController
                             )
                         }
 
@@ -293,7 +299,7 @@ fun CustomerGraph(
                 )
             ) { backStackEntry ->
 
-                Log.d("Review:", "${Screen.Customer.ReviewProductScreen.ROUTE_WITH_ARGS}")
+                Log.d("Review:", Screen.Customer.ReviewProductScreen.ROUTE_WITH_ARGS)
 
                 val productId =
                     backStackEntry.arguments?.getString(Screen.Customer.ReviewProductScreen.PRODUCT_ID_ARG)

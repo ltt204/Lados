@@ -7,6 +7,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import org.nullgroup.lados.data.repositories.implementations.CartItemRepositoryImplement
 import org.nullgroup.lados.data.repositories.implementations.CategoryRepositoryImplement
 import org.nullgroup.lados.data.repositories.implementations.ImageRepositoryImplement
 import org.nullgroup.lados.data.repositories.implementations.OrderRepositoryImplement
@@ -14,6 +15,8 @@ import org.nullgroup.lados.data.repositories.implementations.ProductRepositoryIm
 import org.nullgroup.lados.data.repositories.implementations.ReviewProductRepositoryImplement
 import org.nullgroup.lados.data.repositories.implementations.UserAddressRepositoryImplement
 import org.nullgroup.lados.data.repositories.implementations.UserRepositoryImplement
+import org.nullgroup.lados.data.repositories.implementations.WishlistItemRepositoryImplement
+import org.nullgroup.lados.data.repositories.interfaces.CartItemRepository
 
 import org.nullgroup.lados.data.repositories.interfaces.CategoryRepository
 
@@ -24,6 +27,7 @@ import org.nullgroup.lados.data.repositories.interfaces.OrderRepository
 import org.nullgroup.lados.data.repositories.interfaces.ProductRepository
 import org.nullgroup.lados.data.repositories.interfaces.ReviewProductRepository
 import org.nullgroup.lados.data.repositories.interfaces.UserRepository
+import org.nullgroup.lados.data.repositories.interfaces.WishlistItemRepository
 import javax.inject.Singleton
 
 @Module
@@ -83,5 +87,17 @@ object DataModule {
     @Provides
     fun provideReviewRepository(firestore: FirebaseFirestore): ReviewProductRepository {
         return ReviewProductRepositoryImplement(firestore)
+    }
+
+    @Singleton
+    @Provides
+    fun provideCartRepository(firestore: FirebaseFirestore): CartItemRepository {
+        return CartItemRepositoryImplement(firestore)
+    }
+
+    @Singleton
+    @Provides
+    fun provideWishlistRepository(firestore: FirebaseFirestore): WishlistItemRepository {
+        return WishlistItemRepositoryImplement(firestore)
     }
 }

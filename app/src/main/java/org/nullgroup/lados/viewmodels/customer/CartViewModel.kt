@@ -23,8 +23,6 @@ import org.nullgroup.lados.data.repositories.interfaces.CartItemRepository
 import org.nullgroup.lados.data.repositories.interfaces.ProductRepository
 import javax.inject.Inject
 
-// TODO: SCREEN STATE
-
 @HiltViewModel
 class CartViewModel @Inject constructor(
     // private val userRepository: UserRepository,
@@ -113,14 +111,14 @@ class CartViewModel @Inject constructor(
     var onRefreshError: ((String) -> Unit)? = null
     suspend fun refreshCartInformation() {
         // TODO: to be removed
-        viewModelScope.async {
-            addCartItem("BKj3h1PBk1YbIPy2mnOr", "RmQEs0aelFVq1OaDwhjK", 3)
-            addCartItem("BKj3h1PBk1YbIPy2mnOr", "TCwBMf9PKHmfryUfmEgL", 2)
-            addCartItem("Uv9JE2EwULVB6Gsjq5p7", "1aXlLfhkTo3gDZ0yFXbD", 150)
-            addCartItem("bKenEU3vDCwjjKjsMapv", "0zPcXb6MbfszcEswWz4s", 500)
-            addCartItem("bKenEU3vDCwjjKjsMapv", "WhatIsThisSheet", 6)
-            addCartItem("Ola-la", "IDon-tKnowWhatThisHolyGrailIs", 9)
-        }.await()
+//        viewModelScope.async {
+//            addCartItem("BKj3h1PBk1YbIPy2mnOr", "RmQEs0aelFVq1OaDwhjK", 3)
+//            addCartItem("BKj3h1PBk1YbIPy2mnOr", "TCwBMf9PKHmfryUfmEgL", 2)
+//            addCartItem("Uv9JE2EwULVB6Gsjq5p7", "1aXlLfhkTo3gDZ0yFXbD", 150)
+//            addCartItem("bKenEU3vDCwjjKjsMapv", "0zPcXb6MbfszcEswWz4s", 500)
+//            addCartItem("bKenEU3vDCwjjKjsMapv", "WhatIsThisSheet", 6)
+//            addCartItem("Ola-la", "IDon-tKnowWhatThisHolyGrailIs", 9)
+//        }.await()
 
         viewModelScope.launch {
             cartItemRepository.getCartItemsAsFlow(customerId)
@@ -239,7 +237,6 @@ class CartViewModel @Inject constructor(
             customerId = customerId,
             cartItem = cartItem
         )
-
     }
 
     fun updateCartItemAmountLocally(cartItemId: String, amountDelta: Int) {

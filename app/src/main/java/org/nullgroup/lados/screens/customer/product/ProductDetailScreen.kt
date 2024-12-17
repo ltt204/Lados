@@ -95,7 +95,7 @@ object ProductTheme {
 fun ProductDetailScreen(
     productViewModel: ProductDetailScreenViewModel = hiltViewModel(),
     productId: String,
-    onAddToBag: () -> Unit = {},
+    onAddToBag: () -> Unit = {}, // TODO: Delete this
     navController: NavController
 ) {
 
@@ -104,6 +104,13 @@ fun ProductDetailScreen(
     var showColorBottomSheet by remember { mutableStateOf(false) }
 
     val uiState by productViewModel.uiState.collectAsState()
+
+    // TODO: Adjust as you wish
+    val onAddedToCart: () -> Unit = {
+        navController.popBackStack()
+    }
+    val onAddToCart = productViewModel.onAddToCartClicked(onAddedToCart)
+
 
     // Load product details on initial composition
     LaunchedEffect(productId) {
@@ -134,9 +141,12 @@ fun ProductDetailScreen(
                 },
                 bottomBar = {
                     ProductDetailBottomBar(
+                        // TODO: Change to "Add to Cart"
                         title = "Add to Bag",
                         price = "$${uiState.product.variants.first().salePrice}",
-                        onClick = onAddToBag
+                        // onClick = onAddToBag
+                        // TODO: Adjust as you wish
+                        onClick = onAddToCart
                     )
                 }
             ) { paddingValues ->
@@ -505,7 +515,7 @@ fun ProductReviewSection(
             Spacer(modifier = Modifier.width(8.dp))
 
             Text(
-                text = "${numOfReviews} Reviews",
+                text = "$numOfReviews Reviews",
                 fontWeight = FontWeight.Medium,
                 fontSize = 15.sp,
                 color = Color.Gray

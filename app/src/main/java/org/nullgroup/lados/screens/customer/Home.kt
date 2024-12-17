@@ -620,7 +620,7 @@ fun ProductScreen(
                     }
 
                     IconButton(
-                        onClick = {},
+                        onClick = { navController.navigate(Screen.Customer.CartScreen.route) },
                         modifier = Modifier
                             .clip(CircleShape)
                             .background(MagentaMaterial),

@@ -102,21 +102,22 @@ class CheckoutViewModel @Inject constructor(
 
                 if (checkoutInfoGetResult.isFailure) {
                     _checkoutFailure.value = CheckoutError.FAILED_TO_GET_CHECKOUT_INFO
-                    return@launch
-                }
-
-                cartItemRepository.getCheckingOutItemsAsFlow(customerId).collect {
-                    if (it.isNotEmpty()) {
-                        _orderingItems.value = _orderingItems.value.plus(
-                            it.map { it.cartItem }
-                        )
-                        _orderingItemInformation.value = _orderingItemInformation.value.plus(
-                            it.map {
-                                it.cartItem.id to Pair(it.product, it.variant)
-                            }
-                        )
+//                    return@launch
+                } else {
+                    cartItemRepository.getCheckingOutItemsAsFlow(customerId).collect {
+                        if (it.isNotEmpty()) {
+                            _orderingItems.value = _orderingItems.value.plus(
+                                it.map { it.cartItem }
+                            )
+                            _orderingItemInformation.value = _orderingItemInformation.value.plus(
+                                it.map {
+                                    it.cartItem.id to Pair(it.product, it.variant)
+                                }
+                            )
+                        }
                     }
                 }
+
             }
         }
     }

@@ -1,4 +1,4 @@
-package org.nullgroup.lados.screens.customer
+package org.nullgroup.lados.screens.customer.cartAndCheckout
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -67,6 +67,7 @@ import org.nullgroup.lados.R
 import org.nullgroup.lados.compose.cartRelated.CartItemBar
 import org.nullgroup.lados.compose.cartRelated.PricingDetails
 import org.nullgroup.lados.data.models.Address
+import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.utilities.toUSDCurrency
 import org.nullgroup.lados.viewmodels.customer.CheckoutViewModel
 import org.nullgroup.lados.viewmodels.customer.InsufficientOrderProductInfo
@@ -148,8 +149,10 @@ fun CheckoutScreen(
             onNavigateBack = {
                 navController.popBackStack()
             },
-            // TODO: Implement navigation to "See Order" screen
-            onNavigateNextScreen = null,
+            onNavigateNextScreen = {
+                navController.popBackStack()
+                navController.navigate(Screen.Customer.Order.OrderList.route)
+            },
             modifier = modifier.padding(innerPadding)
         )
         return
