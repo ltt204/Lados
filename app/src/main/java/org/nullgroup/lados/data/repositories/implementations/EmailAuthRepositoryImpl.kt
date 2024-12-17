@@ -14,6 +14,8 @@ import org.nullgroup.lados.data.repositories.interfaces.EmailAuthRepository
 import org.nullgroup.lados.data.repositories.interfaces.SharedPreferencesRepository
 import org.nullgroup.lados.data.repositories.interfaces.UserRepository
 import org.nullgroup.lados.viewmodels.common.states.ResourceState
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 
 class EmailAuthRepositoryImpl(
@@ -81,18 +83,29 @@ class EmailAuthRepositoryImpl(
                 return ResourceState.Error("Failed to create user")
             }
 
-            val credential = GoogleAuthProvider.getCredential(
-                GoogleSignIn.getLastSignedInAccount(context)?.idToken,
-                null
-            )
+            val googleSignInAccount = GoogleSignIn.getLastSignedInAccount(context)
 
-            Log.d("EmailAuthRepositoryImpl", "credential: ${credential.signInMethod}")
+            if (googleSignInAccount != null) {
+                val credential = GoogleAuthProvider.getCredential(
+                    googleSignInAccount.idToken,
+                    null
+                )
 
-            result.user?.linkWithCredential(credential)?.addOnCompleteListener {
-                if (it.isSuccessful) {
-                    Log.d("EmailAuthRepositoryImpl", "linkWithCredential: success")
-                } else {
-                    Log.d("EmailAuthRepositoryImpl", "linkWithCredential: ${it.exception}")
+                val linkResult = suspendCoroutine<Boolean> { continuation ->
+                    result.user?.linkWithCredential(credential)
+                        ?.addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                Log.d("SignUp", "Credential linked successfully")
+                                continuation.resume(true)
+                            } else {
+                                Log.e("SignUp", "Credential linking failed", task.exception)
+                                continuation.resume(false)
+                            }
+                        }
+                }
+
+                if (!linkResult) {
+                    return ResourceState.Error("Failed to link Google account")
                 }
             }
 
@@ -102,10 +115,12 @@ class EmailAuthRepositoryImpl(
                 name = fullName,
                 role = UserRole.CUSTOMER.name,
                 phoneNumber = phone,
-                avatarUri = result.user?.photoUrl?.toString() ?: "",
-                provider = result.user?.providerId ?: "",
+                avatarUri = googleSignInAccount?.photoUrl?.toString() ?: "",
+                provider = "email_google",
                 isActive = true,
             )
+
+            // Save token
             val token = result.user?.getIdToken(true)?.await()?.token
             if (token != null) {
                 sharedPreferences.saveData("token", token)
