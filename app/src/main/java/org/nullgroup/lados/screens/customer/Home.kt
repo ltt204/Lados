@@ -187,7 +187,7 @@ fun TitleTextRow(
     contentLeft: String,
     contentRight: String,
     // note: modify
-    color: Color = LadosTheme.colorScheme.outline,
+    color: Color = Tertiary,
     onClick: () -> Unit = {},
 ) {
     Row(
@@ -210,7 +210,7 @@ fun TitleTextRow(
         ) {
             Text(
                 contentRight, style = TextStyle(
-                    fontSize = 20.sp,
+                    fontSize = 18.sp,
                     // note: modify
                     color = LadosTheme.colorScheme.outline,
                 )
@@ -279,7 +279,7 @@ fun CategoryItem(
         CategoryCircle(imageUrl = category.categoryImage)
         Spacer(Modifier.height(8.dp))
         // note: modify color
-        Text(text = category.categoryName, color = LadosTheme.colorScheme.primary)
+        Text(text = category.categoryName, color = Tertiary, fontSize = 16.sp)
     }
 }
 
@@ -295,7 +295,7 @@ fun ProductItem(
         .height(280.dp)
         .clip(RoundedCornerShape(8.dp))
         // note: modify
-        .background(LadosTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.2f))
+        .background(LadosTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.6f))
         .padding(bottom = 8.dp)
         .clickable { onClick(product.id) }
     ) {
@@ -327,7 +327,7 @@ fun ProductItem(
                 style = TextStyle(
                     fontSize = 16.sp,
                     // note: modify
-                    color = LadosTheme.colorScheme.error,
+                    color = Tertiary,
                 )
             )
             Row(
@@ -340,7 +340,7 @@ fun ProductItem(
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
                         // note: modify
-                        color = LadosTheme.colorScheme.error,
+                        color = Tertiary,
                     )
                 )
                 Text(
