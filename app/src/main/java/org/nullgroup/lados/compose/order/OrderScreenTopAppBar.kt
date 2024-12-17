@@ -31,7 +31,7 @@ fun OrderScreenTopAppBar(
     ) {
         items(items = tabs, key = { tabs.indexOf(it) }) { tab ->
             ScrollTabItem(
-                modifier = Modifier.padding(horizontal = 4.dp),
+                modifier = modifier.padding(horizontal = 0.dp),
                 selected = selectedTabIndex == tabs.indexOf(tab),
                 onClick = {
                     onTabSelected(tabs.indexOf(tab))

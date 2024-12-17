@@ -21,10 +21,16 @@ val darkColorScheme = AppColorScheme(
     onBackground = OnSurfaceDark,
     primary = PrimaryDark,
     onPrimary = OnPrimaryDark,
+    primaryContainer = PrimaryContainerDark,
+    onPrimaryContainer = OnPrimaryContainerDark,
     secondary = SecondaryDark,
     onSecondary = OnSecondaryDark,
+    secondaryContainer = SecondaryContainerDark,
+    onSecondaryContainer = OnSecondaryContainerDark,
     error = ErrorDark,
     onError = OnErrorDark,
+    errorContainer = ErrorContainerDark,
+    onErrorContainer = OnErrorContainerDark,
     outline = OutlineDark,
     surfaceContainerLowest = SurfaceContainerLowestDark,
     surfaceContainerLow = SurfaceContainerLowDark,
@@ -32,6 +38,10 @@ val darkColorScheme = AppColorScheme(
     surfaceContainerHigh = SurfaceContainerHighDark,
     surfaceContainerHighest = SurfaceContainerHighestDark,
     onSurface = OnSurfaceDark,
+    tertiary = TertiaryDark,
+    onTertiary = OnTertiaryDark,
+    tertiaryContainer = TertiaryContainerDark,
+    onTertiaryContainer = OnTertiaryContainerDark,
 )
 
 val lightColorScheme = AppColorScheme(
@@ -39,10 +49,16 @@ val lightColorScheme = AppColorScheme(
     onBackground = OnSurface,
     primary = Primary,
     onPrimary = OnPrimary,
+    primaryContainer = PrimaryContainer,
+    onPrimaryContainer = OnPrimaryContainer,
     secondary = Secondary,
     onSecondary = OnSecondary,
+    secondaryContainer = SecondaryContainer,
+    onSecondaryContainer = OnSecondaryContainer,
     error = Error,
     onError = OnError,
+    errorContainer = ErrorContainer,
+    onErrorContainer = OnErrorContainer,
     outline = Outline,
     surfaceContainerLowest = SurfaceContainerLowest,
     surfaceContainerLow = SurfaceContainerLow,
@@ -50,6 +66,10 @@ val lightColorScheme = AppColorScheme(
     surfaceContainerHigh = SurfaceContainerHigh,
     surfaceContainerHighest = SurfaceContainerHighest,
     onSurface = OnSurface,
+    tertiary = Tertiary,
+    onTertiary = OnTertiary,
+    tertiaryContainer = TertiaryContainer,
+    onTertiaryContainer = OnTertiaryContainer,
 )
 
 private val typography = AppTypography(
@@ -160,13 +180,15 @@ private val size = AppSize(
     normal = 12.dp,
     medium = 16.dp,
     large = 24.dp,
+    extraLarge = 32.dp,
+    extraExtraLarge = 48.dp,
 )
 
 @Composable
 fun LadosTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     dynamicColor: Boolean = true,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     val colorScheme = if (darkTheme) darkColorScheme else lightColorScheme
 

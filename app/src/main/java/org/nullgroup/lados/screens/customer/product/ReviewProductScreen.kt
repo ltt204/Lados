@@ -75,7 +75,8 @@ fun ReviewProductScreen(
     productId: String,
     variantId: String,
     viewModel: ReviewProductViewModel = hiltViewModel(),
-    navController: NavController
+    navController: NavController,
+    modifier: Modifier = Modifier,
 ) {
 
     var ratings by remember {
@@ -88,7 +89,7 @@ fun ReviewProductScreen(
     val uiState = viewModel.productVariantsState.collectAsState()
     val context = LocalContext.current
     Scaffold(
-        modifier = Modifier.background(Color.White),
+        modifier = modifier,
         topBar = {
             TopBar(
                 leadingIcon = {
@@ -149,7 +150,7 @@ fun ReviewProductScreen(
         }
     ) { paddingValues ->
         Box(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxSize()
                 .padding(paddingValues)
                 .padding(horizontal = 20.dp)
