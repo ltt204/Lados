@@ -64,29 +64,36 @@ import org.nullgroup.lados.viewmodels.SharedViewModel
 @Composable
 fun SearchHeaderSearchScreen(
     modifier: Modifier = Modifier,
-    onClear: () -> Unit
+    onClear: () -> Unit,
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text = "History", style = TextStyle(
-            fontSize = 20.sp,
-        )
+        Text(
+            text = "History",
+            style = LadosTheme.typography.titleLarge.copy(
+                color = LadosTheme.colorScheme.onBackground,
+            )
         )
         TextButton(onClick = onClear) {
-            Text(text = "Clear", style = TextStyle(fontSize = 20.sp), color = MaterialTheme.colorScheme.primary)
+            Text(
+                text = "Clear",
+                style = LadosTheme.typography.titleLarge.copy(
+                    color = LadosTheme.colorScheme.primary,
+                )
+            )
         }
     }
 }
 
 @Composable
 fun SearchHistoryRow(
-    modifier: Modifier=Modifier,
+    modifier: Modifier = Modifier,
     content: String,
     onDelete: (String) -> Unit,
-    onReClick: (String) -> Unit
+    onReClick: (String) -> Unit,
 ) {
     Row(
         modifier = modifier
@@ -95,7 +102,9 @@ fun SearchHistoryRow(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {
-        Box(modifier = Modifier.fillMaxWidth(0.9f).clickable { onReClick(content) }) {
+        Box(modifier = Modifier
+            .fillMaxWidth(0.9f)
+            .clickable { onReClick(content) }) {
             Text(
                 text = content,
                 style = TextStyle(fontSize = 18.sp, color = OnSurface.copy(alpha = 0.5f))
@@ -114,7 +123,9 @@ fun SearchHistoryRow(
                 // note: modify
                 tint = LadosTheme.colorScheme.outline,
                 contentDescription = null,
-                modifier=Modifier.size(16.dp).clickable { onDelete(content) }
+                modifier = Modifier
+                    .size(16.dp)
+                    .clickable { onDelete(content) }
             )
         }
     }
@@ -122,10 +133,10 @@ fun SearchHistoryRow(
 
 @Composable
 fun SearchHistory(
-    modifier: Modifier=Modifier,
+    modifier: Modifier = Modifier,
     searchHistory: List<String>,
     onDelete: (String) -> Unit,
-    onReClick: (String) -> Unit = {}
+    onReClick: (String) -> Unit = {},
 ) {
     LazyColumn(
         modifier = modifier
@@ -152,7 +163,7 @@ fun DrawMainSearchScreenContent(
     context: Context,
     searchHistoryManager: SearchHistoryManager,
     onDelete: (String) -> Unit,
-    onReClick: (String) -> Unit
+    onReClick: (String) -> Unit,
 ) {
     Column(
         modifier = modifier
@@ -185,7 +196,7 @@ fun SearchScreen(
     navController: NavController,
     paddingValues: PaddingValues = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
     sharedViewModel: SharedViewModel = SharedViewModel(),
-    context: Context
+    context: Context,
 ) {
     val searchHistoryManager = remember { SearchHistoryManager(context) }
     val searchHistory = searchHistoryManager.searchHistory.collectAsState(initial = emptySet())
@@ -206,12 +217,12 @@ fun SearchScreen(
                     modifier = Modifier
                         .clip(CircleShape)
                         // note: modify
-                        .background(LadosTheme.colorScheme.outline.copy(alpha = 0.2f))
+                        .background(LadosTheme.colorScheme.surfaceContainerHighest)
                 ) {
                     Icon(
                         Icons.Filled.ArrowBack,
                         contentDescription = "Search",
-                        tint = OnSurface
+                        tint = LadosTheme.colorScheme.onBackground,
                     )
                 }
                 Spacer(modifier = Modifier.width(16.dp))

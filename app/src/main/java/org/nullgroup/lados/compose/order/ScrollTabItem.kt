@@ -9,19 +9,22 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.nullgroup.lados.ui.theme.LadosTheme
 
 @Composable
 fun ScrollTabItem(
     modifier: Modifier = Modifier,
     title: String,
     selected: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     Card(
         modifier = modifier
@@ -30,17 +33,33 @@ fun ScrollTabItem(
         shape = CircleShape,
         onClick = onClick,
         colors = CardDefaults.cardColors(
-            containerColor = if (selected) MaterialTheme.colorScheme.inverseSurface else Color(0xFFF4F4F4)
+            containerColor = if (selected)
+                LadosTheme.colorScheme.primary
+            else
+                LadosTheme.colorScheme.surfaceContainerHighest,
         )
     ) {
         Text(
             modifier = Modifier
                 .fillMaxHeight()
-                .padding(horizontal = 8.dp, vertical = 4.dp),
+                .padding(horizontal = 14.dp, vertical = 6.dp),
             text = title,
-            fontSize = 16   .sp,
-            color = if (selected) Color.White else Color.Black,
+            fontSize = 16.sp,
+            color = if (selected)
+                LadosTheme.colorScheme.onSecondary
+            else
+                LadosTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center
         )
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ScrollTabItemPreview() {
+    ScrollTabItem(
+        title = "Mot cai chet truyen thong",
+        selected = true,
+        onClick = {}
+    )
 }
