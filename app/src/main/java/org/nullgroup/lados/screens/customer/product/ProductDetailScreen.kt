@@ -2,6 +2,7 @@ package org.nullgroup.lados.screens.customer.product
 
 import android.os.Build
 import android.util.Log
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -73,13 +74,13 @@ import org.nullgroup.lados.utilities.formatToRelativeTime
 import org.nullgroup.lados.viewmodels.customer.ProductDetailScreenViewModel
 import java.util.Locale
 
-
 data class ProductDetailUiState(
     val product: Product = Product(),
     val sortedColors: List<org.nullgroup.lados.data.models.Color> = emptyList(),
     val sortedSizes: List<Size> = emptyList(),
     val selectedSize: Size? = null,
     val selectedColor: org.nullgroup.lados.data.models.Color? = null,
+    val quantity: Int = 1,
     val isLoading: Boolean = true,
     val error: String? = null
 )
@@ -95,7 +96,6 @@ object ProductTheme {
 fun ProductDetailScreen(
     productViewModel: ProductDetailScreenViewModel = hiltViewModel(),
     productId: String,
-    onAddToBag: () -> Unit = {}, // TODO: Delete this
     navController: NavController
 ) {
 
@@ -103,14 +103,20 @@ fun ProductDetailScreen(
     var showSizeBottomSheet by remember { mutableStateOf(false) }
     var showColorBottomSheet by remember { mutableStateOf(false) }
 
+    val context = LocalContext.current
+
     val uiState by productViewModel.uiState.collectAsState()
 
     // TODO: Adjust as you wish
     val onAddedToCart: () -> Unit = {
-        navController.popBackStack()
+        Toast.makeText(context, "Product added to cart", Toast.LENGTH_SHORT).show()
+        navController.navigateUp()
     }
-    val onAddToCart = productViewModel.onAddToCartClicked(onAddedToCart)
 
+    val onAddedToCartFailed: () -> Unit = {
+        Toast.makeText(context, "Failed to add product to cart", Toast.LENGTH_SHORT).show()
+    }
+    val onAddToCart = productViewModel.onAddToCartClicked(onAddedToCart, onAddedToCartFailed)
 
     // Load product details on initial composition
     LaunchedEffect(productId) {
@@ -141,11 +147,8 @@ fun ProductDetailScreen(
                 },
                 bottomBar = {
                     ProductDetailBottomBar(
-                        // TODO: Change to "Add to Cart"
-                        title = "Add to Bag",
+                        title = "Add to Cart",
                         price = "$${uiState.product.variants.first().salePrice}",
-                        // onClick = onAddToBag
-                        // TODO: Adjust as you wish
                         onClick = onAddToCart
                     )
                 }
@@ -168,6 +171,9 @@ fun ProductDetailScreen(
                     ProductDetailsSection(
                         onSizeClick = { showSizeBottomSheet = true },
                         onColorClick = { showColorBottomSheet = true },
+                        onUpdateQuantity = {
+                            productViewModel.updateQuantity(it)
+                        },
                         description = uiState.product.description,
                         size = uiState.selectedSize?.sizeName ?: "",
                         color = uiState.selectedColor ?: org.nullgroup.lados.data.models.Color()
@@ -196,7 +202,6 @@ fun ProductDetailScreen(
                         itemColor = { Color.Transparent },
                         onItemSelected = {
                             productViewModel.updateSelectedSize(it)
-                            // showSizeBottomSheet = false
                         }
                     )
                 }
@@ -212,7 +217,6 @@ fun ProductDetailScreen(
                         itemColor = { Color(android.graphics.Color.parseColor(it.hexCode)) },
                         onItemSelected = {
                             productViewModel.updateSelectedColor(it)
-                            //showColorBottomSheet = false
                         }
                     )
                 }
@@ -346,7 +350,8 @@ fun ProductDetailsSection(
     color: org.nullgroup.lados.data.models.Color,
     description: String = "",
     onSizeClick: () -> Unit,
-    onColorClick: () -> Unit
+    onColorClick: () -> Unit,
+    onUpdateQuantity: (Int) -> Unit
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -375,7 +380,9 @@ fun ProductDetailsSection(
         )
 
         // Quantity Selection
-        QuantitySelector()
+        QuantitySelector(
+            onUpdateQuantity = onUpdateQuantity
+        )
 
         // Product Description
         Text(
@@ -391,7 +398,7 @@ fun ProductDetailsSection(
 fun SelectableDetailRow(
     title: String,
     currentSelection: String,
-    onClick: () -> Unit,
+    onClick: () -> Unit = {},
     additionalContent: @Composable (() -> Unit)? = null
 ) {
     Row(
@@ -431,7 +438,8 @@ fun SelectableDetailRow(
 
 @Composable
 fun QuantitySelector(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onUpdateQuantity: (Int) -> Unit = {}
 ) {
     var quantity by remember { mutableIntStateOf(1) }
 
@@ -454,7 +462,12 @@ fun QuantitySelector(
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(
-                onClick = { if (quantity > 1) quantity-- }
+                onClick = {
+                    if (quantity > 1) {
+                        quantity--
+                    }
+                    onUpdateQuantity(quantity)
+                }
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.minus_icon),
@@ -470,7 +483,10 @@ fun QuantitySelector(
             )
 
             IconButton(
-                onClick = { quantity++ }
+                onClick = {
+                    quantity++
+                    onUpdateQuantity(quantity)
+                }
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.add_icon),
@@ -551,21 +567,10 @@ fun ReviewCard(
     createAt: String = ""
 ) {
     Box(
-        modifier = Modifier
-            .fillMaxWidth()
-        //.padding(vertical = 10.dp)
-//            .shadow(
-//                elevation = 5.dp, // Độ cao bóng
-//                shape = RoundedCornerShape(10.dp) // Bo góc
-//            )
-        // .clip(RoundedCornerShape(10.dp)) // Cắt phần tử sau khi đổ bóng
-        // .background(Color.White)
+        modifier = Modifier.fillMaxWidth()
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth(),
-            //.padding(vertical = 8.dp, horizontal = 0.dp),
-            //.background(Color.White),
+            modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.Start
         ) {
             Row(

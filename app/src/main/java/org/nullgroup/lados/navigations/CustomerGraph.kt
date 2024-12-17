@@ -347,7 +347,6 @@ fun CustomerGraph(
                         ?: ""
                 ProductDetailScreen(
                     productId = productId,
-                    onAddToBag = {},
                     navController = navController,
                 )
             }
