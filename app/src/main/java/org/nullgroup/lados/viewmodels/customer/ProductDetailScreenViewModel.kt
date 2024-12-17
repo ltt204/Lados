@@ -1,6 +1,8 @@
 package org.nullgroup.lados.viewmodels.customer
 
 import android.util.Log
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -62,7 +64,7 @@ class ProductDetailScreenViewModel @Inject constructor(
         }
     }
 
-    fun addProducts(products: List<Product>){
+    fun addProducts(products: List<Product>) {
         viewModelScope.launch {
             productRepository.addProductsToFireStore(products)
         }
@@ -100,7 +102,7 @@ class ProductDetailScreenViewModel @Inject constructor(
         }
     }
 
-    fun updateSelectedColor(selectedColor: Color){
+    fun updateSelectedColor(selectedColor: Color) {
         _uiState.update {
             it.copy(
                 selectedColor = selectedColor
@@ -108,10 +110,18 @@ class ProductDetailScreenViewModel @Inject constructor(
         }
     }
 
-    fun updateSelectedSize(size: Size){
+    fun updateSelectedSize(size: Size) {
         _uiState.update {
             it.copy(
                 selectedSize = size
+            )
+        }
+    }
+
+    fun updateQuantity(quantity: Int) {
+        _uiState.update {
+            it.copy(
+                quantity = quantity
             )
         }
     }
@@ -132,23 +142,25 @@ class ProductDetailScreenViewModel @Inject constructor(
 
     // TODO: Adjust logic as you wish
     val onAddToCartClicked: (
-        onAddedDone: (() -> Unit)?
-    )-> (() -> Unit) = { onAddedDone ->
+        onAddedDone: (() -> Unit)?,
+            onAddedFailed: (() -> Unit)?
+    ) -> (() -> Unit) = { onAddedDone, onAddedFailed ->
         {
-            viewModelScope.launch{
-                onAddItemToCart(onAddedDone)
+            viewModelScope.launch {
+                onAddItemToCart(onAddedDone, onAddedFailed)
             }
         }
     }
+
     val onAddItemToCart: (
-        onAddedDone: (() -> Unit)?
-    )-> Unit = { onAddedDone ->
+        onAddedDone: (() -> Unit)?,
+        onAddedFailed: (() -> Unit)?
+    ) -> Unit = { onAddedDone, onAddedFailed ->
         viewModelScope.launch {
             val product = uiState.value.product
             val selectedColor = uiState.value.selectedColor
             val selectedSize = uiState.value.selectedSize
-            // TODO: Update quantity based on user input
-            val quantity = 1
+            val quantity = uiState.value.quantity
 
             val correspondingVariant =
                 if (selectedColor != null && selectedSize != null)
@@ -170,7 +182,9 @@ class ProductDetailScreenViewModel @Inject constructor(
                 //      Temporary solution
                 onAddedDone?.invoke()
 
-            } else{
+            } else {
+
+                onAddedFailed?.invoke()
                 // TODO: Notify user to select color and size
             }
         }
