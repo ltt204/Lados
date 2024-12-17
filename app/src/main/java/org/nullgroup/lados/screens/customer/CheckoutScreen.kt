@@ -1,6 +1,7 @@
 package org.nullgroup.lados.screens.customer
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -13,7 +14,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,6 +25,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -42,7 +47,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -56,6 +63,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import kotlinx.coroutines.launch
+import org.nullgroup.lados.R
 import org.nullgroup.lados.compose.cartRelated.CartItemBar
 import org.nullgroup.lados.compose.cartRelated.PricingDetails
 import org.nullgroup.lados.data.models.Address
@@ -74,6 +82,7 @@ fun CheckoutScreen(
 
     val snackBarHostState = remember { mutableStateOf(SnackbarHostState()) }
     val (isAllowedInteracting, setIsAllowedInteracting) = remember { mutableStateOf(true) }
+    val (isCheckoutCompleted, setIsCheckoutCompleted) = remember { mutableStateOf(false) }
 
     val orderingItems = checkoutViewModel.orderingItems.collectAsStateWithLifecycle()
     val orderingItemInformation = checkoutViewModel.orderingItemInformation.collectAsStateWithLifecycle()
@@ -85,15 +94,16 @@ fun CheckoutScreen(
     val selectedAddress = checkoutViewModel.selectedAddress.collectAsStateWithLifecycle()
     val userPhoneNumber = checkoutViewModel.userPhoneNumber
 
-//    val onRefreshCompleted: (String) -> Unit = { message ->
-//        scope.launch {
-//            snackBarHostState.value.showSnackBar(
-//                message = message,
-//                duration = SnackBarDuration.Short
-//            )
-//        }
-//    }
-    // checkoutViewModel.onRefreshComplete = onRefreshCompleted
+    val onClickEmptyAddressSelector: () -> Unit = {
+        if (userAddress.value.isEmpty()) {
+            scope.launch {
+                snackBarHostState.value.showSnackbar(
+                    message = "No address currently available!\nPlease provide one in the Profile section",
+                    duration = SnackbarDuration.Short
+                )
+            }
+        }
+    }
 
     val onNavigateBack = {
         setIsAllowedInteracting(false)
@@ -112,14 +122,14 @@ fun CheckoutScreen(
         setIsAllowedInteracting(true)
     }
     val onSuccessfulCheckout: () -> Unit = {
-        scope.launch {
-            snackBarHostState.value.showSnackbar(
-                message = "Order created successful",
-                duration = SnackbarDuration.Short
-            )
-
-            navController.popBackStack()
-        }
+        setIsCheckoutCompleted(true)
+//        scope.launch {
+//            snackBarHostState.value.showSnackbar(
+//                message = "Order created successful",
+//                duration = SnackbarDuration.Short
+//            )
+//            navController.popBackStack()
+//        }
     }
     val onCheckout = {
         setIsAllowedInteracting(false)
@@ -132,6 +142,18 @@ fun CheckoutScreen(
     val defaultImageUrl = "https://placehold.co/600x400"
     val defaultTitle = "Unknown Product"
     val defaultValue = "???"
+
+    if (isCheckoutCompleted) {
+        CheckoutCompleteScreen(
+            onNavigateBack = {
+                navController.popBackStack()
+            },
+            // TODO: Implement navigation to "See Order" screen
+            onNavigateNextScreen = null,
+            modifier = modifier.padding(innerPadding)
+        )
+        return
+    }
 
     Scaffold (
         modifier = modifier.padding(innerPadding),
@@ -176,6 +198,7 @@ fun CheckoutScreen(
                     addresses = userAddress.value,
                     selectionEnabled = isAllowedInteracting,
                     selectedAddress = selectedAddress.value,
+                    onClickExpander = onClickEmptyAddressSelector,
                     onAddressSelected = { address ->
                         checkoutViewModel.onAddressChanged(address)
                     },
@@ -273,7 +296,7 @@ private fun CheckoutBottomBar(
                 .fillMaxWidth()
             ,
             colors = ButtonColors (
-                containerColor = Color(0xFF9C27B0), // Lavender color
+                containerColor = Color(0xFF8E6CEF), // Lavender color
                 contentColor = Color.White,
                 disabledContentColor = Color.Gray,
                 disabledContainerColor = Color.LightGray,
@@ -316,7 +339,8 @@ private fun AddressSelector(
     addresses: List<Address>,
     selectionEnabled: Boolean = true,
     selectedAddress: Address? = null,
-    onAddressSelected: ((Address) -> Unit)? = null ,
+    onClickExpander: (() -> Unit)? = null,
+    onAddressSelected: ((Address) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     val (expanded, setExpanded) = remember { mutableStateOf(false) }
@@ -350,7 +374,9 @@ private fun AddressSelector(
             }
 
             IconButton(
-                onClick = { setExpanded(!expanded) },
+                onClick = {
+                    setExpanded(!expanded)
+                    onClickExpander?.invoke() },
                 enabled = selectionEnabled,
                 modifier = Modifier
                     .padding(start = 8.dp)
@@ -531,7 +557,7 @@ private fun InsufficientStockDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text("Order creation failed!")
+            Text("Order creation failed")
         },
         text = {
             Column (
@@ -553,7 +579,7 @@ private fun InsufficientStockDialog(
                 }
 
                 Text (
-                    text = "Please adjust the quantity of the item(s) in your cart and try again later",
+                    text = "Please adjust the quantity of the item(s) in your cart and try again later.",
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
@@ -569,5 +595,124 @@ private fun InsufficientStockDialog(
         },
         modifier = modifier
     )
+}
+
+@Composable
+private fun CheckoutCompleteScreen(
+    onNavigateBack: (() -> Unit)? = null,
+    backScreenText: String = "Return to Cart",
+    onNavigateNextScreen: (() -> Unit)? = null,
+    nextScreenText: String = "View Order",
+    modifier: Modifier = Modifier
+) {
+    val purpleColor = Color(0xFF8E6CEF)
+
+    Box(
+        modifier = modifier.fillMaxSize(),
+    ) {
+
+        Column(
+            verticalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Box(
+                contentAlignment = Alignment.BottomCenter,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(0.6f)
+                    .background(purpleColor)
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.checkout_complete_image),
+                    contentDescription = "Order Complete",
+                    modifier = Modifier
+                        .padding(bottom = 60.dp)
+                        .size(120.dp)
+                )
+            }
+
+//        val offset = animateOffsetAsState(
+//            targetValue = Offset(0f, 0f),
+//            animationSpec = spring(
+//                dampingRatio = Spring.DampingRatioMediumBouncy,
+//                stiffness = Spring.StiffnessLow
+//            ),
+//            label = "Box-go-up animation"
+//        )
+
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    //.offset(offset.value.x.dp, offset.value.y.dp)
+                    .fillMaxWidth()
+                    .weight(0.4f)
+                    .offset(y = (-16).dp)
+                    .clip(
+                        RoundedCornerShape(
+                            topStart = 16.dp,
+                            topEnd = 16.dp
+                        )
+                    )
+                    .background(Color.White)
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier
+                        .padding(16.dp)
+                ) {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(0.5f)
+                    ) {
+                        Text(
+                            text = "Order Placed\nSuccessfully",
+                            style = MaterialTheme.typography.displaySmall.copy(
+                                fontWeight = FontWeight.Bold,
+                            )
+                        )
+                    }
+
+                    Text(
+                        text = "Your order has been successfully created",
+                        textAlign = TextAlign.Start,
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.weight(0.3f)
+                    )
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.Bottom,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp)
+                            .weight(0.2f)
+                    ) {
+                        val buttonColors = ButtonColors(
+                            containerColor = purpleColor,
+                            contentColor = Color.White,
+                            disabledContentColor = Color.Gray,
+                            disabledContainerColor = Color.LightGray
+                        )
+                        Button(
+                            onClick = { onNavigateBack?.invoke() },
+                            colors = buttonColors,
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text(backScreenText)
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Button(
+                            onClick = { onNavigateNextScreen?.invoke() },
+                            colors = buttonColors,
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text(nextScreenText)
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 

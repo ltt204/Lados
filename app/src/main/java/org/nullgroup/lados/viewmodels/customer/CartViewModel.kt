@@ -110,7 +110,7 @@ class CartViewModel @Inject constructor(
     private var _dataRefreshed = false
     private var _firstInitialization = true
     // This one is rather for errors
-    var onRefreshComplete: ((String) -> Unit)? = null
+    var onRefreshError: ((String) -> Unit)? = null
     suspend fun refreshCartInformation() {
         // TODO: to be removed
         viewModelScope.async {
@@ -127,9 +127,9 @@ class CartViewModel @Inject constructor(
                 .onCompletion { cause ->
                     if (cause == null) {
                         // This route will only be called when the flow is unsubscribed
-                        // onRefreshComplete?.invoke("Cart refreshed")
+                        // onRefreshError?.invoke("Cart refreshed")
                     } else {
-                        onRefreshComplete?.invoke("Error refreshing cart: ${cause.message}")
+                        onRefreshError?.invoke("Error refreshing cart: ${cause.message}")
                     }
                 }
                 .collect { cartItems ->
@@ -412,82 +412,6 @@ class CartViewModel @Inject constructor(
 
         onSuccessfulCheckingOut?.invoke()
     }
-
-//    // TODO: Remove this function
-//    val checkoutHandler: (
-//        onCheckoutFailure: ((reason: String) -> Unit)?,
-//        onSuccessfulCheckout: (() -> Unit)?
-//    ) -> (() -> Unit) = { onCheckoutFailure, onSuccessfulCheckout ->
-//        {
-//            viewModelScope.launch {
-//                onCheckout(onCheckoutFailure, onSuccessfulCheckout)
-//            }
-//        }
-//    }
-//
-//    // TODO: Remove this function
-//    private suspend fun onCheckout(
-//        onCheckoutFailure: ((reason: String) -> Unit)? = null,
-//        onSuccessfulCheckout: (() -> Unit)? = null
-//        ) {
-//        val selectedItems = selectedCartItems.value
-//
-//        if (selectedItems.isEmpty()) {
-//            return
-//        }
-//
-//        // No need to save now
-////        val savingResult = viewModelScope.async {
-////            commitChangesToDatabaseAsync()
-////        }.await()
-////
-////        if (savingResult.isFailure) {
-////            onCheckoutFailure?.invoke(
-////                "Can't save changes to database: ${savingResult.exceptionOrNull()?.message}"
-////            )
-////            return
-////        }
-//
-//        val orderProductList = selectedItems.map { cartItem ->
-//            val productVariant = cartItemInformation.value[cartItem.id]?.second
-//            if (productVariant != null) {
-//                OrderProduct(
-//                    productId = cartItem.productId,
-//                    variantId = cartItem.variantId,
-//                    amount = cartItem.amount,
-//                    totalPrice = (productVariant.salePrice ?: productVariant.originalPrice) * cartItem.amount
-//                )
-//            } else {
-//                null
-//            }
-//        }.mapNotNull { it }
-//
-//        val checkoutDetail = checkoutDetail()
-//        val newOrder = Order(
-//            customerId = customerId,
-//            orderProducts = orderProductList,
-//            orderTotal = checkoutDetail.total
-//        )
-//
-//        val result = viewModelScope.async {
-//            orderRepository.createOrder(
-//                customerId = customerId,
-//                order = newOrder,
-//            )
-//        }.await()
-//
-//        if (result.isFailure) {
-//            onCheckoutFailure?.invoke("Can't create order for the current items:" +
-//                    " ${result.exceptionOrNull()?.message}")
-//            return
-//        }
-//
-//        removeSelectedCartItemLocally()
-//        viewModelScope.launch {
-//            commitChangesToDatabase()
-//        }
-//        onSuccessfulCheckout?.invoke()
-//    }
 
 }
 

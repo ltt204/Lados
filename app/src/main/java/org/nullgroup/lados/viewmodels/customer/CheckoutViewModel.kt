@@ -62,8 +62,8 @@ class CheckoutViewModel @Inject constructor(
 
     // TODO: Resolve the case when the view-model can't get the cached checkout info
     //      Triggered when the checking-out screen is not launched from the cart screen
-    private val _failureRaiser = MutableStateFlow<CheckoutError?>(null)
-    val failureRaiser = _failureRaiser.asStateFlow()
+    private val _checkoutFailure = MutableStateFlow<CheckoutError?>(null)
+    val checkoutFailure = _checkoutFailure.asStateFlow()
 
     // TODO: Hardcoded customer ID
     private lateinit var customerId: String
@@ -101,7 +101,7 @@ class CheckoutViewModel @Inject constructor(
                 _checkoutInfo.value = checkoutInfoGetResult.getOrNull()
 
                 if (checkoutInfoGetResult.isFailure) {
-                    _failureRaiser.value = CheckoutError.FAILED_TO_GET_CHECKOUT_INFO
+                    _checkoutFailure.value = CheckoutError.FAILED_TO_GET_CHECKOUT_INFO
                     return@launch
                 }
 
@@ -170,7 +170,6 @@ class CheckoutViewModel @Inject constructor(
         )
 
         val result = viewModelScope.async {
-            // TODO: Combine stock reduction and order creation
             orderRepository.createOrder(
                 customerId = customerId,
                 order = newOrder,

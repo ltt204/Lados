@@ -20,15 +20,14 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -43,7 +42,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -51,7 +49,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import kotlinx.coroutines.async
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.nullgroup.lados.R
 import org.nullgroup.lados.compose.cartRelated.CartItemBar
@@ -90,7 +87,7 @@ fun CartScreen(
     val checkoutDetail = cartViewModel.checkoutDetail
     val scope = cartViewModel.viewModelScope
 
-    val onRefreshCompleted: (String) -> Unit = { message ->
+    val onRefreshError: (String) -> Unit = { message ->
         scope.launch {
             snackBarHostState.value.showSnackbar(
                 message = message,
@@ -98,7 +95,7 @@ fun CartScreen(
             )
         }
     }
-    cartViewModel.onRefreshComplete = onRefreshCompleted
+    cartViewModel.onRefreshError = onRefreshError
 
     val onItemSelected = { cartItem: CartItem ->
         if (isAllowedInteracting) {
@@ -120,6 +117,20 @@ fun CartScreen(
     val onSelectedAllItems = { cartViewModel.selectAllCartItems() }
     val onUnselectedAllItems = { cartViewModel.unselectAllCartItems() }
 
+    val onItemRemove = { cartItem: CartItem ->
+        currentDialogState.value = DialogInfo(
+            title = "Remove item",
+            message = "Are you sure you want to remove the item from the cart?",
+            onConfirm = {
+                onItemAmountChanged(cartItem, -cartItem.amount)
+                currentDialogState.value = null
+            },
+            onCancel = {
+                currentDialogState.value = null
+            }
+        )
+    }
+
     val onSelectedItemsRemoved = {
         currentDialogState.value = DialogInfo(
             title = "Remove selected item(s)",
@@ -135,26 +146,29 @@ fun CartScreen(
         // cartViewModel.removeSelectedCartItemLocally()
     }
 
-    // TODO: Remove the snackBar when the user navigates back
     val onNavigateBack = {
         setIsAllowedInteracting(false)
         scope.launch {
-            var result = scope.async {
+            scope.async {
                 cartViewModel.commitChangesToDatabase()
             }.await()
-            if (result.isFailure) {
-                snackBarHostState.value.showSnackbar(
-                    message = result.exceptionOrNull()!!.message.toString(),
-                    duration = SnackbarDuration.Short
-                )
-            } else {
-                snackBarHostState.value.showSnackbar(
-                    message = "Successfully saved change(s) to the database",
-                    duration = SnackbarDuration.Short
-                )
-            }
-            // TODO: Remove this delay
-            delay(100)
+
+//            var result = scope.async {
+//                cartViewModel.commitChangesToDatabase()
+//            }.await()
+//            if (result.isFailure) {
+//                snackBarHostState.value.showSnackbar(
+//                    message = result.exceptionOrNull()!!.message.toString(),
+//                    duration = SnackbarDuration.Short
+//                )
+//            }
+//            else {
+//                snackBarHostState.value.showSnackbar(
+//                    message = "Successfully saved change(s) to the database",
+//                    duration = SnackbarDuration.Short
+//                )
+//            }
+//            delay(100)
             navController.popBackStack()
         }
     }
@@ -187,12 +201,12 @@ fun CartScreen(
     }
 
     val onSuccessfulCheckout: () -> Unit = {
-        scope.launch {
-            snackBarHostState.value.showSnackbar(
-                message = "Checking out successful",
-                duration = SnackbarDuration.Short
-            )
-        }
+//        scope.launch {
+//            snackBarHostState.value.showSnackbar(
+//                message = "Checking out successful",
+//                duration = SnackbarDuration.Short
+//            )
+//        }
 
         navController.navigate(Screen.Customer.CheckOutScreen.route)
     }
@@ -248,12 +262,12 @@ fun CartScreen(
                         content = {
                             if (isAllItemSelected()) {
                                 Icon(
-                                    imageVector = Icons.Default.Clear,
+                                    painter = painterResource(id = R.drawable.icon_deselect),
                                     contentDescription = "Unselected all items from cart"
                                 )
                             } else {
                                 Icon(
-                                    imageVector = Icons.Default.Check,
+                                    painter = painterResource(id = R.drawable.icon_select_all),
                                     contentDescription = "Selected all items from cart"
                                 )
                             }
@@ -292,19 +306,6 @@ fun CartScreen(
                 )
             }
         },
-//        floatingActionButton = {
-//            if (isAnyItemSelected) {
-//                OutlinedButton(
-//                    onClick = {
-//                        onSelectedItemsRemoved()
-//                    },
-//                    modifier = Modifier.padding(bottom = 8.dp)
-//                ) {
-//                    Text("Remove from cart")
-//                }
-//            }
-//
-//        },
         content = { innerScaffoldPadding ->
             ConfirmDialog(currentDialogState.value)
 
@@ -334,13 +335,13 @@ fun CartScreen(
                     Image(
                         painter = painterResource(id = R.drawable.empty_cart_image),
                         contentDescription = "Empty cart",
-                        modifier = Modifier.width(200.dp)
+                        modifier = Modifier.width(120.dp)
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
                         text = "Your cart is empty",
                         style = MaterialTheme.typography.displaySmall.copy(
-                            fontWeight = FontWeight.Bold
+//                            fontWeight = FontWeight.Bold
                         )
                     )
                 }
@@ -371,7 +372,7 @@ fun CartScreen(
                                 )
                                 .background(
                                     if (cartItem !in selectedItems) Color.Transparent
-                                    else if (productVariant == null) Color.Red
+                                    else if (productVariant == null) Color(0xFFFA7F7F)
                                     else Color.LightGray,
                                     shape = RoundedCornerShape(8.dp)
                                 )
@@ -391,7 +392,7 @@ fun CartScreen(
                                 quantity = cartItem.amount,
                                 onRemoveClick = {
                                     if (cartItem.amount == 1) {
-                                        onSelectedItemsRemoved()
+                                        onItemRemove(cartItem)
                                     } else {
                                         onItemAmountChanged(cartItem, -1)
                                     }
@@ -434,9 +435,16 @@ fun CartBottomBar(
             Spacer(modifier = Modifier.height(8.dp))
         }
 
-        OutlinedButton(
+        val buttonColors = ButtonColors(
+            containerColor = Color(0xFF8E6CEF),
+            contentColor = Color.White,
+            disabledContentColor = Color(0xFFAFAFAF),
+            disabledContainerColor = Color(0xFFE0E0E0)
+        )
+        Button(
             onClick = { onCheckout() },
             enabled = isEnabled && checkoutEnabled,
+            colors = buttonColors,
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Checkout")
