@@ -17,9 +17,11 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.nullgroup.lados.data.models.Product
 import org.nullgroup.lados.data.models.ProductVariant
+import org.nullgroup.lados.data.models.User
 import org.nullgroup.lados.data.models.UserEngagement
 import org.nullgroup.lados.data.repositories.interfaces.ProductRepository
 import org.nullgroup.lados.data.repositories.interfaces.ReviewProductRepository
+import org.nullgroup.lados.data.repositories.interfaces.UserRepository
 import org.nullgroup.lados.screens.Screen
 import javax.inject.Inject
 
@@ -39,6 +41,7 @@ class ReviewProductViewModel @Inject constructor(
         checkNotNull(savedStateHandle[Screen.Customer.ReviewProductScreen.VARIANT_ID_ARG]) {
             "Variant ID is missing!"
         }
+
 
     private val _currentProduct: StateFlow<Product?> =
         productRepository.getProductByIdFlow(productId)
@@ -92,6 +95,8 @@ class ReviewProductViewModel @Inject constructor(
             )
         }
     }
+
+
 }
 
 sealed class ReviewProductsState {

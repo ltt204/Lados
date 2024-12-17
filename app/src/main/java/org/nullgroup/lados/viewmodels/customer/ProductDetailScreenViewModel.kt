@@ -15,8 +15,10 @@ import org.nullgroup.lados.data.models.CartItem
 import org.nullgroup.lados.data.models.Color
 import org.nullgroup.lados.data.models.Product
 import org.nullgroup.lados.data.models.Size
+import org.nullgroup.lados.data.models.User
 import org.nullgroup.lados.data.repositories.interfaces.CartItemRepository
 import org.nullgroup.lados.data.repositories.interfaces.ProductRepository
+import org.nullgroup.lados.data.repositories.interfaces.UserRepository
 import org.nullgroup.lados.screens.customer.product.ProductDetailUiState
 import javax.inject.Inject
 
@@ -25,6 +27,7 @@ import javax.inject.Inject
 class ProductDetailScreenViewModel @Inject constructor(
     private val productRepository: ProductRepository,
     private val cartItemRepository: CartItemRepository,
+    private val userRepository: UserRepository
 ) : ViewModel() {
 
     // Sealed class for different product-related states
@@ -33,6 +36,9 @@ class ProductDetailScreenViewModel @Inject constructor(
         data class Success(val product: Product?) : ProductState()
         data class Error(val message: String) : ProductState()
     }
+
+    private val _user = MutableStateFlow<Result<User?>>(Result.success(null))
+    val user: StateFlow<Result<User?>> = _user.asStateFlow()
 
     // Centralized state management using StateFlow
     private val _productState = MutableStateFlow<ProductState>(ProductState.Loading)
@@ -129,14 +135,14 @@ class ProductDetailScreenViewModel @Inject constructor(
     private fun getSortedColors(product: Product): List<Color> {
         return product.variants
             .map { it.color }
-            .distinctBy { it.id }
+            .distinctBy { it.hexCode }
             .sortedBy { it.colorName }
     }
 
     private fun getSortedSizes(product: Product): List<Size> {
         return product.variants
             .map { it.size }
-            .distinctBy { it.id }
+            .distinctBy { it.sizeName }
             .sortedBy { it.sizeName }
     }
 
@@ -187,6 +193,19 @@ class ProductDetailScreenViewModel @Inject constructor(
                 onAddedFailed?.invoke()
                 // TODO: Notify user to select color and size
             }
+        }
+    }
+
+    fun getUser(userId: String){
+        viewModelScope.launch {
+            userRepository.getUserFromFirestore(userId)
+                .onSuccess { user ->
+                    _user.value = Result.success(user)
+                }
+                .onFailure { throwable ->
+                    _user.value = Result.failure(throwable)
+                    Log.e("ReviewProductViewModel", "Error fetching user: ${throwable.message}")
+                }
         }
     }
 }

@@ -72,6 +72,8 @@ import org.nullgroup.lados.data.models.Size
 import org.nullgroup.lados.data.models.UserEngagement
 import org.nullgroup.lados.utilities.formatToRelativeTime
 import org.nullgroup.lados.viewmodels.customer.ProductDetailScreenViewModel
+import org.nullgroup.lados.viewmodels.customer.ProfileViewModel
+import org.nullgroup.lados.viewmodels.customer.ReviewProductViewModel
 import java.util.Locale
 
 data class ProductDetailUiState(
@@ -503,8 +505,12 @@ fun QuantitySelector(
 fun ProductReviewSection(
     engagements: List<UserEngagement>,
     averageRating: Double,
-    numOfReviews: Int
+    numOfReviews: Int,
+    productViewModel: ProductDetailScreenViewModel = hiltViewModel()
 ) {
+
+    val user by productViewModel.user.collectAsState()
+
     Column(
         horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -545,8 +551,18 @@ fun ProductReviewSection(
                 .height(250.dp)
         ) {
             items(items = engagements, key = { it.id }) { engagement ->
+                productViewModel.getUser(engagement.userId)
+
+                var name by remember { mutableStateOf("") }
+
+                LaunchedEffect(user){
+                    if(user.isSuccess){
+                        name = user.getOrNull()?.name ?: ""
+                    }
+                }
+
                 ReviewCard(
-                    name = engagement.userId,
+                    name = name.ifEmpty { engagement.userId },
                     maxRatings = 5,
                     ratings = engagement.ratings,
                     reviews = engagement.reviews,
@@ -566,6 +582,8 @@ fun ReviewCard(
     reviews: String = "",
     createAt: String = ""
 ) {
+
+
     Box(
         modifier = Modifier.fillMaxWidth()
     ) {
