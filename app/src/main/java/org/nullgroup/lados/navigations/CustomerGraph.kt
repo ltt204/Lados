@@ -23,6 +23,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -80,7 +81,7 @@ fun CustomerGraph(
                 exit = slideOutVertically(targetOffsetY = { it }),
             ) {
                 BottomNavigation(
-                    backgroundColor = Color.White,
+                    backgroundColor = LadosTheme.colorScheme.background,
                 ) {
                     val navBackStackEntry by navController.currentBackStackEntryAsState()
                     val currentDestination = navBackStackEntry?.destination
@@ -106,7 +107,7 @@ fun CustomerGraph(
                                             modifier = Modifier
                                                 .size(30.dp)
                                                 .padding(bottom = 5.dp),
-                                            tint = if (isSelected.value) contentColor else Color.Gray
+                                            tint = if (isSelected.value) contentColor else LadosTheme.colorScheme.secondary
 
                                         )
                                     }
@@ -116,7 +117,7 @@ fun CustomerGraph(
                                         Text(
                                             text = it,
                                             fontWeight = FontWeight.SemiBold,
-                                            color = if (isSelected.value) contentColor else Color.Gray
+                                            color = if (isSelected.value) contentColor else LadosTheme.colorScheme.secondary
                                         )
                                     }
                                 },
@@ -150,7 +151,8 @@ fun CustomerGraph(
                             CategorySelectScreen(
                                 navController = navController,
                                 paddingValues = innerPadding,
-                                sharedViewModel = sharedViewModel
+                                sharedViewModel = sharedViewModel,
+                                modifier = modifier,
                             )
                         }
 
@@ -159,7 +161,8 @@ fun CustomerGraph(
                             ProductScreen(
                                 navController = navController,
                                 paddingValues = innerPadding,
-                                sharedViewModel = sharedViewModel
+                                sharedViewModel = sharedViewModel,
+                                modifier = modifier,
                             )
                         }
 
@@ -168,7 +171,8 @@ fun CustomerGraph(
                                 navController = navController,
                                 paddingValues = innerPadding,
                                 sharedViewModel = sharedViewModel,
-                                context = LocalContext.current
+                                context = LocalContext.current,
+                                modifier = modifier,
                             )
                         }
 
@@ -176,7 +180,8 @@ fun CustomerGraph(
                             HomeScreen(
                                 navController = navController,
                                 paddingValues = innerPadding,
-                                sharedViewModel = sharedViewModel
+                                sharedViewModel = sharedViewModel,
+                                modifier = modifier,
                             )
                         }
 
@@ -184,7 +189,8 @@ fun CustomerGraph(
                             FilterScreen(
                                 navController = navController,
                                 paddingValues = innerPadding,
-                                sharedViewModel = sharedViewModel
+                                sharedViewModel = sharedViewModel,
+                                modifier = modifier,
                             )
                         }
 
@@ -193,7 +199,8 @@ fun CustomerGraph(
                                 navController = navController,
                                 paddingValues = innerPadding,
                                 sharedViewModel = sharedViewModel,
-                                context = LocalContext.current
+                                context = LocalContext.current,
+                                modifier = modifier,
                             )
                         }
 
@@ -201,7 +208,8 @@ fun CustomerGraph(
                             isVisibility = true
                             Error_FindNotMatchScreen(
                                 navController = navController,
-                                paddingValues = innerPadding
+                                paddingValues = innerPadding,
+                                modifier = modifier,
                             )
                         }
 
@@ -212,6 +220,9 @@ fun CustomerGraph(
                         Screen.Customer.Profile.route -> {
                             isVisibility = true
                             ProfileScreen(
+                                modifier = modifier,
+                                navController = navController,
+                                paddingValues = innerPadding
                                 modifier = Modifier,
                                 paddingValues = innerPadding,
                                 navController = navController
@@ -221,7 +232,7 @@ fun CustomerGraph(
                         Screen.Customer.Order.OrderList.route -> {
                             isVisibility = true
                             OrderScreen(
-                                modifier = Modifier,
+                                modifier = modifier,
                                 paddingValues = innerPadding,
                                 navController = navController
                             )
@@ -239,7 +250,7 @@ fun CustomerGraph(
             ) {
                 isVisibility = false
                 OrderDetailScreen(
-                    modifier = Modifier,
+                    modifier = modifier,
                     navController = navController,
                     paddingValues = innerPadding
                 )
@@ -254,7 +265,7 @@ fun CustomerGraph(
             ) {
                 isVisibility = false
                 OrderProductsViewScreen(
-                    modifier = Modifier,
+                    modifier = modifier,
                     navController = navController,
                     paddingValues = innerPadding
                 )
@@ -263,7 +274,7 @@ fun CustomerGraph(
             composable(route = Screen.Customer.EditProfile.route) {
                 isVisibility = false
                 EditProfileScreen(
-                    modifier = Modifier,
+                    modifier = modifier,
                     paddingValues = innerPadding,
                     navController = navController
                 )
@@ -293,7 +304,8 @@ fun CustomerGraph(
                 ReviewProductScreen(
                     productId = productId.toString(),
                     variantId = variantId.toString(),
-                    navController = navController
+                    navController = navController,
+                    modifier = modifier,
                 )
             }
 
@@ -302,7 +314,7 @@ fun CustomerGraph(
             ) {
                 isVisibility = false
                 AddressList(
-                    modifier = Modifier,
+                    modifier = modifier,
                     navController = navController,
                     paddingValues = innerPadding
                 )
@@ -313,7 +325,7 @@ fun CustomerGraph(
             ) {
                 isVisibility = false
                 AddAddressScreen(
-                    modifier = Modifier,
+                    modifier = modifier,
                     navController = navController,
                     paddingValues = innerPadding
                 )
@@ -328,7 +340,7 @@ fun CustomerGraph(
             ) {
                 isVisibility = false
                 EditAddressScreen(
-                    modifier = Modifier,
+                    modifier = modifier,
                     navController = navController,
                     paddingValues = innerPadding
                 )

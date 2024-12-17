@@ -34,10 +34,12 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import org.nullgroup.lados.R
+import org.nullgroup.lados.compose.common.LoadOnProgress
 import org.nullgroup.lados.compose.common.ProfileTopAppBar
 import org.nullgroup.lados.compose.common.TwoColsItem
 import org.nullgroup.lados.data.models.Order
 import org.nullgroup.lados.screens.Screen
+import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.utilities.OrderStatus
 import org.nullgroup.lados.utilities.capitalizeWords
 import org.nullgroup.lados.utilities.getFirstFourOrderStatuses
@@ -51,7 +53,7 @@ fun OrderDetailScreen(
     modifier: Modifier = Modifier,
     navController: NavController? = null,
     viewModel: OrderDetailViewModel = hiltViewModel<OrderDetailViewModel>(),
-    paddingValues: PaddingValues = PaddingValues(0.dp)
+    paddingValues: PaddingValues = PaddingValues(0.dp),
 ) {
     val uiState = viewModel.orderDetailState.collectAsState()
     Scaffold(
@@ -79,25 +81,29 @@ fun OrderDetailScreen(
                 val currentOrder = (uiState.value as OrderDetailState.Success).currentOrder
                 Column(
                     modifier = Modifier.padding(
-                        start = 16.dp,
-                        end = 16.dp,
+                        start = LadosTheme.size.medium,
+                        end = LadosTheme.size.medium,
                         top = innerPadding.calculateTopPadding()
                     )
                 ) {
                     OrderStatusArea(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 16.dp, horizontal = 8.dp),
+                            .padding(
+                                vertical = LadosTheme.size.medium,
+                                horizontal = LadosTheme.size.small
+                            ),
                         currentOrder = currentOrder
                     )
                     Spacer(modifier = Modifier.padding(top = 24.dp))
                     Column {
                         Text(
                             text = "Order Items",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.SemiBold
+                            style = LadosTheme.typography.titleLarge.copy(
+                                fontWeight = FontWeight.SemiBold,
+                            ),
                         )
-                        Spacer(modifier = Modifier.padding(bottom = 8.dp))
+                        Spacer(modifier = Modifier.padding(bottom = LadosTheme.size.small))
                         OrderItemsArea(
                             modifier = Modifier,
                             order = currentOrder,
@@ -108,14 +114,15 @@ fun OrderDetailScreen(
                             }
                         )
                     }
-                    Spacer(modifier = Modifier.padding(top = 24.dp))
+                    Spacer(modifier = Modifier.padding(LadosTheme.size.large))
                     Column {
                         Text(
                             text = "Delivery Details",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.SemiBold
+                            style = LadosTheme.typography.titleLarge.copy(
+                                fontWeight = FontWeight.SemiBold,
+                            ),
                         )
-                        Spacer(modifier = Modifier.padding(bottom = 8.dp))
+                        Spacer(modifier = Modifier.padding(bottom = LadosTheme.size.small))
                         DeliveryDetailArea(
                             modifier = Modifier.height(100.dp),
                             order = currentOrder
@@ -131,7 +138,7 @@ fun OrderDetailScreen(
 fun OrderStatusArea(
     modifier: Modifier = Modifier,
     currentOrder: Order,
-    statuses: List<OrderStatus> = getFirstFourOrderStatuses()
+    statuses: List<OrderStatus> = getFirstFourOrderStatuses(),
 ) {
     LazyColumn(modifier = modifier) {
         itemsIndexed(statuses) { _, status ->
@@ -139,7 +146,7 @@ fun OrderStatusArea(
             OrderStatusItem(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 16.dp, horizontal = 8.dp),
+                    .padding(vertical = LadosTheme.size.medium, horizontal = LadosTheme.size.small),
                 status = Pair(status, time)
             )
         }
@@ -151,7 +158,7 @@ fun OrderStatusItem(
     modifier: Modifier = Modifier,
     status: Pair<OrderStatus, Long?> = Pair(OrderStatus.CREATED, null),
 ) {
-    var tintColor = LocalContentColor.current
+    var tintColor = LadosTheme.colorScheme.primary
     val time: String = if (status.second == null) {
         tintColor = tintColor.copy(0.5f)
         "Not updated"
@@ -171,11 +178,10 @@ fun OrderStatusItem(
             Spacer(modifier = Modifier.padding(horizontal = 8.dp))
             Text(
                 text = status.first.name.capitalizeWords(),
-                style = MaterialTheme.typography.titleSmall,
-                fontSize = 16.sp
+                style = LadosTheme.typography.titleMedium,
             )
         }
-        Text(text = time, style = MaterialTheme.typography.titleSmall)
+        Text(text = time, style = LadosTheme.typography.titleSmall)
     }
 }
 
@@ -183,7 +189,7 @@ fun OrderStatusItem(
 fun OrderItemsArea(
     modifier: Modifier = Modifier,
     order: Order,
-    onViewProductsClick: () -> Unit = {}
+    onViewProductsClick: () -> Unit = {},
 ) {
     TwoColsItem(
         modifier = modifier,
@@ -193,15 +199,16 @@ fun OrderItemsArea(
             ) {
                 Icon(
                     modifier = Modifier
-                        .padding(8.dp)
-                        .width(40.dp),
+                        .padding(LadosTheme.size.small)
+                        .width(LadosTheme.size.extraExtraLarge),
                     painter = painterResource(id = R.drawable.baseline_receipt_long_24),
                     contentDescription = "Order Icon"
                 )
                 Text(
                     text = "${order.orderProducts.size} items",
-                    fontWeight = FontWeight.SemiBold,
-                    style = MaterialTheme.typography.bodyMedium
+                    style = LadosTheme.typography.bodyMedium.copy(
+                        fontWeight = FontWeight.SemiBold
+                    )
                 )
             }
         },
@@ -222,30 +229,29 @@ fun OrderItemsArea(
 @Composable
 fun DeliveryDetailArea(
     modifier: Modifier = Modifier,
-    order: Order
+    order: Order,
 ) {
-    // TODO : Replace with actual delivery address and phone number
-    val mockAddress = "123, ABC Street, XYZ City, 123456"
-    val mockPhone = "+91 1234567890"
     Card(
         modifier = modifier.fillMaxWidth(),
         onClick = { /*Do nothing*/ },
     ) {
         Column(
             modifier = Modifier
-                .padding(12.dp)
+                .padding(LadosTheme.size.normal)
                 .fillMaxHeight(),
             verticalArrangement = Arrangement.SpaceEvenly,
         ) {
             Text(
-                text = mockAddress,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.SemiBold
+                text = order.deliveryAddress,
+                style = LadosTheme.typography.bodyLarge.copy(
+                    fontWeight = FontWeight.SemiBold,
+                ),
             )
             Text(
-                text = mockPhone,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.SemiBold
+                text = order.customerPhone,
+                style = LadosTheme.typography.bodyLarge.copy(
+                    fontWeight = FontWeight.SemiBold,
+                ),
             )
         }
     }
@@ -257,7 +263,7 @@ fun OrderStatusItemProcessPreview() {
     OrderStatusItem(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 16.dp, horizontal = 8.dp),
+            .padding(vertical = LadosTheme.size.medium, horizontal = LadosTheme.size.small),
         status = Pair(OrderStatus.CREATED, System.currentTimeMillis())
     )
 }
@@ -268,7 +274,7 @@ fun OrderStatusItemConfirmedPreview() {
     OrderStatusItem(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 16.dp, horizontal = 8.dp),
+            .padding(vertical = LadosTheme.size.medium, horizontal = LadosTheme.size.small),
         status = Pair(OrderStatus.CONFIRMED, null)
     )
 }

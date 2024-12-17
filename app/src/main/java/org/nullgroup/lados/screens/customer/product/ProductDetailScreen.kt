@@ -95,8 +95,9 @@ object ProductTheme {
 fun ProductDetailScreen(
     productViewModel: ProductDetailScreenViewModel = hiltViewModel(),
     productId: String,
-    onAddToBag: () -> Unit = {}, // TODO: Delete this
-    navController: NavController
+    onAddToBag: () -> Unit = {},
+    navController: NavController,
+    modifier: Modifier = Modifier,
 ) {
 
     val scrollState = rememberScrollState()
@@ -121,7 +122,7 @@ fun ProductDetailScreen(
         uiState.isLoading -> {
             Box(
                 contentAlignment = Alignment.Center,
-                modifier = Modifier.fillMaxSize()
+                modifier = modifier.fillMaxSize()
             ) {
                 CircularProgressIndicator(color = ProductTheme.primaryColor)
             }
@@ -151,7 +152,7 @@ fun ProductDetailScreen(
                 }
             ) { paddingValues ->
                 Column(
-                    modifier = Modifier
+                    modifier = modifier
                         .fillMaxWidth()
                         .padding(paddingValues)
                         .padding(bottom = 10.dp)
