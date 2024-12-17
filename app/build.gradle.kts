@@ -68,15 +68,22 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.ui.tooling.preview)
+    implementation(libs.androidx.material3)
+    implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(platform(libs.androidx.compose.bom))
 
     //Should use in Dagger Hilt
-    ksp ("androidx.hilt:hilt-compiler:1.2.0")
-    ksp ("com.google.dagger:hilt-android-compiler:2.49")
-    implementation("com.google.dagger:hilt-android:2.49")
-    implementation ("androidx.hilt:hilt-navigation-compose:1.2.0")
-    implementation(libs.firebase.storage)
+    implementation(libs.hilt.android)
+    implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.play.services.auth)
+    implementation(libs.androidx.runtime.livedata)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.material)
+    implementation(libs.androidx.activity)
+    implementation(libs.androidx.constraintlayout)
+    kapt(libs.hilt.android.compiler.v2511)
+    ksp(libs.androidx.hilt.compiler)
 
     //Constraint Layout
     implementation(libs.androidx.constraintlayout.compose)
@@ -102,6 +109,8 @@ dependencies {
     implementation(libs.coil.compose)
 
     // For Hilt testing
+    testImplementation(libs.dagger.hilt.android.testing)
+    kaptTest(libs.hilt.android.compiler)
     kaptTest (libs.hilt.android.compiler)
     testImplementation (libs.dagger.hilt.android.testing)
 
@@ -113,6 +122,7 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.junit.jupiter.api)
     testRuntimeOnly(libs.junit.jupiter.engine)
+    implementation(libs.kotlinx.coroutines.play.services)
 
     // For JUnit test MockK
     testImplementation (libs.mockk)
@@ -132,6 +142,9 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.4.0")
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.ui.test.junit4)
+    debugImplementation(libs.androidx.ui.tooling)
+    debugImplementation(libs.androidx.ui.test.manifest)
+
     androidTestImplementation(platform(libs.androidx.compose.bom))
 
     implementation("androidx.datastore:datastore-preferences:1.1.1")

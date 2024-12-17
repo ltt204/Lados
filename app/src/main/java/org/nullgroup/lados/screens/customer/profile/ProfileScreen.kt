@@ -248,10 +248,9 @@ fun ProfileScreen(
                 }
             }
 
-            TextButton(
-                modifier = Modifier.fillMaxWidth(),
-                onClick = { /*TODO*/ }
-            ) {
+            TextButton(modifier = Modifier.fillMaxWidth(), onClick = {
+                viewModel.signOut(navController)
+            }) {
                 Text(
                     textAlign = TextAlign.Center,
                     text = "Sign out",

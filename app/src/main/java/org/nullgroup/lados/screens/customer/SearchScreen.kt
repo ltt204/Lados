@@ -64,7 +64,7 @@ import org.nullgroup.lados.viewmodels.SharedViewModel
 fun NormalTextFieldSearchScreen(
     label: String,
     modifier: Modifier = Modifier,
-    icon: @Composable (() -> Unit)
+    icon: @Composable (() -> Unit),
 ) {
     val (text, setText) = mutableStateOf("")
     TextField(
@@ -73,13 +73,14 @@ fun NormalTextFieldSearchScreen(
 
         colors = TextFieldDefaults.colors(unfocusedContainerColor = Color.Transparent),
         onValueChange = setText,
-        label = { Text(text = label, color = GrayMaterial, fontSize = 18.sp)},
+        // note: modify color
+        label = { Text(text = label, color = LadosTheme.colorScheme.error, fontSize = 18.sp) },
         modifier = modifier
     )
 }
 
 @Composable
-fun SearchBarSearchScreen(modifier: Modifier=Modifier) {
+fun SearchBarSearchScreen(modifier: Modifier = Modifier) {
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -105,8 +106,10 @@ fun SearchBarSearchScreen(modifier: Modifier=Modifier) {
             colors = OutlinedTextFieldDefaults.colors(
                 focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                 unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-                unfocusedBorderColor = GrayMaterial,
-                focusedBorderColor = BrownMaterial
+                // note: modify
+                unfocusedBorderColor = LadosTheme.colorScheme.surfaceContainer,
+                // note: modify
+                focusedBorderColor = LadosTheme.colorScheme.primary
             )
         )
     }
@@ -156,12 +159,14 @@ fun SearchHistoryRow(
         Box(
             modifier
                 .clip(CircleShape)
-                .border(BorderStroke(1.dp, BrownMaterial), shape = CircleShape)
+                // note: modify color
+                .border(BorderStroke(1.dp, LadosTheme.colorScheme.outline), shape = CircleShape)
                 .padding(4.dp)
         ) {
             Icon(
                 Icons.Outlined.Close,
-                tint = BlackMaterial,
+                // note: modify
+                tint = LadosTheme.colorScheme.outline,
                 contentDescription = null,
                 modifier=Modifier.size(16.dp).clickable { onDelete(content) }
             )
@@ -254,7 +259,8 @@ fun SearchScreen(
                     onClick = { navController.popBackStack() },
                     modifier = Modifier
                         .clip(CircleShape)
-                        .background(GrayMaterial.copy(alpha = 0.2f))
+                        // note: modify
+                        .background(LadosTheme.colorScheme.outline.copy(alpha = 0.2f))
                 ) {
                     Icon(
                         Icons.Filled.ArrowBack,

@@ -1,7 +1,5 @@
 package org.nullgroup.lados.navigations
 
-//noinspection UsingMaterialAndMaterial3Libraries
-//noinspection UsingMaterialAndMaterial3Libraries
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
@@ -37,6 +35,9 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import org.nullgroup.lados.screens.Screen
+import org.nullgroup.lados.screens.common.ForgotPasswordScreen
+import org.nullgroup.lados.screens.common.LoginScreen
+import org.nullgroup.lados.screens.common.RegisterScreen
 import org.nullgroup.lados.screens.customer.profile.AddAddressScreen
 import org.nullgroup.lados.screens.customer.profile.AddressList
 import org.nullgroup.lados.screens.customer.product.CategorySelectScreen
@@ -53,7 +54,7 @@ import org.nullgroup.lados.screens.customer.product.ProductInCategoryScreen
 import org.nullgroup.lados.screens.customer.ProductScreen
 import org.nullgroup.lados.screens.customer.SearchScreen
 import org.nullgroup.lados.screens.customer.product.ReviewProductScreen
-import org.nullgroup.lados.ui.theme.MagentaMaterial
+import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.viewmodels.SharedViewModel
 
 @Composable
@@ -86,7 +87,9 @@ fun CustomerGraph(
                                 currentDestination?.hierarchy?.any
                                 { it.route == screen.route } == true
                             )
-                            val contentColor = MagentaMaterial
+
+                            // note: modify color
+                            val contentColor = LadosTheme.colorScheme.primary
 
                             BottomNavigationItem(
                                 modifier = Modifier
@@ -339,6 +342,24 @@ fun CustomerGraph(
                     productId = productId,
                     onAddToBag = {},
                     navController = navController,
+                )
+            }
+
+            composable(route = Screen.Common.LoginScreen.route) {
+                isVisibility = false
+                LoginScreen(modifier = modifier, navController = navController)
+            }
+
+            composable(route = Screen.Common.RegisterScreen.route) {
+                isVisibility = false
+                RegisterScreen(modifier = modifier, navController = navController)
+            }
+
+            composable(route = Screen.Common.ForgotPasswordScreen.route) {
+                isVisibility = false
+                ForgotPasswordScreen(
+                    modifier = modifier,
+                    navController = navController
                 )
             }
         }

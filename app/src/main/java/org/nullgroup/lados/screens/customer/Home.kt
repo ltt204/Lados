@@ -80,12 +80,7 @@ import org.nullgroup.lados.compose.common.LoadOnProgress
 import org.nullgroup.lados.data.models.Category
 import org.nullgroup.lados.data.models.Product
 import org.nullgroup.lados.screens.Screen
-import org.nullgroup.lados.ui.theme.BlackMaterial
-import org.nullgroup.lados.ui.theme.BrownMaterial
-import org.nullgroup.lados.ui.theme.GrayMaterial
 import org.nullgroup.lados.ui.theme.LadosTheme
-import org.nullgroup.lados.ui.theme.MagentaMaterial
-import org.nullgroup.lados.ui.theme.WhiteMaterial
 import org.nullgroup.lados.viewmodels.CategoryUiState
 import org.nullgroup.lados.viewmodels.HomeViewModel
 import org.nullgroup.lados.viewmodels.ProductUiState
@@ -162,12 +157,13 @@ fun SearchBar(
 @Composable
 fun CategoryCircle(
     modifier: Modifier = Modifier,
-    imageUrl: String
+    imageUrl: String,
 ) {
     Box(
         modifier
             .clip(CircleShape)
-            .background(BrownMaterial.copy(alpha = 0.2f))
+            // note: modify
+            .background(LadosTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.2f))
             .padding(0.dp)
             .size(64.dp)
     ) {
@@ -185,8 +181,9 @@ fun TitleTextRow(
     modifier: Modifier = Modifier,
     contentLeft: String,
     contentRight: String,
-    color: Color = BlackMaterial,
-    onClick: () -> Unit = {}
+    // note: modify
+    color: Color = LadosTheme.colorScheme.outline,
+    onClick: () -> Unit = {},
 ) {
     Row(
         modifier = modifier
@@ -209,7 +206,8 @@ fun TitleTextRow(
             Text(
                 contentRight, style = TextStyle(
                     fontSize = 20.sp,
-                    color = BrownMaterial,
+                    // note: modify
+                    color = LadosTheme.colorScheme.outline,
                 )
             )
         }
@@ -221,7 +219,7 @@ fun CategoryItems(
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
     sharedViewModel: SharedViewModel,
-    navController: NavController
+    navController: NavController,
 ) {
     val categoryUiState = viewModel.categoryUiState.collectAsStateWithLifecycle()
     when (categoryUiState.value) {
@@ -267,7 +265,7 @@ fun CategoryItems(
 @Composable
 fun CategoryItem(
     modifier: Modifier = Modifier,
-    category: Category
+    category: Category,
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -275,7 +273,8 @@ fun CategoryItem(
     ) {
         CategoryCircle(imageUrl = category.categoryImage)
         Spacer(Modifier.height(8.dp))
-        Text(text = category.categoryName, color = BlackMaterial)
+        // note: modify color
+        Text(text = category.categoryName, color = LadosTheme.colorScheme.primary)
     }
 }
 
@@ -284,13 +283,14 @@ fun CategoryItem(
 fun ProductItem(
     modifier: Modifier = Modifier,
     product: Product,
-    onClick: (String) -> Unit
+    onClick: (String) -> Unit,
 ) {
     Box(modifier = modifier
         .width(160.dp)
         .height(280.dp)
         .clip(RoundedCornerShape(8.dp))
-        .background(GrayMaterial.copy(alpha = 0.2f))
+        // note: modify
+        .background(LadosTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.2f))
         .padding(bottom = 8.dp)
         .clickable { onClick(product.id) }
     ) {
@@ -321,7 +321,8 @@ fun ProductItem(
                 text = product.name,
                 style = TextStyle(
                     fontSize = 16.sp,
-                    color = BlackMaterial,
+                    // note: modify
+                    color = LadosTheme.colorScheme.error,
                 )
             )
             Row(
@@ -333,7 +334,8 @@ fun ProductItem(
                     style = TextStyle(
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
-                        color = BlackMaterial,
+                        // note: modify
+                        color = LadosTheme.colorScheme.error,
                     )
                 )
                 Text(
@@ -488,7 +490,8 @@ fun BottomSheetContent(
     Box(
         modifier = Modifier
             .fillMaxHeight(0.5f)
-            .background(GrayMaterial.copy(alpha = 0.2f))
+            // note: modify
+            .background(LadosTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.2f))
             .clip(RoundedCornerShape(16.dp))
             .padding(
                 start = 8.dp,

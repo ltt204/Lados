@@ -66,11 +66,7 @@ import org.nullgroup.lados.screens.customer.BottomSheetContent
 import org.nullgroup.lados.screens.customer.ProductItem
 import org.nullgroup.lados.screens.customer.SearchBar
 import org.nullgroup.lados.screens.customer.SearchBarRow
-import org.nullgroup.lados.ui.theme.BlackMaterial
-import org.nullgroup.lados.ui.theme.GrayMaterial
 import org.nullgroup.lados.ui.theme.LadosTheme
-import org.nullgroup.lados.ui.theme.MagentaMaterial
-import org.nullgroup.lados.ui.theme.WhiteMaterial
 import org.nullgroup.lados.viewmodels.HomeViewModel
 import org.nullgroup.lados.viewmodels.ProductUiState
 import org.nullgroup.lados.viewmodels.SharedViewModel
@@ -287,12 +283,14 @@ fun ProductInCategoryScreen(
                         onClick = { navController.popBackStack() },
                         modifier = Modifier
                             .clip(CircleShape)
-                            .background(GrayMaterial.copy(alpha = 0.2f))
+                            // note: modify
+                            .background(LadosTheme.colorScheme.outline.copy(alpha = 0.2f))
                     ) {
                         Icon(
                             Icons.Filled.ArrowBack,
                             contentDescription = "Search",
-                            tint = BlackMaterial
+                            // note: modify
+                            tint = LadosTheme.colorScheme.outline
 
                         )
                     }

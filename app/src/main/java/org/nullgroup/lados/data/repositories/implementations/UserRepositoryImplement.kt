@@ -17,13 +17,14 @@ import org.nullgroup.lados.data.repositories.interfaces.UserRepository
 class UserRepositoryImplement(
     private val firestore: FirebaseFirestore,
     private val firebaseAuth: FirebaseAuth,
-    private val imageRepository: ImageRepository
+    private val imageRepository: ImageRepository,
 ) : UserRepository {
+
     override fun getCurrentUserFlow(): Flow<User> = callbackFlow {
-        val userRef = firestore.collection("users").document(firebaseAuth.currentUser?.email!!)
+        val userRef = firestore.collection("users").document(firebaseAuth.currentUser?.uid!!)
 
         val subscription = userRef.addSnapshotListener { snapshot, error ->
-            if (error!=null) {
+            if (error != null) {
                 close(error)
                 return@addSnapshotListener
             }
@@ -37,45 +38,91 @@ class UserRepositoryImplement(
         awaitClose { subscription.remove() }
     }
 
-    override suspend fun login(email: String, password: String): Result<Boolean> {
-        return try {
-            firebaseAuth.signInWithEmailAndPassword(email, password).await()
-            Result.success(true)
-        } catch (e: Exception) {
-            Result.failure(e)
+    override suspend fun addUserToFirestore(user: User) {
+        user.avatarUri = if (firebaseAuth.currentUser!!.photoUrl == null) {
+            imageRepository.getImageUrl(
+                "users",
+                "default_avatar",
+                "jpg"
+            )
+        } else {
+            firebaseAuth.currentUser!!.photoUrl.toString()
         }
-    }
 
-    override suspend fun signUp(
-        fullName: String,
-        email: String,
-        password: String
-    ): Result<Boolean> {
-        return try {
-            firebaseAuth.createUserWithEmailAndPassword(email, password).await()
-            Result.success(true)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+        Log.d("UserRepositoryImplementation", user.avatarUri)
+
+        firestore.collection("users").add(user).await()
     }
 
     override suspend fun saveUserToFirestore(user: User) {
-        user.avatarUri =
-            user.avatarUri.ifEmpty {
-                imageRepository.getImageUrl(
-                    "users",
-                    "default_avatar",
-                    "jpg"
-                )
-            }
+        user.avatarUri = if (firebaseAuth.currentUser!!.photoUrl == null) {
+            imageRepository.getImageUrl(
+                "users",
+                "default_avatar",
+                "jpg"
+            )
+        } else {
+            firebaseAuth.currentUser!!.photoUrl.toString()
+        }
 
-        firestore.collection("users").document(user.email).set(user).await()
+        Log.d("UserRepositoryImplementation", user.avatarUri)
+
+        firestore.collection("users").document(user.id).set(user).await()
     }
 
-    override suspend fun getUserFromFirestore(email: String): Result<User> {
+    override suspend fun deleteUser(id: String): Result<Boolean> {
         return try {
-            val user = firestore.collection("users").document(email).get().await()
-                .toObject(User::class.java)
+            firestore.collection("users").document(id).delete().await()
+            Result.success(true)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+
+    }
+
+    override suspend fun updateUser(user: User): Result<Boolean> {
+        return try {
+            user.avatarUri =
+                user.avatarUri.ifEmpty {
+                    imageRepository.getImageUrl(
+                        "users",
+                        "default_avatar",
+                        "jpg"
+                    )
+                }
+            firestore.collection("users").document(user.id).set(user).await()
+            Result.success(true)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun updateUserRole(email: String, role: String): Result<Boolean> {
+        return try {
+            firestore.collection("users").document(email).update("role", role).await()
+            Result.success(true)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+
+    override suspend fun getCurrentUser(): User {
+        val firebaseUser = firebaseAuth.currentUser
+        val userRef = firestore.collection("users").document(firebaseUser?.uid!!)
+
+        val user = userRef.get().await().toObject(User::class.java) ?: User()
+
+        Log.d("UserRepositoryImplement", "User profile picture: ${user.avatarUri}")
+        return user
+
+    }
+
+    override suspend fun getUserFromFirestore(id: String): Result<User> {
+        return try {
+            val user =
+                firestore.collection("users").document(id).get().await()
+                    .toObject(User::class.java)
             Result.success(user!!)
         } catch (e: Exception) {
             Result.failure(e)
@@ -91,14 +138,14 @@ class UserRepositoryImplement(
         }
     }
 
-    override suspend fun getUserRole(email: String): Result<String> {
+    override suspend fun getUserRole(id: String): Result<String> {
         return try {
-            Log.d("UserRepositoryImplement", "Starting getUserRole for email: $email")
+            Log.d("UserRepositoryImplement", "Starting getUserRole for email: $id")
 
             // Add timeout
             withTimeout(5000L) {
                 // Check if document exists first
-                val docRef = firestore.collection("users").document(email)
+                val docRef = firestore.collection("users").document(id)
                 val snapshot = docRef.get().await()
 
                 if (!snapshot.exists()) {
@@ -122,48 +169,12 @@ class UserRepositoryImplement(
         }
     }
 
-    override suspend fun updateUserRole(email: String, role: String): Result<Boolean> {
+    override suspend fun signOut(): Result<Boolean> {
         return try {
-            firestore.collection("users").document(email).update("role", role).await()
+            firebaseAuth.signOut()
             Result.success(true)
         } catch (e: Exception) {
             Result.failure(e)
         }
-    }
-
-    override suspend fun deleteUser(email: String): Result<Boolean> {
-        return try {
-            firestore.collection("users").document(email).delete().await()
-            Result.success(true)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    override suspend fun updateUser(user: User): Result<Boolean> {
-        return try {
-            user.avatarUri =
-                user.avatarUri.ifEmpty {
-                    imageRepository.getImageUrl(
-                        "users",
-                        "default_avatar",
-                        "jpg"
-                    )
-                }
-            firestore.collection("users").document(user.email).set(user).await()
-            Result.success(true)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    override suspend fun getCurrentUser(): User {
-        val firebaseUser = firebaseAuth.currentUser
-        val userRef = firestore.collection("users").document(firebaseUser?.email!!)
-
-        val user = userRef.get().await().toObject(User::class.java) ?: User()
-
-        Log.d("UserRepositoryImplement", "User profile picture: ${user.avatarUri}")
-        return user
     }
 }

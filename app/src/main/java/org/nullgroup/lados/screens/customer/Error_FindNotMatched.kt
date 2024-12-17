@@ -38,13 +38,14 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import org.nullgroup.lados.R
 import org.nullgroup.lados.screens.customer.product.Title
-import org.nullgroup.lados.ui.theme.BlackMaterial
-import org.nullgroup.lados.ui.theme.GrayMaterial
 import org.nullgroup.lados.ui.theme.LadosTheme
-import org.nullgroup.lados.ui.theme.MagentaMaterial
 
 @Composable
-fun DrawError_FindNotMatch(modifier: Modifier=Modifier, navController: NavController, paddingValues: PaddingValues) {
+fun DrawError_FindNotMatch(
+    modifier: Modifier = Modifier,
+    navController: NavController,
+    paddingValues: PaddingValues,
+) {
     Column(
         modifier = modifier
             .fillMaxHeight()
@@ -72,7 +73,8 @@ fun DrawError_FindNotMatch(modifier: Modifier=Modifier, navController: NavContro
         Spacer(modifier = Modifier.height(16.dp))
         Button(
             onClick = {},
-            colors = ButtonDefaults.buttonColors(MagentaMaterial)
+            // note: modify color
+            colors = ButtonDefaults.buttonColors(LadosTheme.colorScheme.primary)
         ) {
 
             Text(text = "Explore Categories")
@@ -83,12 +85,19 @@ fun DrawError_FindNotMatch(modifier: Modifier=Modifier, navController: NavContro
 }
 
 @Composable
-fun Error_FindNotMatchScreen(modifier: Modifier=Modifier, navController: NavController, paddingValues: PaddingValues= PaddingValues(horizontal = 16.dp, vertical = 8.dp)) {
+fun Error_FindNotMatchScreen(
+    modifier: Modifier = Modifier,
+    navController: NavController,
+    paddingValues: PaddingValues = PaddingValues(
+        horizontal = 16.dp,
+        vertical = 8.dp
+    ),
+) {
     Scaffold(
         modifier = modifier,
         topBar = {
             Row(
-                modifier=Modifier
+                modifier = Modifier
                     .fillMaxWidth()
                     .wrapContentHeight()
                     .padding(vertical = 16.dp, horizontal = 8.dp),
@@ -97,18 +106,24 @@ fun Error_FindNotMatchScreen(modifier: Modifier=Modifier, navController: NavCont
             ) {
                 IconButton(
                     onClick = {},
-                    modifier = Modifier.clip(CircleShape)
-                        .background(GrayMaterial.copy(alpha = 0.2f))
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        // note: modify color
+                        .background(LadosTheme.colorScheme.secondary.copy(alpha = 0.2f))
                 ) {
                     Icon(
                         Icons.Filled.ArrowBack,
                         contentDescription = "Search",
-                        tint = BlackMaterial
+                        // note: modify color
+                        tint = LadosTheme.colorScheme.onSurface
 
                     )
                 }
                 Spacer(modifier = Modifier.width(16.dp))
-                SearchBar(modifier=Modifier.fillMaxWidth(), navController=navController, onSearch = {})
+                SearchBar(
+                    modifier = Modifier.fillMaxWidth(),
+                    navController = navController,
+                    onSearch = {})
             }
         }
     ) {
