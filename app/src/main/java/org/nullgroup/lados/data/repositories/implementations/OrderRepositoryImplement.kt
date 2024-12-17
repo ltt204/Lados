@@ -153,8 +153,7 @@ class OrderRepositoryImplement(
     }
 
     override fun getOrders(): Flow<List<Order>> = callbackFlow {
-        val userEmail = firebaseAuth.currentUser?.email!!
-        val orderRef = firestore.collection("users").document(userEmail).collection("orders")
+        val orderRef = firestore.collection("users").document(firebaseAuth.currentUser?.uid!!).collection("orders")
 
         val subscription = orderRef.addSnapshotListener { snapshot, e ->
             Log.d("OrderRepositoryImplement", "getOrders: $snapshot")
@@ -166,7 +165,7 @@ class OrderRepositoryImplement(
             if (snapshot != null) {
                 val orders =
                     snapshot.documents.mapNotNull { it.toObject(Order::class.java) }.filter {
-                        it.customerId == userEmail
+                        it.customerId == firebaseAuth.currentUser?.uid!!
                     }
                 Log.d("OrderRepositoryImplement", "getOrders: $orders")
                 trySend(orders).isSuccess
@@ -177,9 +176,8 @@ class OrderRepositoryImplement(
     }
 
     override fun getOrderById(orderId: String): Flow<Order> = callbackFlow {
-        val userEmail = firebaseAuth.currentUser?.email!!
         val orderRef =
-            firestore.collection("users").document(userEmail).collection("orders").document(orderId)
+            firestore.collection("users").document(firebaseAuth.currentUser?.uid!!).collection("orders").document(orderId)
 
         val subscription = orderRef.addSnapshotListener { snapshot, e ->
             Log.d("OrderRepositoryImplement", "getOrderById: $snapshot")

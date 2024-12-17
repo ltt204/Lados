@@ -223,9 +223,6 @@ fun CustomerGraph(
                                 modifier = modifier,
                                 navController = navController,
                                 paddingValues = innerPadding
-                                modifier = Modifier,
-                                paddingValues = innerPadding,
-                                navController = navController
                             )
                         }
 
