@@ -24,6 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -38,6 +39,9 @@ import androidx.navigation.navArgument
 import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.screens.customer.cartAndCheckout.CartScreen
 import org.nullgroup.lados.screens.customer.cartAndCheckout.CheckoutScreen
+import org.nullgroup.lados.screens.common.ForgotPasswordScreen
+import org.nullgroup.lados.screens.common.LoginScreen
+import org.nullgroup.lados.screens.common.RegisterScreen
 import org.nullgroup.lados.screens.customer.profile.AddAddressScreen
 import org.nullgroup.lados.screens.customer.profile.AddressList
 import org.nullgroup.lados.screens.customer.product.CategorySelectScreen
@@ -55,7 +59,7 @@ import org.nullgroup.lados.screens.customer.ProductScreen
 import org.nullgroup.lados.screens.customer.SearchScreen
 import org.nullgroup.lados.screens.customer.product.ReviewProductScreen
 import org.nullgroup.lados.screens.customer.profile.ProfileScreen
-import org.nullgroup.lados.ui.theme.MagentaMaterial
+import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.viewmodels.SharedViewModel
 
 @Composable
@@ -88,7 +92,9 @@ fun CustomerGraph(
                                 currentDestination?.hierarchy?.any
                                 { it.route == screen.route } == true
                             )
-                            val contentColor = MagentaMaterial
+
+                            // note: modify color
+                            val contentColor = LadosTheme.colorScheme.primary
 
                             BottomNavigationItem(
                                 modifier = Modifier
@@ -164,7 +170,8 @@ fun CustomerGraph(
                             SearchScreen(
                                 navController = navController,
                                 paddingValues = innerPadding,
-                                sharedViewModel = sharedViewModel
+                                sharedViewModel = sharedViewModel,
+                                context= LocalContext.current
                             )
                         }
 
@@ -188,7 +195,8 @@ fun CustomerGraph(
                             ProductInCategoryScreen(
                                 navController = navController,
                                 paddingValues = innerPadding,
-                                sharedViewModel = sharedViewModel
+                                sharedViewModel = sharedViewModel,
+                                context= LocalContext.current
                             )
                         }
 
@@ -362,6 +370,24 @@ fun CustomerGraph(
                     modifier = Modifier,
                     innerPadding = innerPadding,
                     navController = navController,
+                )
+            }
+
+            composable(route = Screen.Common.LoginScreen.route) {
+                isVisibility = false
+                LoginScreen(modifier = modifier, navController = navController)
+            }
+
+            composable(route = Screen.Common.RegisterScreen.route) {
+                isVisibility = false
+                RegisterScreen(modifier = modifier, navController = navController)
+            }
+
+            composable(route = Screen.Common.ForgotPasswordScreen.route) {
+                isVisibility = false
+                ForgotPasswordScreen(
+                    modifier = modifier,
+                    navController = navController
                 )
             }
         }

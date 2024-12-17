@@ -1,22 +1,28 @@
 package org.nullgroup.lados.di
 
+import android.app.Activity
+import android.content.Context
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ActivityContext
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import org.nullgroup.lados.data.repositories.implementations.CartItemRepositoryImplement
 import org.nullgroup.lados.data.repositories.implementations.CategoryRepositoryImplement
-import org.nullgroup.lados.data.repositories.implementations.ImageRepositoryImplement
 import org.nullgroup.lados.data.repositories.implementations.OrderRepositoryImplement
 import org.nullgroup.lados.data.repositories.implementations.ProductRepositoryImplement
+import org.nullgroup.lados.data.repositories.implementations.SharedPreferencesImpl
+import org.nullgroup.lados.data.repositories.implementations.ImageRepositoryImplement
 import org.nullgroup.lados.data.repositories.implementations.ReviewProductRepositoryImplement
 import org.nullgroup.lados.data.repositories.implementations.UserAddressRepositoryImplement
 import org.nullgroup.lados.data.repositories.implementations.UserRepositoryImplement
 import org.nullgroup.lados.data.repositories.implementations.WishlistItemRepositoryImplement
 import org.nullgroup.lados.data.repositories.interfaces.CartItemRepository
+import org.nullgroup.lados.data.repositories.interfaces.SharedPreferencesRepository
 
 import org.nullgroup.lados.data.repositories.interfaces.CategoryRepository
 
@@ -39,7 +45,7 @@ object DataModule {
     fun provideUserRepository(
         firestore: FirebaseFirestore,
         firebaseAuth: FirebaseAuth,
-        imageRepository: ImageRepository
+        imageRepository: ImageRepository,
     ): UserRepository {
         return UserRepositoryImplement(firestore, firebaseAuth, imageRepository)
     }
@@ -47,7 +53,7 @@ object DataModule {
     @Singleton
     @Provides
     fun provideProductRepository(
-        firestore: FirebaseFirestore
+        firestore: FirebaseFirestore,
     ): ProductRepository {
         return ProductRepositoryImplement(firestore)
     }
@@ -56,7 +62,7 @@ object DataModule {
     @Provides
     fun provideUserAddressRepository(
         firestore: FirebaseFirestore,
-        firebaseAuth: FirebaseAuth
+        firebaseAuth: FirebaseAuth,
     ): IUserAddressRepository {
         return UserAddressRepositoryImplement(firestore, firebaseAuth)
     }
@@ -64,22 +70,42 @@ object DataModule {
     @Singleton
     @Provides
     fun provideImageRepository(
-        firebaseStorage: FirebaseStorage
+        firebaseStorage: FirebaseStorage,
     ): ImageRepository {
         return ImageRepositoryImplement(firebaseStorage)
     }
 
+    @Provides
+    @Singleton
+    fun provideSharedPreferencesRepository(
+        @ApplicationContext context: Context,
+    ): SharedPreferencesRepository {
+        return SharedPreferencesImpl(context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideActivity(
+        @ActivityContext context: Context,
+    ): Activity {
+        return context as Activity
+    }
+
+
     @Singleton
     @Provides
     fun provideCategoryRepository(
-        firestore: FirebaseFirestore
+        firestore: FirebaseFirestore,
     ): CategoryRepository {
         return CategoryRepositoryImplement(firestore)
     }
 
     @Singleton
     @Provides
-    fun provideOrderRepository(firestore: FirebaseFirestore, fireAuth: FirebaseAuth): OrderRepository {
+    fun provideOrderRepository(
+        firestore: FirebaseFirestore,
+        fireAuth: FirebaseAuth,
+    ): OrderRepository {
         return OrderRepositoryImplement(firestore, fireAuth)
     }
 

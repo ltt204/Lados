@@ -24,12 +24,14 @@ sealed class Screen(
     ) : Screen(name, route, icon) {
         data object LoginScreen : Common(route = "login")
         data object RegisterScreen : Common(route = "register")
+        data object ForgotPasswordScreen : Common(route = "forgot_password")
 
         companion object {
             fun getAllScreens(): List<Common> {
                 return listOf(
                     LoginScreen,
                     RegisterScreen,
+                    ForgotPasswordScreen,
                 )
             }
         }

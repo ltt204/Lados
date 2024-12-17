@@ -50,20 +50,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import org.nullgroup.lados.screens.customer.product.DrawProductInCategoryScreenContent
-import org.nullgroup.lados.ui.theme.BlackMaterial
-import org.nullgroup.lados.ui.theme.BrownMaterial
-import org.nullgroup.lados.ui.theme.GrayMaterial
 import org.nullgroup.lados.ui.theme.LadosTheme
-import org.nullgroup.lados.ui.theme.MagentaMaterial
-import org.nullgroup.lados.ui.theme.WhiteMaterial
-import org.nullgroup.lados.ui.theme.YellowMaterial
 import org.nullgroup.lados.viewmodels.SharedViewModel
 
 @Composable
 fun Header(modifier: Modifier = Modifier, content: String) {
     Text(
         text = content,
-        style = TextStyle(fontSize = 20.sp, color = BlackMaterial, fontWeight = FontWeight.SemiBold),
+        // note: modify color
+        style = TextStyle(
+            fontSize = 20.sp,
+            color = LadosTheme.colorScheme.secondary,
+            fontWeight = FontWeight.SemiBold
+        ),
         modifier = modifier
     )
 }
@@ -75,7 +74,12 @@ fun FilterItem(modifier: Modifier = Modifier, content: String) {
     Box(
         modifier = modifier
             .clip(CircleShape)
-            .background(if (isChoose) BrownMaterial else GrayMaterial.copy(alpha = 0.2f))
+            // note: modify background
+            .background(
+                if (isChoose) LadosTheme.colorScheme.onSurface else LadosTheme.colorScheme.secondary.copy(
+                    alpha = 0.2f
+                )
+            )
             .padding(horizontal = 16.dp, vertical = 12.dp)
             .clickable { isChoose = !isChoose }
     ) {
@@ -83,7 +87,8 @@ fun FilterItem(modifier: Modifier = Modifier, content: String) {
             text = content,
             style = TextStyle(
                 fontSize = 16.sp,
-                color = if (isChoose) WhiteMaterial else BlackMaterial
+                // note: modify color
+                color = if (isChoose) LadosTheme.colorScheme.onBackground else LadosTheme.colorScheme.background
             )
         )
     }
@@ -95,7 +100,7 @@ fun RangeSliderWithLabels(
     range: MutableState<ClosedFloatingPointRange<Float>>,
     onValueChange: (ClosedFloatingPointRange<Float>) -> Unit,
     valueRange: ClosedFloatingPointRange<Float> = 0f..100f,
-    steps: Int = 0
+    steps: Int = 0,
 ) {
     Box(modifier = Modifier.fillMaxWidth()) {
         RangeSlider(
@@ -108,8 +113,10 @@ fun RangeSliderWithLabels(
             valueRange = valueRange,
             steps = steps,
             colors = SliderDefaults.colors(
-                thumbColor = BrownMaterial,
-                activeTrackColor = BrownMaterial,
+                // note: modify
+                thumbColor = LadosTheme.colorScheme.surfaceContainer,
+                // note: modify
+                activeTrackColor = LadosTheme.colorScheme.onPrimary,
                 inactiveTrackColor = Color.LightGray
             ),
             modifier = Modifier
@@ -137,7 +144,7 @@ fun RangeSliderWithLabels(
 }
 
 @Composable
-fun PricingRange(modifier: Modifier=Modifier, start: Float, end: Float){
+fun PricingRange(modifier: Modifier = Modifier, start: Float, end: Float) {
     val selectedRange = remember { mutableStateOf(start..end) }
     RangeSliderWithLabels(
         range = selectedRange,
@@ -184,7 +191,8 @@ fun CustomSlider() {
         ) {
             steps.forEach { step ->
                 BasicText(
-                    text = if (step == steps.last()) "${step.toInt()}+" else step.toInt().toString(),
+                    text = if (step == steps.last()) "${step.toInt()}+" else step.toInt()
+                        .toString(),
                     style = TextStyle(fontSize = 12.sp),
                     modifier = Modifier
                 )
@@ -194,7 +202,7 @@ fun CustomSlider() {
 }
 
 @Composable
-fun ReviewRow(modifier: Modifier=Modifier, content: String) {
+fun ReviewRow(modifier: Modifier = Modifier, content: String) {
     Row(
         modifier = modifier,
     ) {
@@ -202,7 +210,8 @@ fun ReviewRow(modifier: Modifier=Modifier, content: String) {
             Icon(
                 Icons.Filled.Star,
                 contentDescription = null,
-                tint = YellowMaterial
+                // note: modify color
+                tint = LadosTheme.colorScheme.onSurface
             )
         }
         Spacer(modifier = Modifier.width(8.dp))
@@ -215,17 +224,18 @@ fun RadioButtonGroup(
     modifier: Modifier = Modifier,
     options: List<String>,
     selectedOption: MutableState<String>,
-    onOptionSelected: (String) -> Unit
+    onOptionSelected: (String) -> Unit,
 ) {
     Column {
         options.forEach { option ->
-            Row(modifier = modifier
-                .fillMaxWidth(),
+            Row(
+                modifier = modifier
+                    .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
 
             ) {
-                ReviewRow(modifier, content=option)
+                ReviewRow(modifier, content = option)
                 RadioButton(
                     selected = selectedOption.value == option,
                     onClick = {
@@ -239,7 +249,7 @@ fun RadioButtonGroup(
 }
 
 @Composable
-fun RadioButtonGroupDraw(modifier: Modifier=Modifier, content: List<String>) {
+fun RadioButtonGroupDraw(modifier: Modifier = Modifier, content: List<String>) {
     val selectedOption = remember { mutableStateOf(content[0]) }
 
     RadioButtonGroup(
@@ -255,7 +265,7 @@ fun RadioButtonGroupDraw(modifier: Modifier=Modifier, content: List<String>) {
 @Composable
 fun FilterScreenBottom(
     onResetFilterClick: () -> Unit,
-    onApplyChangesClick: () -> Unit
+    onApplyChangesClick: () -> Unit,
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -266,10 +276,10 @@ fun FilterScreenBottom(
             onClick = onResetFilterClick,
             modifier = Modifier
                 .weight(1f)
-                .height(48.dp)
-            ,
+                .height(48.dp),
+            // note: modify
             colors = ButtonDefaults.buttonColors(
-                BrownMaterial
+                LadosTheme.colorScheme.error
             )
         ) {
             Text("Reset Filter", color = Color.White)
@@ -281,10 +291,10 @@ fun FilterScreenBottom(
             onClick = onApplyChangesClick,
             modifier = Modifier
                 .weight(1f)
-                .height(48.dp)
-            ,
+                .height(48.dp),
+            // note: modify
             colors = ButtonDefaults.buttonColors(
-                BrownMaterial
+                LadosTheme.colorScheme.error
             )
         ) {
             Text("Apply Changes", color = Color.White)
@@ -293,15 +303,18 @@ fun FilterScreenBottom(
 }
 
 
-
-
 @Composable
-fun FilterScreen(modifier: Modifier=Modifier, navController: NavController, paddingValues: PaddingValues= PaddingValues(horizontal = 16.dp, vertical = 8.dp), sharedViewModel: SharedViewModel = SharedViewModel()) {
+fun FilterScreen(
+    modifier: Modifier = Modifier,
+    navController: NavController,
+    paddingValues: PaddingValues = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+    sharedViewModel: SharedViewModel = SharedViewModel(),
+) {
     Scaffold(
         modifier = modifier,
         topBar = {
             Row(
-                modifier= Modifier
+                modifier = Modifier
                     .fillMaxWidth()
                     .wrapContentHeight()
                     .padding(vertical = 16.dp, horizontal = 8.dp),
@@ -312,17 +325,22 @@ fun FilterScreen(modifier: Modifier=Modifier, navController: NavController, padd
                     onClick = { navController.popBackStack() },
                     modifier = Modifier
                         .clip(CircleShape)
-                        .background(GrayMaterial.copy(alpha = 0.2f))
+                        // note: modify
+                        .background(LadosTheme.colorScheme.surfaceContainer.copy(alpha = 0.2f))
                 ) {
                     Icon(
                         Icons.Filled.ArrowBack,
                         contentDescription = "Search",
-                        tint = BlackMaterial
+                        // note: modify
+                        tint = LadosTheme.colorScheme.onBackground
 
                     )
                 }
                 Spacer(modifier = Modifier.width(16.dp))
-                SearchBar(modifier=Modifier.fillMaxWidth(), navController=navController, onSearch = {})
+                SearchBar(
+                    modifier = Modifier.fillMaxWidth(),
+                    navController = navController,
+                    onSearch = {})
             }
         }
     ) {
@@ -336,7 +354,11 @@ fun FilterScreen(modifier: Modifier=Modifier, navController: NavController, padd
 
 
 @Composable
-fun DrawFilterScreenContent(modifier: Modifier=Modifier, navController: NavController, paddingValues: PaddingValues) {
+fun DrawFilterScreenContent(
+    modifier: Modifier = Modifier,
+    navController: NavController,
+    paddingValues: PaddingValues,
+) {
     Column(
         modifier = modifier
             .padding(
@@ -349,7 +371,7 @@ fun DrawFilterScreenContent(modifier: Modifier=Modifier, navController: NavContr
             navController = navController,
             textStyle = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.SemiBold),
             paddingValues = PaddingValues(horizontal = 8.dp),
-            onButtonClick = {}
+            onButtonClick = {},
         )
         //FilterMenuSelection(title = "Test", options = listOf("Option 1", "Option 2", "Option 3"), onSelectionChanged = {})
     }
@@ -360,12 +382,13 @@ fun FilterMenuSelection(
     modifier: Modifier = Modifier,
     title: String,
     options: List<String>, // Renamed 'content' to 'options' for clarity
-    onSelectionChanged: (String) -> Unit // Changed event to a callback with the selected item
+    onSelectionChanged: (String) -> Unit, // Changed event to a callback with the selected item
 ) {
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
-            .background(GrayMaterial.copy(alpha = 0.2f))
+            // note: modify
+            .background(LadosTheme.colorScheme.surfaceContainer.copy(alpha = 0.2f))
             .padding(vertical = 24.dp, horizontal = 16.dp)
     ) {
         Column(
@@ -395,7 +418,8 @@ fun FilterMenuSelection(
 
                         .fillMaxWidth(0.95f)
                         .height(48.dp),
-                    colors = ButtonDefaults.buttonColors(MagentaMaterial)
+                    // note: modify
+                    colors = ButtonDefaults.buttonColors(LadosTheme.colorScheme.primary)
                 ) {
                     Row(
                         modifier = Modifier
@@ -418,6 +442,7 @@ fun FilterMenuSelection(
         }
     }
 }
+
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun GreetingPreview() {

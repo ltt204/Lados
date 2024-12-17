@@ -43,8 +43,6 @@ import coil.request.ImageRequest
 import org.nullgroup.lados.R
 import org.nullgroup.lados.data.models.Category
 import org.nullgroup.lados.screens.Screen
-import org.nullgroup.lados.ui.theme.BlackMaterial
-import org.nullgroup.lados.ui.theme.GrayMaterial
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.viewmodels.CategoryUiState
 import org.nullgroup.lados.viewmodels.HomeViewModel
@@ -52,11 +50,14 @@ import org.nullgroup.lados.viewmodels.SharedViewModel
 
 @Composable
 fun Title(
-    modifier: Modifier = Modifier, textStyle: TextStyle = TextStyle(
+    modifier: Modifier = Modifier,
+    textStyle: TextStyle = TextStyle(
         fontSize = 24.sp,
         fontWeight = FontWeight.Bold,
-        color = BlackMaterial,
-    ), content: String
+        // note: modify
+        color = LadosTheme.colorScheme.outline,
+    ),
+    content: String,
 ) {
     Text(
         text = content,
@@ -70,7 +71,8 @@ fun CategoryItemSelect(modifier: Modifier = Modifier, category: Category) {
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(8.dp))
-            .background(GrayMaterial.copy(alpha = 0.2f))
+            // note: modify
+            .background(LadosTheme.colorScheme.outline.copy(alpha = 0.2f))
             .fillMaxWidth()
             .height(72.dp)
             .padding(12.dp),
@@ -103,7 +105,8 @@ fun CategoryItemSelect(modifier: Modifier = Modifier, category: Category) {
                 style = TextStyle(
                     fontSize = 16.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = BlackMaterial,
+                    // note: modify
+                    color = LadosTheme.colorScheme.outline,
                 )
             )
         }
@@ -116,18 +119,14 @@ fun DrawCategorySelectScreenContent(
     viewModel: HomeViewModel = hiltViewModel(),
     navController: NavController,
     paddingValues: PaddingValues,
-    sharedViewModel: SharedViewModel = SharedViewModel()
+    sharedViewModel: SharedViewModel = SharedViewModel(),
 ) {
-    val categoryUiState = viewModel.categoryUiState.collectAsStateWithLifecycle().value
+    val categoryUiState=viewModel.categoryUiState.collectAsStateWithLifecycle().value
 
     val categories = when (categoryUiState) {
         is CategoryUiState.Success -> categoryUiState.categories
-        is CategoryUiState.Loading -> {
-            emptyList()
-        }
-        is CategoryUiState.Error -> {
-            emptyList()
-        }
+        is CategoryUiState.Loading -> emptyList()
+        is CategoryUiState.Error -> emptyList()
     }
 
     Column(
@@ -156,7 +155,7 @@ fun CategorySelectScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
     paddingValues: PaddingValues = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-    sharedViewModel: SharedViewModel = SharedViewModel()
+    sharedViewModel: SharedViewModel = SharedViewModel(),
 ) {
     Scaffold(
         modifier = modifier
@@ -175,12 +174,14 @@ fun CategorySelectScreen(
                     onClick = { navController.popBackStack() },
                     modifier = Modifier
                         .clip(CircleShape)
-                        .background(GrayMaterial.copy(alpha = 0.2f))
+                        // note: modify
+                        .background(LadosTheme.colorScheme.outline.copy(alpha = 0.2f))
                 ) {
                     Icon(
                         Icons.Filled.ArrowBack,
                         contentDescription = "Search",
-                        tint = BlackMaterial
+                        // note: modify
+                        tint = LadosTheme.colorScheme.outline
 
                     )
                 }
