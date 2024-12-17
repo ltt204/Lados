@@ -38,6 +38,7 @@ import org.nullgroup.lados.compose.common.ProfileTopAppBar
 import org.nullgroup.lados.compose.common.TwoColsItem
 import org.nullgroup.lados.data.models.Order
 import org.nullgroup.lados.screens.Screen
+import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.utilities.OrderStatus
 import org.nullgroup.lados.utilities.capitalizeWords
 import org.nullgroup.lados.utilities.getFirstFourOrderStatuses
@@ -151,7 +152,7 @@ fun OrderStatusItem(
     modifier: Modifier = Modifier,
     status: Pair<OrderStatus, Long?> = Pair(OrderStatus.CREATED, null),
 ) {
-    var tintColor = LocalContentColor.current
+    var tintColor = LadosTheme.colorScheme.onBackground
     val time: String = if (status.second == null) {
         tintColor = tintColor.copy(0.5f)
         "Not updated"
@@ -224,9 +225,6 @@ fun DeliveryDetailArea(
     modifier: Modifier = Modifier,
     order: Order
 ) {
-    // TODO : Replace with actual delivery address and phone number
-    val mockAddress = "123, ABC Street, XYZ City, 123456"
-    val mockPhone = "+91 1234567890"
     Card(
         modifier = modifier.fillMaxWidth(),
         onClick = { /*Do nothing*/ },
@@ -238,12 +236,12 @@ fun DeliveryDetailArea(
             verticalArrangement = Arrangement.SpaceEvenly,
         ) {
             Text(
-                text = mockAddress,
+                text = order.deliveryAddress,
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.SemiBold
             )
             Text(
-                text = mockPhone,
+                text = order.customerPhone,
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.SemiBold
             )

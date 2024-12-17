@@ -1,6 +1,5 @@
 package org.nullgroup.lados.screens.customer.order
 
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -15,7 +14,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.Card
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -25,9 +23,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -64,7 +60,7 @@ fun OrderScreen(
         mutableStateOf(0)
     }
     Scaffold(
-        modifier = modifier.padding(top = paddingValues.calculateTopPadding()),
+        modifier = modifier.padding(top = paddingValues.calculateTopPadding(), bottom = paddingValues.calculateBottomPadding()),
         topBar = {
             Column {
                 ProfileTopAppBar(onBackClick = { navController?.navigateUp() }, content = "Orders")
@@ -151,11 +147,12 @@ fun OrderCard(
                 Text(
                     text = "${order.orderProducts.size} items",
                     fontWeight = FontWeight.SemiBold,
-                    fontSize = 20.sp
+                    style = Typography.bodyLarge
                 )
                 Text(
                     text = "$${order.orderTotal}",
-                    color = Color(0xFF272727).copy(alpha = 0.5f), fontSize = 16.sp
+                    color = Color(0xFF272727).copy(alpha = 0.5f),
+                    style = Typography.bodyMedium
                 )
             }
             IconButton(onClick = {

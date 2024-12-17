@@ -49,6 +49,7 @@ import org.nullgroup.lados.data.models.Product
 import org.nullgroup.lados.data.models.ProductVariant
 import org.nullgroup.lados.data.models.Size
 import org.nullgroup.lados.screens.Screen
+import org.nullgroup.lados.ui.theme.Typography
 import org.nullgroup.lados.utilities.OrderStatus
 import org.nullgroup.lados.utilities.getActionForButtonOfOrderProduct
 import org.nullgroup.lados.utilities.getStatusByName
@@ -186,9 +187,8 @@ fun OrderProductItem(
                             Text(text = "Size: ${variant.size.sizeName}", fontSize = 12.sp)
                             Text(text = "Color: ${variant.color.colorName}", fontSize = 12.sp)
                         }
-                        Row(
+                        Column(
                             modifier = Modifier,
-                            verticalAlignment = Alignment.CenterVertically
                         ) {
                             val isSale = variant.salePrice != null
                             Text(
@@ -198,10 +198,6 @@ fun OrderProductItem(
                                 fontWeight = FontWeight.SemiBold
                             )
                             if (isSale) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                                    contentDescription = null
-                                )
                                 Text(
                                     text = "$${variant.salePrice}",
                                     fontSize = 18.sp,
@@ -225,7 +221,7 @@ fun OrderProductItem(
                     }) {
                         Text(
                             text = it,
-                            fontSize = 16.sp,
+                            style = Typography.bodyMedium,
                             fontWeight = FontWeight.SemiBold,
                             textAlign = TextAlign.Center
                         )
