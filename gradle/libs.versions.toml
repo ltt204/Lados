@@ -18,6 +18,7 @@ hiltAndroidTesting = "2.52"
 hiltCompiler = "1.2.0"
 hiltNavigationCompose = "1.2.0"
 javaJwt = "3.18.2"
+javaJwtVersion = "4.4.0"
 junitJupiterApi = "5.8.1"
 junitJupiterEngine = "5.8.1"
 kotlin = "1.9.0"
@@ -75,6 +76,7 @@ hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", ve
 hilt-android-compiler-v249 = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltAndroidCompilerVersion" }
 hilt-android-compiler-v2511 = { module = "com.google.dagger:hilt-android-compiler", version.ref = "googleHiltAndroidCompiler" }
 java-jwt = { module = "com.auth0:java-jwt", version.ref = "javaJwt" }
+java-jwt-v440 = { module = "com.auth0:java-jwt", version.ref = "javaJwtVersion" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
