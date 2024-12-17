@@ -3,8 +3,8 @@ package org.nullgroup.lados.viewmodels.customer
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,7 +25,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CartViewModel @Inject constructor(
-    // private val userRepository: UserRepository,
+    private val firebaseAuth: FirebaseAuth,
     private val productRepository: ProductRepository,
     private val cartItemRepository: CartItemRepository,
 ): ViewModel() {
@@ -72,8 +72,7 @@ class CartViewModel @Inject constructor(
 
     // val isAnyCartItemSelected = { _selectedCartItemIds.value.isNotEmpty() }
 
-    // TODO: Hardcode
-    private val customerId = "admin@test.com"
+    private lateinit var customerId: String
 
     var orderDiscountRate: Double = 0.0
     var orderMaximumDiscount: Double = 0.0
@@ -100,17 +99,20 @@ class CartViewModel @Inject constructor(
     }
 
     init {
-        viewModelScope.launch {
-            refreshCartInformation()
-        }
+        refreshCartInformation()
     }
 
     private var _dataRefreshed = false
     private var _firstInitialization = true
     // This one is rather for errors
     var onRefreshError: ((String) -> Unit)? = null
-    suspend fun refreshCartInformation() {
-        // TODO: to be removed
+    fun refreshCartInformation() {
+        customerId = firebaseAuth.currentUser?.uid ?: "".also {
+            // Should not happen if the user is required to login first
+            onRefreshError?.invoke("Please login first to see your cart")
+            return
+        }
+
 //        viewModelScope.async {
 //            addCartItem("BKj3h1PBk1YbIPy2mnOr", "RmQEs0aelFVq1OaDwhjK", 3)
 //            addCartItem("BKj3h1PBk1YbIPy2mnOr", "TCwBMf9PKHmfryUfmEgL", 2)
@@ -224,20 +226,19 @@ class CartViewModel @Inject constructor(
         }
     }
 
-    // TODO: Remove this function
-    // Use this when adding product to cart in other places
-    suspend fun addCartItem(productId: String, variantId: String, amount: Int): Result<Boolean> {
-        val cartItem = CartItem(
-            productId = productId,
-            variantId = variantId,
-            amount = amount
-        )
-
-        return cartItemRepository.addCartItemToCart(
-            customerId = customerId,
-            cartItem = cartItem
-        )
-    }
+//    // Use this when adding product to cart in other places
+//    suspend fun addCartItem(productId: String, variantId: String, amount: Int): Result<Boolean> {
+//        val cartItem = CartItem(
+//            productId = productId,
+//            variantId = variantId,
+//            amount = amount
+//        )
+//
+//        return cartItemRepository.addCartItemToCart(
+//            // customerId = customerId,
+//            cartItem = cartItem
+//        )
+//    }
 
     fun updateCartItemAmountLocally(cartItemId: String, amountDelta: Int) {
         if (amountDelta == 0) {

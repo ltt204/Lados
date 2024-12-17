@@ -149,10 +149,6 @@ class ProductDetailScreenViewModel @Inject constructor(
             val selectedSize = uiState.value.selectedSize
             // TODO: Update quantity based on user input
             val quantity = 1
-            // TODO: Delete later
-            //       Cart will implement with user authentication later
-            //       when user authentication is completed
-            val currentUserId = "admin@test.com"
 
             val correspondingVariant =
                 if (selectedColor != null && selectedSize != null)
@@ -167,9 +163,8 @@ class ProductDetailScreenViewModel @Inject constructor(
                     variantId = correspondingVariant.id,
                     amount = quantity
                 )
-                cartItemRepository.addCartItemToCart(currentUserId, cartItem)
-                // TODO: Change to this in the future
-                // cartItemRepository.addCartItemToCart(cartItem)
+
+                cartItemRepository.addCartItemToCart(cartItem)
 
                 // TODO: Notify user that product is added to cart
                 //      Temporary solution

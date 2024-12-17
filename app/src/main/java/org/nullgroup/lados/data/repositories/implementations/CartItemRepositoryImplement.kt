@@ -1,10 +1,10 @@
 package org.nullgroup.lados.data.repositories.implementations
 
 import android.util.Log
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
-import com.google.firebase.firestore.toObject
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -16,6 +16,7 @@ import org.nullgroup.lados.data.repositories.interfaces.CartItemRepository
 
 class CartItemRepositoryImplement(
     private val firestore: FirebaseFirestore,
+    private val firebaseAuth: FirebaseAuth
 ): CartItemRepository {
     private val userCollectionName = "users"
 
@@ -55,10 +56,12 @@ class CartItemRepositoryImplement(
      * If the item has "already existed", remove it and add the new one
      **/
     override suspend fun addCartItemToCart(
-        customerId: String,
+//        customerId: String,
         cartItem: CartItem
     ): Result<Boolean> {
         return try {
+            val customerId = firebaseAuth.currentUser?.uid
+                ?: throw Exception("User not logged in")
             val cartCollectionRef = firestore
                 .collection(userCollectionName).document(customerId)
                 .collection(CartItem.COLLECTION_NAME)

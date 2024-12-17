@@ -7,7 +7,10 @@ import org.nullgroup.lados.data.models.CheckoutInfo
 
 interface CartItemRepository {
     fun getCartItemsAsFlow(customerId: String): Flow<List<CartItem>>
-    suspend fun addCartItemToCart(customerId: String, cartItem: CartItem): Result<Boolean>
+    suspend fun addCartItemToCart(
+//        customerId: String,
+        cartItem: CartItem,
+    ): Result<Boolean>
     suspend fun removeCartItemsFromCart(customerId: String, cartItemIds: List<String>): Result<Boolean>
     suspend fun updateCartItemsAmount(
         customerId: String,
