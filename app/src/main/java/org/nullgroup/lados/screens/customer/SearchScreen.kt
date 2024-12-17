@@ -55,65 +55,11 @@ import androidx.navigation.NavController
 import kotlinx.coroutines.launch
 import org.nullgroup.lados.data.local.SearchHistoryManager
 import org.nullgroup.lados.screens.Screen
-import org.nullgroup.lados.ui.theme.BlackMaterial
-import org.nullgroup.lados.ui.theme.BrownMaterial
-import org.nullgroup.lados.ui.theme.GrayMaterial
+import org.nullgroup.lados.ui.theme.LadosTheme
+import org.nullgroup.lados.ui.theme.OnSurface
+import org.nullgroup.lados.ui.theme.Tertiary
+import org.nullgroup.lados.ui.theme.Outline
 import org.nullgroup.lados.viewmodels.SharedViewModel
-
-@Composable
-fun NormalTextFieldSearchScreen(
-    label: String,
-    modifier: Modifier = Modifier,
-    icon: @Composable (() -> Unit),
-) {
-    val (text, setText) = mutableStateOf("")
-    TextField(
-        leadingIcon = icon,
-        value = text,
-
-        colors = TextFieldDefaults.colors(unfocusedContainerColor = Color.Transparent),
-        onValueChange = setText,
-        // note: modify color
-        label = { Text(text = label, color = LadosTheme.colorScheme.error, fontSize = 18.sp) },
-        modifier = modifier
-    )
-}
-
-@Composable
-fun SearchBarSearchScreen(modifier: Modifier = Modifier) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center
-    ) {
-        OutlinedTextField(
-            value = "",
-            onValueChange = {},
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(50)),
-            singleLine = true,
-            placeholder = { Text("Search") },
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Filled.Search,
-                    contentDescription = "Search"
-                )
-            },
-            shape = RoundedCornerShape(50),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-                // note: modify
-                unfocusedBorderColor = LadosTheme.colorScheme.surfaceContainer,
-                // note: modify
-                focusedBorderColor = LadosTheme.colorScheme.primary
-            )
-        )
-    }
-}
 
 @Composable
 fun SearchHeaderSearchScreen(
@@ -152,7 +98,7 @@ fun SearchHistoryRow(
         Box(modifier = Modifier.fillMaxWidth(0.9f).clickable { onReClick(content) }) {
             Text(
                 text = content,
-                style = TextStyle(fontSize = 18.sp, color = BlackMaterial.copy(alpha = 0.5f))
+                style = TextStyle(fontSize = 18.sp, color = OnSurface.copy(alpha = 0.5f))
             )
         }
         Spacer(Modifier.weight(1f))
@@ -223,7 +169,7 @@ fun DrawMainSearchScreenContent(
         Spacer(Modifier.height(4.dp))
         HorizontalDivider(
             modifier = Modifier.fillMaxWidth(),
-            color = GrayMaterial.copy(alpha = 0.3f)
+            color = Outline.copy(alpha = 0.3f)
         )
         SearchHistory(
             searchHistory = searchHistory,
@@ -265,7 +211,7 @@ fun SearchScreen(
                     Icon(
                         Icons.Filled.ArrowBack,
                         contentDescription = "Search",
-                        tint = BlackMaterial
+                        tint = OnSurface
                     )
                 }
                 Spacer(modifier = Modifier.width(16.dp))

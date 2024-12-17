@@ -67,6 +67,10 @@ import org.nullgroup.lados.screens.customer.ProductItem
 import org.nullgroup.lados.screens.customer.SearchBar
 import org.nullgroup.lados.screens.customer.SearchBarRow
 import org.nullgroup.lados.ui.theme.LadosTheme
+import org.nullgroup.lados.ui.theme.OnSurface
+import org.nullgroup.lados.ui.theme.Outline
+import org.nullgroup.lados.ui.theme.Primary
+import org.nullgroup.lados.ui.theme.SurfaceContainerHighest
 import org.nullgroup.lados.viewmodels.HomeViewModel
 import org.nullgroup.lados.viewmodels.ProductUiState
 import org.nullgroup.lados.viewmodels.SharedViewModel
@@ -93,7 +97,7 @@ fun FilterButton(
         enabled = isVisible,
         modifier = modifier,
         colors = ButtonDefaults.buttonColors(
-            if (isSelected) MagentaMaterial else GrayMaterial.copy(
+            if (isSelected) Primary else Outline.copy(
                 alpha = 0.2f
             )
         ),
@@ -105,11 +109,11 @@ fun FilterButton(
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             modifier = Modifier.padding(horizontal = 4.dp)
         ) {
-            Text(text = text, color = if (isSelected) WhiteMaterial else BlackMaterial)
+            Text(text = text, color = if (isSelected) SurfaceContainerHighest else OnSurface)
             if (icon != null) {
                 Icon(
                     icon,
-                    tint = if (isSelected) WhiteMaterial else BlackMaterial,
+                    tint = if (isSelected) SurfaceContainerHighest else OnSurface,
                     contentDescription = contentDescription,
                     modifier = Modifier.size(28.dp)
                 )
