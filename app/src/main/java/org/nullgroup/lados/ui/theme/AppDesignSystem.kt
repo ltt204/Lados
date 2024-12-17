@@ -13,10 +13,16 @@ data class AppColorScheme(
     val onBackground: Color,
     val primary: Color,
     val onPrimary: Color,
+    val primaryContainer: Color,
+    val onPrimaryContainer: Color,
     val secondary: Color,
     val onSecondary: Color,
+    val secondaryContainer: Color,
+    val onSecondaryContainer: Color,
     val error: Color,
     val onError: Color,
+    val errorContainer: Color,
+    val onErrorContainer: Color,
     val outline: Color,
     val surfaceContainerLowest: Color,
     val surfaceContainerLow: Color,
@@ -24,6 +30,10 @@ data class AppColorScheme(
     val surfaceContainerHigh: Color,
     val surfaceContainerHighest: Color,
     val onSurface: Color,
+    val tertiary: Color,
+    val onTertiary: Color,
+    val tertiaryContainer: Color,
+    val onTertiaryContainer: Color,
 )
 
 data class AppTypography(
@@ -59,6 +69,8 @@ data class AppSize(
     val normal: Dp,
     val medium: Dp,
     val large: Dp,
+    val extraLarge: Dp,
+    val extraExtraLarge: Dp,
 )
 
 val LocalAppColorScheme = staticCompositionLocalOf {
@@ -67,10 +79,16 @@ val LocalAppColorScheme = staticCompositionLocalOf {
         onBackground = Color.Unspecified,
         primary = Color.Unspecified,
         onPrimary = Color.Unspecified,
+        primaryContainer = Color.Unspecified,
+        onPrimaryContainer = Color.Unspecified,
         secondary = Color.Unspecified,
         onSecondary = Color.Unspecified,
+        secondaryContainer = Color.Unspecified,
+        onSecondaryContainer = Color.Unspecified,
         error = Color.Unspecified,
         onError = Color.Unspecified,
+        errorContainer = Color.Unspecified,
+        onErrorContainer = Color.Unspecified,
         outline = Color.Unspecified,
         surfaceContainerLowest = Color.Unspecified,
         surfaceContainerLow = Color.Unspecified,
@@ -78,6 +96,10 @@ val LocalAppColorScheme = staticCompositionLocalOf {
         surfaceContainerHigh = Color.Unspecified,
         surfaceContainerHighest = Color.Unspecified,
         onSurface = Color.Unspecified,
+        tertiary = Color.Unspecified,
+        onTertiary = Color.Unspecified,
+        tertiaryContainer = Color.Unspecified,
+        onTertiaryContainer = Color.Unspecified,
     )
 }
 
@@ -119,5 +141,7 @@ val LocalAppSize = staticCompositionLocalOf {
         normal = Dp.Unspecified,
         medium = Dp.Unspecified,
         large = Dp.Unspecified,
+        extraLarge = Dp.Unspecified,
+        extraExtraLarge = Dp.Unspecified,
     )
 }

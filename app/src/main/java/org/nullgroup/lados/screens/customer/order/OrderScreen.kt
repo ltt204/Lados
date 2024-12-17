@@ -1,10 +1,12 @@
 package org.nullgroup.lados.screens.customer.order
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -14,6 +16,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -42,6 +45,7 @@ import org.nullgroup.lados.compose.common.ProfileTopAppBar
 import org.nullgroup.lados.compose.order.OrderScreenTopAppBar
 import org.nullgroup.lados.data.models.Order
 import org.nullgroup.lados.screens.Screen
+import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.ui.theme.Typography
 import org.nullgroup.lados.utilities.OrderStatus
 import org.nullgroup.lados.viewmodels.customer.OrderState
@@ -53,19 +57,29 @@ fun OrderScreen(
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues = PaddingValues(0.dp),
     navController: NavController? = null,
-    orderViewModel: OrderViewModel = hiltViewModel()
+    orderViewModel: OrderViewModel = hiltViewModel(),
 ) {
     val orderUiState = orderViewModel.orderState.collectAsState().value
     var tabSelectedIndex by rememberSaveable {
         mutableStateOf(0)
     }
     Scaffold(
-        modifier = modifier.padding(top = paddingValues.calculateTopPadding(), bottom = paddingValues.calculateBottomPadding()),
+        modifier = modifier.padding(
+            top = paddingValues.calculateTopPadding(),
+            bottom = paddingValues.calculateBottomPadding()
+        ),
         topBar = {
             Column {
-                ProfileTopAppBar(onBackClick = { navController?.navigateUp() }, content = "Orders")
+                ProfileTopAppBar(
+                    onBackClick = { navController?.navigateUp() },
+                    content = "Orders",
+                )
                 OrderScreenTopAppBar(
-                    modifier = Modifier.padding(start = 16.dp, top = 8.dp, end = 16.dp),
+                    modifier = modifier.padding(
+                        start = LadosTheme.size.medium,
+                        top = LadosTheme.size.small,
+                        end = LadosTheme.size.medium,
+                    ),
                     selectedTabIndex = tabSelectedIndex,
                     onTabSelected = {
                         tabSelectedIndex = it
@@ -74,13 +88,19 @@ fun OrderScreen(
             }
         }
     ) { innerPadding ->
-        Column(modifier = Modifier.padding(top = innerPadding.calculateTopPadding())) {
+        Column(modifier = modifier.padding(top = innerPadding.calculateTopPadding())) {
             when (orderUiState) {
                 is OrderState.Loading -> {
                     LoadOnProgress(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .background(
+                                color = LadosTheme.colorScheme.background,
+                            )
+                            .fillMaxWidth(),
                         content = {
-                            CircularProgressIndicator()
+                            CircularProgressIndicator(
+                                color = LadosTheme.colorScheme.primary,
+                            )
                         }
                     )
                 }
@@ -93,9 +113,10 @@ fun OrderScreen(
                     orderViewModel.filterOrderByStatus(OrderStatus.entries[tabSelectedIndex])
                     LazyColumn(
                         modifier = Modifier
+                            .background(color = LadosTheme.colorScheme.background)
                             .fillMaxWidth()
-                            .padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                            .padding(LadosTheme.size.medium),
+                        verticalArrangement = Arrangement.spacedBy(LadosTheme.size.small),
                     ) {
                         items(items = orderUiState.orders, key = { it.orderId }) { order ->
                             OrderCard(
@@ -117,26 +138,33 @@ fun OrderScreen(
 fun OrderCard(
     modifier: Modifier = Modifier,
     order: Order,
-    onItemClick: (String) -> Unit = {}
+    onItemClick: (String) -> Unit = {},
 ) {
     Card(
-        modifier = modifier.height(84.dp),
-        onClick = { onItemClick(order.orderId) }
+        modifier = modifier
+            .height(84.dp),
+        onClick = { onItemClick(order.orderId) },
+        colors = CardColors(
+            containerColor = LadosTheme.colorScheme.surfaceContainerHighest,
+            contentColor = LadosTheme.colorScheme.onBackground,
+            disabledContainerColor = LadosTheme.colorScheme.surfaceContainer,
+            disabledContentColor = LadosTheme.colorScheme.onSurface,
+        ),
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight()
-                .padding(8.dp),
+            modifier = modifier
+                .background(color = LadosTheme.colorScheme.background)
+                .fillMaxSize()
+                .padding(LadosTheme.size.small),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
             Icon(
                 modifier = Modifier
-                    .padding(8.dp)
-                    .width(40.dp),
+                    .padding(LadosTheme.size.small)
+                    .width(LadosTheme.size.extraExtraLarge),
                 painter = painterResource(id = R.drawable.baseline_receipt_long_24),
-                contentDescription = "Order Icon"
+                contentDescription = "Order Icon",
             )
             Column(
                 modifier = Modifier
@@ -146,13 +174,16 @@ fun OrderCard(
             ) {
                 Text(
                     text = "${order.orderProducts.size} items",
-                    fontWeight = FontWeight.SemiBold,
-                    style = Typography.bodyLarge
+                    style = LadosTheme.typography.bodyLarge.copy(
+                        fontWeight = FontWeight.SemiBold,
+                        color = LadosTheme.colorScheme.onBackground,
+                    ),
                 )
                 Text(
                     text = "$${order.orderTotal}",
-                    color = Color(0xFF272727).copy(alpha = 0.5f),
-                    style = Typography.bodyMedium
+                    style = LadosTheme.typography.bodyMedium.copy(
+                        color = LadosTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.3f),
+                    ),
                 )
             }
             IconButton(onClick = {

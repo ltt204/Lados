@@ -1,6 +1,7 @@
 package org.nullgroup.lados.screens.customer.order
 
 import android.util.Log
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -20,7 +21,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -49,6 +49,7 @@ import org.nullgroup.lados.data.models.Product
 import org.nullgroup.lados.data.models.ProductVariant
 import org.nullgroup.lados.data.models.Size
 import org.nullgroup.lados.screens.Screen
+import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.ui.theme.Typography
 import org.nullgroup.lados.utilities.OrderStatus
 import org.nullgroup.lados.utilities.getActionForButtonOfOrderProduct
@@ -62,7 +63,7 @@ fun OrderProductsViewScreen(
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues = PaddingValues(0.dp),
     navController: NavController? = null,
-    orderProductsViewModel: OrderProductsViewModel = hiltViewModel()
+    orderProductsViewModel: OrderProductsViewModel = hiltViewModel(),
 ) {
     val orderProducts = orderProductsViewModel.productVariantsState.collectAsState()
 
@@ -77,14 +78,14 @@ fun OrderProductsViewScreen(
                 content = "Order Products"
             )
         },
-        backgroundColor = MaterialTheme.colorScheme.background
+        backgroundColor = LadosTheme.colorScheme.background
     ) { innerPadding ->
         when (orderProducts.value) {
             is OrderProductsState.Loading -> {
                 LoadOnProgress(
                     modifier = modifier.fillMaxSize(),
                     content = {
-                        CircularProgressIndicator(modifier = Modifier.size(48.dp))
+                        CircularProgressIndicator(modifier = Modifier.size(LadosTheme.size.extraExtraLarge))
                     }
                 )
             }
@@ -98,8 +99,8 @@ fun OrderProductsViewScreen(
                 OrderProductsView(
                     modifier = Modifier.padding(
                         top = innerPadding.calculateTopPadding(),
-                        start = 16.dp,
-                        end = 16.dp
+                        start = LadosTheme.size.medium,
+                        end = LadosTheme.size.medium
                     ),
                     orderProducts = (orderProducts.value as OrderProductsState.Success).orderProducts,
                     orderStatus = getStatusByName(
@@ -142,7 +143,7 @@ fun OrderProductItem(
     product: Product,
     variant: ProductVariant,
     navController: NavController? = null,
-    buttonAction: Pair<String?, (NavController, String?, String?) -> Unit>
+    buttonAction: Pair<String?, (NavController, String?, String?) -> Unit>,
 ) {
     val image = variant.images.firstOrNull()?.link
     Card(
@@ -159,7 +160,7 @@ fun OrderProductItem(
                     SubcomposeAsyncImage(
                         modifier = Modifier
                             .size(100.dp)
-                            .clip(RoundedCornerShape(12.dp)),
+                            .clip(LadosTheme.shape.medium),
                         model = ImageRequest
                             .Builder(LocalContext.current)
                             .crossfade(true)
@@ -168,24 +169,29 @@ fun OrderProductItem(
                         contentDescription = "Product Image",
                         contentScale = ContentScale.Crop,
                         loading = {
-                            CircularProgressIndicator(modifier = Modifier.size(12.dp))
+                            CircularProgressIndicator(modifier = Modifier.size(LadosTheme.size.medium))
                         },
                         error = {
                             Text(text = "Image failed to load: ${it.result.throwable.message}")
                         }
                     )
-                    Spacer(modifier = Modifier.padding(horizontal = 8.dp))
+                    Spacer(modifier = Modifier.padding(horizontal = LadosTheme.size.small))
                     Column(
                         modifier = Modifier.fillMaxHeight(),
                     ) {
                         Text(
                             text = product.name,
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.SemiBold
+                            style = LadosTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
                         )
                         Column {
-                            Text(text = "Size: ${variant.size.sizeName}", fontSize = 12.sp)
-                            Text(text = "Color: ${variant.color.colorName}", fontSize = 12.sp)
+                            Text(
+                                text = "Size: ${variant.size.sizeName}",
+                                style = LadosTheme.typography.bodySmall
+                            )
+                            Text(
+                                text = "Color: ${variant.color.colorName}",
+                                style = LadosTheme.typography.bodySmall
+                            )
                         }
                         Column(
                             modifier = Modifier,
@@ -194,16 +200,16 @@ fun OrderProductItem(
                             Text(
                                 text = "$${variant.originalPrice}",
                                 textDecoration = if (isSale) TextDecoration.LineThrough else null,
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.SemiBold
+                                style = LadosTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                             )
                             if (isSale) {
                                 Text(
                                     text = "$${variant.salePrice}",
-                                    fontSize = 18.sp,
-                                    textAlign = TextAlign.Center,
-                                    color = androidx.compose.ui.graphics.Color.Red,
-                                    fontWeight = FontWeight.SemiBold
+                                    style = LadosTheme.typography.titleMedium.copy(
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = LadosTheme.colorScheme.error,
+                                        textAlign = TextAlign.Center
+                                    ),
                                 )
                             }
                         }
@@ -221,9 +227,10 @@ fun OrderProductItem(
                     }) {
                         Text(
                             text = it,
-                            style = Typography.bodyMedium,
-                            fontWeight = FontWeight.SemiBold,
-                            textAlign = TextAlign.Center
+                            style = LadosTheme.typography.bodyMedium.copy(
+                                fontWeight = FontWeight.SemiBold,
+                                textAlign = TextAlign.Center
+                            ),
                         )
                     }
                 }
