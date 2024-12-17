@@ -1,7 +1,6 @@
 package org.nullgroup.lados.screens.customer.order
 
 import android.util.Log
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -13,14 +12,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Scaffold
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -35,7 +30,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.SubcomposeAsyncImage
@@ -45,12 +39,12 @@ import org.nullgroup.lados.compose.common.ProfileTopAppBar
 import org.nullgroup.lados.compose.common.TwoColsItem
 import org.nullgroup.lados.data.models.Color
 import org.nullgroup.lados.data.models.Image
+import org.nullgroup.lados.data.models.OrderProduct
 import org.nullgroup.lados.data.models.Product
 import org.nullgroup.lados.data.models.ProductVariant
 import org.nullgroup.lados.data.models.Size
 import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.ui.theme.LadosTheme
-import org.nullgroup.lados.ui.theme.Typography
 import org.nullgroup.lados.utilities.OrderStatus
 import org.nullgroup.lados.utilities.getActionForButtonOfOrderProduct
 import org.nullgroup.lados.utilities.getStatusByName
@@ -65,8 +59,9 @@ fun OrderProductsViewScreen(
     navController: NavController? = null,
     orderProductsViewModel: OrderProductsViewModel = hiltViewModel(),
 ) {
-    val orderProducts = orderProductsViewModel.productVariantsState.collectAsState()
-
+    val productVariants = orderProductsViewModel.productVariantsState.collectAsState()
+    val orderProducts = orderProductsViewModel.orderProducts.collectAsState()
+    Log.d("OrderProductsViewScreen", "OrderProductsViewScreen: $orderProducts")
     Scaffold(
         modifier = modifier
             .padding(top = paddingValues.calculateTopPadding()),
@@ -80,7 +75,7 @@ fun OrderProductsViewScreen(
         },
         backgroundColor = LadosTheme.colorScheme.background
     ) { innerPadding ->
-        when (orderProducts.value) {
+        when (productVariants.value) {
             is OrderProductsState.Loading -> {
                 LoadOnProgress(
                     modifier = modifier.fillMaxSize(),
@@ -102,7 +97,8 @@ fun OrderProductsViewScreen(
                         start = LadosTheme.size.medium,
                         end = LadosTheme.size.medium
                     ),
-                    orderProducts = (orderProducts.value as OrderProductsState.Success).orderProducts,
+                    orderProducts = orderProducts.value,
+                    productVariants = (productVariants.value as OrderProductsState.Success).orderProducts,
                     orderStatus = getStatusByName(
                         currentOrder.value
                             .orderStatusLog.entries.last().key
@@ -117,18 +113,21 @@ fun OrderProductsViewScreen(
 @Composable
 fun OrderProductsView(
     modifier: Modifier = Modifier,
-    orderProducts: List<Pair<Product, ProductVariant>>,
+    productVariants: List<Pair<Product, ProductVariant>>,
+    orderProducts: List<OrderProduct> = emptyList(),
     orderStatus: OrderStatus,
     navController: NavController? = null,
 ) {
     val buttonAction = orderStatus.getActionForButtonOfOrderProduct()
 
     LazyColumn(modifier = modifier) {
-        items(items = orderProducts, key = { it.first.id }) { (product, variant) ->
+        items(items = productVariants, key = { it.first.id }) { (product, variant) ->
+            val orderProduct = orderProducts.find { it.productId == product.id }
             OrderProductItem(
                 modifier = Modifier.heightIn(min = 72.dp, max = 128.dp),
                 product = product,
                 variant = variant,
+                orderProduct = orderProduct!!,
                 navController = navController,
                 buttonAction = buttonAction
             )
@@ -142,6 +141,7 @@ fun OrderProductItem(
     modifier: Modifier = Modifier,
     product: Product,
     variant: ProductVariant,
+    orderProduct: OrderProduct,
     navController: NavController? = null,
     buttonAction: Pair<String?, (NavController, String?, String?) -> Unit>,
 ) {
@@ -192,19 +192,24 @@ fun OrderProductItem(
                                 text = "Color: ${variant.color.colorName}",
                                 style = LadosTheme.typography.bodySmall
                             )
+                            Text(
+                                text = "Qty: ${orderProduct.amount}",
+                                style = LadosTheme.typography.bodySmall
+                            )
                         }
                         Column(
                             modifier = Modifier,
                         ) {
+                            val amount = orderProduct.amount
                             val isSale = variant.salePrice != null
                             Text(
-                                text = "$${variant.originalPrice}",
+                                text = "$${variant.originalPrice * amount}",
                                 textDecoration = if (isSale) TextDecoration.LineThrough else null,
                                 style = LadosTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                             )
                             if (isSale) {
                                 Text(
-                                    text = "$${variant.salePrice}",
+                                    text = "$${variant.salePrice!! * amount}",
                                     style = LadosTheme.typography.titleMedium.copy(
                                         fontWeight = FontWeight.SemiBold,
                                         color = LadosTheme.colorScheme.error,
@@ -375,6 +380,13 @@ fun OrderProductItemPreview() {
         Modifier,
         product,
         variant,
+        OrderProduct(
+            id = "orderProduct1",
+            productId = "product1",
+            variantId = "variant1",
+            amount = 2,
+            totalPrice = 59.98
+        ),
         buttonAction = Pair("Action") { navController, _, _ -> /*TODO*/ }
     )
 }

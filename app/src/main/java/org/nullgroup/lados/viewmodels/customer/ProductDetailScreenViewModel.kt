@@ -1,6 +1,8 @@
 package org.nullgroup.lados.viewmodels.customer
 
 import android.util.Log
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -9,17 +11,23 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.nullgroup.lados.data.models.CartItem
 import org.nullgroup.lados.data.models.Color
 import org.nullgroup.lados.data.models.Product
 import org.nullgroup.lados.data.models.Size
+import org.nullgroup.lados.data.models.User
+import org.nullgroup.lados.data.repositories.interfaces.CartItemRepository
 import org.nullgroup.lados.data.repositories.interfaces.ProductRepository
+import org.nullgroup.lados.data.repositories.interfaces.UserRepository
 import org.nullgroup.lados.screens.customer.product.ProductDetailUiState
 import javax.inject.Inject
 
 
 @HiltViewModel
 class ProductDetailScreenViewModel @Inject constructor(
-    private val productRepository: ProductRepository
+    private val productRepository: ProductRepository,
+    private val cartItemRepository: CartItemRepository,
+    private val userRepository: UserRepository
 ) : ViewModel() {
 
     // Sealed class for different product-related states
@@ -28,6 +36,9 @@ class ProductDetailScreenViewModel @Inject constructor(
         data class Success(val product: Product?) : ProductState()
         data class Error(val message: String) : ProductState()
     }
+
+    private val _user = MutableStateFlow<Result<User?>>(Result.success(null))
+    val user: StateFlow<Result<User?>> = _user.asStateFlow()
 
     // Centralized state management using StateFlow
     private val _productState = MutableStateFlow<ProductState>(ProductState.Loading)
@@ -59,7 +70,7 @@ class ProductDetailScreenViewModel @Inject constructor(
         }
     }
 
-    fun addProducts(products: List<Product>){
+    fun addProducts(products: List<Product>) {
         viewModelScope.launch {
             productRepository.addProductsToFireStore(products)
         }
@@ -97,7 +108,7 @@ class ProductDetailScreenViewModel @Inject constructor(
         }
     }
 
-    fun updateSelectedColor(selectedColor: Color){
+    fun updateSelectedColor(selectedColor: Color) {
         _uiState.update {
             it.copy(
                 selectedColor = selectedColor
@@ -105,7 +116,7 @@ class ProductDetailScreenViewModel @Inject constructor(
         }
     }
 
-    fun updateSelectedSize(size: Size){
+    fun updateSelectedSize(size: Size) {
         _uiState.update {
             it.copy(
                 selectedSize = size
@@ -113,17 +124,88 @@ class ProductDetailScreenViewModel @Inject constructor(
         }
     }
 
+    fun updateQuantity(quantity: Int) {
+        _uiState.update {
+            it.copy(
+                quantity = quantity
+            )
+        }
+    }
+
     private fun getSortedColors(product: Product): List<Color> {
         return product.variants
             .map { it.color }
-            .distinctBy { it.id }
+            .distinctBy { it.hexCode }
             .sortedBy { it.colorName }
     }
 
     private fun getSortedSizes(product: Product): List<Size> {
         return product.variants
             .map { it.size }
-            .distinctBy { it.id }
+            .distinctBy { it.sizeName }
             .sortedBy { it.sizeName }
+    }
+
+    // TODO: Adjust logic as you wish
+    val onAddToCartClicked: (
+        onAddedDone: (() -> Unit)?,
+            onAddedFailed: (() -> Unit)?
+    ) -> (() -> Unit) = { onAddedDone, onAddedFailed ->
+        {
+            viewModelScope.launch {
+                onAddItemToCart(onAddedDone, onAddedFailed)
+            }
+        }
+    }
+
+    val onAddItemToCart: (
+        onAddedDone: (() -> Unit)?,
+        onAddedFailed: (() -> Unit)?
+    ) -> Unit = { onAddedDone, onAddedFailed ->
+        viewModelScope.launch {
+            val product = uiState.value.product
+            val selectedColor = uiState.value.selectedColor
+            val selectedSize = uiState.value.selectedSize
+            val quantity = uiState.value.quantity
+
+            val correspondingVariant =
+                if (selectedColor != null && selectedSize != null)
+                    product.variants.find {
+                        it.color.id == selectedColor.id && it.size.id == selectedSize.id
+                    }
+                else null
+
+            if (correspondingVariant != null) {
+                val cartItem = CartItem(
+                    productId = product.id,
+                    variantId = correspondingVariant.id,
+                    amount = quantity
+                )
+
+                cartItemRepository.addCartItemToCart(cartItem)
+
+                // TODO: Notify user that product is added to cart
+                //      Temporary solution
+                onAddedDone?.invoke()
+
+            } else {
+
+                onAddedFailed?.invoke()
+                // TODO: Notify user to select color and size
+            }
+        }
+    }
+
+    fun getUser(userId: String){
+        viewModelScope.launch {
+            userRepository.getUserFromFirestore(userId)
+                .onSuccess { user ->
+                    _user.value = Result.success(user)
+                }
+                .onFailure { throwable ->
+                    _user.value = Result.failure(throwable)
+                    Log.e("ReviewProductViewModel", "Error fetching user: ${throwable.message}")
+                }
+        }
     }
 }

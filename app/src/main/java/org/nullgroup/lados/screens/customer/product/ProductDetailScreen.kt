@@ -2,6 +2,7 @@ package org.nullgroup.lados.screens.customer.product
 
 import android.os.Build
 import android.util.Log
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -71,8 +72,9 @@ import org.nullgroup.lados.data.models.Size
 import org.nullgroup.lados.data.models.UserEngagement
 import org.nullgroup.lados.utilities.formatToRelativeTime
 import org.nullgroup.lados.viewmodels.customer.ProductDetailScreenViewModel
+import org.nullgroup.lados.viewmodels.customer.ProfileViewModel
+import org.nullgroup.lados.viewmodels.customer.ReviewProductViewModel
 import java.util.Locale
-
 
 data class ProductDetailUiState(
     val product: Product = Product(),
@@ -80,6 +82,7 @@ data class ProductDetailUiState(
     val sortedSizes: List<Size> = emptyList(),
     val selectedSize: Size? = null,
     val selectedColor: org.nullgroup.lados.data.models.Color? = null,
+    val quantity: Int = 1,
     val isLoading: Boolean = true,
     val error: String? = null
 )
@@ -95,16 +98,27 @@ object ProductTheme {
 fun ProductDetailScreen(
     productViewModel: ProductDetailScreenViewModel = hiltViewModel(),
     productId: String,
-    onAddToBag: () -> Unit = {},
-    navController: NavController,
-    modifier: Modifier = Modifier,
+    navController: NavController
 ) {
 
     val scrollState = rememberScrollState()
     var showSizeBottomSheet by remember { mutableStateOf(false) }
     var showColorBottomSheet by remember { mutableStateOf(false) }
 
+    val context = LocalContext.current
+
     val uiState by productViewModel.uiState.collectAsState()
+
+    // TODO: Adjust as you wish
+    val onAddedToCart: () -> Unit = {
+        Toast.makeText(context, "Product added to cart", Toast.LENGTH_SHORT).show()
+        navController.navigateUp()
+    }
+
+    val onAddedToCartFailed: () -> Unit = {
+        Toast.makeText(context, "Failed to add product to cart", Toast.LENGTH_SHORT).show()
+    }
+    val onAddToCart = productViewModel.onAddToCartClicked(onAddedToCart, onAddedToCartFailed)
 
     // Load product details on initial composition
     LaunchedEffect(productId) {
@@ -115,7 +129,7 @@ fun ProductDetailScreen(
         uiState.isLoading -> {
             Box(
                 contentAlignment = Alignment.Center,
-                modifier = modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize()
             ) {
                 CircularProgressIndicator(color = ProductTheme.primaryColor)
             }
@@ -135,14 +149,14 @@ fun ProductDetailScreen(
                 },
                 bottomBar = {
                     ProductDetailBottomBar(
-                        title = "Add to Bag",
+                        title = "Add to Cart",
                         price = "$${uiState.product.variants.first().salePrice}",
-                        onClick = onAddToBag
+                        onClick = onAddToCart
                     )
                 }
             ) { paddingValues ->
                 Column(
-                    modifier = modifier
+                    modifier = Modifier
                         .fillMaxWidth()
                         .padding(paddingValues)
                         .padding(bottom = 10.dp)
@@ -159,6 +173,9 @@ fun ProductDetailScreen(
                     ProductDetailsSection(
                         onSizeClick = { showSizeBottomSheet = true },
                         onColorClick = { showColorBottomSheet = true },
+                        onUpdateQuantity = {
+                            productViewModel.updateQuantity(it)
+                        },
                         description = uiState.product.description,
                         size = uiState.selectedSize?.sizeName ?: "",
                         color = uiState.selectedColor ?: org.nullgroup.lados.data.models.Color()
@@ -187,7 +204,6 @@ fun ProductDetailScreen(
                         itemColor = { Color.Transparent },
                         onItemSelected = {
                             productViewModel.updateSelectedSize(it)
-                            // showSizeBottomSheet = false
                         }
                     )
                 }
@@ -203,7 +219,6 @@ fun ProductDetailScreen(
                         itemColor = { Color(android.graphics.Color.parseColor(it.hexCode)) },
                         onItemSelected = {
                             productViewModel.updateSelectedColor(it)
-                            //showColorBottomSheet = false
                         }
                     )
                 }
@@ -337,7 +352,8 @@ fun ProductDetailsSection(
     color: org.nullgroup.lados.data.models.Color,
     description: String = "",
     onSizeClick: () -> Unit,
-    onColorClick: () -> Unit
+    onColorClick: () -> Unit,
+    onUpdateQuantity: (Int) -> Unit
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -366,7 +382,9 @@ fun ProductDetailsSection(
         )
 
         // Quantity Selection
-        QuantitySelector()
+        QuantitySelector(
+            onUpdateQuantity = onUpdateQuantity
+        )
 
         // Product Description
         Text(
@@ -382,7 +400,7 @@ fun ProductDetailsSection(
 fun SelectableDetailRow(
     title: String,
     currentSelection: String,
-    onClick: () -> Unit,
+    onClick: () -> Unit = {},
     additionalContent: @Composable (() -> Unit)? = null
 ) {
     Row(
@@ -422,7 +440,8 @@ fun SelectableDetailRow(
 
 @Composable
 fun QuantitySelector(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onUpdateQuantity: (Int) -> Unit = {}
 ) {
     var quantity by remember { mutableIntStateOf(1) }
 
@@ -445,7 +464,12 @@ fun QuantitySelector(
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(
-                onClick = { if (quantity > 1) quantity-- }
+                onClick = {
+                    if (quantity > 1) {
+                        quantity--
+                    }
+                    onUpdateQuantity(quantity)
+                }
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.minus_icon),
@@ -461,7 +485,10 @@ fun QuantitySelector(
             )
 
             IconButton(
-                onClick = { quantity++ }
+                onClick = {
+                    quantity++
+                    onUpdateQuantity(quantity)
+                }
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.add_icon),
@@ -478,8 +505,12 @@ fun QuantitySelector(
 fun ProductReviewSection(
     engagements: List<UserEngagement>,
     averageRating: Double,
-    numOfReviews: Int
+    numOfReviews: Int,
+    productViewModel: ProductDetailScreenViewModel = hiltViewModel()
 ) {
+
+    val user by productViewModel.user.collectAsState()
+
     Column(
         horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -506,7 +537,7 @@ fun ProductReviewSection(
             Spacer(modifier = Modifier.width(8.dp))
 
             Text(
-                text = "${numOfReviews} Reviews",
+                text = "$numOfReviews Reviews",
                 fontWeight = FontWeight.Medium,
                 fontSize = 15.sp,
                 color = Color.Gray
@@ -520,8 +551,18 @@ fun ProductReviewSection(
                 .height(250.dp)
         ) {
             items(items = engagements, key = { it.id }) { engagement ->
+                productViewModel.getUser(engagement.userId)
+
+                var name by remember { mutableStateOf("") }
+
+                LaunchedEffect(user){
+                    if(user.isSuccess){
+                        name = user.getOrNull()?.name ?: ""
+                    }
+                }
+
                 ReviewCard(
-                    name = engagement.userId,
+                    name = name.ifEmpty { engagement.userId },
                     maxRatings = 5,
                     ratings = engagement.ratings,
                     reviews = engagement.reviews,
@@ -541,22 +582,13 @@ fun ReviewCard(
     reviews: String = "",
     createAt: String = ""
 ) {
+
+
     Box(
-        modifier = Modifier
-            .fillMaxWidth()
-        //.padding(vertical = 10.dp)
-//            .shadow(
-//                elevation = 5.dp, // Độ cao bóng
-//                shape = RoundedCornerShape(10.dp) // Bo góc
-//            )
-        // .clip(RoundedCornerShape(10.dp)) // Cắt phần tử sau khi đổ bóng
-        // .background(Color.White)
+        modifier = Modifier.fillMaxWidth()
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth(),
-            //.padding(vertical = 8.dp, horizontal = 0.dp),
-            //.background(Color.White),
+            modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.Start
         ) {
             Row(

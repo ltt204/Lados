@@ -8,7 +8,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+//noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.BottomNavigation
+//noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -35,6 +37,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import org.nullgroup.lados.screens.Screen
+import org.nullgroup.lados.screens.customer.cartAndCheckout.CartScreen
+import org.nullgroup.lados.screens.customer.cartAndCheckout.CheckoutScreen
 import org.nullgroup.lados.screens.common.ForgotPasswordScreen
 import org.nullgroup.lados.screens.common.LoginScreen
 import org.nullgroup.lados.screens.common.RegisterScreen
@@ -286,7 +290,7 @@ fun CustomerGraph(
                 )
             ) { backStackEntry ->
 
-                Log.d("Review:", "${Screen.Customer.ReviewProductScreen.ROUTE_WITH_ARGS}")
+                Log.d("Review:", Screen.Customer.ReviewProductScreen.ROUTE_WITH_ARGS)
 
                 val productId =
                     backStackEntry.arguments?.getString(Screen.Customer.ReviewProductScreen.PRODUCT_ID_ARG)
@@ -352,9 +356,25 @@ fun CustomerGraph(
                         ?: ""
                 ProductDetailScreen(
                     productId = productId,
-                    onAddToBag = {},
                     navController = navController,
-                    modifier = modifier,
+                )
+            }
+
+            composable(route = Screen.Customer.CartScreen.route) {
+                isVisibility = false
+                CartScreen(
+                    modifier = Modifier,
+                    innerPadding = innerPadding,
+                    navController = navController
+                )
+            }
+
+            composable(route = Screen.Customer.CheckOutScreen.route) {
+                isVisibility = false
+                CheckoutScreen(
+                    modifier = Modifier,
+                    innerPadding = innerPadding,
+                    navController = navController,
                 )
             }
 

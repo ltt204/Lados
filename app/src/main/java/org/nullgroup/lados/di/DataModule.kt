@@ -11,6 +11,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ActivityContext
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import org.nullgroup.lados.data.repositories.implementations.CartItemRepositoryImplement
 import org.nullgroup.lados.data.repositories.implementations.CategoryRepositoryImplement
 import org.nullgroup.lados.data.repositories.implementations.OrderRepositoryImplement
 import org.nullgroup.lados.data.repositories.implementations.ProductRepositoryImplement
@@ -19,6 +20,8 @@ import org.nullgroup.lados.data.repositories.implementations.ImageRepositoryImpl
 import org.nullgroup.lados.data.repositories.implementations.ReviewProductRepositoryImplement
 import org.nullgroup.lados.data.repositories.implementations.UserAddressRepositoryImplement
 import org.nullgroup.lados.data.repositories.implementations.UserRepositoryImplement
+import org.nullgroup.lados.data.repositories.implementations.WishlistItemRepositoryImplement
+import org.nullgroup.lados.data.repositories.interfaces.CartItemRepository
 import org.nullgroup.lados.data.repositories.interfaces.SharedPreferencesRepository
 
 import org.nullgroup.lados.data.repositories.interfaces.CategoryRepository
@@ -30,6 +33,7 @@ import org.nullgroup.lados.data.repositories.interfaces.OrderRepository
 import org.nullgroup.lados.data.repositories.interfaces.ProductRepository
 import org.nullgroup.lados.data.repositories.interfaces.ReviewProductRepository
 import org.nullgroup.lados.data.repositories.interfaces.UserRepository
+import org.nullgroup.lados.data.repositories.interfaces.WishlistItemRepository
 import javax.inject.Singleton
 
 @Module
@@ -109,5 +113,20 @@ object DataModule {
     @Provides
     fun provideReviewRepository(firestore: FirebaseFirestore): ReviewProductRepository {
         return ReviewProductRepositoryImplement(firestore)
+    }
+
+    @Singleton
+    @Provides
+    fun provideCartRepository(
+        firestore: FirebaseFirestore,
+        firebaseAuth: FirebaseAuth,
+    ): CartItemRepository {
+        return CartItemRepositoryImplement(firestore, firebaseAuth)
+    }
+
+    @Singleton
+    @Provides
+    fun provideWishlistRepository(firestore: FirebaseFirestore): WishlistItemRepository {
+        return WishlistItemRepositoryImplement(firestore)
     }
 }

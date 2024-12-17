@@ -97,6 +97,9 @@ sealed class Screen(
         data object EditProfile :
             Customer("Edit Profile", "customer_edit_profile", Icons.Default.AccountCircle)
 
+        data object CartScreen : Customer("Cart", "customer_cart", Icons.Default.ShoppingCart)
+        data object CheckOutScreen: Customer("Check Out", "customer_check_out", Icons.Filled.MailOutline)
+
         sealed class Address(
             name: String,
             route: String,
