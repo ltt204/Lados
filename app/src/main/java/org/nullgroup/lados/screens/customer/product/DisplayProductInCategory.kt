@@ -58,11 +58,7 @@ import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.screens.customer.BottomSheetContent
 import org.nullgroup.lados.screens.customer.ProductItem
 import org.nullgroup.lados.screens.customer.SearchBarRow
-import org.nullgroup.lados.ui.theme.BlackMaterial
-import org.nullgroup.lados.ui.theme.GrayMaterial
 import org.nullgroup.lados.ui.theme.LadosTheme
-import org.nullgroup.lados.ui.theme.MagentaMaterial
-import org.nullgroup.lados.ui.theme.WhiteMaterial
 import org.nullgroup.lados.viewmodels.HomeViewModel
 import org.nullgroup.lados.viewmodels.ProductUiState
 import org.nullgroup.lados.viewmodels.SharedViewModel
@@ -75,7 +71,7 @@ fun FilterButton(
     icon: ImageVector? = null,
     contentDescription: String? = null,
     @SuppressLint("ModifierParameter") modifier: Modifier = Modifier,
-    onButtonClick: (String) -> Unit = {}
+    onButtonClick: (String) -> Unit = {},
 ) {
     var selectedButton by remember { mutableStateOf<Boolean?>(false) }
     Button(
@@ -85,7 +81,9 @@ fun FilterButton(
         },
         modifier = modifier,
         colors = ButtonDefaults.buttonColors(
-            if (selectedButton == true) MagentaMaterial else GrayMaterial.copy(
+            // note: modify
+            if (selectedButton == true) LadosTheme.colorScheme.primary
+            else LadosTheme.colorScheme.outline.copy(
                 alpha = 0.2f
             )
         ),
@@ -96,11 +94,18 @@ fun FilterButton(
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             modifier = Modifier.padding(horizontal = 4.dp)
         ) {
-            Text(text = text, color = if (selectedButton == true) WhiteMaterial else BlackMaterial)
+            // note: modify
+            Text(
+                text = text,
+                color = if (selectedButton == true) LadosTheme.colorScheme.background
+                else LadosTheme.colorScheme.onBackground
+            )
             if (icon != null) {
                 Icon(
                     icon,
-                    tint = if (selectedButton == true) WhiteMaterial else BlackMaterial,
+                    // note: modify color
+                    tint = if (selectedButton == true) LadosTheme.colorScheme.surfaceContainer
+                    else LadosTheme.colorScheme.outline,
                     contentDescription = contentDescription,
                     modifier = Modifier.size(28.dp)
                 )
@@ -118,7 +123,7 @@ fun DrawProductInCategoryScreenContent(
     paddingValues: PaddingValues,
     products: List<Product> = emptyList(),
     sharedViewModel: SharedViewModel = SharedViewModel(),
-    onButtonClick: (String) -> Unit
+    onButtonClick: (String) -> Unit,
 ) {
     Column(
         modifier = modifier
@@ -209,7 +214,7 @@ fun ProductInCategoryScreen(
         vertical = 8.dp
     ),
     sharedViewModel: SharedViewModel = SharedViewModel(),
-    viewModel: HomeViewModel = hiltViewModel()
+    viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val productUiState = viewModel.productUiState.collectAsStateWithLifecycle().value
 
@@ -258,12 +263,14 @@ fun ProductInCategoryScreen(
                         onClick = { navController.popBackStack() },
                         modifier = Modifier
                             .clip(CircleShape)
-                            .background(GrayMaterial.copy(alpha = 0.2f))
+                            // note: modify
+                            .background(LadosTheme.colorScheme.outline.copy(alpha = 0.2f))
                     ) {
                         Icon(
                             Icons.Filled.ArrowBack,
                             contentDescription = "Search",
-                            tint = BlackMaterial
+                            // note: modify
+                            tint = LadosTheme.colorScheme.outline
 
                         )
                     }

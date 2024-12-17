@@ -43,16 +43,14 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import org.nullgroup.lados.ui.theme.BlackMaterial
-import org.nullgroup.lados.ui.theme.BrownMaterial
-import org.nullgroup.lados.ui.theme.GrayMaterial
+import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.viewmodels.SharedViewModel
 
 @Composable
 fun NormalTextFieldSearchScreen(
     label: String,
     modifier: Modifier = Modifier,
-    icon: @Composable (() -> Unit)
+    icon: @Composable (() -> Unit),
 ) {
     val (text, setText) = mutableStateOf("")
     TextField(
@@ -61,13 +59,14 @@ fun NormalTextFieldSearchScreen(
 
         colors = TextFieldDefaults.colors(unfocusedContainerColor = Color.Transparent),
         onValueChange = setText,
-        label = { Text(text = label, color = GrayMaterial, fontSize = 18.sp)},
+        // note: modify color
+        label = { Text(text = label, color = LadosTheme.colorScheme.error, fontSize = 18.sp) },
         modifier = modifier
     )
 }
 
 @Composable
-fun SearchBarSearchScreen(modifier: Modifier=Modifier) {
+fun SearchBarSearchScreen(modifier: Modifier = Modifier) {
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -93,19 +92,20 @@ fun SearchBarSearchScreen(modifier: Modifier=Modifier) {
             colors = OutlinedTextFieldDefaults.colors(
                 focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                 unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-                unfocusedBorderColor = GrayMaterial,
-                focusedBorderColor = BrownMaterial
+                // note: modify
+                unfocusedBorderColor = LadosTheme.colorScheme.surfaceContainer,
+                // note: modify
+                focusedBorderColor = LadosTheme.colorScheme.primary
             )
         )
     }
 }
 
 @Composable
-fun SearchHeaderSearchScreen(modifier: Modifier=Modifier) {
+fun SearchHeaderSearchScreen(modifier: Modifier = Modifier) {
     Row(
         modifier = modifier
-            .fillMaxWidth()
-        ,
+            .fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -114,7 +114,7 @@ fun SearchHeaderSearchScreen(modifier: Modifier=Modifier) {
 }
 
 @Composable
-fun SearchHistoryRow(modifier: Modifier=Modifier, content: String) {
+fun SearchHistoryRow(modifier: Modifier = Modifier, content: String) {
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -125,36 +125,40 @@ fun SearchHistoryRow(modifier: Modifier=Modifier, content: String) {
 
         Text(
             text = content,
-            style = TextStyle(fontSize = 18.sp, color = BlackMaterial.copy(alpha = 0.5f))
+            // note: modify color
+            style = TextStyle(
+                fontSize = 18.sp,
+                color = LadosTheme.colorScheme.onBackground.copy(alpha = 0.5f)
+            )
         )
         Spacer(Modifier.weight(1f))
 
         Box(
             modifier
                 .clip(CircleShape)
-                .border(BorderStroke(1.dp, BrownMaterial), shape = CircleShape)
+                // note: modify color
+                .border(BorderStroke(1.dp, LadosTheme.colorScheme.outline), shape = CircleShape)
                 .padding(4.dp)
         ) {
             Icon(
                 Icons.Outlined.Close,
-                tint = BlackMaterial,
+                // note: modify
+                tint = LadosTheme.colorScheme.outline,
                 contentDescription = null,
-                modifier=Modifier.size(16.dp)
+                modifier = Modifier.size(16.dp)
             )
         }
     }
 }
 
 @Composable
-fun SearchHistory(modifier: Modifier=Modifier){
-    LazyColumn (
-        modifier=modifier
-            .fillMaxWidth()
-        ,
-    ){
+fun SearchHistory(modifier: Modifier = Modifier) {
+    LazyColumn(
+        modifier = modifier
+            .fillMaxWidth(),
+    ) {
 
-        items(20){
-                item ->
+        items(20) { item ->
             SearchHistoryRow(modifier, "History $item")
             Spacer(Modifier.height(8.dp))
         }
@@ -163,22 +167,24 @@ fun SearchHistory(modifier: Modifier=Modifier){
 
 @Composable
 fun DrawMainSearchScreenContent(
-    modifier: Modifier=Modifier,
+    modifier: Modifier = Modifier,
     navController: NavController,
-    paddingValues: PaddingValues= PaddingValues(horizontal = 16.dp, vertical = 8.dp)) {
+    paddingValues: PaddingValues = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+) {
     Column(
         modifier = modifier
             .fillMaxWidth()
             .fillMaxHeight()
             .padding(horizontal = 8.dp)
-            .padding(top = paddingValues.calculateTopPadding())
-        ,
+            .padding(top = paddingValues.calculateTopPadding()),
     ) {
         SearchHeaderSearchScreen()
         Spacer(Modifier.height(4.dp))
-        HorizontalDivider(modifier = Modifier
-            .fillMaxWidth(),
-            color=GrayMaterial.copy(alpha=0.3f)
+        HorizontalDivider(
+            modifier = Modifier
+                .fillMaxWidth(),
+            // note: modify
+            color = LadosTheme.colorScheme.outline.copy(alpha = 0.3f)
         )
         SearchHistory()
     }
@@ -188,16 +194,16 @@ fun DrawMainSearchScreenContent(
 fun SearchScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
-    paddingValues: PaddingValues  = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-    sharedViewModel: SharedViewModel = SharedViewModel()) {
+    paddingValues: PaddingValues = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+    sharedViewModel: SharedViewModel = SharedViewModel(),
+) {
     Scaffold(
         modifier = modifier
             .padding(paddingValues)
-            .padding(horizontal = 16.dp)
-        ,
+            .padding(horizontal = 16.dp),
         topBar = {
             Row(
-                modifier= Modifier
+                modifier = Modifier
                     .fillMaxWidth()
                     .wrapContentHeight()
                     .padding(vertical = 16.dp, horizontal = 8.dp),
@@ -208,19 +214,21 @@ fun SearchScreen(
                     onClick = { navController.popBackStack() },
                     modifier = Modifier
                         .clip(CircleShape)
-                        .background(GrayMaterial.copy(alpha = 0.2f))
+                        // note: modify
+                        .background(LadosTheme.colorScheme.outline.copy(alpha = 0.2f))
                 ) {
                     Icon(
                         Icons.Filled.ArrowBack,
                         contentDescription = "Search",
-                        tint = BlackMaterial
+                        // note: modify
+                        tint = LadosTheme.colorScheme.outline
 
                     )
                 }
                 Spacer(modifier = Modifier.width(16.dp))
                 SearchBar(
-                    modifier=Modifier.fillMaxWidth(),
-                    navController=navController,
+                    modifier = Modifier.fillMaxWidth(),
+                    navController = navController,
                     onSearch = {})
             }
         }

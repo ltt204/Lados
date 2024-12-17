@@ -1,6 +1,7 @@
 package org.nullgroup.lados.ui.theme
 
 import androidx.compose.material3.Typography
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -14,8 +15,10 @@ val Typography = Typography(
         fontSize = 16.sp,
         lineHeight = 24.sp,
         letterSpacing = 0.5.sp
-    )
-    /* Other default text styles to override
+    ),
+    headlineMedium = TextStyle(
+        fontWeight = FontWeight.Bold,
+    ),
     titleLarge = TextStyle(
         fontFamily = FontFamily.Default,
         fontWeight = FontWeight.Normal,
@@ -29,6 +32,11 @@ val Typography = Typography(
         fontSize = 11.sp,
         lineHeight = 16.sp,
         letterSpacing = 0.5.sp
+    ),
+    displayLarge = TextStyle (
+        color = Color.White,
+        fontSize = 96.sp,
+        letterSpacing = 1.sp,
+        fontWeight = FontWeight.Bold,
     )
-    */
 )

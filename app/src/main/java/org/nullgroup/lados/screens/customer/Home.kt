@@ -76,12 +76,7 @@ import org.nullgroup.lados.compose.common.LoadOnProgress
 import org.nullgroup.lados.data.models.Category
 import org.nullgroup.lados.data.models.Product
 import org.nullgroup.lados.screens.Screen
-import org.nullgroup.lados.ui.theme.BlackMaterial
-import org.nullgroup.lados.ui.theme.BrownMaterial
-import org.nullgroup.lados.ui.theme.GrayMaterial
 import org.nullgroup.lados.ui.theme.LadosTheme
-import org.nullgroup.lados.ui.theme.MagentaMaterial
-import org.nullgroup.lados.ui.theme.WhiteMaterial
 import org.nullgroup.lados.viewmodels.CategoryUiState
 import org.nullgroup.lados.viewmodels.HomeViewModel
 import org.nullgroup.lados.viewmodels.ProductUiState
@@ -90,7 +85,7 @@ import org.nullgroup.lados.viewmodels.SharedViewModel
 @Composable
 fun SearchBarRow(
     modifier: Modifier = Modifier,
-    navController: NavController
+    navController: NavController,
 ) {
     Row(
         modifier = modifier
@@ -109,7 +104,7 @@ fun SearchBarRow(
 fun SearchBar(
     modifier: Modifier = Modifier,
     navController: NavController,
-    onSearch: (String) -> Unit
+    onSearch: (String) -> Unit,
 ) {
     var searchText by remember { mutableStateOf("") }
     val focusManager = LocalFocusManager.current
@@ -128,7 +123,8 @@ fun SearchBar(
                 .fillMaxWidth()
                 .border(
                     1.dp,
-                    BlackMaterial,
+                    // note: modify
+                    LadosTheme.colorScheme.surfaceContainerHigh,
                     shape = RoundedCornerShape(50)
                 )
                 .align(Alignment.Center),
@@ -147,8 +143,10 @@ fun SearchBar(
             colors = OutlinedTextFieldDefaults.colors(
                 focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                 unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-                unfocusedBorderColor = GrayMaterial,
-                focusedBorderColor = BrownMaterial
+                // note: modify
+                unfocusedBorderColor = LadosTheme.colorScheme.background,
+                // note: modify
+                focusedBorderColor = LadosTheme.colorScheme.secondary,
             )
         )
     }
@@ -157,12 +155,13 @@ fun SearchBar(
 @Composable
 fun CategoryCircle(
     modifier: Modifier = Modifier,
-    imageUrl: String
+    imageUrl: String,
 ) {
     Box(
         modifier
             .clip(CircleShape)
-            .background(BrownMaterial.copy(alpha = 0.2f))
+            // note: modify
+            .background(LadosTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.2f))
             .padding(0.dp)
             .size(64.dp)
     ) {
@@ -180,8 +179,9 @@ fun TitleTextRow(
     modifier: Modifier = Modifier,
     contentLeft: String,
     contentRight: String,
-    color: Color = BlackMaterial,
-    onClick: () -> Unit = {}
+    // note: modify
+    color: Color = LadosTheme.colorScheme.outline,
+    onClick: () -> Unit = {},
 ) {
     Row(
         modifier = modifier
@@ -204,7 +204,8 @@ fun TitleTextRow(
             Text(
                 contentRight, style = TextStyle(
                     fontSize = 20.sp,
-                    color = BrownMaterial,
+                    // note: modify
+                    color = LadosTheme.colorScheme.outline,
                 )
             )
         }
@@ -216,7 +217,7 @@ fun CategoryItems(
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
     sharedViewModel: SharedViewModel,
-    navController: NavController
+    navController: NavController,
 ) {
     val categoryUiState = viewModel.categoryUiState.collectAsStateWithLifecycle()
     when (categoryUiState.value) {
@@ -259,7 +260,7 @@ fun CategoryItems(
 @Composable
 fun CategoryItem(
     modifier: Modifier = Modifier,
-    category: Category
+    category: Category,
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -267,7 +268,8 @@ fun CategoryItem(
     ) {
         CategoryCircle(imageUrl = category.categoryImage)
         Spacer(Modifier.height(8.dp))
-        Text(text = category.categoryName, color = BlackMaterial)
+        // note: modify color
+        Text(text = category.categoryName, color = LadosTheme.colorScheme.primary)
     }
 }
 
@@ -276,13 +278,14 @@ fun CategoryItem(
 fun ProductItem(
     modifier: Modifier = Modifier,
     product: Product,
-    onClick: (String) -> Unit
+    onClick: (String) -> Unit,
 ) {
     Box(modifier = modifier
         .width(160.dp)
         .height(280.dp)
         .clip(RoundedCornerShape(8.dp))
-        .background(GrayMaterial.copy(alpha = 0.2f))
+        // note: modify
+        .background(LadosTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.2f))
         .padding(bottom = 8.dp)
         .clickable { onClick(product.id) }
     ) {
@@ -313,7 +316,8 @@ fun ProductItem(
                 text = product.name,
                 style = TextStyle(
                     fontSize = 16.sp,
-                    color = BlackMaterial,
+                    // note: modify
+                    color = LadosTheme.colorScheme.error,
                 )
             )
             Row(
@@ -325,7 +329,8 @@ fun ProductItem(
                     style = TextStyle(
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
-                        color = BlackMaterial,
+                        // note: modify
+                        color = LadosTheme.colorScheme.error,
                     )
                 )
                 Text(
@@ -345,7 +350,7 @@ fun ProductItem(
 fun ProductRow(
     modifier: Modifier = Modifier,
     onProductClick: (String) -> Unit,
-    viewModel: HomeViewModel = hiltViewModel()
+    viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val productUiState = viewModel.productUiState.collectAsStateWithLifecycle()
     when (productUiState.value) {
@@ -386,7 +391,7 @@ fun DrawProductScreenContent(
     paddingValues: PaddingValues,
     navController: NavController,
     sharedViewModel: SharedViewModel,
-    onProductClick: (String) -> Unit
+    onProductClick: (String) -> Unit,
 ) {
     Column(
         modifier = modifier
@@ -439,7 +444,8 @@ fun DrawProductScreenContent(
                 TitleTextRow(
                     contentLeft = "New In",
                     contentRight = "See all",
-                    color = MagentaMaterial
+                    // note: modify
+                    color = LadosTheme.colorScheme.primary
                 )
             }
             item {
@@ -459,13 +465,14 @@ fun BottomSheetContent(
     options: List<String>,
     onSelectionChanged: (String) -> Unit,
     paddingValues: PaddingValues,
-    onCloseClick: () -> Unit
+    onCloseClick: () -> Unit,
 ) {
     var selectedButtonIndex by remember { mutableStateOf<Int?>(null) }
     Box(
         modifier = Modifier
             .fillMaxHeight(0.5f)
-            .background(GrayMaterial.copy(alpha = 0.2f))
+            // note: modify
+            .background(LadosTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.2f))
             .clip(RoundedCornerShape(16.dp))
             .padding(
                 start = 8.dp,
@@ -515,7 +522,9 @@ fun BottomSheetContent(
                         .fillMaxWidth(0.95f)
                         .height(56.dp),
                     colors = ButtonDefaults.buttonColors(
-                        if (selectedButtonIndex == index) MagentaMaterial else GrayMaterial.copy(
+                        // note: modify
+                        if (selectedButtonIndex == index) LadosTheme.colorScheme.primary
+                        else LadosTheme.colorScheme.surfaceContainer.copy(
                             alpha = 0.3f
                         )
                     )
@@ -530,7 +539,9 @@ fun BottomSheetContent(
                             text = option,
                             fontWeight = FontWeight.Bold,
                             style = MaterialTheme.typography.bodyLarge,
-                            color = if (selectedButtonIndex == index) WhiteMaterial else BlackMaterial
+                            // note: modify
+                            color = if (selectedButtonIndex == index) LadosTheme.colorScheme.background
+                            else LadosTheme.colorScheme.onBackground
                         )
                         if (selectedButtonIndex == index)
                             Icon(
@@ -550,7 +561,7 @@ fun ProductScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
     paddingValues: PaddingValues = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-    sharedViewModel: SharedViewModel = SharedViewModel()
+    sharedViewModel: SharedViewModel = SharedViewModel(),
 ) {
     val sheetState = rememberModalBottomSheetState(
         initialValue = ModalBottomSheetValue.Hidden
@@ -603,7 +614,8 @@ fun ProductScreen(
                     Button(
                         onClick = { scope.launch { sheetState.show() } },
                         contentPadding = PaddingValues(horizontal = 8.dp),
-                        colors = ButtonDefaults.buttonColors(MagentaMaterial)
+                        // note: modify
+                        colors = ButtonDefaults.buttonColors(LadosTheme.colorScheme.error)
                     ) {
                         Row(
                             modifier = Modifier.padding(horizontal = 4.dp),
@@ -623,12 +635,14 @@ fun ProductScreen(
                         onClick = {},
                         modifier = Modifier
                             .clip(CircleShape)
-                            .background(MagentaMaterial),
+                            // note: modify
+                            .background(LadosTheme.colorScheme.primary),
                     ) {
                         Icon(
                             Icons.Outlined.ShoppingCart,
                             contentDescription = "Cart",
-                            tint = WhiteMaterial
+                            // note: modify
+                            tint = LadosTheme.colorScheme.outline
                         )
                     }
                 }

@@ -5,11 +5,19 @@ coil = "2.4.0"
 constraintlayoutCompose = "1.0.1"
 converterGson = "2.9.0"
 converterGsonVersion = "2.11.0"
+firebaseAdmin = "9.1.1"
+firebaseAdminVersion = "9.2.0"
 firebaseAuthKtx = "22.3.1"
 firebaseBom = "33.6.0"
 firebaseFirestoreKtx = "24.10.3"
+googleHiltAndroidCompiler = "2.51.1"
+hiltAndroid = "2.52"
 hiltAndroidCompiler = "2.48.1"
+hiltAndroidCompilerVersion = "2.49"
 hiltAndroidTesting = "2.52"
+hiltCompiler = "1.2.0"
+hiltNavigationCompose = "1.2.0"
+javaJwt = "3.18.2"
 junitJupiterApi = "5.8.1"
 junitJupiterEngine = "5.8.1"
 kotlin = "1.9.0"
@@ -17,6 +25,7 @@ coreKtx = "1.13.1"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
+kotlinxCoroutinesPlayServices = "1.8.0"
 kotlinxCoroutinesTest = "1.8.0"
 lifecycleRuntimeKtx = "2.8.6"
 activityCompose = "1.9.2"
@@ -30,6 +39,12 @@ material3 = "1.3.0"
 mockitoCore = "3.12.4"
 mockitoInline = "3.12.4"
 mockitoJunitJupiter = "4.0.0"
+playServicesAuth = "21.2.0"
+runtimeLivedata = "1.7.5"
+appcompat = "1.7.0"
+materialVersion = "1.12.0"
+activity = "1.9.3"
+constraintlayout = "2.2.0"
 okhttp = "4.12.0"
 retrofit = "2.11.0"
 firebaseStorage = "21.0.1"
@@ -40,16 +55,25 @@ composeMaterial3 = "1.0.0-alpha29"
 androidx-compose-material3-material3 = { module = "androidx.compose.material3:material3" }
 androidx-constraintlayout-compose = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "constraintlayoutCompose" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-hilt-compiler = { module = "androidx.hilt:hilt-compiler", version.ref = "hiltCompiler" }
+androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 androidx-material = { module = "androidx.compose.material:material", version.ref = "material" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
 converter-gson = { module = "com.squareup.retrofit:converter-gson", version.ref = "converterGson" }
 coil = { module = "io.coil-kt:coil", version.ref = "coil" }
+androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
 dagger-hilt-android-testing = { module = "com.google.dagger:hilt-android-testing", version.ref = "hiltAndroidTesting" }
+firebase-admin = { module = "com.google.firebase:firebase-admin", version.ref = "firebaseAdmin" }
+firebase-admin-v920 = { module = "com.google.firebase:firebase-admin", version.ref = "firebaseAdminVersion" }
 firebase-auth-ktx = { module = "com.google.firebase:firebase-auth-ktx", version.ref = "firebaseAuthKtx" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 firebase-firestore-ktx = { module = "com.google.firebase:firebase-firestore-ktx", version.ref = "firebaseFirestoreKtx" }
 google-hilt-android-gradle-plugin = { module = "com.google.dagger:hilt-android-gradle-plugin", version.ref = "hiltAndroidCompiler" }
+hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
 hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltAndroidCompiler" }
+hilt-android-compiler-v249 = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltAndroidCompilerVersion" }
+hilt-android-compiler-v2511 = { module = "com.google.dagger:hilt-android-compiler", version.ref = "googleHiltAndroidCompiler" }
+java-jwt = { module = "com.auth0:java-jwt", version.ref = "javaJwt" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -68,6 +92,7 @@ firebase-database = { group = "com.google.firebase", name = "firebase-database",
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore", version.ref = "firebaseFirestore" }
 junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junitJupiterApi" }
 junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junitJupiterEngine" }
+kotlinx-coroutines-play-services = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref = "kotlinxCoroutinesPlayServices" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
 material3 = { module = "androidx.compose.material3:material3", version.ref = "material3" }
 mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockitoCore" }
@@ -78,6 +103,12 @@ retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit
 retrofit2-converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGsonVersion" }
 firebase-storage = { group = "com.google.firebase", name = "firebase-storage", version.ref = "firebaseStorage" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+play-services-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "playServicesAuth" }
+androidx-runtime-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata", version.ref = "runtimeLivedata" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+material = { group = "com.google.android.material", name = "material", version.ref = "materialVersion" }
+androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
+androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 androidx-compose-material3 = { group = "androidx.wear.compose", name = "compose-material3", version.ref = "composeMaterial3" }
 
 [plugins]

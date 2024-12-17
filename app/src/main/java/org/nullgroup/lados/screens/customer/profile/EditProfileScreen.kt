@@ -133,7 +133,8 @@ fun EditProfileScreen(
         if (isSaveClick) {
             when (profilePictureUiState) {
                 is ProfilePictureUiState.Loading,
-                is ProfilePictureUiState.Initial -> {
+                is ProfilePictureUiState.Initial,
+                -> {
                     Log.d("EditProfileScreen", "ProfilePictureUiState.Loading")
                 }
 
@@ -172,7 +173,7 @@ fun EditProfileScreen(
 
 @Composable
 fun LoadingContent(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     LoadOnProgress(
         modifier = modifier
@@ -191,7 +192,7 @@ fun SuccessContent(
     onEditImage: () -> Unit,
     onNameChanged: (String) -> Unit,
     onPhoneChanged: (String) -> Unit,
-    isInfoChanged: Boolean
+    isInfoChanged: Boolean,
 ) {
     val userName = remember { mutableStateOf(userInfo.user.name) }
     val userPhone = remember { mutableStateOf(userInfo.user.phoneNumber) }
@@ -274,7 +275,7 @@ fun SuccessContent(
 fun ProfileImage(
     modifier: Modifier = Modifier,
     imageUri: String,
-    onEditImage: () -> Unit = {}
+    onEditImage: () -> Unit = {},
 ) {
     Box(
         modifier = modifier

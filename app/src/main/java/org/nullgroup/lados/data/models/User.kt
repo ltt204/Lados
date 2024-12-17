@@ -11,6 +11,8 @@ data class User(
     val role: String = "",
     val phoneNumber: String = "",
     var avatarUri: String = "",
+    var provider: String = "",
+    var isActive: Boolean = true,
 )
 
 data class UserProfilePicture(
@@ -19,3 +21,9 @@ data class UserProfilePicture(
     val fileName: String = "",
     val extension: String = ""
 )
+
+enum class UserRole {
+    CUSTOMER,
+    STAFF,
+    ADMIN
+}
