@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -31,12 +30,10 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import org.nullgroup.lados.R
@@ -46,7 +43,6 @@ import org.nullgroup.lados.compose.order.OrderScreenTopAppBar
 import org.nullgroup.lados.data.models.Order
 import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.ui.theme.LadosTheme
-import org.nullgroup.lados.ui.theme.Typography
 import org.nullgroup.lados.utilities.OrderStatus
 import org.nullgroup.lados.viewmodels.customer.OrderState
 import org.nullgroup.lados.viewmodels.customer.OrderViewModel
@@ -64,22 +60,32 @@ fun OrderScreen(
         mutableStateOf(0)
     }
     Scaffold(
-        modifier = modifier.padding(
-            top = paddingValues.calculateTopPadding(),
-            bottom = paddingValues.calculateBottomPadding()
-        ),
+        modifier = modifier
+            .fillMaxSize()
+            .padding(
+                top = paddingValues.calculateTopPadding(),
+                bottom = paddingValues.calculateBottomPadding()
+            ),
+        containerColor = LadosTheme.colorScheme.background,
         topBar = {
-            Column {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        color = LadosTheme.colorScheme.background
+                    )
+            ) {
                 ProfileTopAppBar(
                     onBackClick = { navController?.navigateUp() },
                     content = "Orders",
                 )
                 OrderScreenTopAppBar(
-                    modifier = modifier.padding(
-                        start = LadosTheme.size.medium,
-                        top = LadosTheme.size.small,
-                        end = LadosTheme.size.medium,
-                    ),
+                    modifier = modifier
+                        .padding(
+                            start = LadosTheme.size.medium,
+                            end = LadosTheme.size.medium,
+                            top = LadosTheme.size.small,
+                        ),
                     selectedTabIndex = tabSelectedIndex,
                     onTabSelected = {
                         tabSelectedIndex = it
@@ -88,14 +94,11 @@ fun OrderScreen(
             }
         }
     ) { innerPadding ->
-        Column(modifier = modifier.padding(top = innerPadding.calculateTopPadding())) {
+        Column(modifier = modifier) {
             when (orderUiState) {
                 is OrderState.Loading -> {
                     LoadOnProgress(
                         modifier = Modifier
-                            .background(
-                                color = LadosTheme.colorScheme.background,
-                            )
                             .fillMaxWidth(),
                         content = {
                             CircularProgressIndicator(
@@ -113,7 +116,6 @@ fun OrderScreen(
                     orderViewModel.filterOrderByStatus(OrderStatus.entries[tabSelectedIndex])
                     LazyColumn(
                         modifier = Modifier
-                            .background(color = LadosTheme.colorScheme.background)
                             .fillMaxWidth()
                             .padding(LadosTheme.size.medium),
                         verticalArrangement = Arrangement.spacedBy(LadosTheme.size.small),

@@ -42,7 +42,7 @@ fun ScrollTabItem(
         Text(
             modifier = Modifier
                 .fillMaxHeight()
-                .padding(horizontal = 14.dp, vertical = 8.dp),
+                .padding(horizontal = 14.dp, vertical = 6.dp),
             text = title,
             fontSize = 16.sp,
             color = if (selected)

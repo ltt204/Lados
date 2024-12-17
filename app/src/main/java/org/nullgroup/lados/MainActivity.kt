@@ -45,7 +45,6 @@ class MainActivity : ComponentActivity() {
 
                     //RoleBasedNavigation()
 
-                    CustomerGraph()
                     var showSplash by remember { mutableStateOf(true) }
 
                     LaunchedEffect(Unit) {
