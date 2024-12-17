@@ -1,4 +1,4 @@
-package org.nullgroup.lados.compose.profile
+package org.nullgroup.lados.compose.common
 
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -20,7 +20,7 @@ fun ProfileTopAppBar(
     content: String
 ) {
     CenterAlignedTopAppBar(
-        title = { Text(text = content, style = Typography.headlineSmall) },
+        title = { Text(text = content, style = Typography.headlineMedium) },
         navigationIcon = {
             IconButton(onClick = { onBackClick() }) {
                 Icon(

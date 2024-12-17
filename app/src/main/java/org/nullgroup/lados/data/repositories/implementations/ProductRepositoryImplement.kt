@@ -1,6 +1,9 @@
 package org.nullgroup.lados.data.repositories.implementations
 
+import android.util.Log
+import com.google.android.gms.tasks.Task
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.QuerySnapshot
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -11,10 +14,9 @@ import org.nullgroup.lados.data.models.ProductVariant
 import org.nullgroup.lados.data.models.UserEngagement
 import org.nullgroup.lados.data.repositories.interfaces.ProductRepository
 
-class ProductRepositoryImplement (
+class ProductRepositoryImplement(
     private val firestore: FirebaseFirestore
 ) : ProductRepository {
-
     override fun getProductsFlow(): Flow<List<Product>> = callbackFlow {
         val subscription = firestore.collection("products")
             .addSnapshotListener { value, error ->
@@ -29,7 +31,65 @@ class ProductRepositoryImplement (
                 trySend(products).isSuccess
             }
 
-        awaitClose{ subscription.remove() }
+        awaitClose { subscription.remove() }
+    }
+
+    override fun getProductsWithRangeOfIdsFlow(ids: List<String>): Flow<List<Product>> =
+        callbackFlow {
+            firestore.collection("products")
+                .whereIn("id", ids)
+                .addSnapshotListener { value, error ->
+                    if (error != null) {
+                        throw error
+                    }
+
+                    val products = value?.documents?.mapNotNull { document ->
+                        document.toObject(Product::class.java)
+                    } ?: emptyList()
+
+                    products.forEach { product ->
+                        getProductVariantsByProductId(product.id).addOnSuccessListener {
+                            val variants = it.documents.mapNotNull { variantDoc ->
+                                variantDoc.toObject(ProductVariant::class.java)
+                            }
+                            product.variants = variants
+                        }
+                    }
+
+                    trySend(products).isSuccess
+                }
+        }
+
+    override fun getProductByIdFlow(id: String): Flow<Product?> = callbackFlow {
+        val productRef = firestore.collection("products")
+            .document(id)
+        val variantRef = firestore.collection("products")
+            .document(id)
+            .collection("variants")
+
+        val product = productRef.get().await().toObject(Product::class.java)
+
+        val variants = variantRef.get().await().documents.mapNotNull { variantDoc ->
+            variantDoc.toObject(ProductVariant::class.java)
+        }
+        for (variant in variants) {
+            val variantImagesRef = firestore.collection("products")
+                .document(id)
+                .collection("variants")
+                .document(variant.id)
+                .collection("images")
+
+            val images = variantImagesRef.get().await().documents.mapNotNull { imageDoc ->
+                imageDoc.toObject(Image::class.java)
+            }
+            variant.images = images
+        }
+
+        product?.variants = variants
+
+        trySend(product).isSuccess
+
+        awaitClose { }
     }
 
     override suspend fun addProductsToFireStore(products: List<Product>): Result<Boolean> {
@@ -334,6 +394,37 @@ class ProductRepositoryImplement (
         } catch (e: Exception) {
             Result.failure(e)
         }
+    }
+
+    private fun getProductVariantsByProductId(productId: String): Task<QuerySnapshot> {
+        val variants = firestore.collection("products")
+            .document(productId)
+            .collection("variants")
+            .get()
+            .addOnSuccessListener {
+                val variants = it.documents.mapNotNull { variantDoc ->
+                    variantDoc.toObject(ProductVariant::class.java)
+                }
+
+                for (variant in variants) {
+                    variant.let { v ->
+                        firestore.collection("products")
+                            .document(productId)
+                            .collection("variants")
+                            .document(v.id)
+                            .collection("images")
+                            .get()
+                            .addOnSuccessListener { img ->
+                                val images = img.documents.mapNotNull { imageDoc ->
+                                    imageDoc.toObject(Image::class.java)
+                                }
+                                v.images = images
+                            }
+                    }
+                }
+            }
+
+        return variants
     }
 }
 

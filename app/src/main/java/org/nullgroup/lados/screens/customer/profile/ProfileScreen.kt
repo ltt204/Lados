@@ -1,4 +1,4 @@
-package org.nullgroup.lados.screens.customer
+package org.nullgroup.lados.screens.customer.profile
 
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+//noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -21,7 +22,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
@@ -44,8 +44,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
-import org.nullgroup.lados.compose.profile.LoadOnProgress
-import org.nullgroup.lados.compose.profile.TwoColsItem
+import org.nullgroup.lados.compose.common.LoadOnProgress
+import org.nullgroup.lados.compose.common.TwoColsItem
 import org.nullgroup.lados.data.models.User
 import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.viewmodels.customer.ProfileViewModel
@@ -248,7 +248,10 @@ fun ProfileScreen(
                 }
             }
 
-            TextButton(modifier = Modifier.fillMaxWidth(), onClick = { /*TODO*/ }) {
+            TextButton(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = { /*TODO*/ }
+            ) {
                 Text(
                     textAlign = TextAlign.Center,
                     text = "Sign out",

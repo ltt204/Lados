@@ -1,20 +1,8 @@
 package org.nullgroup.lados.data.models
 
 import com.google.firebase.firestore.DocumentId
-
-// Enum for order status
-enum class OrderStatus {
-    CREATED,
-    CONFIRMED,
-    SHIPPED,
-    DELIVERED,
-    CANCELLED,
-        // Optional feature: Customer can cancel the order
-    RETURNED,
-        // Optional feature: Customer can return the products after delivery
-        // if they are not satisfied
-        // Maybe unused
-}
+import com.google.firebase.firestore.Exclude
+import org.nullgroup.lados.utilities.OrderStatus
 
 // Order data class
 data class Order(
