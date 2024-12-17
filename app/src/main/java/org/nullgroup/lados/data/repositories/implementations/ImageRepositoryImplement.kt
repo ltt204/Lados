@@ -28,7 +28,8 @@ class ImageRepositoryImplement(
             .child(child)
             .child("$fileName.$extension")
 
-        val imageUrl: String = imageRef.putBytes(image).await().storage.downloadUrl.await().toString()
+        val imageUrl: String =
+            imageRef.putBytes(image).await().storage.downloadUrl.await().toString()
 
         return imageUrl
     }
@@ -43,10 +44,10 @@ class ImageRepositoryImplement(
     override suspend fun deleteImage(child: String, fileName: String, extension: String) {
         val imageRef =
             firebaseStorage.reference.child("images").child(child).child("$fileName.$extension")
-        imageRef.delete().addOnSuccessListener {
-            Log.d("ImageRepositoryImplement", "Delete successful")
-        }.addOnFailureListener {
-            // Will changes to Result sealed class for better handle exception
+
+        try {
+            imageRef.delete().await()
+        } catch (e: Exception) {
             throw Exception("Delete failed")
         }
     }
@@ -88,4 +89,8 @@ class ImageRepositoryImplement(
         Log.d("ImageRepositoryImplement", "image URL: $imageUrl")
         return imageUrl
     }
+//
+//    private fun checkImageExists(imageRef: String): Boolean {
+//
+//    }
 }

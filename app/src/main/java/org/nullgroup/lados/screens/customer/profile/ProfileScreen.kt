@@ -1,5 +1,6 @@
 package org.nullgroup.lados.screens.customer.profile
 
+//noinspection UsingMaterialAndMaterial3Libraries
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,13 +15,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-//noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -45,9 +44,11 @@ import androidx.navigation.NavController
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import org.nullgroup.lados.compose.common.LoadOnProgress
+import org.nullgroup.lados.compose.common.ProfileTopAppBar
 import org.nullgroup.lados.compose.common.TwoColsItem
 import org.nullgroup.lados.data.models.User
 import org.nullgroup.lados.screens.Screen
+import org.nullgroup.lados.ui.theme.Typography
 import org.nullgroup.lados.viewmodels.customer.ProfileViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -60,9 +61,12 @@ fun ProfileScreen(
 ) {
     val currentUser = viewModel.currentUser.collectAsState()
     Scaffold(
-        modifier = modifier.padding(vertical = paddingValues.calculateTopPadding()),
+        modifier = modifier.padding(
+            top = paddingValues.calculateTopPadding(),
+            bottom = paddingValues.calculateBottomPadding()
+        ),
         topBar = {
-            CenterAlignedTopAppBar(title = { Text(text = "Profile", fontWeight = FontWeight.Bold) })
+            ProfileTopAppBar(onBackClick = { /*TODO*/ }, content = "Profile")
         },
         backgroundColor = Color.Transparent
     ) { innerPadding ->
@@ -151,7 +155,7 @@ fun ProfileScreen(
                             Text(
                                 text = "Address",
                                 color = Color.Gray,
-                                fontSize = 16.sp
+                                style = Typography.bodyLarge
                             )
                         },
                         trailingAction = {
@@ -163,6 +167,10 @@ fun ProfileScreen(
                                 contentDescription = "Arrow",
                             )
                         }, onClick = {
+                            Log.d(
+                                "ProfileScreen",
+                                "ProfileScreen: ${Screen.Customer.Address.AddressList.route}"
+                            )
                             navController?.navigate(Screen.Customer.Address.AddressList.route)
                         })
                     TwoColsItem(
@@ -171,7 +179,7 @@ fun ProfileScreen(
                             Text(
                                 text = "Wishlist",
                                 color = Color.Gray,
-                                fontSize = 16.sp
+                                style = Typography.bodyLarge
                             )
                         },
                         trailingAction = {
@@ -191,7 +199,7 @@ fun ProfileScreen(
                             Text(
                                 text = "Privacy",
                                 color = Color.Gray,
-                                fontSize = 16.sp
+                                style = Typography.bodyLarge
                             )
                         },
                         trailingAction = {
@@ -211,7 +219,7 @@ fun ProfileScreen(
                             Text(
                                 text = "Help",
                                 color = Color.Gray,
-                                fontSize = 16.sp
+                                style = Typography.bodyLarge
                             )
                         },
                         trailingAction = {
@@ -231,7 +239,7 @@ fun ProfileScreen(
                             Text(
                                 text = "About",
                                 color = Color.Gray,
-                                fontSize = 16.sp
+                                style = Typography.bodyLarge
                             )
                         },
                         trailingAction = {

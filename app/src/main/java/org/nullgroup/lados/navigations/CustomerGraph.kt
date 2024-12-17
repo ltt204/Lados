@@ -5,7 +5,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -38,22 +37,23 @@ import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.screens.common.ForgotPasswordScreen
 import org.nullgroup.lados.screens.common.LoginScreen
 import org.nullgroup.lados.screens.common.RegisterScreen
-import org.nullgroup.lados.screens.customer.profile.AddAddressScreen
-import org.nullgroup.lados.screens.customer.profile.AddressList
-import org.nullgroup.lados.screens.customer.product.CategorySelectScreen
-import org.nullgroup.lados.screens.customer.profile.EditAddressScreen
-import org.nullgroup.lados.screens.customer.profile.EditProfileScreen
 import org.nullgroup.lados.screens.customer.Error_FindNotMatchScreen
 import org.nullgroup.lados.screens.customer.FilterScreen
 import org.nullgroup.lados.screens.customer.HomeScreen
+import org.nullgroup.lados.screens.customer.ProductScreen
+import org.nullgroup.lados.screens.customer.SearchScreen
 import org.nullgroup.lados.screens.customer.order.OrderDetailScreen
 import org.nullgroup.lados.screens.customer.order.OrderProductsViewScreen
 import org.nullgroup.lados.screens.customer.order.OrderScreen
+import org.nullgroup.lados.screens.customer.product.CategorySelectScreen
 import org.nullgroup.lados.screens.customer.product.ProductDetailScreen
 import org.nullgroup.lados.screens.customer.product.ProductInCategoryScreen
-import org.nullgroup.lados.screens.customer.ProductScreen
-import org.nullgroup.lados.screens.customer.SearchScreen
 import org.nullgroup.lados.screens.customer.product.ReviewProductScreen
+import org.nullgroup.lados.screens.customer.profile.AddAddressScreen
+import org.nullgroup.lados.screens.customer.profile.AddressList
+import org.nullgroup.lados.screens.customer.profile.EditAddressScreen
+import org.nullgroup.lados.screens.customer.profile.EditProfileScreen
+import org.nullgroup.lados.screens.customer.profile.ProfileScreen
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.viewmodels.SharedViewModel
 
@@ -63,7 +63,6 @@ fun CustomerGraph(
     navController: NavHostController = rememberNavController(),
     sharedViewModel: SharedViewModel = hiltViewModel(),
     startDestination: String = Screen.Customer.Home.route,
-    paddingValues: PaddingValues = PaddingValues()
 ) {
 
     var isVisibility by remember { mutableStateOf(true) }
@@ -135,7 +134,6 @@ fun CustomerGraph(
             }
         }
     ) { innerPadding ->
-
         NavHost(
             navController = navController,
             startDestination = startDestination
@@ -166,7 +164,7 @@ fun CustomerGraph(
                                 navController = navController,
                                 paddingValues = innerPadding,
                                 sharedViewModel = sharedViewModel,
-                                context= LocalContext.current
+                                context = LocalContext.current
                             )
                         }
 
@@ -191,11 +189,12 @@ fun CustomerGraph(
                                 navController = navController,
                                 paddingValues = innerPadding,
                                 sharedViewModel = sharedViewModel,
-                                context= LocalContext.current
+                                context = LocalContext.current
                             )
                         }
 
                         Screen.Customer.ErrorFindNotMatched.route -> {
+                            isVisibility = true
                             Error_FindNotMatchScreen(
                                 navController = navController,
                                 paddingValues = innerPadding
@@ -207,8 +206,8 @@ fun CustomerGraph(
                         }
 
                         Screen.Customer.Profile.route -> {
-                            isVisibility = false
-                            AddressList(
+                            isVisibility = true
+                            ProfileScreen(
                                 modifier = Modifier,
                                 navController = navController,
                                 paddingValues = innerPadding
@@ -218,33 +217,6 @@ fun CustomerGraph(
                         Screen.Customer.Order.OrderList.route -> {
                             isVisibility = true
                             OrderScreen(
-                                modifier = Modifier,
-                                paddingValues = innerPadding,
-                                navController = navController
-                            )
-                        }
-
-                        Screen.Customer.Address.AddressList.route -> {
-                            isVisibility = false
-                            AddressList(
-                                modifier = Modifier,
-                                navController = navController,
-                                paddingValues = innerPadding
-                            )
-                        }
-
-                        Screen.Customer.Address.AddAddress.route -> {
-                            isVisibility = false
-                            AddAddressScreen(
-                                modifier = Modifier,
-                                paddingValues = innerPadding,
-                                navController = navController
-                            )
-                        }
-
-                        Screen.Customer.EditProfile.route -> {
-                            isVisibility = false
-                            EditProfileScreen(
                                 modifier = Modifier,
                                 paddingValues = innerPadding,
                                 navController = navController
@@ -284,6 +256,15 @@ fun CustomerGraph(
                 )
             }
 
+            composable(route = Screen.Customer.EditProfile.route) {
+                isVisibility = false
+                EditProfileScreen(
+                    modifier = Modifier,
+                    paddingValues = innerPadding,
+                    navController = navController
+                )
+            }
+
             composable(
                 route = Screen.Customer.ReviewProductScreen.ROUTE_WITH_ARGS,
                 arguments = listOf(
@@ -309,6 +290,28 @@ fun CustomerGraph(
                     productId = productId.toString(),
                     variantId = variantId.toString(),
                     navController = navController
+                )
+            }
+
+            composable(
+                route = Screen.Customer.Address.AddressList.route
+            ) {
+                isVisibility = false
+                AddressList(
+                    modifier = Modifier,
+                    navController = navController,
+                    paddingValues = innerPadding
+                )
+            }
+
+            composable(
+                route = Screen.Customer.Address.AddAddress.route
+            ) {
+                isVisibility = false
+                AddAddressScreen(
+                    modifier = Modifier,
+                    navController = navController,
+                    paddingValues = innerPadding
                 )
             }
 
