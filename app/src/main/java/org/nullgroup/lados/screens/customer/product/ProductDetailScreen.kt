@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -70,6 +71,7 @@ import org.nullgroup.lados.data.models.Size
 import org.nullgroup.lados.data.models.UserEngagement
 import org.nullgroup.lados.utilities.formatToRelativeTime
 import org.nullgroup.lados.viewmodels.customer.ProductDetailScreenViewModel
+import java.util.Locale
 
 
 data class ProductDetailUiState(
@@ -162,7 +164,9 @@ fun ProductDetailScreen(
                     )
 
                     ProductReviewSection(
-                        engagements = uiState.product.engagements,
+                        engagements = uiState.product.engagements.sortedByDescending {
+                            it.createdAt
+                        },
                         averageRating = uiState.product.engagements.map {
                             it.ratings
                         }.average(),
@@ -255,7 +259,6 @@ fun ProductInformationSection(
     salePrice: Double,
     productImages: List<Image> = emptyList()
 ) {
-    val mockImageUrl = "https://jimmyluxury.in/cdn/shop/files/IMG_9967copy.webp?v=1728367047"
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         modifier = modifier
@@ -270,9 +273,10 @@ fun ProductInformationSection(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             items(productImages.size) { index ->
+                Log.d("Size", productImages[index].link)
                 SubcomposeAsyncImage(
                     model = coil.request.ImageRequest.Builder(LocalContext.current)
-                        .data(mockImageUrl)
+                        .data(productImages[index].link)
                         .crossfade(true)
                         .build(),
                     contentDescription = "Loaded Image",
@@ -492,7 +496,7 @@ fun ProductReviewSection(
             horizontalAlignment = Alignment.Start
         ) {
             Text(
-                text = "$averageRating Ratings",
+                text = "${String.format(Locale.getDefault(), "%.2f", averageRating)} Ratings",
                 fontWeight = FontWeight.Bold,
                 fontSize = 25.sp,
                 color = ProductTheme.primaryColor
@@ -501,7 +505,7 @@ fun ProductReviewSection(
             Spacer(modifier = Modifier.width(8.dp))
 
             Text(
-                text = "$numOfReviews Reviews",
+                text = "${numOfReviews} Reviews",
                 fontWeight = FontWeight.Medium,
                 fontSize = 15.sp,
                 color = Color.Gray
@@ -514,13 +518,13 @@ fun ProductReviewSection(
             modifier = Modifier
                 .height(250.dp)
         ) {
-            items(engagements.size) { index ->
+            items(items = engagements, key = { it.id }) { engagement ->
                 ReviewCard(
-                    name = engagements[index].userId,
+                    name = engagement.userId,
                     maxRatings = 5,
-                    ratings = engagements[index].ratings,
-                    reviews = engagements[index].reviews,
-                    createAt = formatToRelativeTime(engagements[index].createdAt)
+                    ratings = engagement.ratings,
+                    reviews = engagement.reviews,
+                    createAt = formatToRelativeTime(engagement.createdAt)
                 )
             }
         }

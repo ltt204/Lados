@@ -127,6 +127,9 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     androidTestImplementation(libs.androidx.junit)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    // For fetching online images
+    implementation("io.coil-kt:coil-compose:2.4.0")
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.ui.test.junit4)
     androidTestImplementation(platform(libs.androidx.compose.bom))

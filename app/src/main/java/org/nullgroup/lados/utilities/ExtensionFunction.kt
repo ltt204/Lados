@@ -8,12 +8,16 @@ import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.navigation.NavController
 import com.google.firebase.Timestamp
+import org.nullgroup.lados.screens.Screen
 import java.io.ByteArrayOutputStream
+import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.Date
+import java.util.Locale
 
 fun Drawable.toByteArray(
     format: Bitmap.CompressFormat = Bitmap.CompressFormat.JPEG,
@@ -47,7 +51,10 @@ fun Timestamp.toDate(): Date {
 
 @RequiresApi(Build.VERSION_CODES.O)
 fun formatToRelativeTime(timestamp: Timestamp): String {
-    val parsedTime = Instant.ofEpochSecond(timestamp.seconds, timestamp.nanoseconds.toLong()) // Chuyển Timestamp sang Instant
+    val parsedTime = Instant.ofEpochSecond(
+        timestamp.seconds,
+        timestamp.nanoseconds.toLong()
+    ) // Chuyển Timestamp sang Instant
     val now = Instant.now()
     val seconds = ChronoUnit.SECONDS.between(parsedTime, now)
     val minutes = ChronoUnit.MINUTES.between(parsedTime, now)
@@ -75,4 +82,65 @@ fun getCurrentUTCFormattedTime(): String {
     // Định dạng theo chuẩn ISO 8601 với mili giây và 'Z' để chỉ UTC
     val formatter = DateTimeFormatter.ISO_INSTANT
     return formatter.format(utcInstant)
+}
+
+fun OrderStatus.getActionForButtonOfOrderProduct(): Pair<String?, ((NavController, String?, String?) -> Unit)> {
+    return when (this) {
+        OrderStatus.CREATED, OrderStatus.SHIPPED -> {
+            "Detail" to { navController, productId, _ ->
+                /*TODO: Do nothing, disable the button or hide it */
+                navController.navigate("${Screen.Customer.ProductDetailScreen.route}/$productId")
+            }
+        }
+
+        OrderStatus.DELIVERED -> {
+            "Leave review" to { navController, productId, variantId ->
+                /*TODO: Navigate to review screen*/
+                navController.navigate("${Screen.Customer.ReviewProductScreen.route}/$productId/$variantId")
+            }
+        }
+
+        // TODO: Consider designing user flow for these cases
+        OrderStatus.CANCELLED, OrderStatus.RETURNED -> {
+            "Re-order" to { navController, orderId, _ ->
+                /*TODO: Allow user to re-order, which mean they will be navigated to the checkout screen with current list of products of order.*/
+//                it.navigate(Screen.Customer.Checkout.route)
+            }
+        }
+
+        else -> {
+            null to { _, _, _ -> /*TODO*/ }
+        }
+    }
+}
+
+fun String.capitalizeWords(): String {
+    val words = this.lowercase(Locale.getDefault()).split(" ")
+    return words.joinToString(" ") {
+        it.replaceFirstChar { ch ->
+            if (ch.isLowerCase())
+                ch.titlecase(Locale.ROOT)
+            else
+                ch.toString()
+        }
+    }
+}
+
+
+fun getFirstFourOrderStatuses(): List<OrderStatus> {
+    return OrderStatus.entries.toTypedArray().take(4)
+}
+
+fun Long.toDateTimeString(
+    formatPattern: String,
+    locale: Locale = Locale.getDefault()
+): String {
+    val date = Date(this)
+    val format = SimpleDateFormat(formatPattern, locale)
+    return format.format(date)
+}
+
+
+fun getStatusByName(name: String): OrderStatus {
+    return OrderStatus.valueOf(name.uppercase())
 }
