@@ -127,7 +127,7 @@ fun ProductDetailScreen(
         uiState.isLoading -> {
             Box(
                 contentAlignment = Alignment.Center,
-                modifier = modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize()
             ) {
                 CircularProgressIndicator(color = ProductTheme.primaryColor)
             }
@@ -154,7 +154,7 @@ fun ProductDetailScreen(
                 }
             ) { paddingValues ->
                 Column(
-                    modifier = modifier
+                    modifier = Modifier
                         .fillMaxWidth()
                         .padding(paddingValues)
                         .padding(bottom = 10.dp)
