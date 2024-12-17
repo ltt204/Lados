@@ -8,10 +8,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.nullgroup.lados.data.models.Address
@@ -29,6 +27,7 @@ import javax.inject.Inject
 
 enum class CheckoutError {
     FAILED_TO_GET_CHECKOUT_INFO,
+    FAILED_TO_GET_USER_INFO,
 }
 
 data class InsufficientOrderProductInfo(
@@ -60,17 +59,15 @@ class CheckoutViewModel @Inject constructor(
     private val _insufficientOrderItems = MutableStateFlow<List<InsufficientOrderProductInfo>>(emptyList())
     val insufficientOrderItems = _insufficientOrderItems.asStateFlow()
 
-    // TODO: Resolve the case when the view-model can't get the cached checkout info
-    //      Triggered when the checking-out screen is not launched from the cart screen
-    private val _checkoutFailure = MutableStateFlow<CheckoutError?>(null)
-    val checkoutFailure = _checkoutFailure.asStateFlow()
+    // Resolve the case when the view-model can't get the cached checkout info
+    // when the checking-out screen is not launched from the cart screen;
+    // Or when the user information is not available
+    var checkoutFailureHandler: ((CheckoutError?) -> Unit)? = null
 
-    // TODO: Hardcoded customer ID
     private lateinit var customerId: String
 
-    private lateinit var _userAddresses: StateFlow<List<Address>>
-    val userAddresses: StateFlow<List<Address>>
-        get() = _userAddresses
+    private val _userAddresses = MutableStateFlow(emptyList<Address>())
+    val userAddresses: StateFlow<List<Address>> = _userAddresses.asStateFlow()
 
     private val _selectedAddress = MutableStateFlow<Address?>(null)
     val selectedAddress = _selectedAddress.asStateFlow()
@@ -80,20 +77,26 @@ class CheckoutViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            // TODO: Return the actual user data
-//            val currentUser = userRepository.getCurrentUser()
-//            customerId = currentUser.id
-            customerId = "admin@test.com"
-//            _userPhoneNumber.value = currentUser.phoneNumber
-            _userPhoneNumber.value = "1234567890"
+            try {
+                val currentUser = userRepository.getCurrentUser()
+                customerId = currentUser.id
+                _userPhoneNumber.value = currentUser.phoneNumber
+            } catch (_: Exception) { // Possible NullPointerException from getCurrentUser()
+                customerId = ""
+                checkoutFailureHandler?.invoke(CheckoutError.FAILED_TO_GET_USER_INFO)
+                return@launch
+            }
 
             viewModelScope.launch {
-                _userAddresses = userAddressRepository.getAddressesFlow()
-                    .stateIn(
-                        scope = viewModelScope,
-                        started = SharingStarted.WhileSubscribed(),
-                        initialValue = emptyList()
-                    )
+                userAddressRepository.getAddressesFlow()
+//                    .stateIn(
+//                        scope = viewModelScope,
+//                        started = SharingStarted.WhileSubscribed(),
+//                        initialValue = emptyList()
+//                    )
+                    .collect {
+                        _userAddresses.value = it
+                    }
             }
 
             viewModelScope.launch {
@@ -101,7 +104,7 @@ class CheckoutViewModel @Inject constructor(
                 _checkoutInfo.value = checkoutInfoGetResult.getOrNull()
 
                 if (checkoutInfoGetResult.isFailure) {
-                    _checkoutFailure.value = CheckoutError.FAILED_TO_GET_CHECKOUT_INFO
+                    checkoutFailureHandler?.invoke(CheckoutError.FAILED_TO_GET_CHECKOUT_INFO)
 //                    return@launch
                 } else {
                     cartItemRepository.getCheckingOutItemsAsFlow(customerId).collect {

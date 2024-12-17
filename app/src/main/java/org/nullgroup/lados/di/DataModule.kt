@@ -117,8 +117,11 @@ object DataModule {
 
     @Singleton
     @Provides
-    fun provideCartRepository(firestore: FirebaseFirestore): CartItemRepository {
-        return CartItemRepositoryImplement(firestore)
+    fun provideCartRepository(
+        firestore: FirebaseFirestore,
+        firebaseAuth: FirebaseAuth,
+    ): CartItemRepository {
+        return CartItemRepositoryImplement(firestore, firebaseAuth)
     }
 
     @Singleton

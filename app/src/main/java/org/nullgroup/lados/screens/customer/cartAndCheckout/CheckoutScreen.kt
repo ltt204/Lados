@@ -69,6 +69,7 @@ import org.nullgroup.lados.compose.cartRelated.PricingDetails
 import org.nullgroup.lados.data.models.Address
 import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.utilities.toUSDCurrency
+import org.nullgroup.lados.viewmodels.customer.CheckoutError
 import org.nullgroup.lados.viewmodels.customer.CheckoutViewModel
 import org.nullgroup.lados.viewmodels.customer.InsufficientOrderProductInfo
 
@@ -94,6 +95,38 @@ fun CheckoutScreen(
     val userAddress = checkoutViewModel.userAddresses.collectAsStateWithLifecycle()
     val selectedAddress = checkoutViewModel.selectedAddress.collectAsStateWithLifecycle()
     val userPhoneNumber = checkoutViewModel.userPhoneNumber
+
+    checkoutViewModel.checkoutFailureHandler = { checkoutFailure ->
+        when (checkoutFailure) {
+            null -> {
+                // Do nothing
+            }
+            CheckoutError.FAILED_TO_GET_USER_INFO -> {
+                scope.launch {
+                    snackBarHostState.value.showSnackbar(
+                        message = "Failed to get user info",
+                        duration = SnackbarDuration.Short
+                    )
+                }
+            }
+            CheckoutError.FAILED_TO_GET_CHECKOUT_INFO -> {
+                scope.launch {
+                    snackBarHostState.value.showSnackbar(
+                        message = "Failed to get checkout info",
+                        duration = SnackbarDuration.Short
+                    )
+                }
+            }
+            else -> {
+                scope.launch {
+                    snackBarHostState.value.showSnackbar(
+                        message = "Unknown error occurred",
+                        duration = SnackbarDuration.Short
+                    )
+                }
+            }
+        }
+    }
 
     val onClickEmptyAddressSelector: () -> Unit = {
         if (userAddress.value.isEmpty()) {
