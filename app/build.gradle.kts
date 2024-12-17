@@ -88,6 +88,8 @@ dependencies {
     //Constraint Layout
     implementation(libs.androidx.constraintlayout.compose)
 
+    implementation (libs.java.jwt.v440)
+
     // Coil for image loading
     implementation (libs.coil)
     implementation(libs.coil.compose)

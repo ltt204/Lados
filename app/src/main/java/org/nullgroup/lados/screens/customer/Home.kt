@@ -81,6 +81,11 @@ import org.nullgroup.lados.data.models.Category
 import org.nullgroup.lados.data.models.Product
 import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.ui.theme.LadosTheme
+import org.nullgroup.lados.ui.theme.OnSurface
+import org.nullgroup.lados.ui.theme.Outline
+import org.nullgroup.lados.ui.theme.Primary
+import org.nullgroup.lados.ui.theme.SurfaceContainerHighest
+import org.nullgroup.lados.ui.theme.Tertiary
 import org.nullgroup.lados.viewmodels.CategoryUiState
 import org.nullgroup.lados.viewmodels.HomeViewModel
 import org.nullgroup.lados.viewmodels.ProductUiState
@@ -142,8 +147,8 @@ fun SearchBar(
             colors = OutlinedTextFieldDefaults.colors(
                 focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                 unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-                focusedBorderColor = BrownMaterial, // Consider renaming
-                unfocusedBorderColor = GrayMaterial // Consider renaming
+                focusedBorderColor = Tertiary, // Consider renaming
+                unfocusedBorderColor = Outline // Consider renaming
             ),
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
             keyboardActions = KeyboardActions(onSearch = {
@@ -182,7 +187,7 @@ fun TitleTextRow(
     contentLeft: String,
     contentRight: String,
     // note: modify
-    color: Color = LadosTheme.colorScheme.outline,
+    color: Color = Tertiary,
     onClick: () -> Unit = {},
 ) {
     Row(
@@ -205,7 +210,7 @@ fun TitleTextRow(
         ) {
             Text(
                 contentRight, style = TextStyle(
-                    fontSize = 20.sp,
+                    fontSize = 18.sp,
                     // note: modify
                     color = LadosTheme.colorScheme.outline,
                 )
@@ -274,7 +279,7 @@ fun CategoryItem(
         CategoryCircle(imageUrl = category.categoryImage)
         Spacer(Modifier.height(8.dp))
         // note: modify color
-        Text(text = category.categoryName, color = LadosTheme.colorScheme.primary)
+        Text(text = category.categoryName, color = Tertiary, fontSize = 16.sp)
     }
 }
 
@@ -290,7 +295,7 @@ fun ProductItem(
         .height(280.dp)
         .clip(RoundedCornerShape(8.dp))
         // note: modify
-        .background(LadosTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.2f))
+        .background(LadosTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.6f))
         .padding(bottom = 8.dp)
         .clickable { onClick(product.id) }
     ) {
@@ -322,7 +327,7 @@ fun ProductItem(
                 style = TextStyle(
                     fontSize = 16.sp,
                     // note: modify
-                    color = LadosTheme.colorScheme.error,
+                    color = Tertiary,
                 )
             )
             Row(
@@ -335,7 +340,7 @@ fun ProductItem(
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
                         // note: modify
-                        color = LadosTheme.colorScheme.error,
+                        color = Tertiary,
                     )
                 )
                 Text(
@@ -455,7 +460,7 @@ fun DrawProductScreenContent(
                         TitleTextRow(
                             contentLeft = "New In",
                             contentRight = "See all",
-                            color = MagentaMaterial,
+                            color = Primary,
                             onClick = {
                                 sharedViewModel.updateTypeScreen("New In")
                                 navController.navigate(
@@ -554,7 +559,7 @@ fun BottomSheetContent(
                         .fillMaxWidth(0.95f)
                         .height(56.dp),
                     colors = ButtonDefaults.buttonColors(
-                        if ((title!="Sort by" && selectedButtonIndex == index) || (title=="Sort by" && selectedButtonIndex == index+2)) MagentaMaterial else GrayMaterial.copy(
+                        if ((title!="Sort by" && selectedButtonIndex == index) || (title=="Sort by" && selectedButtonIndex == index+2)) Primary else Outline.copy(
                             alpha = 0.3f
                         )
 
@@ -570,7 +575,7 @@ fun BottomSheetContent(
                             text = option,
                             fontWeight = FontWeight.Bold,
                             style = MaterialTheme.typography.bodyLarge,
-                            color = if ((title != "Sort by" && selectedButtonIndex == index) || (title == "Sort by" && selectedButtonIndex == index + 2)) WhiteMaterial else BlackMaterial
+                            color = if ((title != "Sort by" && selectedButtonIndex == index) || (title == "Sort by" && selectedButtonIndex == index + 2)) SurfaceContainerHighest else OnSurface
                         )
                         if ((title != "Sort by" && selectedButtonIndex == index) || (title == "Sort by" && selectedButtonIndex == index + 2))
                             Icon(
@@ -628,12 +633,12 @@ fun ProductScreen(
                     onClick = { navController.navigate(Screen.Customer.CartScreen.route) },
                     modifier = Modifier
                         .clip(CircleShape)
-                        .background(MagentaMaterial),
+                        .background(Primary),
                 ) {
                     Icon(
                         Icons.Outlined.ShoppingCart,
                         contentDescription = "Cart",
-                        tint = WhiteMaterial
+                        tint = SurfaceContainerHighest
                     )
                 }
             }
