@@ -147,8 +147,7 @@ dependencies {
 
     androidTestImplementation(platform(libs.androidx.compose.bom))
 
-    // For JWT
-    implementation(libs.java.jwt)
+    implementation("androidx.datastore:datastore-preferences:1.1.1")
 }
 
 kapt {

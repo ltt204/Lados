@@ -371,7 +371,7 @@ fun DrawFilterScreenContent(
             navController = navController,
             textStyle = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.SemiBold),
             paddingValues = PaddingValues(horizontal = 8.dp),
-            onButtonClick = {}
+            onButtonClick = {},
         )
         //FilterMenuSelection(title = "Test", options = listOf("Option 1", "Option 2", "Option 3"), onSelectionChanged = {})
     }

@@ -1,6 +1,8 @@
 package org.nullgroup.lados.screens.customer.product
 
 import android.annotation.SuppressLint
+import android.content.Context
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -33,6 +35,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,13 +53,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.nullgroup.lados.compose.common.LoadOnProgress
+import org.nullgroup.lados.data.local.SearchHistoryManager
 import org.nullgroup.lados.data.models.Product
 import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.screens.customer.BottomSheetContent
 import org.nullgroup.lados.screens.customer.ProductItem
+import org.nullgroup.lados.screens.customer.SearchBar
 import org.nullgroup.lados.screens.customer.SearchBarRow
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.viewmodels.HomeViewModel
@@ -72,21 +80,24 @@ fun FilterButton(
     contentDescription: String? = null,
     @SuppressLint("ModifierParameter") modifier: Modifier = Modifier,
     onButtonClick: (String) -> Unit = {},
+    isNormal: Boolean=true,
+    isSelected: Boolean=false,
+    isVisible: Boolean=true
 ) {
-    var selectedButton by remember { mutableStateOf<Boolean?>(false) }
+    //var selectedButton by remember { mutableStateOf(isSelected) }
     Button(
         onClick = {
             onButtonClick(type)
-            selectedButton = !selectedButton!!
+            //if (isNormal) selectedButton=!selectedButton
         },
+        enabled = isVisible,
         modifier = modifier,
         colors = ButtonDefaults.buttonColors(
-            // note: modify
-            if (selectedButton == true) LadosTheme.colorScheme.primary
-            else LadosTheme.colorScheme.outline.copy(
+            if (isSelected) MagentaMaterial else GrayMaterial.copy(
                 alpha = 0.2f
             )
         ),
+
         contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
     ) {
         Row(
@@ -94,23 +105,40 @@ fun FilterButton(
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             modifier = Modifier.padding(horizontal = 4.dp)
         ) {
-            // note: modify
-            Text(
-                text = text,
-                color = if (selectedButton == true) LadosTheme.colorScheme.background
-                else LadosTheme.colorScheme.onBackground
-            )
+            Text(text = text, color = if (isSelected) WhiteMaterial else BlackMaterial)
             if (icon != null) {
                 Icon(
                     icon,
-                    // note: modify color
-                    tint = if (selectedButton == true) LadosTheme.colorScheme.surfaceContainer
-                    else LadosTheme.colorScheme.outline,
+                    tint = if (isSelected) WhiteMaterial else BlackMaterial,
                     contentDescription = contentDescription,
                     modifier = Modifier.size(28.dp)
                 )
                 Spacer(modifier = Modifier.width(4.dp))
             }
+        }
+    }
+}
+
+@Composable
+fun ProductsGrid(
+    modifier: Modifier = Modifier,
+    navController: NavController,
+    products: List<Product> = emptyList(),
+){
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(2),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        items(products.size) { item ->
+            ProductItem(
+                product = products[item],
+                onClick = { id ->
+                    navController.navigate(
+                        Screen.Customer.ProductDetailScreen.route + "/$id"
+                    )
+                }
+            )
         }
     }
 }
@@ -123,7 +151,13 @@ fun DrawProductInCategoryScreenContent(
     paddingValues: PaddingValues,
     products: List<Product> = emptyList(),
     sharedViewModel: SharedViewModel = SharedViewModel(),
-    onButtonClick: (String) -> Unit,
+    onButtonClick: (String) -> Unit ={},
+    onNormalButtonClick: (String) -> Unit={},
+    isSelected: List<Boolean> = listOf(false,false,false),
+    inCategory: Boolean = false,
+    inNewest: Boolean=false,
+    inTopSelling: Boolean=false,
+    inSearch: Boolean=false,
 ) {
     Column(
         modifier = modifier
@@ -133,47 +167,36 @@ fun DrawProductInCategoryScreenContent(
     ) {
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(4.dp),
-            modifier = modifier // Apply padding here
+            modifier = modifier
         ) {
-            items(5) { index -> // Use items() for better readability
+            items(3) { index ->
                 when (index) {
                     0 -> FilterButton(
-                        text = "2",
-                        icon = Icons.Outlined.List,
-                        contentDescription = "Build Filter",
-                        type = "Filter",
-                        onButtonClick = onButtonClick
-                    )
-
-                    1 -> FilterButton(
                         text = "On Sale",
                         contentDescription = "On Sale Filter",
                         type = "Deals",
-                        onButtonClick = onButtonClick
+                        onButtonClick = onNormalButtonClick,
+                        isSelected = isSelected[0],
                     )
 
-                    2 -> FilterButton(
+                    1 -> FilterButton(
                         text = "Price",
                         icon = Icons.Outlined.KeyboardArrowDown,
                         contentDescription = "Price Sort",
                         type = "Price",
-                        onButtonClick = onButtonClick
+                        onButtonClick = onButtonClick,
+                        isNormal = false,
+                        isSelected = isSelected[1]
                     )
 
-                    3 -> FilterButton(
+                    2 -> FilterButton(
                         text = "Sort by",
                         icon = Icons.Outlined.KeyboardArrowDown,
                         contentDescription = "Sort by",
                         type = "Sort by",
-                        onButtonClick = onButtonClick
-                    )
-
-                    4 -> FilterButton(
-                        text = "Men",
-                        icon = Icons.Outlined.KeyboardArrowDown,
-                        contentDescription = "Men's Filter",
-                        type = "Gender",
-                        onButtonClick = onButtonClick
+                        onButtonClick = onButtonClick,
+                        isNormal = false,
+                        isSelected = isSelected[2]
                     )
                 }
             }
@@ -184,26 +207,21 @@ fun DrawProductInCategoryScreenContent(
                 textStyle = textStyle
             )
         }
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            items(products.size) { item ->
-                ProductItem(
-                    product = products[item],
-                    onClick = { id ->
-                        navController.navigate(
-                            Screen.Customer.ProductDetailScreen.route + "/$id"
-                        )
-                    }
-                )
-            }
-        }
+        ProductsGrid(
+            navController = navController,
+
+            products = if (inTopSelling)
+                products.filter { it.engagements.size >= 2 }.take(10)
+            else if (inNewest)
+                products.sortedByDescending { it.createdAt }
+            else if (inCategory)
+                products.filter { it.categoryId == sharedViewModel.sharedData?.categoryId }
+            else if (inSearch)
+                products.filter { it.name.contains(sharedViewModel.searchQuery ?: "") }
+            else products
+        )
     }
-
 }
-
 
 @Composable
 fun ProductInCategoryScreen(
@@ -215,12 +233,18 @@ fun ProductInCategoryScreen(
     ),
     sharedViewModel: SharedViewModel = SharedViewModel(),
     viewModel: HomeViewModel = hiltViewModel(),
+    context: Context
 ) {
     val productUiState = viewModel.productUiState.collectAsStateWithLifecycle().value
+    var selectedSortOption by remember { mutableStateOf<String?>(null) }
+    var isSelected by remember { mutableStateOf(listOf(false, false, false)) }
+    val typeScreen = sharedViewModel.typeScreen
 
     val sheetState = rememberModalBottomSheetState(
         initialValue = ModalBottomSheetValue.Hidden
     )
+
+    val searchHistoryManager = remember { SearchHistoryManager(context) }
 
     val scope = rememberCoroutineScope()
     var sheetContent by remember {
@@ -228,15 +252,11 @@ fun ProductInCategoryScreen(
     }
 
     val optionsMap = mapOf(
-        "Sort by" to listOf(
+        "Sort by" to if (typeScreen!="Newest")listOf(
             "Recommended",
             "Newest",
-            "Lowest - Highest Price",
-            "Highest - Lowest Price"
-        ),
-        "Gender" to listOf("Man", "Women", "kids"),
-        "Deals" to listOf("On sale", "Free Shipping Eligible"),
-        "Price" to listOf("Min", "Max")
+        ) else listOf("Recommended"),
+        "Price" to listOf("Lowest - Highest Price", "Highest - Lowest Price")
     )
     ModalBottomSheetLayout(
         sheetState = sheetState,
@@ -275,7 +295,20 @@ fun ProductInCategoryScreen(
                         )
                     }
 
-                    SearchBarRow(navController = navController)
+                    SearchBar(
+                        modifier = Modifier.fillMaxWidth(),
+                        navController = navController,
+                        onSearch = { query ->
+                            (context as ComponentActivity).lifecycleScope.launch {
+                                searchHistoryManager.addSearchQuery(query)
+                            }
+                            sharedViewModel.updateSearchQuery(query)
+                            sharedViewModel.updateTypeScreen("In Search")
+                            navController.navigate(
+                                Screen.Customer.DisplayProductInCategory.route
+                            )
+                        }
+                    )
                 }
             }
         ) {
@@ -300,22 +333,83 @@ fun ProductInCategoryScreen(
                         navController = navController,
                         products = productUiState.products,
                         sharedViewModel = sharedViewModel,
+                        inCategory = typeScreen=="In Category",
+                        inTopSelling = typeScreen=="Top Selling",
+                        inNewest = typeScreen=="Newest",
+                        inSearch = typeScreen=="In Search",
+                        onNormalButtonClick = { _ ->
+                            val oldStatus: List<Boolean> = isSelected
+                            if (selectedSortOption == "On Sale") {
+                                selectedSortOption = null
+                                viewModel.resetProducts()
+                                isSelected = listOf(false, oldStatus[1], oldStatus[2])
+                            } else {
+                                selectedSortOption = "On Sale"
+                                viewModel.filterSaleProducts()
+                                isSelected = listOf(true,  oldStatus[1], false)
+                            }
+                        },
                         onButtonClick = { content ->
                             val option = optionsMap[content] ?: emptyList()
-                            sheetContent = {
-                                BottomSheetContent(
-                                    title = content,
-                                    options = option,
-                                    paddingValues = paddingValues,
-                                    onSelectionChanged = {},
-                                    onCloseClick = {
-                                        scope.launch {
-                                            sheetState.hide()
-                                        }
-                                    })
+                            if (option.isNotEmpty()) {
+                                sheetContent = {
+                                    BottomSheetContent(
+                                        title = content,
+                                        options = option,
+                                        paddingValues = paddingValues,
+                                        onClearClick = {
+                                            clearOption ->
+
+                                            if (clearOption == "Sort by") {
+                                                val oldStatus= isSelected[1]
+                                                isSelected = listOf(
+                                                    selectedSortOption == "On Sale",
+                                                    oldStatus,
+                                                    false,
+                                                )
+                                            } else if (clearOption == "Price") {
+                                                val oldStatus= isSelected[2]
+                                                isSelected = listOf(
+                                                    selectedSortOption == "On Sale",
+                                                    false,
+                                                    oldStatus
+                                                )
+                                            }
+                                            viewModel.resetProducts()
+                                        },
+                                        onSelectionChanged = { selectedOption ->
+                                            when (selectedOption) {
+                                                "Lowest - Highest Price" -> {
+                                                    viewModel.sortProductsByPriceLowToHigh()
+                                                    isSelected= listOf(selectedSortOption=="On Sale", true, false)
+                                                }
+                                                "Highest - Lowest Price" -> {
+                                                    viewModel.sortProductsByPriceHighToLow()
+                                                    isSelected = listOf(selectedSortOption=="On Sale", true, false)
+                                                }
+                                                "Recommended" -> {
+                                                    viewModel.resetProducts()
+                                                    isSelected = listOf(false, false, true)
+                                                }
+                                                "Newest" -> {
+                                                    viewModel.sortProductsByCreatedAt()
+                                                    isSelected= listOf(selectedSortOption=="On Sale", false, true)
+                                                }
+                                            }
+                                        },
+                                        onCloseClick = {
+                                            scope.launch {
+                                                sheetState.hide()
+                                            }
+                                        })
+                                }
+                                scope.launch { sheetState.show() }
                             }
-                            scope.launch { sheetState.show() }
-                        }
+                            else{
+
+                            }
+                        },
+                        isSelected = isSelected,
                     )
                 }
             }
@@ -323,6 +417,7 @@ fun ProductInCategoryScreen(
     }
 }
 
+/*
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun ReviewProductInCategoryScreen() {
@@ -330,3 +425,4 @@ fun ReviewProductInCategoryScreen() {
         ProductInCategoryScreen(navController = NavController(LocalContext.current))
     }
 }
+ */

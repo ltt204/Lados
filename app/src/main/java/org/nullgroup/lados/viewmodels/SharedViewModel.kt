@@ -15,4 +15,19 @@ class SharedViewModel @Inject constructor() : ViewModel() {
     fun updateComplexData(data: Category) {
         sharedData = data
     }
+
+    var typeScreen by mutableStateOf<String?>(null)
+    fun updateTypeScreen(data: String) {
+        typeScreen = data
+    }
+
+    var searchQuery by mutableStateOf<String?>(null)
+    fun updateSearchQuery(data: String) {
+        searchQuery = data
+    }
+
+    fun clearData() {
+        typeScreen = null
+        searchQuery = null
+    }
 }

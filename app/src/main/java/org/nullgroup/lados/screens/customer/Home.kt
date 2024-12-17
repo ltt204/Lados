@@ -23,6 +23,8 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 //noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.ModalBottomSheetLayout
 //noinspection UsingMaterialAndMaterial3Libraries
@@ -62,12 +64,14 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import kotlinx.coroutines.launch
@@ -86,6 +90,7 @@ import org.nullgroup.lados.viewmodels.SharedViewModel
 fun SearchBarRow(
     modifier: Modifier = Modifier,
     navController: NavController,
+    direct: Boolean=false
 ) {
     Row(
         modifier = modifier
@@ -95,7 +100,7 @@ fun SearchBarRow(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {
-        SearchBar(navController = navController, onSearch = {})
+        SearchBar(navController = navController, onSearch = {}, direct = direct)
     }
 
 }
@@ -105,6 +110,7 @@ fun SearchBar(
     modifier: Modifier = Modifier,
     navController: NavController,
     onSearch: (String) -> Unit,
+    direct: Boolean=false,
 ) {
     var searchText by remember { mutableStateOf("") }
     val focusManager = LocalFocusManager.current
@@ -112,23 +118,17 @@ fun SearchBar(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .clickable { navController.navigate(Screen.Customer.SearchScreen.route) },
+            .clickable { if (direct) navController.navigate(Screen.Customer.SearchScreen.route) },
+
         contentAlignment = Alignment.Center
     ) {
         OutlinedTextField(
             value = searchText,
-            onValueChange = {},
-            enabled = false,
+            onValueChange = { if (!direct) searchText = it },
+            enabled = !direct,
             modifier = Modifier
                 .fillMaxWidth()
-                .border(
-                    1.dp,
-                    // note: modify
-                    LadosTheme.colorScheme.surfaceContainerHigh,
-                    shape = RoundedCornerShape(50)
-                )
                 .align(Alignment.Center),
-
             singleLine = true,
             placeholder = { Text("Search") },
             leadingIcon = {
@@ -138,16 +138,18 @@ fun SearchBar(
                     modifier = Modifier.size(20.dp)
                 )
             },
-
             shape = RoundedCornerShape(50),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                 unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-                // note: modify
-                unfocusedBorderColor = LadosTheme.colorScheme.background,
-                // note: modify
-                focusedBorderColor = LadosTheme.colorScheme.secondary,
-            )
+                focusedBorderColor = BrownMaterial, // Consider renaming
+                unfocusedBorderColor = GrayMaterial // Consider renaming
+            ),
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+            keyboardActions = KeyboardActions(onSearch = {
+                onSearch(searchText)
+                focusManager.clearFocus()
+            })
         )
     }
 }
@@ -246,12 +248,15 @@ fun CategoryItems(
                     CategoryItem(
                         category = category,
                         modifier = Modifier.clickable {
+                            sharedViewModel.updateTypeScreen("In Category")
                             sharedViewModel.updateComplexData(category)
                             navController.navigate(Screen.Customer.DisplayProductInCategory.route)
                         })
                 }
             }
         }
+
+        else -> {}
     }
 
 
@@ -351,6 +356,31 @@ fun ProductRow(
     modifier: Modifier = Modifier,
     onProductClick: (String) -> Unit,
     viewModel: HomeViewModel = hiltViewModel(),
+    products: List<Product> = emptyList()
+) {
+    LazyRow(
+        modifier = modifier.heightIn(min = 280.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        contentPadding = PaddingValues(8.dp),
+    ) {
+        items(items = products, key = { it.id })
+        { item ->
+            ProductItem(
+                product = item,
+                onClick = onProductClick
+            )
+        }
+    }
+}
+
+@Composable
+fun DrawProductScreenContent(
+    modifier: Modifier = Modifier,
+    paddingValues: PaddingValues,
+    navController: NavController,
+    sharedViewModel: SharedViewModel,
+    onProductClick: (String) -> Unit,
+    viewModel: HomeViewModel
 ) {
     val productUiState = viewModel.productUiState.collectAsStateWithLifecycle()
     when (productUiState.value) {
@@ -366,106 +396,95 @@ fun ProductRow(
         }
 
         is ProductUiState.Success -> {
-            val products = (productUiState.value as ProductUiState.Success).products
-            LazyRow(
-                modifier = modifier.heightIn(min = 280.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                contentPadding = PaddingValues(8.dp),
+            Column(
+                modifier = modifier
+                    .padding(horizontal = 8.dp)
+                    .padding(top = paddingValues.calculateTopPadding()),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                items(items = products, key = { it.id })
-                { item ->
-                    ProductItem(
-                        product = item,
-                        onClick = onProductClick
-                    )
+                LazyColumn(
+                    modifier = modifier
+                        .fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    item {
+                        SearchBarRow(navController = navController, direct = true)
+                        Spacer(modifier = Modifier.height(4.dp))
+                    }
+                    item {
+                        TitleTextRow(
+                            contentLeft = "Categories",
+                            contentRight = "See all",
+                            onClick = {
+                                sharedViewModel.updateTypeScreen("In Category")
+                                navController.navigate(
+                                    Screen.Customer.CategorySelectScreen.route
+                                )
+                            }
+                        )
+                    }
+
+                    item {
+                        CategoryItems(
+                            sharedViewModel = sharedViewModel,
+                            navController = navController
+                        )
+                    }
+
+                    item {
+                        TitleTextRow(
+                            contentLeft = "Top Selling",
+                            contentRight = "See all",
+                            onClick = {
+                                sharedViewModel.updateTypeScreen("Top Selling")
+                                navController.navigate(
+                                    Screen.Customer.DisplayProductInCategory.route
+                                )
+                            }
+                        )
+                    }
+
+                    item {
+                        ProductRow(
+                            onProductClick = onProductClick,
+                            products = (productUiState.value as ProductUiState.Success).products.filter { it.engagements.size >= 2 }.take(5)
+                        )
+                    }
+
+                    item {
+                        TitleTextRow(
+                            contentLeft = "New In",
+                            contentRight = "See all",
+                            color = MagentaMaterial,
+                            onClick = {
+                                sharedViewModel.updateTypeScreen("New In")
+                                navController.navigate(
+                                    Screen.Customer.DisplayProductInCategory.route
+                                )
+                            }
+                        )
+                    }
+                    item {
+                        ProductRow(
+                            onProductClick = onProductClick,
+                            products = (productUiState.value as ProductUiState.Success).products.sortedByDescending { it.createdAt }.take(1)
+                        )
+                    }
                 }
             }
         }
     }
-
 }
-
-@Composable
-fun DrawProductScreenContent(
-    modifier: Modifier = Modifier,
-    paddingValues: PaddingValues,
-    navController: NavController,
-    sharedViewModel: SharedViewModel,
-    onProductClick: (String) -> Unit,
-) {
-    Column(
-        modifier = modifier
-            .padding(horizontal = 8.dp)
-            .padding(top = paddingValues.calculateTopPadding()),
-        verticalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
-        LazyColumn(
-            modifier = modifier
-                .fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            item {
-                SearchBarRow(navController = navController)
-                Spacer(modifier = Modifier.height(4.dp))
-            }
-            item {
-                TitleTextRow(
-                    contentLeft = "Categories",
-                    contentRight = "See all",
-                    onClick = {
-                        navController.navigate(
-                            Screen.Customer.CategorySelectScreen.route
-                        )
-                    }
-                )
-            }
-
-            item {
-                CategoryItems(
-                    sharedViewModel = sharedViewModel,
-                    navController = navController
-                )
-            }
-
-            item {
-                TitleTextRow(
-                    contentLeft = "Top Selling",
-                    contentRight = "See all"
-                )
-            }
-
-            item {
-                ProductRow(
-                    onProductClick = onProductClick
-                )
-            }
-
-            item {
-                TitleTextRow(
-                    contentLeft = "New In",
-                    contentRight = "See all",
-                    // note: modify
-                    color = LadosTheme.colorScheme.primary
-                )
-            }
-            item {
-                ProductRow(
-                    onProductClick = onProductClick
-                )
-            }
-        }
-    }
-}
-
 
 @Composable
 fun BottomSheetContent(
     modifier: Modifier = Modifier,
     title: String,
     options: List<String>,
-    onSelectionChanged: (String) -> Unit,
+    onSelectionChanged: (String) -> Unit = {},
     paddingValues: PaddingValues,
     onCloseClick: () -> Unit,
+    onClearClick: (String) -> Unit = {}
 ) {
     var selectedButtonIndex by remember { mutableStateOf<Int?>(null) }
     Box(
@@ -494,7 +513,16 @@ fun BottomSheetContent(
                 ) {
                 TextButton(
                     onClick = {
-                        selectedButtonIndex = null
+                        if (title == "Sort by" && selectedButtonIndex!! >= 2) {
+                            selectedButtonIndex = null
+                            onClearClick("Sort by")
+                        }
+                        else
+                            if (title != "Sort by" && selectedButtonIndex!! < 2) {
+                                selectedButtonIndex = null
+                                onClearClick("Price")
+                            }
+                        onCloseClick()
                     }
                 ) {
                     Text("Clear", style = TextStyle(fontSize = 16.sp))
@@ -517,16 +545,19 @@ fun BottomSheetContent(
                 Button(
                     onClick = {
                         selectedButtonIndex = index
+                        if (title=="Sort by")
+                             selectedButtonIndex= selectedButtonIndex!! +2
+                        onCloseClick()
+                        onSelectionChanged(option)
                     },
                     modifier = Modifier
                         .fillMaxWidth(0.95f)
                         .height(56.dp),
                     colors = ButtonDefaults.buttonColors(
-                        // note: modify
-                        if (selectedButtonIndex == index) LadosTheme.colorScheme.primary
-                        else LadosTheme.colorScheme.surfaceContainer.copy(
+                        if ((title!="Sort by" && selectedButtonIndex == index) || (title=="Sort by" && selectedButtonIndex == index+2)) MagentaMaterial else GrayMaterial.copy(
                             alpha = 0.3f
                         )
+
                     )
                 ) {
                     Row(
@@ -539,11 +570,9 @@ fun BottomSheetContent(
                             text = option,
                             fontWeight = FontWeight.Bold,
                             style = MaterialTheme.typography.bodyLarge,
-                            // note: modify
-                            color = if (selectedButtonIndex == index) LadosTheme.colorScheme.background
-                            else LadosTheme.colorScheme.onBackground
+                            color = if ((title != "Sort by" && selectedButtonIndex == index) || (title == "Sort by" && selectedButtonIndex == index + 2)) WhiteMaterial else BlackMaterial
                         )
-                        if (selectedButtonIndex == index)
+                        if ((title != "Sort by" && selectedButtonIndex == index) || (title == "Sort by" && selectedButtonIndex == index + 2))
                             Icon(
                                 Icons.Outlined.Done,
                                 contentDescription = null
@@ -562,110 +591,74 @@ fun ProductScreen(
     navController: NavController,
     paddingValues: PaddingValues = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
     sharedViewModel: SharedViewModel = SharedViewModel(),
+    viewModel: HomeViewModel = hiltViewModel()
 ) {
-    val sheetState = rememberModalBottomSheetState(
-        initialValue = ModalBottomSheetValue.Hidden
-    )
-    val scope = rememberCoroutineScope()
-
-    ModalBottomSheetLayout(
-        sheetState = sheetState,
-        sheetShape = RoundedCornerShape(
-            topStart = 30.dp,
-            topEnd = 30.dp
-        ),
-        sheetContent = {
-            BottomSheetContent(
-                title = "Gender",
-                options = listOf("Men", "Women", "kids"),
-                paddingValues = paddingValues,
-                onSelectionChanged = {
-
-                },
-                onCloseClick = {
-                    scope.launch { sheetState.hide() }
-                }
-            )
-        }
-    ) {
-        Scaffold(
-            modifier = modifier
-                .padding(paddingValues)
-                .padding(horizontal = 16.dp),
-            topBar = {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight()
-                        .padding(vertical = 16.dp, horizontal = 0.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    IconButton(onClick = {}) {
-                        Image(
-                            painter = painterResource(R.drawable.ic_launcher_background),
-                            contentDescription = "Back",
-                            modifier = Modifier
-                                .clip(CircleShape)
-                                .size(48.dp)
-                        )
-                    }
-
-                    Button(
-                        onClick = { scope.launch { sheetState.show() } },
-                        contentPadding = PaddingValues(horizontal = 8.dp),
-                        // note: modify
-                        colors = ButtonDefaults.buttonColors(LadosTheme.colorScheme.error)
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 4.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            Text(text = "Men", fontWeight = FontWeight.Bold)
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Icon(
-                                Icons.Outlined.KeyboardArrowDown,
-                                contentDescription = null,
-                            )
-                        }
-                    }
-
-                    IconButton(
-                        onClick = {},
+    Scaffold(
+        modifier = modifier
+            .padding(paddingValues)
+            .padding(horizontal = 16.dp),
+        topBar = {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight()
+                    .padding(vertical = 16.dp, horizontal = 0.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                IconButton(onClick = {}) {
+                    Image(
+                        painter = painterResource(R.drawable.ic_launcher_background),
+                        contentDescription = "Back",
                         modifier = Modifier
                             .clip(CircleShape)
-                            // note: modify
-                            .background(LadosTheme.colorScheme.primary),
-                    ) {
-                        Icon(
-                            Icons.Outlined.ShoppingCart,
-                            contentDescription = "Cart",
-                            // note: modify
-                            tint = LadosTheme.colorScheme.outline
-                        )
-                    }
+                            .size(48.dp)
+                    )
+                }
+
+                Text(
+                    text = "Lados",
+                    style = TextStyle(
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                )
+
+                IconButton(
+                    onClick = {},
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .background(MagentaMaterial),
+                ) {
+                    Icon(
+                        Icons.Outlined.ShoppingCart,
+                        contentDescription = "Cart",
+                        tint = WhiteMaterial
+                    )
                 }
             }
-        ) { it ->
-            DrawProductScreenContent(
-                modifier = modifier,
-                paddingValues = it,
-                navController = navController,
-                sharedViewModel = sharedViewModel,
-                onProductClick = { id ->
-                    navController.navigate(Screen.Customer.ProductDetailScreen.route + "/$id")
-                }
-            )
         }
+    ) { it ->
+        DrawProductScreenContent(
+            modifier = modifier,
+            paddingValues = it,
+            navController = navController,
+            sharedViewModel = sharedViewModel,
+            onProductClick = { id ->
+                navController.navigate(Screen.Customer.ProductDetailScreen.route + "/$id")
+            },
+            viewModel = viewModel
+        )
     }
 }
+
 
 @Preview(
     name = "Summary",
     showBackground = true,
     showSystemUi = true
 )
+
 @Composable
 fun Summary() {
     LadosTheme {
