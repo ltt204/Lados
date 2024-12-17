@@ -65,6 +65,7 @@ import org.nullgroup.lados.data.models.UserEngagement
 import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.screens.customer.order.OrderItemsArea
 import org.nullgroup.lados.utilities.getCurrentUTCFormattedTime
+import org.nullgroup.lados.viewmodels.customer.ProfileViewModel
 import org.nullgroup.lados.viewmodels.customer.ReviewProductViewModel
 import org.nullgroup.lados.viewmodels.customer.ReviewProductsState
 
@@ -75,6 +76,7 @@ fun ReviewProductScreen(
     productId: String,
     variantId: String,
     viewModel: ReviewProductViewModel = hiltViewModel(),
+    profileViewModel: ProfileViewModel = hiltViewModel(),
     navController: NavController,
     modifier: Modifier = Modifier,
 ) {
@@ -87,6 +89,8 @@ fun ReviewProductScreen(
     }
 
     val uiState = viewModel.productVariantsState.collectAsState()
+    val user by profileViewModel.currentUser.collectAsState()
+
     val context = LocalContext.current
     Scaffold(
         modifier = modifier,
@@ -119,7 +123,7 @@ fun ReviewProductScreen(
                         productId = productId,
                         engagement = UserEngagement(
                             productId = productId,
-                            userId = "u5",
+                            userId = user.id,
                             ratings = ratings,
                             reviews = reviews,
                             createdAt = Timestamp.now()
