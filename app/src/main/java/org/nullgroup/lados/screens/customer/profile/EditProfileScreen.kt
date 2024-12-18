@@ -17,7 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.Scaffold
+import androidx.compose.material3.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Edit
@@ -47,7 +47,7 @@ import androidx.navigation.NavController
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import org.nullgroup.lados.compose.profile.ConfirmDialog
-import org.nullgroup.lados.compose.profile.CustomTextField
+import org.nullgroup.lados.compose.SignIn.CustomTextField
 import org.nullgroup.lados.compose.common.LoadOnProgress
 import org.nullgroup.lados.compose.common.ProfileTopAppBar
 import org.nullgroup.lados.data.models.User
@@ -96,7 +96,7 @@ fun EditProfileScreen(
                 content = "Edit profile"
             )
         },
-        backgroundColor = Color.Transparent
+        containerColor = Color.Transparent
     ) { innerPadding ->
         when (userInfo) {
             is UserUiState.Loading -> LoadingContent()
@@ -219,44 +219,22 @@ fun SuccessContent(
         }
         CustomTextField(
             modifier = Modifier.fillMaxWidth(),
-            value = userName.value,
+            text = userName.value,
             onValueChange = {
                 userName.value = it
                 onNameChanged(it)
             },
-            header = "Name",
-            placeHolder = "Name",
-            trailingIcon = {
-                IconButton(onClick = { userName.value = "" }) {
-                    Icon(
-                        imageVector = Icons.Default.Clear,
-                        contentDescription = null,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-            }
+            label = "Name"
         )
         Spacer(modifier = Modifier.padding(top = 16.dp))
         CustomTextField(
             modifier = Modifier.fillMaxWidth(),
-            value = userPhone.value,
+            text = userPhone.value,
             onValueChange = {
                 userPhone.value = it
                 onPhoneChanged(it)
             },
-            header = "Phone number",
-            placeHolder = "Phone number",
-            trailingIcon = {
-                IconButton(onClick = {
-                    userPhone.value = ""
-                }) {
-                    Icon(
-                        imageVector = Icons.Default.Clear,
-                        contentDescription = null,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-            }
+            label = "Phone number"
         )
         Spacer(modifier = Modifier.weight(1f))
         Button(

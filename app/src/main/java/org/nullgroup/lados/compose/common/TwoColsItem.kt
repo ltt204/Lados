@@ -24,7 +24,7 @@ fun TwoColsItem(
 ) {
     Card(modifier = modifier
         .fillMaxWidth()
-        .heightIn(min = 72.dp, max = 128.dp),
+        .heightIn(min = 64.dp, max = 128.dp),
         colors = CardDefaults.cardColors(
             containerColor = androidx.compose.material3.MaterialTheme.colorScheme.surfaceDim,
         ),

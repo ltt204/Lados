@@ -11,12 +11,19 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material.ExposedDropdownMenuBox
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MenuItemColors
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -30,10 +37,16 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.nullgroup.lados.compose.common.LoadOnError
 import org.nullgroup.lados.compose.common.LoadOnProgress
+import org.nullgroup.lados.ui.theme.LadosTheme
+import org.nullgroup.lados.utilities.PasswordValidator
 import org.nullgroup.lados.viewmodels.customer.MenuItemsUIState
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
@@ -62,19 +75,27 @@ fun AddressExposedDropDownMenu(
             isExpanded = !isExpanded
             Log.d("AddressExposedDropDownMenu", "isExpanded: $isExpanded")
         }) {
-
-        OutlinedTextField(
-            modifier = Modifier.fillMaxWidth(),
-            value = selectedItem,
-            label = { Text(text = placeHolder) },
-            placeholder = { Text(text = placeHolder, color = Color.Gray) },
+        org.nullgroup.lados.compose.SignIn.CustomTextField(
+            label = placeHolder,
+            text = selectedItem,
             onValueChange = { },
-            readOnly = true,
+            modifier = Modifier.fillMaxWidth(),
             trailingIcon = {
                 ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded)
             },
-            singleLine = true
         )
+//        OutlinedTextField(
+//            modifier = Modifier.fillMaxWidth(),
+//            value = selectedItem,
+//            label = { Text(text = placeHolder) },
+//            placeholder = { Text(text = placeHolder, color = Color.Gray) },
+//            onValueChange = { },
+//            readOnly = true,
+//            trailingIcon = {
+//                ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded)
+//            },
+//            singleLine = true
+//        )
         ExposedDropdownMenu(
             modifier = Modifier
                 .fillMaxWidth()

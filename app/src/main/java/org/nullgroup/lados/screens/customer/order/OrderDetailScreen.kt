@@ -1,15 +1,19 @@
 package org.nullgroup.lados.screens.customer.order
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
@@ -65,7 +69,8 @@ fun OrderDetailScreen(
                 },
                 content = "Order Detail"
             )
-        }
+        },
+        containerColor = LadosTheme.colorScheme.background,
     ) { innerPadding ->
         // Column for showing order status
         when (uiState.value) {
@@ -124,7 +129,9 @@ fun OrderDetailScreen(
                         )
                         Spacer(modifier = Modifier.padding(bottom = LadosTheme.size.small))
                         DeliveryDetailArea(
-                            modifier = Modifier.height(100.dp),
+                            modifier = Modifier
+                                .wrapContentHeight()
+                                .heightIn(min = 100.dp),
                             order = currentOrder
                         )
                     }
@@ -194,8 +201,8 @@ fun OrderItemsArea(
     TwoColsItem(
         modifier = modifier,
         content = {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
+            Row(verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
             ) {
                 Icon(
                     modifier = Modifier
@@ -204,12 +211,24 @@ fun OrderItemsArea(
                     painter = painterResource(id = R.drawable.baseline_receipt_long_24),
                     contentDescription = "Order Icon"
                 )
-                Text(
-                    text = "${order.orderProducts.size} items",
-                    style = LadosTheme.typography.bodyMedium.copy(
-                        fontWeight = FontWeight.SemiBold
+                Column(
+                    modifier = Modifier,
+                    verticalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    Text(
+                        text = "${order.orderProducts.size} items",
+                        style = LadosTheme.typography.bodyLarge.copy(
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 18.sp
+                        ),
                     )
-                )
+                    Text(
+                        text = "$${order.orderTotal}",
+                        style = LadosTheme.typography.bodyMedium.copy(
+                            fontSize = 14.sp
+                        ),
+                    )
+                }
             }
         },
         trailingAction = {
@@ -237,22 +256,28 @@ fun DeliveryDetailArea(
     ) {
         Column(
             modifier = Modifier
-                .padding(LadosTheme.size.normal)
-                .fillMaxHeight(),
+                .padding(LadosTheme.size.large),
             verticalArrangement = Arrangement.SpaceEvenly,
         ) {
-            Text(
-                text = order.deliveryAddress,
-                style = LadosTheme.typography.bodyLarge.copy(
+            Column {
+                Text(text = "Delivery Address: ", style = LadosTheme.typography.bodyLarge.copy(
                     fontWeight = FontWeight.SemiBold,
-                ),
-            )
-            Text(
-                text = order.customerPhoneNumber,
-                style = LadosTheme.typography.bodyLarge.copy(
+                ),)
+                Text(
+                    text = order.deliveryAddress,
+                    style = LadosTheme.typography.bodyLarge
+                )
+            }
+            Spacer(modifier = Modifier.height(LadosTheme.size.small))
+            Row {
+                Text(text = "Customer Phone: ", style = LadosTheme.typography.bodyLarge.copy(
                     fontWeight = FontWeight.SemiBold,
-                ),
-            )
+                ),)
+                Text(
+                    text = order.customerPhoneNumber,
+                    style = LadosTheme.typography.bodyLarge
+                )
+            }
         }
     }
 }
@@ -276,5 +301,38 @@ fun OrderStatusItemConfirmedPreview() {
             .fillMaxWidth()
             .padding(vertical = LadosTheme.size.medium, horizontal = LadosTheme.size.small),
         status = Pair(OrderStatus.CREATED, null)
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun OrderItemsAreaPreview() {
+    OrderItemsArea(
+        modifier = Modifier,
+        order = Order(
+            orderId = "1",
+            orderProducts = emptyList(),
+            orderTotal = 0.0,
+            deliveryAddress = "Kathmandu",
+            customerPhoneNumber = "9841234567",
+            orderStatusLog = emptyMap()
+        ),
+        onViewProductsClick = {}
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun DeliveryDetailAreaPreview() {
+    DeliveryDetailArea(
+        modifier = Modifier.height(100.dp),
+        order = Order(
+            orderId = "1",
+            orderProducts = emptyList(),
+            orderTotal = 0.0,
+            deliveryAddress = "Kathmandu",
+            customerPhoneNumber = "9841234567",
+            orderStatusLog = emptyMap()
+        )
     )
 }

@@ -22,6 +22,8 @@ class EditProfileViewModel @Inject constructor(
 ) : ViewModel() {
     val isInfoChanged = mutableStateOf(false)
 
+    val isProfilePictureChanged = mutableStateOf(false)
+
     var userUiState: MutableState<UserUiState> = mutableStateOf(UserUiState.Loading)
         private set
 
@@ -41,29 +43,33 @@ class EditProfileViewModel @Inject constructor(
                 userUiState.value = UserUiState.Loading
                 try {
                     if (isInfoChanged.value) {
-                        profilePictureUiState.value = Loading
-
                         try {
-                            try {
-                                imageRepository.deleteImage(
-                                    child = "users",
-                                    fileName = user.email,
-                                    extension = "jpg"
-                                )
-                            } catch (e: Exception) {
-                                // Ignore
-                            }
+                            if (isProfilePictureChanged.value) {
+                                profilePictureUiState.value = Loading
+                                try {
+                                    imageRepository.deleteImage(
+                                        child = "users",
+                                        fileName = user.email,
+                                        extension = "jpg"
+                                    )
+                                } catch (e: Exception) {
+                                    // Ignore
+                                }
 
-                            val firebaseStorageUrl = imageRepository.uploadImage(
-                                userProfilePicture.value.image,
-                                userProfilePicture.value.child,
-                                userProfilePicture.value.fileName,
-                                userProfilePicture.value.extension
-                            )
+                                val firebaseStorageUrl = imageRepository.uploadImage(
+                                    userProfilePicture.value.image,
+                                    userProfilePicture.value.child,
+                                    userProfilePicture.value.fileName,
+                                    userProfilePicture.value.extension
+                                )
 
                             delay(500)
                             profilePictureUiState.value =
                                 ProfilePictureUiState.Success(firebaseStorageUrl)
+                            } else {
+                                profilePictureUiState.value =
+                                    ProfilePictureUiState.Success(user.avatarUri)
+                            }
                         } catch (e: Exception) {
                             profilePictureUiState.value =
                                 ProfilePictureUiState.Error(e.message ?: "An error occurred")
@@ -101,6 +107,7 @@ class EditProfileViewModel @Inject constructor(
                     extension = "jpg"
                 )
 
+                isProfilePictureChanged.value = true
                 isInfoChanged.value = true
             }
         }
@@ -110,6 +117,7 @@ class EditProfileViewModel @Inject constructor(
         viewModelScope.launch {
             delay(500)
             if (userUiState.value is UserUiState.Success) {
+                isInfoChanged.value = true
                 val user = (userUiState.value as UserUiState.Success).user
                 userUiState.value = UserUiState.Success(user.copy(name = name))
             }
@@ -120,6 +128,7 @@ class EditProfileViewModel @Inject constructor(
         viewModelScope.launch {
             delay(500)
             if (userUiState.value is UserUiState.Success) {
+                isInfoChanged.value = true
                 val user = (userUiState.value as UserUiState.Success).user
                 userUiState.value = UserUiState.Success(user.copy(phoneNumber = phone))
             }

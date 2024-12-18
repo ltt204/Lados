@@ -32,6 +32,7 @@ import org.nullgroup.lados.compose.common.ProfileTopAppBar
 import org.nullgroup.lados.compose.profile.SwipeToDeleteContainer
 import org.nullgroup.lados.compose.common.TwoColsItem
 import org.nullgroup.lados.screens.Screen
+import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.viewmodels.customer.AddressListViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -45,6 +46,7 @@ fun AddressList(
     val addressList = viewModel.userAddresses.collectAsState()
     Scaffold(
         modifier = modifier.padding(vertical = paddingValues.calculateTopPadding()),
+        containerColor = Color.Transparent,
         topBar = {
             ProfileTopAppBar(
                 onBackClick = { navController?.navigateUp() },
