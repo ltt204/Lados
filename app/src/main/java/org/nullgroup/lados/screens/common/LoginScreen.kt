@@ -64,7 +64,7 @@ fun EmailScreen(
     val loginScreenViewModel = hiltViewModel<LoginScreenViewModel>()
 
     var email by remember {
-        mutableStateOf("")
+        mutableStateOf("02trongtin03@gmail.com")
     }
 
     var isError by remember {
@@ -192,7 +192,7 @@ fun PasswordScreen(
 ) {
     val loginScreenViewModel = hiltViewModel<LoginScreenViewModel>()
     var password by remember {
-        mutableStateOf("")
+        mutableStateOf("Test123@")
     }
     var passwordVisible by remember {
         mutableStateOf(false)
