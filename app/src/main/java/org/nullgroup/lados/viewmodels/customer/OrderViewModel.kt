@@ -54,6 +54,7 @@ class OrderViewModel @Inject constructor(
                 it.orderStatusLog.entries.last().key == status.name
             }
             _orderState.update { OrderState.Success(filteredOrders) }
+            Log.d("OrderViewModel", "filterOrderByStatus: $filteredOrders")
         }
     }
 }

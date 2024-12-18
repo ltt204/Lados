@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import org.nullgroup.lados.data.models.Order
+import org.nullgroup.lados.data.models.OrderProduct
 import org.nullgroup.lados.data.models.Product
 import org.nullgroup.lados.data.models.ProductVariant
 import org.nullgroup.lados.data.repositories.interfaces.OrderRepository
@@ -35,6 +36,9 @@ class OrderProductsViewModel @Inject constructor(
         MutableStateFlow<OrderProductsState>(OrderProductsState.Loading)
     val productVariantsState: StateFlow<OrderProductsState> =
         this._productVariantsState.asStateFlow()
+
+    private var _orderProducts: MutableStateFlow<List<OrderProduct>> = MutableStateFlow(emptyList())
+    val orderProducts: StateFlow<List<OrderProduct>> = _orderProducts.asStateFlow()
 
     init {
         fetchProducts()

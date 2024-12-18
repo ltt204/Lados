@@ -248,7 +248,7 @@ fun DeliveryDetailArea(
                 ),
             )
             Text(
-                text = order.customerPhone,
+                text = order.customerPhoneNumber,
                 style = LadosTheme.typography.bodyLarge.copy(
                     fontWeight = FontWeight.SemiBold,
                 ),
@@ -275,6 +275,6 @@ fun OrderStatusItemConfirmedPreview() {
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = LadosTheme.size.medium, horizontal = LadosTheme.size.small),
-        status = Pair(OrderStatus.CONFIRMED, null)
+        status = Pair(OrderStatus.CREATED, null)
     )
 }

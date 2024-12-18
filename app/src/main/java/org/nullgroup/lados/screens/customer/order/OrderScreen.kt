@@ -34,6 +34,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import org.nullgroup.lados.R
@@ -94,7 +95,7 @@ fun OrderScreen(
             }
         }
     ) { innerPadding ->
-        Column(modifier = modifier) {
+        Column(modifier = modifier.padding(top = innerPadding.calculateTopPadding())) {
             when (orderUiState) {
                 is OrderState.Loading -> {
                     LoadOnProgress(
@@ -147,7 +148,7 @@ fun OrderCard(
             .height(84.dp),
         onClick = { onItemClick(order.orderId) },
         colors = CardColors(
-            containerColor = LadosTheme.colorScheme.surfaceContainerHighest,
+            containerColor = LadosTheme.colorScheme.onSecondaryContainer,
             contentColor = LadosTheme.colorScheme.onBackground,
             disabledContainerColor = LadosTheme.colorScheme.surfaceContainer,
             disabledContentColor = LadosTheme.colorScheme.onSurface,
@@ -155,7 +156,7 @@ fun OrderCard(
     ) {
         Row(
             modifier = modifier
-                .background(color = LadosTheme.colorScheme.background)
+                .background(color = LadosTheme.colorScheme.surfaceContainerHighest)
                 .fillMaxSize()
                 .padding(LadosTheme.size.small),
             verticalAlignment = Alignment.CenterVertically,
@@ -178,13 +179,13 @@ fun OrderCard(
                     text = "${order.orderProducts.size} items",
                     style = LadosTheme.typography.bodyLarge.copy(
                         fontWeight = FontWeight.SemiBold,
-                        color = LadosTheme.colorScheme.onBackground,
+                        fontSize = 18.sp
                     ),
                 )
                 Text(
                     text = "$${order.orderTotal}",
                     style = LadosTheme.typography.bodyMedium.copy(
-                        color = LadosTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.3f),
+                        fontSize = 14.sp
                     ),
                 )
             }
@@ -207,7 +208,7 @@ fun OrderScreenPreview() {
     OrderScreen()
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 fun OrderCardPreview() {
     OrderCard(
