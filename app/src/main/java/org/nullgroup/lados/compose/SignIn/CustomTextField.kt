@@ -27,11 +27,13 @@ fun CustomTextField(
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     isError: Boolean = false,
+    isReadonly: Boolean = false,
     label: String = "",
 ) {
     OutlinedTextField(
         value = text,
         onValueChange = onValueChange,
+        readOnly = isReadonly,
         shape = shape,
         placeholder = {
             Text(

@@ -19,12 +19,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import org.nullgroup.lados.compose.common.ProfileTopAppBar
 import org.nullgroup.lados.compose.profile.AddressForm
 import org.nullgroup.lados.compose.profile.ConfirmDialog
-import org.nullgroup.lados.compose.common.ProfileTopAppBar
 import org.nullgroup.lados.viewmodels.customer.EditAddressViewModel
 import org.nullgroup.lados.viewmodels.customer.SavingResult
 
@@ -62,7 +63,8 @@ fun EditAddressScreen(
                 },
                 content = "Edit Address"
             )
-        }
+        },
+        containerColor = Color.Transparent
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -98,7 +100,8 @@ fun EditAddressScreen(
                 onClick = {
                     saveConfirmation = true
                 },
-                enabled = viewModel.isInfoChanged.value) {
+                enabled = viewModel.isInfoChanged.value
+            ) {
                 Text(text = "Save")
             }
         }
@@ -122,6 +125,7 @@ fun EditAddressScreen(
             is SavingResult.Loading -> {
                 // Do nothing
             }
+
             is SavingResult.Success -> {
                 isSaveClick = false
                 navController?.navigateUp()
@@ -150,7 +154,7 @@ fun EditAddressScreen(
             primaryButtonText = "Exit",
             secondaryButtonText = "Continue"
         )
-    } else if(cancelConfirmation) {
+    } else if (cancelConfirmation) {
         cancelConfirmation = false
         navController?.navigateUp()
     }
