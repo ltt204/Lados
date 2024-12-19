@@ -211,7 +211,7 @@ fun OrderItemsArea(
                     modifier = Modifier
                         .padding(LadosTheme.size.small)
                         .width(LadosTheme.size.extraExtraLarge),
-                    painter = painterResource(id = R.drawable.baseline_receipt_long_24),
+                    painter = painterResource(id = R.drawable.frame_67),
                     contentDescription = "Order Icon"
                 )
                 Column(
@@ -238,7 +238,8 @@ fun OrderItemsArea(
             TextButton(onClick = { onViewProductsClick() }) {
                 Text(
                     text = "View All",
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.SemiBold,
+                    color = LadosTheme.colorScheme.primary.copy(alpha = 0.8f)
                 )
             }
         },

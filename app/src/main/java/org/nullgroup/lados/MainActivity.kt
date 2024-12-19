@@ -40,7 +40,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             LadosTheme {
                 Surface(
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize(),
+                    color = androidx.compose.ui.graphics.Color.Transparent
                 ) {
 
                     //RoleBasedNavigation()

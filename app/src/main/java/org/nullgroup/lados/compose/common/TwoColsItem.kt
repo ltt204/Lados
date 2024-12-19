@@ -24,10 +24,8 @@ fun TwoColsItem(
     trailingAction: @Composable (onClick: () -> Unit) -> Unit = {},
     onClick: () -> Unit = {},
     colors: CardColors = CardDefaults.cardColors(
-        containerColor = LadosTheme.colorScheme.surfaceContainerHighest,
-        contentColor = LadosTheme.colorScheme.onBackground,
-        disabledContainerColor = LadosTheme.colorScheme.surfaceContainer,
-        disabledContentColor = LadosTheme.colorScheme.onSurface,
+        containerColor = LadosTheme.colorScheme.surfaceContainerHigh,
+        disabledContainerColor = LadosTheme.colorScheme.outline,
     )
 ) {
     Card(modifier = modifier
