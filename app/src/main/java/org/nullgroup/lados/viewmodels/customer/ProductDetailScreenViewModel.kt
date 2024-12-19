@@ -48,6 +48,18 @@ class ProductDetailScreenViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(ProductDetailUiState())
     val uiState: StateFlow<ProductDetailUiState> = _uiState.asStateFlow()
 
+    private val _users = MutableStateFlow<Map<String, String>>(emptyMap())
+    val users: StateFlow<Map<String, String>> = _users.asStateFlow()
+
+    fun fetchUsers(userIds: List<String>) {
+        viewModelScope.launch {
+            val fetchedUsers = userIds.distinct().associateWith { userId ->
+                userRepository.getUserFromFirestore(userId).getOrNull()?.name ?: userId
+            }
+            _users.value = fetchedUsers
+        }
+    }
+
     fun getProductById(id: String) {
         viewModelScope.launch {
             _productState.value = ProductState.Loading
@@ -101,8 +113,9 @@ class ProductDetailScreenViewModel @Inject constructor(
                 product = product,
                 sortedColors = sortedColors,
                 sortedSizes = sortedSizes,
-                selectedSize = sortedSizes.firstOrNull(),
-                selectedColor = sortedColors.firstOrNull(),
+                selectedSize = product.variants.first().size,
+                selectedColor = product.variants.first().color,
+                quantityInStock = product.variants.first().quantityInStock,
                 isLoading = false
             )
         }
@@ -132,6 +145,29 @@ class ProductDetailScreenViewModel @Inject constructor(
         }
     }
 
+    fun updateQuantityInStock() {
+
+        val product = uiState.value.product
+        val selectedColor = uiState.value.selectedColor
+        val selectedSize = uiState.value.selectedSize
+
+        val correspondingVariant =
+            if (selectedColor != null && selectedSize != null) {
+                product.variants.find {
+                    it.color.hexCode == selectedColor.hexCode &&
+                            it.size.sizeName == selectedSize.sizeName
+                }
+            } else {
+                product.variants.first()
+            }
+
+        _uiState.update {
+            it.copy(
+                quantityInStock = correspondingVariant?.quantityInStock ?: 0
+            )
+        }
+    }
+
     private fun getSortedColors(product: Product): List<Color> {
         return product.variants
             .map { it.color }
@@ -149,7 +185,7 @@ class ProductDetailScreenViewModel @Inject constructor(
     // TODO: Adjust logic as you wish
     val onAddToCartClicked: (
         onAddedDone: (() -> Unit)?,
-            onAddedFailed: (() -> Unit)?
+        onAddedFailed: (() -> Unit)?
     ) -> (() -> Unit) = { onAddedDone, onAddedFailed ->
         {
             viewModelScope.launch {
@@ -196,7 +232,7 @@ class ProductDetailScreenViewModel @Inject constructor(
         }
     }
 
-    fun getUser(userId: String){
+    fun getUser(userId: String) {
         viewModelScope.launch {
             userRepository.getUserFromFirestore(userId)
                 .onSuccess { user ->
@@ -208,4 +244,6 @@ class ProductDetailScreenViewModel @Inject constructor(
                 }
         }
     }
+
+
 }
