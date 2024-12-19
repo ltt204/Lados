@@ -290,6 +290,7 @@ fun CustomerGraph(
                     }
                 )
             ) { backStackEntry ->
+                isVisibility = false
 
                 Log.d("Review:", Screen.Customer.ReviewProductScreen.ROUTE_WITH_ARGS)
 

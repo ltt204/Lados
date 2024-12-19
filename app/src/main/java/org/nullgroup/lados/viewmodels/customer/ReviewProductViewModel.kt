@@ -42,7 +42,6 @@ class ReviewProductViewModel @Inject constructor(
             "Variant ID is missing!"
         }
 
-
     private val _currentProduct: StateFlow<Product?> =
         productRepository.getProductByIdFlow(productId)
             .stateIn(
@@ -95,7 +94,6 @@ class ReviewProductViewModel @Inject constructor(
             )
         }
     }
-
 
 }
 

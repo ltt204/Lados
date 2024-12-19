@@ -1,7 +1,6 @@
 package org.nullgroup.lados.screens.customer.product
 
 import android.os.Build
-import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
@@ -70,10 +69,9 @@ import org.nullgroup.lados.data.models.Image
 import org.nullgroup.lados.data.models.Product
 import org.nullgroup.lados.data.models.Size
 import org.nullgroup.lados.data.models.UserEngagement
+import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.utilities.formatToRelativeTime
 import org.nullgroup.lados.viewmodels.customer.ProductDetailScreenViewModel
-import org.nullgroup.lados.viewmodels.customer.ProfileViewModel
-import org.nullgroup.lados.viewmodels.customer.ReviewProductViewModel
 import java.util.Locale
 
 data class ProductDetailUiState(
@@ -83,15 +81,11 @@ data class ProductDetailUiState(
     val selectedSize: Size? = null,
     val selectedColor: org.nullgroup.lados.data.models.Color? = null,
     val quantity: Int = 1,
+    val quantityInStock: Int = 0,
     val isLoading: Boolean = true,
     val error: String? = null
 )
 
-object ProductTheme {
-    val backgroundColor = Color.Black.copy(alpha = 0.05f)
-    val primaryColor = Color(0xff8e6cef)
-    val textColor = Color.Gray
-}
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -112,7 +106,6 @@ fun ProductDetailScreen(
     // TODO: Adjust as you wish
     val onAddedToCart: () -> Unit = {
         Toast.makeText(context, "Product added to cart", Toast.LENGTH_SHORT).show()
-        navController.navigateUp()
     }
 
     val onAddedToCartFailed: () -> Unit = {
@@ -129,9 +122,11 @@ fun ProductDetailScreen(
         uiState.isLoading -> {
             Box(
                 contentAlignment = Alignment.Center,
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(LadosTheme.colorScheme.background)
             ) {
-                CircularProgressIndicator(color = ProductTheme.primaryColor)
+                CircularProgressIndicator(color = LadosTheme.colorScheme.primary)
             }
         }
 
@@ -150,6 +145,7 @@ fun ProductDetailScreen(
                 bottomBar = {
                     ProductDetailBottomBar(
                         title = "Add to Cart",
+                        enabled = uiState.quantityInStock > 0,
                         price = "$${uiState.product.variants.first().salePrice}",
                         onClick = onAddToCart
                     )
@@ -158,6 +154,7 @@ fun ProductDetailScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .background(LadosTheme.colorScheme.background)
                         .padding(paddingValues)
                         .padding(bottom = 10.dp)
                         .padding(horizontal = 16.dp)
@@ -168,6 +165,7 @@ fun ProductDetailScreen(
                         originalPrice = uiState.product.variants.first().originalPrice,
                         salePrice = uiState.product.variants.first().salePrice ?: 0.0,
                         productImages = uiState.product.variants.first().images,
+                        quantityInStock = uiState.quantityInStock
                     )
 
                     ProductDetailsSection(
@@ -202,8 +200,10 @@ fun ProductDetailScreen(
                         items = uiState.sortedSizes,
                         itemContent = { it.sizeName },
                         itemColor = { Color.Transparent },
+                        initialSelection = uiState.sortedSizes.indexOf(uiState.selectedSize),
                         onItemSelected = {
                             productViewModel.updateSelectedSize(it)
+                            productViewModel.updateQuantityInStock()
                         }
                     )
                 }
@@ -217,8 +217,10 @@ fun ProductDetailScreen(
                         items = uiState.sortedColors,
                         itemContent = { it.colorName },
                         itemColor = { Color(android.graphics.Color.parseColor(it.hexCode)) },
+                        initialSelection = uiState.sortedColors.indexOf(uiState.selectedColor),
                         onItemSelected = {
                             productViewModel.updateSelectedColor(it)
+                            productViewModel.updateQuantityInStock()
                         }
                     )
                 }
@@ -245,11 +247,12 @@ fun ProductDetailTopBar(
             onClick = onNavigateBack,
             modifier = Modifier
                 .clip(CircleShape)
-                .background(ProductTheme.backgroundColor)
+                .background(LadosTheme.colorScheme.surfaceContainerHighest)
         ) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                contentDescription = "Back"
+                contentDescription = "Back",
+                tint = LadosTheme.colorScheme.onBackground
             )
         }
 
@@ -257,11 +260,12 @@ fun ProductDetailTopBar(
             onClick = { isFavorite = isFavorite.not() },
             modifier = Modifier
                 .clip(CircleShape)
-                .background(ProductTheme.backgroundColor)
+                .background(LadosTheme.colorScheme.surfaceContainerHighest)
         ) {
             Icon(
                 imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                contentDescription = "Favorite"
+                contentDescription = "Favorite",
+                tint = LadosTheme.colorScheme.onBackground
             )
         }
     }
@@ -273,7 +277,8 @@ fun ProductInformationSection(
     name: String,
     originalPrice: Double,
     salePrice: Double,
-    productImages: List<Image> = emptyList()
+    productImages: List<Image> = emptyList(),
+    quantityInStock: Int = 0
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -282,14 +287,13 @@ fun ProductInformationSection(
             .padding(bottom = 16.dp)
     ) {
 
-        Log.d("Size", productImages.size.toString())
         // Image Carousel
         LazyRow(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             items(productImages.size) { index ->
-                Log.d("Size", productImages[index].link)
+
                 SubcomposeAsyncImage(
                     model = coil.request.ImageRequest.Builder(LocalContext.current)
                         .data(productImages[index].link)
@@ -315,7 +319,8 @@ fun ProductInformationSection(
         Text(
             text = name,
             fontWeight = FontWeight.Bold,
-            fontSize = 25.sp
+            fontSize = 25.sp,
+            color = LadosTheme.colorScheme.onBackground
         )
 
         Row(
@@ -329,18 +334,25 @@ fun ProductInformationSection(
                 text = "$$salePrice",
                 fontWeight = FontWeight.Bold,
                 fontSize = 22.sp,
-                color = ProductTheme.primaryColor
+                color = LadosTheme.colorScheme.primary
             )
 
             Text(
                 text = "$${originalPrice}",
+                color = LadosTheme.colorScheme.outline,
                 fontWeight = FontWeight.Medium,
                 textDecoration = TextDecoration.LineThrough,
                 fontSize = 15.sp
-
             )
 
         }
+
+        Text(
+            "Quantity in stock: $quantityInStock",
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 16.sp,
+            color = LadosTheme.colorScheme.onBackground
+        )
 
     }
 }
@@ -390,7 +402,7 @@ fun ProductDetailsSection(
         Text(
             text = description,
             fontSize = 14.sp,
-            color = ProductTheme.textColor,
+            color = LadosTheme.colorScheme.onBackground,
             fontWeight = FontWeight.Medium
         )
     }
@@ -407,15 +419,17 @@ fun SelectableDetailRow(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(32.dp))
-            .background(ProductTheme.backgroundColor)
+            .background(LadosTheme.colorScheme.surfaceContainerHighest)
             .clickable(onClick = onClick)
             .padding(vertical = 18.dp, horizontal = 16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
+
         Text(
             text = title,
-            fontSize = 15.sp
+            fontSize = 15.sp,
+            color = LadosTheme.colorScheme.onBackground
         )
 
         Row(
@@ -427,12 +441,14 @@ fun SelectableDetailRow(
             Text(
                 text = currentSelection,
                 fontWeight = FontWeight.Bold,
-                fontSize = 15.sp
+                fontSize = 15.sp,
+                color = LadosTheme.colorScheme.onBackground
             )
 
             Icon(
                 imageVector = Icons.Default.KeyboardArrowDown,
-                contentDescription = "Select $title"
+                contentDescription = "Select $title",
+                tint = LadosTheme.colorScheme.onBackground
             )
         }
     }
@@ -449,14 +465,15 @@ fun QuantitySelector(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(32.dp))
-            .background(ProductTheme.backgroundColor)
+            .background(LadosTheme.colorScheme.surfaceContainerHighest)
             .padding(vertical = 8.dp, horizontal = 16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = "Quantity",
-            fontSize = 15.sp
+            fontSize = 15.sp,
+            color = LadosTheme.colorScheme.onBackground
         )
 
         Row(
@@ -474,14 +491,15 @@ fun QuantitySelector(
                 Icon(
                     painter = painterResource(id = R.drawable.minus_icon),
                     contentDescription = "Decrease Quantity",
-                    tint = ProductTheme.primaryColor
+                    tint = LadosTheme.colorScheme.primary
                 )
             }
 
             Text(
                 text = quantity.toString(),
                 fontWeight = FontWeight.Bold,
-                fontSize = 15.sp
+                fontSize = 15.sp,
+                color = LadosTheme.colorScheme.onBackground
             )
 
             IconButton(
@@ -493,7 +511,7 @@ fun QuantitySelector(
                 Icon(
                     painter = painterResource(id = R.drawable.add_icon),
                     contentDescription = "Increase Quantity",
-                    tint = ProductTheme.primaryColor
+                    tint = LadosTheme.colorScheme.primary
                 )
             }
         }
@@ -509,18 +527,26 @@ fun ProductReviewSection(
     productViewModel: ProductDetailScreenViewModel = hiltViewModel()
 ) {
 
-    val user by productViewModel.user.collectAsState()
+    LaunchedEffect(engagements) {
+        val userIds = engagements.map { it.userId }
+        productViewModel.fetchUsers(userIds)
+    }
+
+    val users by productViewModel.users.collectAsState()
 
     Column(
         horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier.padding(horizontal = 16.dp)
+        modifier = Modifier
+            .padding(horizontal = 16.dp)
+            .padding(top = 16.dp)
     ) {
 
         Text(
             text = "Reviews",
             fontWeight = FontWeight.Bold,
-            fontSize = 20.sp
+            fontSize = 20.sp,
+            color = LadosTheme.colorScheme.onBackground
         )
 
         Column(
@@ -531,7 +557,7 @@ fun ProductReviewSection(
                 text = "${String.format(Locale.getDefault(), "%.2f", averageRating)} Ratings",
                 fontWeight = FontWeight.Bold,
                 fontSize = 25.sp,
-                color = ProductTheme.primaryColor
+                color = LadosTheme.colorScheme.primary
             )
 
             Spacer(modifier = Modifier.width(8.dp))
@@ -540,12 +566,12 @@ fun ProductReviewSection(
                 text = "$numOfReviews Reviews",
                 fontWeight = FontWeight.Medium,
                 fontSize = 15.sp,
-                color = Color.Gray
+                color = LadosTheme.colorScheme.outline
             )
         }
 
         LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
             horizontalAlignment = Alignment.Start,
             modifier = Modifier
                 .height(250.dp)
@@ -553,16 +579,8 @@ fun ProductReviewSection(
             items(items = engagements, key = { it.id }) { engagement ->
                 productViewModel.getUser(engagement.userId)
 
-                var name by remember { mutableStateOf("") }
-
-                LaunchedEffect(user){
-                    if(user.isSuccess){
-                        name = user.getOrNull()?.name ?: ""
-                    }
-                }
-
                 ReviewCard(
-                    name = name.ifEmpty { engagement.userId },
+                    name = users[engagement.userId] ?: engagement.userId,
                     maxRatings = 5,
                     ratings = engagement.ratings,
                     reviews = engagement.reviews,
@@ -582,7 +600,6 @@ fun ReviewCard(
     reviews: String = "",
     createAt: String = ""
 ) {
-
 
     Box(
         modifier = Modifier.fillMaxWidth()
@@ -605,12 +622,13 @@ fun ReviewCard(
                         modifier = Modifier
                             .size(42.dp)
                             .clip(CircleShape)
-                            .background(ProductTheme.primaryColor)
+                            .background(LadosTheme.colorScheme.primary)
                     )
                     Text(
                         text = name,
                         fontWeight = FontWeight.Bold,
                         fontSize = 15.sp,
+                        color =LadosTheme.colorScheme.onBackground,
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
@@ -626,7 +644,7 @@ fun ReviewCard(
                         Icon(
                             painter = painterResource(R.drawable.star_icon),
                             contentDescription = "Star",
-                            tint = if (index < ratings) ProductTheme.primaryColor else Color.LightGray,
+                            tint = if (index < ratings) LadosTheme.colorScheme.primary else LadosTheme.colorScheme.outline,
                             modifier = Modifier.size(18.dp)
                         )
                     }
@@ -637,14 +655,15 @@ fun ReviewCard(
                 text = reviews,
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 15.sp,
-                modifier = Modifier.padding(top = 8.dp)
+                color = LadosTheme.colorScheme.onBackground,
+                modifier = Modifier.padding(vertical = 8.dp)
             )
 
             Text(
                 createAt,
                 fontWeight = FontWeight.Medium,
-                fontSize = 14.sp,
-                color = Color.Gray
+                fontSize = 12.sp,
+                color = LadosTheme.colorScheme.outline
             )
         }
     }
@@ -654,12 +673,15 @@ fun ReviewCard(
 fun ProductDetailBottomBar(
     title: String = "",
     price: String = "",
+    enabled: Boolean = true,
     onClick: () -> Unit = {}
 ) {
     Button(
         onClick = onClick,
+        enabled = enabled,
         colors = ButtonDefaults.buttonColors(
-            containerColor = ProductTheme.primaryColor,
+            containerColor = LadosTheme.colorScheme.primary,
+            disabledContainerColor = LadosTheme.colorScheme.outline
         ),
         modifier = Modifier
             .fillMaxWidth()
@@ -695,9 +717,10 @@ fun <T> SelectionList(
     items: List<T>,
     itemContent: @Composable (T) -> String,
     itemColor: @Composable (T) -> Color,
+    initialSelection: Int = -1,
     onItemSelected: (T) -> Unit = {}
 ) {
-    var selectedIndex by remember { mutableIntStateOf(-1) }
+    var selectedIndex by remember { mutableIntStateOf(initialSelection) }
 
     LazyColumn(
         modifier = Modifier.fillMaxWidth(),
@@ -725,8 +748,8 @@ fun SelectableItem(
     onClick: () -> Unit
 ) {
     val backgroundColor =
-        if (isSelected) ProductTheme.primaryColor else ProductTheme.backgroundColor
-    val textColor = if (isSelected) Color.White else Color.Black
+        if (isSelected) LadosTheme.colorScheme.primary else LadosTheme.colorScheme.surfaceContainerHighest
+    val textColor = if (isSelected) Color.White else LadosTheme.colorScheme.onBackground
 
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -778,7 +801,9 @@ fun SelectionBottomSheet(
     if (showBottomSheet) {
         ModalBottomSheet(
             onDismissRequest = onDismiss,
+            containerColor = LadosTheme.colorScheme.background,
             modifier = Modifier.fillMaxWidth()
+
         ) {
             Column(
                 modifier = Modifier
@@ -794,19 +819,20 @@ fun SelectionBottomSheet(
                     Text(
                         text = title,
                         fontWeight = FontWeight.Bold,
-                        fontSize = 25.sp
+                        fontSize = 25.sp,
+                        color = LadosTheme.colorScheme.onBackground
                     )
                     Icon(
                         imageVector = Icons.Default.Close,
                         contentDescription = "Close",
-                        modifier = Modifier.clickable(onClick = onDismiss)
+                        modifier = Modifier.clickable(onClick = onDismiss),
+                        tint = LadosTheme.colorScheme.onBackground
                     )
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))
                 content()
                 Spacer(modifier = Modifier.height(20.dp))
-
             }
         }
     }
