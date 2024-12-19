@@ -2,7 +2,6 @@ package org.nullgroup.lados.screens.customer
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,25 +25,22 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 //noinspection UsingMaterialAndMaterial3Libraries
-import androidx.compose.material.ModalBottomSheetLayout
 //noinspection UsingMaterialAndMaterial3Libraries
-import androidx.compose.material.ModalBottomSheetValue
 //noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Done
-import androidx.compose.material.icons.outlined.KeyboardArrowDown
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.ShoppingCart
 //noinspection UsingMaterialAndMaterial3Libraries
-import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -54,18 +50,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -76,25 +69,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import kotlinx.coroutines.launch
 import org.nullgroup.lados.R
 import org.nullgroup.lados.compose.common.LoadOnProgress
 import org.nullgroup.lados.data.models.Category
 import org.nullgroup.lados.data.models.Product
 import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.ui.theme.LadosTheme
-import org.nullgroup.lados.ui.theme.OnSurface
-import org.nullgroup.lados.ui.theme.Outline
-import org.nullgroup.lados.ui.theme.Primary
-import org.nullgroup.lados.ui.theme.SurfaceContainerHighest
-import org.nullgroup.lados.ui.theme.Tertiary
 import org.nullgroup.lados.viewmodels.CategoryUiState
 import org.nullgroup.lados.viewmodels.HomeViewModel
 import org.nullgroup.lados.viewmodels.ProductUiState
 import org.nullgroup.lados.viewmodels.SharedViewModel
+import java.text.DecimalFormat
 
 @Composable
 fun SearchBarRow(
@@ -317,10 +304,13 @@ fun ProductItem(
     modifier: Modifier = Modifier,
     product: Product,
     onClick: (String) -> Unit,
+    onFavicon: (String) -> Unit = {}
 ) {
+    var isClicked by remember { mutableStateOf(false) }
+
     Box(modifier = modifier
         .width(160.dp)
-        .height(280.dp)
+        .height(300.dp)
         .clip(RoundedCornerShape(8.dp))
         // note: modify
         .background(LadosTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.8f))
@@ -335,13 +325,23 @@ fun ProductItem(
                 .height(220.dp),
             contentScale = ContentScale.Crop,
         )
-
         Image(
-            painter = painterResource(R.drawable.favicon),
+            painter = painterResource(
+                if (!isClicked) R.drawable.love
+                else R.drawable.heart
+            ),
             contentDescription = "Image",
             modifier = Modifier
                 .align(Alignment.TopEnd)
                 .padding(8.dp)
+                .background(
+                    LadosTheme.colorScheme.onPrimary.copy(alpha = 0.5f),
+                    CircleShape
+                ).padding(4.dp)
+                .clickable {
+                    isClicked = !isClicked
+                    onFavicon(product.id)
+                }
         )
 
         Column(
@@ -359,7 +359,6 @@ fun ProductItem(
                 )
             )
             Row(
-
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
@@ -379,6 +378,37 @@ fun ProductItem(
                             alpha = 0.5f,
                         ),
                         textDecoration = TextDecoration.LineThrough
+                    )
+                )
+            }
+            Row(
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    val decimalFormat = DecimalFormat("#.##")
+                    Text(
+                        text = decimalFormat.format(product.engagements.sumOf { it.ratings } * 1.0f / product.engagements.size),
+                        style = TextStyle(
+                            fontSize = 16.sp,
+                            color = LadosTheme.colorScheme.onBackground,
+                        )
+                    )
+                    Spacer(modifier = Modifier.width(2.dp))
+                    Icon(
+                        imageVector = Icons.Filled.Star,
+                        contentDescription = "Rating",
+                        tint = LadosTheme.colorScheme.yellow,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+                Text(
+                    text = "(${product.engagements.size})",
+                    style = TextStyle(
+                        fontSize = 16.sp,
+                        color = LadosTheme.colorScheme.onBackground,
                     )
                 )
             }
@@ -664,16 +694,6 @@ fun ProductScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                IconButton(onClick = {}) {
-                    Image(
-                        painter = painterResource(R.drawable.ic_launcher_background),
-                        contentDescription = "Back",
-                        modifier = Modifier
-                            .clip(CircleShape)
-                            .size(48.dp)
-                    )
-                }
-
                 Text(
                     text = "Lados",
                     style = LadosTheme.typography.headlineSmall.copy(
