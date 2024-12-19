@@ -70,6 +70,7 @@ import org.nullgroup.lados.data.models.Image
 import org.nullgroup.lados.data.models.Product
 import org.nullgroup.lados.data.models.Size
 import org.nullgroup.lados.data.models.UserEngagement
+import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.utilities.formatToRelativeTime
 import org.nullgroup.lados.viewmodels.customer.ProductDetailScreenViewModel
 import org.nullgroup.lados.viewmodels.customer.ProfileViewModel
@@ -147,6 +148,7 @@ fun ProductDetailScreen(
                         onNavigateBack = { navController.navigateUp() }
                     )
                 },
+                containerColor = LadosTheme.colorScheme.background,
                 bottomBar = {
                     ProductDetailBottomBar(
                         title = "Add to Cart",

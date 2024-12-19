@@ -203,6 +203,7 @@ fun SearchScreen(
 
     Scaffold(
         modifier = modifier.padding(paddingValues),
+        containerColor = LadosTheme.colorScheme.background,
         topBar = {
             Row(
                 modifier = Modifier

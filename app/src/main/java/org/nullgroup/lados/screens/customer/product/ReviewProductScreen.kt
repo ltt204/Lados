@@ -64,6 +64,7 @@ import org.nullgroup.lados.data.models.Size
 import org.nullgroup.lados.data.models.UserEngagement
 import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.screens.customer.order.OrderItemsArea
+import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.utilities.getCurrentUTCFormattedTime
 import org.nullgroup.lados.viewmodels.customer.ProfileViewModel
 import org.nullgroup.lados.viewmodels.customer.ReviewProductViewModel
@@ -94,6 +95,7 @@ fun ReviewProductScreen(
     val context = LocalContext.current
     Scaffold(
         modifier = modifier,
+        containerColor = LadosTheme.colorScheme.background,
         topBar = {
             TopBar(
                 leadingIcon = {

@@ -161,6 +161,7 @@ fun CategorySelectScreen(
         modifier = modifier
             .padding(paddingValues)
             .padding(horizontal = 16.dp),
+        containerColor = LadosTheme.colorScheme.background,
         topBar = {
             Row(
                 modifier = Modifier
