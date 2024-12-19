@@ -8,26 +8,32 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import org.nullgroup.lados.ui.theme.LadosTheme
 
 @Composable
 fun TwoColsItem(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit = {},
     trailingAction: @Composable (onClick: () -> Unit) -> Unit = {},
-    onClick: () -> Unit = {}
+    onClick: () -> Unit = {},
+    colors: CardColors = CardDefaults.cardColors(
+        containerColor = LadosTheme.colorScheme.surfaceContainerHighest,
+        contentColor = LadosTheme.colorScheme.onBackground,
+        disabledContainerColor = LadosTheme.colorScheme.surfaceContainer,
+        disabledContentColor = LadosTheme.colorScheme.onSurface,
+    )
 ) {
     Card(modifier = modifier
         .fillMaxWidth()
         .heightIn(min = 64.dp, max = 128.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = androidx.compose.material3.MaterialTheme.colorScheme.surfaceDim,
-        ),
+        colors = colors,
         onClick = { onClick() }
     ) {
         Row(

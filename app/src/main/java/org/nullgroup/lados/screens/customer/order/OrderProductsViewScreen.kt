@@ -242,8 +242,10 @@ fun OrderProductItem(
                 }
             },
             onClick = {
-                navController?.navigate(
-                    "${Screen.Customer.ProductDetailScreen.route}/${product.id}"
+                buttonAction.second.invoke(
+                    navController!!,
+                    product.id,
+                    variant.id
                 )
             }
         )

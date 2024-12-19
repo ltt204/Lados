@@ -1,13 +1,10 @@
 package org.nullgroup.lados.screens.customer.order
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -19,10 +16,9 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -38,7 +34,6 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import org.nullgroup.lados.R
-import org.nullgroup.lados.compose.common.LoadOnProgress
 import org.nullgroup.lados.compose.common.ProfileTopAppBar
 import org.nullgroup.lados.compose.common.TwoColsItem
 import org.nullgroup.lados.data.models.Order
@@ -107,6 +102,7 @@ fun OrderDetailScreen(
                             style = LadosTheme.typography.titleLarge.copy(
                                 fontWeight = FontWeight.SemiBold,
                             ),
+                            color = LadosTheme.colorScheme.onBackground,
                         )
                         Spacer(modifier = Modifier.padding(bottom = LadosTheme.size.small))
                         OrderItemsArea(
@@ -126,6 +122,7 @@ fun OrderDetailScreen(
                             style = LadosTheme.typography.titleLarge.copy(
                                 fontWeight = FontWeight.SemiBold,
                             ),
+                            color = LadosTheme.colorScheme.onBackground,
                         )
                         Spacer(modifier = Modifier.padding(bottom = LadosTheme.size.small))
                         DeliveryDetailArea(
@@ -185,10 +182,15 @@ fun OrderStatusItem(
             Spacer(modifier = Modifier.padding(horizontal = 8.dp))
             Text(
                 text = status.first.name.capitalizeWords(),
+                color = LadosTheme.colorScheme.onBackground,
                 style = LadosTheme.typography.titleMedium,
             )
         }
-        Text(text = time, style = LadosTheme.typography.titleSmall)
+        Text(
+            text = time,
+            color = LadosTheme.colorScheme.onBackground,
+            style = LadosTheme.typography.titleSmall
+        )
     }
 }
 
@@ -201,7 +203,8 @@ fun OrderItemsArea(
     TwoColsItem(
         modifier = modifier,
         content = {
-            Row(verticalAlignment = Alignment.CenterVertically,
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
             ) {
                 Icon(
@@ -253,6 +256,12 @@ fun DeliveryDetailArea(
     Card(
         modifier = modifier.fillMaxWidth(),
         onClick = { /*Do nothing*/ },
+        colors = CardColors(
+            containerColor = LadosTheme.colorScheme.surfaceContainerHighest,
+            contentColor = LadosTheme.colorScheme.onBackground,
+            disabledContainerColor = LadosTheme.colorScheme.surfaceContainer,
+            disabledContentColor = LadosTheme.colorScheme.onSurface,
+        ),
     ) {
         Column(
             modifier = Modifier
@@ -260,9 +269,12 @@ fun DeliveryDetailArea(
             verticalArrangement = Arrangement.SpaceEvenly,
         ) {
             Column {
-                Text(text = "Delivery Address: ", style = LadosTheme.typography.bodyLarge.copy(
-                    fontWeight = FontWeight.SemiBold,
-                ),)
+                Text(
+                    text = "Delivery Address: ",
+                    style = LadosTheme.typography.bodyLarge.copy(
+                        fontWeight = FontWeight.SemiBold,
+                    ),
+                )
                 Text(
                     text = order.deliveryAddress,
                     style = LadosTheme.typography.bodyLarge
@@ -270,9 +282,12 @@ fun DeliveryDetailArea(
             }
             Spacer(modifier = Modifier.height(LadosTheme.size.small))
             Row {
-                Text(text = "Customer Phone: ", style = LadosTheme.typography.bodyLarge.copy(
-                    fontWeight = FontWeight.SemiBold,
-                ),)
+                Text(
+                    text = "Customer Phone: ",
+                    style = LadosTheme.typography.bodyLarge.copy(
+                        fontWeight = FontWeight.SemiBold,
+                    ),
+                )
                 Text(
                     text = order.customerPhoneNumber,
                     style = LadosTheme.typography.bodyLarge
