@@ -353,7 +353,7 @@ fun ProductItem(
                     onFavicon(product.id)
                 }
         )
-
+        Spacer(Modifier.height(4.dp))
         Column(
             modifier = Modifier
                 .align(Alignment.BottomStart)
@@ -683,13 +683,13 @@ fun BottomSheetContent(
 fun ProductScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
-    paddingValues: PaddingValues = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+    paddingValues: PaddingValues = PaddingValues(0.dp),
     sharedViewModel: SharedViewModel = SharedViewModel(),
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     Scaffold(
         modifier = modifier
-            .padding(paddingValues)
+            .padding(top=paddingValues.calculateTopPadding())
             .padding(horizontal = 16.dp),
         containerColor = LadosTheme.colorScheme.background,
         topBar = {

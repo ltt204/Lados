@@ -149,7 +149,7 @@ fun ProductsGrid(
 fun DrawProductInCategoryScreenContent(
     modifier: Modifier = Modifier,
     navController: NavController,
-    textStyle: TextStyle = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.Bold),
+    textStyle: TextStyle = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.Bold, color = LadosTheme.colorScheme.onBackground),
     paddingValues: PaddingValues,
     products: List<Product> = emptyList(),
     sharedViewModel: SharedViewModel = SharedViewModel(),
