@@ -13,6 +13,7 @@ import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusModifier
+import androidx.compose.ui.text.font.FontWeight
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.ui.theme.Typography
 
@@ -21,6 +22,7 @@ import org.nullgroup.lados.ui.theme.Typography
 fun ProfileTopAppBar(
     onBackClick: () -> Unit,
     content: String,
+    textWeight: FontWeight = FontWeight.SemiBold,
     modifier: Modifier = Modifier,
     scrollBehavior: TopAppBarScrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(),
 ) {
@@ -31,7 +33,8 @@ fun ProfileTopAppBar(
                 style = Typography.headlineMedium
                     .copy(
                         color = LadosTheme.colorScheme.onBackground
-                    )
+                    ),
+                fontWeight = textWeight,
             )
         },
         navigationIcon = {
