@@ -14,6 +14,7 @@ import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.local.Persistence
 import kotlinx.coroutines.tasks.await
 import org.json.JSONObject
 import org.nullgroup.lados.data.models.AuthTokens
@@ -102,7 +103,11 @@ class AuthRepositoryImpl(
             sharedPreferences.getAuthTokens() ?: return ResourceState.Error("No saved tokens")
 
         return try {
-            // Thử dùng ID token trước
+            val user = firebaseAuth.currentUser
+            if (user != null) {
+                return ResourceState.Success(mapToUser(user, "email"))
+            }
+
             if (!isTokenExpired(tokens.idToken)) {
                 val credential = when (tokens.provider) {
                     "google.com" -> GoogleAuthProvider.getCredential(tokens.idToken, null)
@@ -117,7 +122,6 @@ class AuthRepositoryImpl(
                 }
             }
 
-            // Nếu ID token hết hạn, dùng refresh token để sign in
             val credential = when (tokens.provider) {
                 "google.com" -> GoogleAuthProvider.getCredential(tokens.refreshToken, null)
                 "password" -> EmailAuthProvider.getCredential(tokens.refreshToken, "s")
@@ -126,11 +130,9 @@ class AuthRepositoryImpl(
             val authResult = firebaseAuth.signInWithCredential(credential).await()
 
             if (authResult?.user != null) {
-                // Lấy ID token mới
                 val newIdToken = authResult.user!!.getIdToken(false).await().token
 
                 if (newIdToken != null) {
-                    // Lưu ID token mới
                     sharedPreferences.saveAuthTokens(tokens.copy(idToken = newIdToken))
                     ResourceState.Success(mapToUser(authResult.user!!, tokens.provider))
                 } else {
@@ -241,16 +243,7 @@ class AuthRepositoryImpl(
                 }
             }
 
-            val user = User(
-                id = result.user?.uid ?: "",
-                email = email,
-                name = fullName,
-                role = UserRole.CUSTOMER.name,
-                phoneNumber = phone,
-                avatarUri = googleSignInAccount?.photoUrl?.toString() ?: "",
-                provider = "email_google",
-                isActive = true,
-            )
+            val user = mapToUser(result.user!!, "password")
 
             userRepository.saveUserToFirestore(user)
 

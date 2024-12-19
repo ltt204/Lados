@@ -63,6 +63,10 @@ fun EmailScreen(
 ) {
     val loginScreenViewModel = hiltViewModel<LoginScreenViewModel>()
 
+    LaunchedEffect(Unit) {
+        loginScreenViewModel.handleLoginEvent(LoginScreenEvent.HandleAutoSignIn)
+    }
+
     var email by remember {
         mutableStateOf("")
     }

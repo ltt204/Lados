@@ -27,42 +27,6 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object AuthenticationModule {
 
-//    @Provides
-//    @Singleton
-//    fun provideEmailAuthRepository(
-//        firestore: FirebaseFirestore,
-//        firebaseAuth: FirebaseAuth,
-//        userRepository: UserRepository,
-//        sharedPreferences: SharedPreferencesRepository,
-//    ): EmailAuthRepository {
-//        return EmailAuthRepositoryImpl(
-//            firebaseAuth,
-//            firestore,
-//            userRepository,
-//            sharedPreferences,
-//        )
-//    }
-
-//    @Provides
-//    @Singleton
-//    fun provideGoogleAuthRepository(
-//        @ApplicationContext context: Context,
-//        oneTapClient: SignInClient,
-//        firebaseAuth: FirebaseAuth,
-//        googleSignInClient: GoogleSignInClient,
-//        userRepository: UserRepository,
-//        sharedPreferences: SharedPreferencesRepository,
-//    ): GoogleAuthRepository {
-//        return GoogleAuthRepositoryImpl(
-//            context,
-//            oneTapClient,
-//            firebaseAuth,
-//            googleSignInClient,
-//            userRepository,
-//            sharedPreferences,
-//        )
-//    }
-
     @Provides
     @Singleton
     fun provideSignInClient(@ApplicationContext context: Context): SignInClient {

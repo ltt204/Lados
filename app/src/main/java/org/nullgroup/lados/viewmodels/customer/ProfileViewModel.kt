@@ -3,6 +3,7 @@ package org.nullgroup.lados.viewmodels.customer
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -10,14 +11,15 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.nullgroup.lados.data.models.User
+import org.nullgroup.lados.data.repositories.interfaces.AuthRepository
 import org.nullgroup.lados.data.repositories.interfaces.UserRepository
 import javax.inject.Inject
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
     private val userRepository: UserRepository,
-    private val firebaseAuth: FirebaseAuth,
-) :ViewModel() {
+    private val auth: AuthRepository,
+) : ViewModel() {
     val currentUser = userRepository.getCurrentUserFlow()
         .stateIn(
             scope = viewModelScope,
@@ -28,9 +30,11 @@ class ProfileViewModel @Inject constructor(
         }
 
     fun signOut(navController: NavController?) {
-        firebaseAuth.signOut()
-        navController?.navigate("login") {
-            popUpTo(navController.graph.startDestinationId) { inclusive = true }
+        viewModelScope.launch {
+            auth.signOut()
+            navController?.navigate("login") {
+                popUpTo(navController.graph.startDestinationId) { inclusive = true }
+            }
         }
     }
 }

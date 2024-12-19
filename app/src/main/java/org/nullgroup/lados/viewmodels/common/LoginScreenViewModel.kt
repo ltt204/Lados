@@ -2,31 +2,16 @@ package org.nullgroup.lados.viewmodels.common
 
 import android.content.Context
 import android.util.Patterns.*
-import androidx.activity.result.ActivityResult
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.IntentSenderRequest
-import androidx.credentials.CredentialManager
-import androidx.credentials.GetCredentialRequest
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
-import com.google.android.libraries.identity.googleid.GetGoogleIdOption
-import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.GoogleAuthProvider
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 import org.nullgroup.lados.data.models.User
-import org.nullgroup.lados.data.models.UserRole
 import org.nullgroup.lados.data.repositories.interfaces.AuthRepository
-import org.nullgroup.lados.data.repositories.interfaces.SharedPreferencesRepository
-import org.nullgroup.lados.data.repositories.interfaces.UserRepository
-import org.nullgroup.lados.utilities.isTokenExpired
 import org.nullgroup.lados.viewmodels.common.states.LoginScreenStepState
 import org.nullgroup.lados.viewmodels.common.states.ResourceState
 import org.nullgroup.lados.viewmodels.common.events.LoginScreenEvent
@@ -150,6 +135,15 @@ class LoginScreenViewModel @Inject constructor(
 
     private fun handleAutoSignIn() = viewModelScope.launch {
         loginState.value = auth.autoSignIn()
+
+        when (val state = loginState.value) {
+            is ResourceState.Error -> {}
+            ResourceState.Idle -> {}
+            ResourceState.Loading -> {}
+            is ResourceState.Success -> {
+                loginStep.value = LoginScreenStepState.Home(state.data!!)
+            }
+        }
     }
 
     private fun handleSignUp(navController: NavController) {
