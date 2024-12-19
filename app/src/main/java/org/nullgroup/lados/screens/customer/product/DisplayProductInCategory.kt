@@ -97,9 +97,7 @@ fun FilterButton(
         enabled = isVisible,
         modifier = modifier,
         colors = ButtonDefaults.buttonColors(
-            if (isSelected) Primary else Outline.copy(
-                alpha = 0.2f
-            )
+            if (isSelected) LadosTheme.colorScheme.primary else LadosTheme.colorScheme.onPrimary
         ),
 
         contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
@@ -109,11 +107,11 @@ fun FilterButton(
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             modifier = Modifier.padding(horizontal = 4.dp)
         ) {
-            Text(text = text, color = if (isSelected) SurfaceContainerHighest else OnSurface)
+            Text(text = text, color = if (isSelected) LadosTheme.colorScheme.onPrimary else LadosTheme.colorScheme.primary)
             if (icon != null) {
                 Icon(
                     icon,
-                    tint = if (isSelected) SurfaceContainerHighest else OnSurface,
+                    tint = if (isSelected) LadosTheme.colorScheme.onPrimary else LadosTheme.colorScheme.primary,
                     contentDescription = contentDescription,
                     modifier = Modifier.size(28.dp)
                 )
@@ -264,6 +262,8 @@ fun ProductInCategoryScreen(
     )
     ModalBottomSheetLayout(
         sheetState = sheetState,
+        sheetBackgroundColor = LadosTheme.colorScheme.background,
+        sheetContentColor = LadosTheme.colorScheme.onBackground,
         sheetShape = RoundedCornerShape(
             topStart = 30.dp,
             topEnd = 30.dp
@@ -299,7 +299,7 @@ fun ProductInCategoryScreen(
 
                         )
                     }
-
+                    Spacer(Modifier.width(8.dp))
                     SearchBar(
                         modifier = Modifier.fillMaxWidth(),
                         navController = navController,

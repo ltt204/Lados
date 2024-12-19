@@ -107,7 +107,7 @@ fun SearchHistoryRow(
             .clickable { onReClick(content) }) {
             Text(
                 text = content,
-                style = TextStyle(fontSize = 18.sp, color = OnSurface.copy(alpha = 0.5f))
+                style = TextStyle(fontSize = 18.sp, color = LadosTheme.colorScheme.onBackground)
             )
         }
         Spacer(Modifier.weight(1f))
@@ -180,7 +180,7 @@ fun DrawMainSearchScreenContent(
         Spacer(Modifier.height(4.dp))
         HorizontalDivider(
             modifier = Modifier.fillMaxWidth(),
-            color = Outline.copy(alpha = 0.3f)
+            color = LadosTheme.colorScheme.primary
         )
         SearchHistory(
             searchHistory = searchHistory,
@@ -202,7 +202,9 @@ fun SearchScreen(
     val searchHistory = searchHistoryManager.searchHistory.collectAsState(initial = emptySet())
 
     Scaffold(
-        modifier = modifier.padding(paddingValues),
+        modifier = modifier
+            .padding(paddingValues)
+            .padding(horizontal = 16.dp),
         containerColor = LadosTheme.colorScheme.background,
         topBar = {
             Row(
