@@ -51,6 +51,7 @@ import org.nullgroup.lados.compose.SignIn.CustomTextField
 import org.nullgroup.lados.compose.common.LoadOnProgress
 import org.nullgroup.lados.compose.common.ProfileTopAppBar
 import org.nullgroup.lados.data.models.User
+import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.ui.theme.Typography
 import org.nullgroup.lados.utilities.toByteArray
 import org.nullgroup.lados.utilities.toDrawable
@@ -214,7 +215,8 @@ fun SuccessContent(
             Text(
                 modifier = Modifier.padding(bottom = 32.dp),
                 text = userInfo.user.email,
-                style = Typography.headlineSmall
+                style = Typography.headlineSmall,
+                color = LadosTheme.colorScheme.onBackground
             )
         }
         CustomTextField(

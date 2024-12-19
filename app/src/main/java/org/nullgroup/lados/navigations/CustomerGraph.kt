@@ -74,6 +74,7 @@ fun CustomerGraph(
 
     Scaffold(
         modifier = modifier.fillMaxWidth(),
+        containerColor = LadosTheme.colorScheme.background,
         bottomBar = {
             AnimatedVisibility(
                 visible = isVisibility,
