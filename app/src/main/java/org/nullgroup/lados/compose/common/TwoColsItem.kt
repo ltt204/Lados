@@ -25,6 +25,7 @@ fun TwoColsItem(
     onClick: () -> Unit = {},
     colors: CardColors = CardDefaults.cardColors(
         containerColor = LadosTheme.colorScheme.surfaceContainerHigh,
+        contentColor = LadosTheme.colorScheme.onPrimaryContainer,
         disabledContainerColor = LadosTheme.colorScheme.outline,
     )
 ) {

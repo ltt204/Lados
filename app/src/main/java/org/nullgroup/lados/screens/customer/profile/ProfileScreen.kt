@@ -116,18 +116,17 @@ fun ProfileScreen(
                             Text(
                                 modifier = Modifier, text = currentUser.value.name,
                                 fontSize = 18.sp,
-                                color = LadosTheme.colorScheme.outline,
+                                color = LadosTheme.colorScheme.onBackground,
                                 fontWeight = FontWeight.SemiBold,
                             )
                             Text(
                                 modifier = Modifier, text = currentUser.value.email,
-                                color = LadosTheme.colorScheme.outline.copy(alpha = 0.6f),
+                                color = LadosTheme.colorScheme.onBackground.copy(alpha = 0.8f),
                                 fontSize = 16.sp
                             )
                             Text(
                                 modifier = Modifier, text = currentUser.value.phoneNumber,
-                                color = LadosTheme.colorScheme.outline.copy(alpha = 0.6f),
-
+                                color = LadosTheme.colorScheme.onBackground.copy(alpha = 0.8f),
                                 fontSize = 16.sp
                             )
                         }
@@ -157,7 +156,7 @@ fun ProfileScreen(
                         content = {
                             Text(
                                 text = "Address",
-                                color = LadosTheme.colorScheme.outline,
+                                color = LadosTheme.colorScheme.onBackground.copy(alpha = 0.8f),
                                 style = Typography.bodyLarge
                             )
                         },
@@ -182,7 +181,7 @@ fun ProfileScreen(
                         content = {
                             Text(
                                 text = "Wishlist",
-                                color = LadosTheme.colorScheme.outline,
+                                color = LadosTheme.colorScheme.onBackground.copy(alpha = 0.8f),
                                 style = Typography.bodyLarge
                             )
                         },
@@ -203,7 +202,7 @@ fun ProfileScreen(
                         content = {
                             Text(
                                 text = "Privacy",
-                                color = LadosTheme.colorScheme.outline,
+                                color = LadosTheme.colorScheme.onBackground.copy(alpha = 0.8f),
                                 style = Typography.bodyLarge
                             )
                         },
@@ -224,7 +223,7 @@ fun ProfileScreen(
                         content = {
                             Text(
                                 text = "Help",
-                                color = LadosTheme.colorScheme.outline,
+                                color = LadosTheme.colorScheme.onBackground.copy(alpha = 0.8f),
                                 style = Typography.bodyLarge
                             )
                         },
@@ -245,7 +244,7 @@ fun ProfileScreen(
                         content = {
                             Text(
                                 text = "About",
-                                color = LadosTheme.colorScheme.outline,
+                                color = LadosTheme.colorScheme.onBackground.copy(alpha = 0.8f),
                                 style = Typography.bodyLarge
                             )
                         },
