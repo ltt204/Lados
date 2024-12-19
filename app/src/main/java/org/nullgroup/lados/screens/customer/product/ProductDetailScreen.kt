@@ -1,7 +1,6 @@
 package org.nullgroup.lados.screens.customer.product
 
 import android.os.Build
-import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
@@ -73,8 +72,6 @@ import org.nullgroup.lados.data.models.UserEngagement
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.utilities.formatToRelativeTime
 import org.nullgroup.lados.viewmodels.customer.ProductDetailScreenViewModel
-import org.nullgroup.lados.viewmodels.customer.ProfileViewModel
-import org.nullgroup.lados.viewmodels.customer.ReviewProductViewModel
 import java.util.Locale
 
 data class ProductDetailUiState(
@@ -89,11 +86,6 @@ data class ProductDetailUiState(
     val error: String? = null
 )
 
-object ProductTheme {
-    val backgroundColor = Color.Black.copy(alpha = 0.05f)
-    val primaryColor = Color(0xff8e6cef)
-    val textColor = Color.Gray
-}
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -535,7 +527,12 @@ fun ProductReviewSection(
     productViewModel: ProductDetailScreenViewModel = hiltViewModel()
 ) {
 
-    val user by productViewModel.user.collectAsState()
+    LaunchedEffect(engagements) {
+        val userIds = engagements.map { it.userId }
+        productViewModel.fetchUsers(userIds)
+    }
+
+    val users by productViewModel.users.collectAsState()
 
     Column(
         horizontalAlignment = Alignment.Start,
@@ -582,16 +579,8 @@ fun ProductReviewSection(
             items(items = engagements, key = { it.id }) { engagement ->
                 productViewModel.getUser(engagement.userId)
 
-                var name by remember { mutableStateOf("") }
-
-                LaunchedEffect(user) {
-                    if (user.isSuccess) {
-                        name = user.getOrNull()?.name ?: ""
-                    }
-                }
-
                 ReviewCard(
-                    name = name.ifEmpty { engagement.userId },
+                    name = users[engagement.userId] ?: engagement.userId,
                     maxRatings = 5,
                     ratings = engagement.ratings,
                     reviews = engagement.reviews,
@@ -611,7 +600,6 @@ fun ReviewCard(
     reviews: String = "",
     createAt: String = ""
 ) {
-
 
     Box(
         modifier = Modifier.fillMaxWidth()
@@ -634,7 +622,7 @@ fun ReviewCard(
                         modifier = Modifier
                             .size(42.dp)
                             .clip(CircleShape)
-                            .background(ProductTheme.primaryColor)
+                            .background(LadosTheme.colorScheme.primary)
                     )
                     Text(
                         text = name,

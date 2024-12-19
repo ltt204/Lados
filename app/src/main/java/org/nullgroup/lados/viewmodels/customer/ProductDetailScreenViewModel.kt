@@ -48,6 +48,18 @@ class ProductDetailScreenViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(ProductDetailUiState())
     val uiState: StateFlow<ProductDetailUiState> = _uiState.asStateFlow()
 
+    private val _users = MutableStateFlow<Map<String, String>>(emptyMap())
+    val users: StateFlow<Map<String, String>> = _users.asStateFlow()
+
+    fun fetchUsers(userIds: List<String>) {
+        viewModelScope.launch {
+            val fetchedUsers = userIds.distinct().associateWith { userId ->
+                userRepository.getUserFromFirestore(userId).getOrNull()?.name ?: userId
+            }
+            _users.value = fetchedUsers
+        }
+    }
+
     fun getProductById(id: String) {
         viewModelScope.launch {
             _productState.value = ProductState.Loading

@@ -18,8 +18,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.IconButton
 import androidx.compose.material.icons.Icons
@@ -64,6 +66,7 @@ import org.nullgroup.lados.data.models.Size
 import org.nullgroup.lados.data.models.UserEngagement
 import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.screens.customer.order.OrderItemsArea
+import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.utilities.getCurrentUTCFormattedTime
 import org.nullgroup.lados.viewmodels.customer.ProfileViewModel
 import org.nullgroup.lados.viewmodels.customer.ReviewProductViewModel
@@ -93,7 +96,6 @@ fun ReviewProductScreen(
 
     val context = LocalContext.current
     Scaffold(
-        modifier = modifier,
         topBar = {
             TopBar(
                 leadingIcon = {
@@ -101,11 +103,12 @@ fun ReviewProductScreen(
                         onClick = { navController.navigateUp() },
                         modifier = Modifier
                             .clip(CircleShape)
-                            .background(ProductTheme.backgroundColor)
+                            .background(LadosTheme.colorScheme.surfaceContainerHighest)
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                            contentDescription = "Back"
+                            contentDescription = "Back",
+                            tint = LadosTheme.colorScheme.onBackground
                         )
                     }
                 },
@@ -133,12 +136,11 @@ fun ReviewProductScreen(
                     navController.navigate("${Screen.Customer.ProductDetailScreen.route}/$productId")
                 },
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = ProductTheme.primaryColor,
+                    containerColor = LadosTheme.colorScheme.primary,
                 ),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 8.dp, horizontal = 24.dp)
-                    .padding(bottom = 24.dp)
+                    .padding(horizontal = 24.dp)
             ) {
                 Text(
                     text = "Send",
@@ -156,12 +158,17 @@ fun ReviewProductScreen(
         Box(
             modifier = modifier
                 .fillMaxSize()
+                .background(LadosTheme.colorScheme.background)
                 .padding(paddingValues)
                 .padding(horizontal = 20.dp)
         ) {
+
+
+            var scrollState = rememberScrollState()
             Column(
                 verticalArrangement = Arrangement.spacedBy(24.dp),
                 modifier = Modifier.fillMaxWidth()
+                    .verticalScroll(scrollState)
             ) {
 
                 when (uiState.value) {
@@ -232,7 +239,8 @@ fun TopBar(
         Text(
             text = title,
             fontWeight = FontWeight.Bold,
-            fontSize = 25.sp
+            fontSize = 25.sp,
+            color = LadosTheme.colorScheme.onBackground
         )
 
         trailingIcon?.invoke()
@@ -269,17 +277,20 @@ fun ProductSection(
             Text(
                 text = productName,
                 fontWeight = FontWeight.Bold,
-                fontSize = 20.sp
+                fontSize = 20.sp,
+                color = LadosTheme.colorScheme.onBackground
             )
 
             Text(
                 text = "Size: ${variant.size.sizeName}",
-                fontSize = 14.sp
+                fontSize = 14.sp,
+                color = LadosTheme.colorScheme.outline
             )
 
             Text(
                 text = "Color: ${variant.color.colorName}",
-                fontSize = 14.sp
+                fontSize = 14.sp,
+                color = LadosTheme.colorScheme.outline
             )
         }
 
@@ -313,7 +324,8 @@ fun RatingSection(
         Text(
             text = "Ratings",
             fontWeight = FontWeight.Bold,
-            fontSize = 25.sp
+            fontSize = 25.sp,
+            color = LadosTheme.colorScheme.onBackground
         )
 
         Row(
@@ -325,7 +337,7 @@ fun RatingSection(
                 Icon(
                     painter = painterResource(id = R.drawable.star_icon),
                     contentDescription = "Star",
-                    tint = if (index < ratings) ProductTheme.primaryColor else Color.LightGray,
+                    tint = if (index < ratings) LadosTheme.colorScheme.primary else LadosTheme.colorScheme.outline,
                     modifier = Modifier
                         .size(28.dp)
                         .clickable {
@@ -339,7 +351,7 @@ fun RatingSection(
 
             Text(
                 text = list[ratings - 1],
-                color = ProductTheme.primaryColor,
+                color = LadosTheme.colorScheme.primary,
                 fontWeight = FontWeight.Medium,
                 fontSize = 20.sp
             )
@@ -365,7 +377,8 @@ fun ReviewSection(
         Text(
             text = "Reviews",
             fontWeight = FontWeight.Bold,
-            fontSize = 25.sp
+            fontSize = 25.sp,
+            color = LadosTheme.colorScheme.onBackground
         )
 
         TextField(
@@ -381,31 +394,29 @@ fun ReviewSection(
             placeholder = {
                 Text(
                     text = "Enter your review here",
-                    color = Color.Gray,
-                    fontSize = 18.sp
+                    fontSize = 18.sp,
+                    color = LadosTheme.colorScheme.outline
                 )
 
             },
 
             colors = TextFieldDefaults.colors(
-                focusedTextColor = Color.Black,
-                unfocusedTextColor = Color.Black,
-                focusedContainerColor = Color.White,
-                unfocusedContainerColor = Color.White,
+                focusedTextColor = LadosTheme.colorScheme.onBackground,
+                unfocusedTextColor = LadosTheme.colorScheme.onBackground,
+                focusedContainerColor = LadosTheme.colorScheme.background,
+                unfocusedContainerColor = LadosTheme.colorScheme.background,
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent
             ),
             modifier = Modifier
                 .fillMaxWidth()
-                .border(1.dp, Color.Gray, RoundedCornerShape(10.dp))
+                .border(1.dp, LadosTheme.colorScheme.outline, RoundedCornerShape(10.dp))
                 .heightIn(min = 200.dp),
 
             maxLines = Int.MAX_VALUE,
             shape = RoundedCornerShape(10.dp)
         )
-
     }
-
 }
 
 
