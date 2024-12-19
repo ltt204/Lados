@@ -202,7 +202,9 @@ fun SearchScreen(
     val searchHistory = searchHistoryManager.searchHistory.collectAsState(initial = emptySet())
 
     Scaffold(
-        modifier = modifier.padding(paddingValues),
+        modifier = modifier
+            .padding(paddingValues)
+            .padding(horizontal = 16.dp),
         containerColor = LadosTheme.colorScheme.background,
         topBar = {
             Row(
