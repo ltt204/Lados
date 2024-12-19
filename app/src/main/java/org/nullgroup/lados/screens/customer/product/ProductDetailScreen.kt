@@ -106,7 +106,6 @@ fun ProductDetailScreen(
     // TODO: Adjust as you wish
     val onAddedToCart: () -> Unit = {
         Toast.makeText(context, "Product added to cart", Toast.LENGTH_SHORT).show()
-        navController.navigateUp()
     }
 
     val onAddedToCartFailed: () -> Unit = {
@@ -146,6 +145,7 @@ fun ProductDetailScreen(
                 bottomBar = {
                     ProductDetailBottomBar(
                         title = "Add to Cart",
+                        enabled = uiState.quantityInStock > 0,
                         price = "$${uiState.product.variants.first().salePrice}",
                         onClick = onAddToCart
                     )
@@ -673,10 +673,12 @@ fun ReviewCard(
 fun ProductDetailBottomBar(
     title: String = "",
     price: String = "",
+    enabled: Boolean = true,
     onClick: () -> Unit = {}
 ) {
     Button(
         onClick = onClick,
+        enabled = enabled,
         colors = ButtonDefaults.buttonColors(
             containerColor = LadosTheme.colorScheme.primary,
         ),
