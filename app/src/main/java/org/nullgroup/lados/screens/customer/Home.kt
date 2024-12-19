@@ -32,6 +32,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.ArrowRight
+import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.Done
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.ShoppingCart
@@ -198,7 +200,7 @@ fun TitleTextRow(
     contentLeft: String,
     contentRight: String,
     // note: modify
-    color: Color = LadosTheme.colorScheme.onBackground,
+    color: Color = LadosTheme.colorScheme.tertiary,
     onClick: () -> Unit = {},
 ) {
     Row(
@@ -225,6 +227,11 @@ fun TitleTextRow(
                     // note: modify
                     color = LadosTheme.colorScheme.onBackground,
                 )
+            )
+            Icon(
+                Icons.Outlined.ChevronRight,
+                contentDescription = null,
+                tint = LadosTheme.colorScheme.onBackground,
             )
         }
     }
@@ -388,6 +395,13 @@ fun ProductItem(
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    Icon(
+                        imageVector = Icons.Filled.Star,
+                        contentDescription = "Rating",
+                        tint = LadosTheme.colorScheme.yellow,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(2.dp))
                     val decimalFormat = DecimalFormat("#.##")
                     Text(
                         text = decimalFormat.format(product.engagements.sumOf { it.ratings } * 1.0f / product.engagements.size),
@@ -396,14 +410,8 @@ fun ProductItem(
                             color = LadosTheme.colorScheme.onBackground,
                         )
                     )
-                    Spacer(modifier = Modifier.width(2.dp))
-                    Icon(
-                        imageVector = Icons.Filled.Star,
-                        contentDescription = "Rating",
-                        tint = LadosTheme.colorScheme.yellow,
-                        modifier = Modifier.size(16.dp)
-                    )
                 }
+                Spacer(modifier = Modifier.width(4.dp))
                 Text(
                     text = "(${product.engagements.size})",
                     style = TextStyle(
@@ -466,86 +474,81 @@ fun DrawProductScreenContent(
         }
 
         is ProductUiState.Success -> {
-            Column(
+            LazyColumn(
                 modifier = modifier
+                    .fillMaxWidth()
                     .padding(horizontal = 8.dp)
                     .padding(top = paddingValues.calculateTopPadding()),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                LazyColumn(
-                    modifier = modifier
-                        .fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                ) {
-                    item {
-                        SearchBarRow(
-                            navController = navController,
-                            direct = true,
-                            modifier = modifier,
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                    }
-                    item {
-                        TitleTextRow(
-                            contentLeft = "Categories",
-                            contentRight = "See all",
-                            onClick = {
-                                sharedViewModel.updateTypeScreen("In Category")
-                                navController.navigate(
-                                    Screen.Customer.CategorySelectScreen.route
-                                )
-                            }
-                        )
-                    }
 
-                    item {
-                        CategoryItems(
-                            sharedViewModel = sharedViewModel,
-                            navController = navController
-                        )
-                    }
+                item {
+                    SearchBarRow(
+                        navController = navController,
+                        direct = true,
+                        modifier = modifier,
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                }
+                item {
+                    TitleTextRow(
+                        contentLeft = "Categories",
+                        contentRight = "See all",
+                        onClick = {
+                            sharedViewModel.updateTypeScreen("In Category")
+                            navController.navigate(
+                                Screen.Customer.CategorySelectScreen.route
+                            )
+                        }
+                    )
+                }
 
-                    item {
-                        TitleTextRow(
-                            contentLeft = "Top Selling",
-                            contentRight = "See all",
-                            onClick = {
-                                sharedViewModel.updateTypeScreen("Top Selling")
-                                navController.navigate(
-                                    Screen.Customer.DisplayProductInCategory.route
-                                )
-                            }
-                        )
-                    }
+                item {
+                    CategoryItems(
+                        sharedViewModel = sharedViewModel,
+                        navController = navController
+                    )
+                }
 
-                    item {
-                        ProductRow(
-                            onProductClick = onProductClick,
-                            products = (productUiState.value as ProductUiState.Success).products.filter { it.engagements.size >= 2 }
-                                .take(5)
-                        )
-                    }
+                item {
+                    TitleTextRow(
+                        contentLeft = "Top Selling",
+                        contentRight = "See all",
+                        onClick = {
+                            sharedViewModel.updateTypeScreen("Top Selling")
+                            navController.navigate(
+                                Screen.Customer.DisplayProductInCategory.route
+                            )
+                        }
+                    )
+                }
 
-                    item {
-                        TitleTextRow(
-                            contentLeft = "New In",
-                            contentRight = "See all",
-                            color = LadosTheme.colorScheme.primary,
-                            onClick = {
-                                sharedViewModel.updateTypeScreen("New In")
-                                navController.navigate(
-                                    Screen.Customer.DisplayProductInCategory.route
-                                )
-                            }
-                        )
-                    }
-                    item {
-                        ProductRow(
-                            onProductClick = onProductClick,
-                            products = (productUiState.value as ProductUiState.Success).products.sortedByDescending { it.createdAt }
-                                .take(1)
-                        )
-                    }
+                item {
+                    ProductRow(
+                        onProductClick = onProductClick,
+                        products = (productUiState.value as ProductUiState.Success).products.filter { it.engagements.size >= 2 }
+                            .take(5)
+                    )
+                }
+
+                item {
+                    TitleTextRow(
+                        contentLeft = "New In",
+                        contentRight = "See all",
+                        onClick = {
+                            sharedViewModel.updateTypeScreen("New In")
+                            navController.navigate(
+                                Screen.Customer.DisplayProductInCategory.route
+                            )
+                        }
+                    )
+                }
+                item {
+                    ProductRow(
+                        onProductClick = onProductClick,
+                        products = (productUiState.value as ProductUiState.Success).products.sortedByDescending { it.createdAt }
+                            .take(1)
+                    )
                 }
             }
         }
