@@ -153,12 +153,14 @@ fun SearchBar(
             },
             shape = RoundedCornerShape(50),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = LadosTheme.colorScheme.secondaryContainer,
-                unfocusedContainerColor = LadosTheme.colorScheme.surfaceContainerHighest,
-                disabledContainerColor = LadosTheme.colorScheme.surfaceContainerHighest,
-                focusedBorderColor = LadosTheme.colorScheme.primary, // Consider renaming
-                unfocusedBorderColor = LadosTheme.colorScheme.outline, // Consider renaming
-                disabledBorderColor = LadosTheme.colorScheme.outline,
+                focusedContainerColor = LadosTheme.colorScheme.surfaceContainerHighest,
+                focusedBorderColor = LadosTheme.colorScheme.primary,
+                unfocusedContainerColor = LadosTheme.colorScheme.surfaceContainerHigh,
+                unfocusedBorderColor = Color.Transparent,
+                errorBorderColor = LadosTheme.colorScheme.error,
+                focusedTextColor = LadosTheme.colorScheme.onBackground,
+                unfocusedTextColor = LadosTheme.colorScheme.onBackground,
+                errorTextColor = LadosTheme.colorScheme.error,
             ),
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
             keyboardActions = KeyboardActions(onSearch = {
@@ -570,7 +572,7 @@ fun BottomSheetContent(
         modifier = Modifier
             .fillMaxHeight(0.5f)
             // note: modify
-            .background(LadosTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.2f))
+            .background(LadosTheme.colorScheme.background)
             .clip(RoundedCornerShape(16.dp))
             .padding(
                 start = 8.dp,
@@ -612,7 +614,8 @@ fun BottomSheetContent(
                 Text(
                     text = title, style = TextStyle(
                         fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        color = LadosTheme.colorScheme.onBackground
                     )
                 )
                 IconButton(onClick = onCloseClick) {
@@ -641,7 +644,7 @@ fun BottomSheetContent(
                             (title == "Sort by" && selectedButtonIndex == index + 2)
                         )
                             LadosTheme.colorScheme.primary else
-                            LadosTheme.colorScheme.outline.copy(alpha = 0.3f)
+                            LadosTheme.colorScheme.onPrimary
                     )
                 ) {
                     Row(
@@ -657,8 +660,8 @@ fun BottomSheetContent(
                             color = if ((title != "Sort by" && selectedButtonIndex == index) ||
                                 (title == "Sort by" && selectedButtonIndex == index + 2)
                             )
-                                LadosTheme.colorScheme.surfaceContainerHighest
-                            else LadosTheme.colorScheme.onSurface
+                                LadosTheme.colorScheme.onPrimary
+                            else LadosTheme.colorScheme.primary
                         )
                         if ((title != "Sort by" && selectedButtonIndex == index) ||
                             (title == "Sort by" && selectedButtonIndex == index + 2)
