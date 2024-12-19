@@ -299,7 +299,7 @@ fun ProductInCategoryScreen(
 
                         )
                     }
-
+                    Spacer(Modifier.width(8.dp))
                     SearchBar(
                         modifier = Modifier.fillMaxWidth(),
                         navController = navController,

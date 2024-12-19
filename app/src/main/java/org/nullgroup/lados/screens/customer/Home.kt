@@ -79,6 +79,7 @@ import org.nullgroup.lados.data.models.Category
 import org.nullgroup.lados.data.models.Product
 import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.ui.theme.LadosTheme
+import org.nullgroup.lados.ui.theme.Primary
 import org.nullgroup.lados.viewmodels.CategoryUiState
 import org.nullgroup.lados.viewmodels.HomeViewModel
 import org.nullgroup.lados.viewmodels.ProductUiState
@@ -156,7 +157,7 @@ fun SearchBar(
                 focusedContainerColor = LadosTheme.colorScheme.surfaceContainerHighest,
                 focusedBorderColor = LadosTheme.colorScheme.primary,
                 unfocusedContainerColor = LadosTheme.colorScheme.surfaceContainerHigh,
-                unfocusedBorderColor = Color.Transparent,
+                unfocusedBorderColor = if (direct) Primary else LadosTheme.colorScheme.onBackground,
                 errorBorderColor = LadosTheme.colorScheme.error,
                 focusedTextColor = LadosTheme.colorScheme.onBackground,
                 unfocusedTextColor = LadosTheme.colorScheme.onBackground,
@@ -344,7 +345,7 @@ fun ProductItem(
                 .align(Alignment.TopEnd)
                 .padding(8.dp)
                 .background(
-                    LadosTheme.colorScheme.onPrimary.copy(alpha = 0.5f),
+                    Color.Gray.copy(alpha=0.8f),
                     CircleShape
                 ).padding(4.dp)
                 .clickable {
