@@ -135,8 +135,10 @@ fun ReviewProductScreen(
                     Toast.makeText(context, "Review sent!", Toast.LENGTH_SHORT).show()
                     navController.navigate("${Screen.Customer.ProductDetailScreen.route}/$productId")
                 },
+                enabled = reviews.isNotEmpty(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = LadosTheme.colorScheme.primary,
+                    disabledContainerColor = LadosTheme.colorScheme.outline
                 ),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -144,7 +146,7 @@ fun ReviewProductScreen(
             ) {
                 Text(
                     text = "Send",
-                    color = Color.White,
+                    color = LadosTheme.colorScheme.background,
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp,
                     modifier = Modifier.padding(
@@ -179,7 +181,9 @@ fun ReviewProductScreen(
                             ,
                             contentAlignment = Alignment.Center
                         ){
-                            CircularProgressIndicator()
+                            CircularProgressIndicator(
+                                color = LadosTheme.colorScheme.primary
+                            )
                         }
                     }
 
@@ -312,7 +316,7 @@ fun RatingSection(
     )
 
     var ratings by remember {
-        mutableIntStateOf(1)
+        mutableIntStateOf(5)
     }
 
     Column(
