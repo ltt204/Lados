@@ -12,8 +12,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -29,8 +29,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import org.nullgroup.lados.compose.common.ProfileTopAppBar
-import org.nullgroup.lados.compose.profile.SwipeToDeleteContainer
 import org.nullgroup.lados.compose.common.TwoColsItem
+import org.nullgroup.lados.compose.profile.SwipeToDeleteContainer
 import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.viewmodels.customer.AddressListViewModel
@@ -96,7 +96,7 @@ fun AddressList(
                                         text = address.toString(),
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis,
-                                        fontSize = 16.sp
+                                        fontSize = 16.sp,
                                     )
                                 },
                                 trailingAction = {
@@ -111,7 +111,10 @@ fun AddressList(
                                             )
                                             navController?.navigate("${Screen.Customer.Address.EditAddress.route}/${address.id}")
                                         }) {
-                                        Text(text = "Edit")
+                                        Text(
+                                            text = "Edit",
+                                            color = LadosTheme.colorScheme.onPrimaryContainer,
+                                        )
                                     }
                                 }
                             )
@@ -125,11 +128,12 @@ fun AddressList(
                     .height(56.dp),
                 onClick = { navController?.navigate(Screen.Customer.Address.AddAddress.route) },
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF8E6CEF),
-                    contentColor = Color.White,
-                )
+                    containerColor = LadosTheme.colorScheme.primary,
+                    contentColor = LadosTheme.colorScheme.onPrimary,
+                    disabledContainerColor = LadosTheme.colorScheme.outline,
+                ),
             ) {
-                Text(text = "Add Address")
+                Text(text = "Add Address", style = LadosTheme.typography.bodyLarge)
             }
         }
     }
