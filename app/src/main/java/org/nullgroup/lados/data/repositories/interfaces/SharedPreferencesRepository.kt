@@ -1,7 +1,9 @@
 package org.nullgroup.lados.data.repositories.interfaces
 
+import org.nullgroup.lados.data.models.AuthTokens
+
 interface SharedPreferencesRepository {
-    fun saveData(key: String, value: String)
-    fun getData(key: String): String?
-    fun clearData(key: String)
+    fun saveAuthTokens(tokens: AuthTokens)
+    fun getAuthTokens(): AuthTokens?
+    fun clearAuthTokens()
 }

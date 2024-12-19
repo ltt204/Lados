@@ -3,8 +3,12 @@ package org.nullgroup.lados.data.repositories.implementations
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Base64
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKey
 import dagger.hilt.android.qualifiers.ActivityContext
 import dagger.hilt.android.qualifiers.ApplicationContext
+import org.nullgroup.lados.R
+import org.nullgroup.lados.data.models.AuthTokens
 import org.nullgroup.lados.data.repositories.interfaces.SharedPreferencesRepository
 
 class SharedPreferencesImpl(
@@ -14,32 +18,42 @@ class SharedPreferencesImpl(
     private var sharedPreferences: SharedPreferences
 
     init {
-        sharedPreferences =
-            context.getSharedPreferences(encodeString("token"), Context.MODE_PRIVATE)
+        sharedPreferences = getEncryptedSharedPrefs()
     }
 
-    private fun encodeString(input: String): String {
-        return Base64.encodeToString(input.toByteArray(), Base64.DEFAULT)
+    private fun getEncryptedSharedPrefs(): SharedPreferences {
+        val masterKey = MasterKey.Builder(context)
+            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+            .build()
+
+        return EncryptedSharedPreferences.create(
+            context,
+            context.getString(R.string.encrypt_auth_prefs),
+            masterKey,
+            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+        )
     }
 
-    private fun decodeString(input: String): String {
-        return String(Base64.decode(input, Base64.DEFAULT))
+    override fun saveAuthTokens(tokens: AuthTokens) {
+        sharedPreferences.edit().apply {
+            putString("id_token", tokens.idToken)
+            putString("refresh_token", tokens.refreshToken)
+            putString("provider", tokens.provider)
+        }.apply()
     }
 
-    override fun saveData(key: String, value: String) {
-        val keyEncode = encodeString(key)
-        val valueEncode = encodeString(value)
-        sharedPreferences.edit().putString(keyEncode, valueEncode).apply()
+    override fun getAuthTokens(): AuthTokens? {
+        val idToken = sharedPreferences.getString("id_token", null)
+        val refreshToken = sharedPreferences.getString("refresh_token", null)
+        val provider = sharedPreferences.getString("provider", null)
+
+        return if (idToken != null && refreshToken != null && provider != null) {
+            AuthTokens(idToken, refreshToken, provider)
+        } else null
     }
 
-    override fun getData(key: String): String? {
-        val keyEncode = encodeString(key)
-        val valueEncode = sharedPreferences.getString(keyEncode, null)
-        return valueEncode?.let { decodeString(it) }
-    }
-
-    override fun clearData(key: String) {
-        val keyEncode = encodeString(key)
-        sharedPreferences.edit().remove(keyEncode).apply()
+    override fun clearAuthTokens() {
+        sharedPreferences.edit().clear().apply()
     }
 }

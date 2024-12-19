@@ -71,15 +71,6 @@ fun EmailScreen(
         mutableStateOf(false)
     }
 
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartIntentSenderForResult(),
-        onResult = { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                loginScreenViewModel.onGoogleSignInResult(result)
-            }
-        }
-    )
-
     val context = LocalContext.current
 
     Column(
@@ -172,9 +163,7 @@ fun EmailScreen(
                 icon = R.drawable.ic_google,
                 onClick = {
                     loginScreenViewModel.handleLoginEvent(
-                        LoginScreenEvent.HandleLogInWithGoogle(
-                            launcher,
-                        )
+                        LoginScreenEvent.HandleLogInWithGoogle(context)
                     )
                 },
                 modifier = Modifier
