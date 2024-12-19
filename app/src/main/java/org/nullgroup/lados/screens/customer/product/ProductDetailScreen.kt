@@ -681,6 +681,7 @@ fun ProductDetailBottomBar(
         enabled = enabled,
         colors = ButtonDefaults.buttonColors(
             containerColor = LadosTheme.colorScheme.primary,
+            disabledContainerColor = LadosTheme.colorScheme.outline
         ),
         modifier = Modifier
             .fillMaxWidth()
