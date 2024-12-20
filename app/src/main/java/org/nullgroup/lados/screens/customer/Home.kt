@@ -634,7 +634,7 @@ fun BottomSheetContent(
                         selectedButtonIndex = index
                         if (title == "Sort by")
                             selectedButtonIndex = selectedButtonIndex!! + 2
-                        onCloseClick()
+                        //onCloseClick()
                         onSelectionChanged(option)
                     },
                     modifier = Modifier
@@ -644,8 +644,8 @@ fun BottomSheetContent(
                         if ((title != "Sort by" && selectedButtonIndex == index) ||
                             (title == "Sort by" && selectedButtonIndex == index + 2)
                         )
-                            LadosTheme.colorScheme.primary else
-                            LadosTheme.colorScheme.onPrimary
+                            LadosTheme.colorScheme.primaryContainer else
+                            LadosTheme.colorScheme.onPrimaryContainer
                     )
                 ) {
                     Row(
@@ -661,15 +661,20 @@ fun BottomSheetContent(
                             color = if ((title != "Sort by" && selectedButtonIndex == index) ||
                                 (title == "Sort by" && selectedButtonIndex == index + 2)
                             )
-                                LadosTheme.colorScheme.onPrimary
-                            else LadosTheme.colorScheme.primary
+                                LadosTheme.colorScheme.onPrimaryContainer
+                            else LadosTheme.colorScheme.primaryContainer
                         )
                         if ((title != "Sort by" && selectedButtonIndex == index) ||
                             (title == "Sort by" && selectedButtonIndex == index + 2)
                         )
                             Icon(
                                 Icons.Outlined.Done,
-                                contentDescription = null
+                                contentDescription = null,
+                                tint = if ((title != "Sort by" && selectedButtonIndex == index) ||
+                                    (title == "Sort by" && selectedButtonIndex == index + 2)
+                                )
+                                    LadosTheme.colorScheme.onPrimaryContainer
+                                else LadosTheme.colorScheme.primaryContainer
                             )
                     }
                 }

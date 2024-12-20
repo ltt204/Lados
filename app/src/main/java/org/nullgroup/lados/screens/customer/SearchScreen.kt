@@ -50,15 +50,19 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import kotlinx.coroutines.launch
 import org.nullgroup.lados.data.local.SearchHistoryManager
+import org.nullgroup.lados.data.models.Product
 import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.ui.theme.OnSurface
 import org.nullgroup.lados.ui.theme.Tertiary
 import org.nullgroup.lados.ui.theme.Outline
+import org.nullgroup.lados.viewmodels.HomeViewModel
 import org.nullgroup.lados.viewmodels.SharedViewModel
 
 @Composable
@@ -200,7 +204,6 @@ fun SearchScreen(
 ) {
     val searchHistoryManager = remember { SearchHistoryManager(context) }
     val searchHistory = searchHistoryManager.searchHistory.collectAsState(initial = emptySet())
-
     Scaffold(
         modifier = modifier
             .padding(paddingValues)
