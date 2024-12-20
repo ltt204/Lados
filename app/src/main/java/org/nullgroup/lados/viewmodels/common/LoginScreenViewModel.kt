@@ -1,21 +1,17 @@
 package org.nullgroup.lados.viewmodels.common
 
+import android.content.Context
 import android.util.Patterns.*
-import androidx.activity.result.ActivityResult
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.IntentSenderRequest
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
+import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.common.GoogleApiAvailability
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import org.nullgroup.lados.data.models.User
-import org.nullgroup.lados.data.repositories.interfaces.EmailAuthRepository
-import org.nullgroup.lados.data.repositories.interfaces.GoogleAuthRepository
-import org.nullgroup.lados.data.repositories.interfaces.SharedPreferencesRepository
-import org.nullgroup.lados.data.repositories.interfaces.UserRepository
-import org.nullgroup.lados.utilities.isTokenExpired
+import org.nullgroup.lados.data.repositories.interfaces.AuthRepository
 import org.nullgroup.lados.viewmodels.common.states.LoginScreenStepState
 import org.nullgroup.lados.viewmodels.common.states.ResourceState
 import org.nullgroup.lados.viewmodels.common.events.LoginScreenEvent
@@ -23,9 +19,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class LoginScreenViewModel @Inject constructor(
-    private val emailAuth: EmailAuthRepository,
-    private val googleAuth: GoogleAuthRepository,
-    private val sharedPreferences: SharedPreferencesRepository,
+    private val auth: AuthRepository,
 ) : ViewModel() {
 
     var loginStep = MutableStateFlow<LoginScreenStepState>(LoginScreenStepState.Email())
@@ -57,7 +51,7 @@ class LoginScreenViewModel @Inject constructor(
 
             viewModelScope.launch {
 
-                when (val state = emailAuth.checkEmailExist(email)) {
+                when (val state = auth.checkEmailExist(email)) {
                     is ResourceState.Error -> {
                         loginState.value = ResourceState.Error(state.message)
                     }
@@ -87,7 +81,7 @@ class LoginScreenViewModel @Inject constructor(
 
             viewModelScope.launch {
 
-                emailAuth.signIn(email, password).let { result ->
+                auth.signInWithPassword(email, password).let { result ->
                     loginState.value = result
 
                     when (result) {
@@ -110,18 +104,46 @@ class LoginScreenViewModel @Inject constructor(
         }
     }
 
-    private fun handleLogInWithGoogle(
-        launcher: ActivityResultLauncher<IntentSenderRequest>,
-    ) {
-        viewModelScope.launch {
-            val signInIntentSender = googleAuth.signIn()
-            launcher.launch(
-                IntentSenderRequest.Builder(
-                    signInIntentSender ?: return@launch
-                ).build()
-            )
+    private fun handleLogInWithGoogle(context: Context) {
+        val googleApiAvailability = GoogleApiAvailability.getInstance()
+        val resultCode = googleApiAvailability.isGooglePlayServicesAvailable(context)
+
+        if (resultCode != ConnectionResult.SUCCESS) {
+            if (googleApiAvailability.isUserResolvableError(resultCode)) {
+                loginState.value = ResourceState.Error("Please update Google Play Services")
+                return
+            } else {
+                loginState.value =
+                    ResourceState.Error("Devices that do not support Google Play Services")
+                return
+            }
         }
-        loginState.value = ResourceState.Idle
+
+        viewModelScope.launch {
+            loginState.value = auth.signInWithGoogle(context)
+
+            when (val state = loginState.value) {
+                is ResourceState.Error -> {}
+                ResourceState.Idle -> {}
+                ResourceState.Loading -> {}
+                is ResourceState.Success -> {
+                    loginStep.value = LoginScreenStepState.Home(state.data!!)
+                }
+            }
+        }
+    }
+
+    private fun handleAutoSignIn() = viewModelScope.launch {
+        loginState.value = auth.autoSignIn()
+
+        when (val state = loginState.value) {
+            is ResourceState.Error -> {}
+            ResourceState.Idle -> {}
+            ResourceState.Loading -> {}
+            is ResourceState.Success -> {
+                loginStep.value = LoginScreenStepState.Home(state.data!!)
+            }
+        }
     }
 
     private fun handleSignUp(navController: NavController) {
@@ -132,35 +154,6 @@ class LoginScreenViewModel @Inject constructor(
     private fun handleForgotPassword(navController: NavController) {
         navController.navigate("forgot_password")
         loginState.value = ResourceState.Idle
-    }
-
-    fun onGoogleSignInResult(result: ActivityResult) {
-
-        viewModelScope.launch {
-            loginState.value = ResourceState.Loading
-            loginState.value = googleAuth.signInWithIntent(
-                intent = result.data ?: return@launch
-            )
-
-            when (val state = loginState.value) {
-                is ResourceState.Error -> {}
-                ResourceState.Idle -> {}
-                ResourceState.Loading -> {}
-                is ResourceState.Success -> {
-                    if (state.data != null) {
-                        loginStep.value = LoginScreenStepState.Home(state.data)
-                    }
-                }
-            }
-        }
-    }
-
-    private fun handleCheckTokenSaved() {
-        val token = sharedPreferences.getData("token") ?: return
-
-        if (!isTokenExpired(token)) {
-            loginStep.value = LoginScreenStepState.Home(User())
-        }
     }
 
     fun handleLoginEvent(event: LoginScreenEvent) {
@@ -180,15 +173,15 @@ class LoginScreenViewModel @Inject constructor(
             }
 
             is LoginScreenEvent.HandleLogInWithGoogle -> {
-                handleLogInWithGoogle(event.launcher)
+                handleLogInWithGoogle(event.context)
             }
 
             is LoginScreenEvent.HandleSignUp -> {
                 handleSignUp(event.navController)
             }
 
-            is LoginScreenEvent.HandleCheckTokenSaved -> {
-                handleCheckTokenSaved()
+            is LoginScreenEvent.HandleAutoSignIn -> {
+                handleAutoSignIn()
             }
         }
     }
