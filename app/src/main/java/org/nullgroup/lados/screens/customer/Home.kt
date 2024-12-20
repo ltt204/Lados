@@ -697,6 +697,7 @@ fun ProductScreen(
         modifier = modifier
             .padding(
                 top = paddingValues.calculateTopPadding(),
+                bottom = paddingValues.calculateBottomPadding(),
             )
             .padding(horizontal = 16.dp),
         containerColor = LadosTheme.colorScheme.background,
