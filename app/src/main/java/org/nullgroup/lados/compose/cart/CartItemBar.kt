@@ -1,4 +1,4 @@
-package org.nullgroup.lados.compose.cartRelated
+package org.nullgroup.lados.compose.cart
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -16,7 +16,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonColors
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -35,6 +34,8 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import org.nullgroup.lados.R
+import org.nullgroup.lados.screens.customer.cart.ItemState
+import org.nullgroup.lados.ui.theme.LadosTheme
 
 @Composable
 fun CartItemBar(
@@ -48,11 +49,36 @@ fun CartItemBar(
     onAddClick: (() -> Unit)? = null,
     quantity: Int = 0,
     onRemoveClick: (() -> Unit)? = null,
+    itemState: ItemState? = ItemState.UNSELECTED,
     modifier: Modifier = Modifier
 ) {
     if (quantity == 0) {
         return
     }
+
+    val buttonColor = when (itemState) {
+        ItemState.INVALID -> LadosTheme.colorScheme.error
+        else -> LadosTheme.colorScheme.secondary
+    }
+    val buttonTextColor = when (itemState) {
+        ItemState.INVALID -> LadosTheme.colorScheme.onError
+        else -> LadosTheme.colorScheme.onSecondary
+    }
+    val textColor = when (itemState) {
+        ItemState.SELECTED -> LadosTheme.colorScheme.onPrimaryContainer
+        ItemState.INVALID -> LadosTheme.colorScheme.onErrorContainer
+        else -> LadosTheme.colorScheme.onSecondaryContainer
+    }
+    val bodySmallTypo = LadosTheme.typography.bodySmall.copy(color = textColor)
+    val bodyMediumTypo = LadosTheme.typography.bodyMedium.copy(color = textColor)
+    val bodyLargeTypo = LadosTheme.typography.bodyLarge.copy(color = textColor)
+
+    val iconButtonColors = IconButtonColors(
+        contentColor = buttonTextColor,
+        containerColor = buttonColor,
+        disabledContentColor = buttonTextColor,
+        disabledContainerColor = buttonColor.copy(alpha = 0.38f)
+    )
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -86,26 +112,22 @@ fun CartItemBar(
         ) {
             Text(
                 text = title,
-                color = Color.Black,
-                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                style = bodyMediumTypo.copy(fontWeight = FontWeight.Bold),
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
             Spacer(modifier = Modifier.height(8.dp))
 
-            val specialStyle = MaterialTheme.typography.bodySmall.toSpanStyle().copy(
-                color = Color.Black,
+            val boldSpanStyle = bodySmallTypo.toSpanStyle().copy(
                 fontWeight = FontWeight.Bold
             )
-            val normalStyle = MaterialTheme.typography.bodySmall.toSpanStyle().copy(
-                color = Color.Gray
-            )
+            val normalSpanStyle = bodySmallTypo.toSpanStyle()
             Text(
                 text = buildAnnotatedString {
-                    withStyle(normalStyle) {
+                    withStyle(normalSpanStyle) {
                         append("Size - ")
                     }
-                    withStyle(specialStyle) {
+                    withStyle(boldSpanStyle) {
                         append(size)
                     }
                 },
@@ -114,10 +136,10 @@ fun CartItemBar(
             )
             Text(
                 text = buildAnnotatedString {
-                    withStyle(normalStyle) {
+                    withStyle(normalSpanStyle) {
                         append("Color - ")
                     }
-                    withStyle(specialStyle) {
+                    withStyle(boldSpanStyle) {
                         append(color)
                     }
                 },
@@ -139,8 +161,7 @@ fun CartItemBar(
                 if (originalPrice != salePrice) {
                     Text(
                         text = originalPrice,
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            color = Color.Gray,
+                        style = bodyMediumTypo.copy(
                             textDecoration = TextDecoration.LineThrough,
                             fontWeight = FontWeight.Bold,
                         )
@@ -148,12 +169,12 @@ fun CartItemBar(
                     Icon(
                         painter = painterResource(id = R.drawable.icon_rightarrow_alt),
                         contentDescription = "Change to sale price",
-                        tint = Color(0xFF9371FF)
+                        tint = textColor,
                     )
                 }
                 Text(
                     text = salePrice,
-                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                    style = bodyMediumTypo.copy(fontWeight = FontWeight.Bold),
                 )
             }
             Row {
@@ -164,16 +185,16 @@ fun CartItemBar(
                             append(quantity.toString())
                         }
                     },
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = bodyLargeTypo,
                 )
             }
 
-            val iconButtonColors = IconButtonColors(
-                contentColor = Color.White,
-                containerColor = Color(0xFF9371FF),
-                disabledContentColor = Color.Gray,
-                disabledContainerColor = Color(0xFF9371FF).copy(alpha = 0.25f)
-            )
+//            val iconButtonColors = IconButtonColors(
+//                contentColor = Color.White,
+//                containerColor = Color(0xFF9371FF),
+//                disabledContentColor = Color.Gray,
+//                disabledContainerColor = Color(0xFF9371FF).copy(alpha = 0.25f)
+//            )
             Row(
                 horizontalArrangement = Arrangement.SpaceAround,
                 verticalAlignment = Alignment.CenterVertically,

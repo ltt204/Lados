@@ -23,7 +23,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -37,8 +36,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import org.nullgroup.lados.screens.Screen
-import org.nullgroup.lados.screens.customer.cartAndCheckout.CartScreen
-import org.nullgroup.lados.screens.customer.cartAndCheckout.CheckoutScreen
+import org.nullgroup.lados.screens.customer.cart.CartScreen
+import org.nullgroup.lados.screens.customer.checkout.CheckoutScreen
 import org.nullgroup.lados.screens.common.ForgotPasswordScreen
 import org.nullgroup.lados.screens.common.LoginScreen
 import org.nullgroup.lados.screens.common.RegisterScreen

@@ -5,6 +5,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
@@ -74,6 +77,7 @@ class CartViewModel @Inject constructor(
 
     private lateinit var customerId: String
 
+    // TODO: Replace with actual order discount rate and maximum discount
     var orderDiscountRate: Double = 0.0
     var orderMaximumDiscount: Double = 0.0
     val checkoutDetail: () -> CheckoutInfo = {
@@ -102,7 +106,7 @@ class CartViewModel @Inject constructor(
         refreshCartInformation()
     }
 
-    private var _dataRefreshed = false
+    // private var _dataRefreshed = false
     private var _firstInitialization = true
     // This one is rather for errors
     var onRefreshError: ((String) -> Unit)? = null
@@ -147,52 +151,52 @@ class CartViewModel @Inject constructor(
 //                    }
 //                    _cartItems.value = _cartItems.value.plus(newItems)
 
-                    _dataRefreshed = true
+                    // _dataRefreshed = true
                     if (_firstInitialization) {
                         _cartItems.value = cartItems
-                        _isLoading.value = false
                         _firstInitialization = false
-                        return@collect
+//                        if (cartItems.isEmpty()) {
+//                            _isLoading.value = false
+//                        }
+                    } else {
+                        // Assume that the value collected is the final items in cart
+                        // Assume that the only changes allowed with items with the same id is amount count
+                        val newItems = cartItems.toMutableList()
+                        _cartItems.value = _cartItems.value.mapNotNull {
+                            val matchingItem = cartItems.find { item -> item.id == it.id }
+                            if (matchingItem == null) {
+                                // Just being cautious
+                                _originalAmount.remove(it.id)
+
+                                // _selectedCartItemIds.value = _selectedCartItemIds.value.minus(it.id)
+                                null
+                            } else if (it.amount != matchingItem.amount) {
+                                // Just being cautious
+                                _originalAmount.remove(it.id)
+
+                                // _selectedCartItemIds.value = _selectedCartItemIds.value.minus(it.id)
+                                newItems.remove(matchingItem)
+                                matchingItem
+                            } else {
+                                newItems.remove(matchingItem)
+                                it
+                            }
+                        }.plus(newItems)
                     }
 
-                    // Assume that the value collected is the final items in cart
-                    // Assume that the only changes allowed with items with the same id is amount count
-                    val newItems = cartItems.toMutableList()
-                    _cartItems.value = _cartItems.value.mapNotNull {
-                        val matchingItem = cartItems.find { item -> item.id == it.id }
-                        if (matchingItem == null) {
-                            // Just being cautious
-                            _originalAmount.remove(it.id)
-
-                            // _selectedCartItemIds.value = _selectedCartItemIds.value.minus(it.id)
-                            null
-                        } else if (it.amount != matchingItem.amount) {
-                            // Just being cautious
-                            _originalAmount.remove(it.id)
-
-                            // _selectedCartItemIds.value = _selectedCartItemIds.value.minus(it.id)
-                            newItems.remove(matchingItem)
-                            matchingItem
-                        } else {
-                            newItems.remove(matchingItem)
-                            it
-                        }
-                    }.plus(newItems)
-                }
-        }
-
-        viewModelScope.launch {
-            _cartItems
-                .filterNotNull()
-                .collect { cartItems ->
-                    if (_dataRefreshed) {
-                        _dataRefreshed = false
-                        getItemsInformation(cartItems)
+                    viewModelScope.launch {
+                        _cartItems
+                            .filterNotNull()
+                            .collect { cartItems ->
+                                getItemsInformation(cartItems)
+                                _isLoading.value = false
+                            }
                     }
                 }
         }
     }
-    private fun getItemsInformation(cartItems: List<CartItem>) {
+    private suspend fun getItemsInformation(cartItems: List<CartItem>) {
+        val getItemInfoDeferredTasks = mutableListOf<Deferred<Unit>>()
         for (cartItem in cartItems) {
             if (cartItem.amount == 0) {
                 continue
@@ -200,7 +204,7 @@ class CartViewModel @Inject constructor(
             if (_cartItemInformation.value.containsKey(cartItem.id)) {
                 continue
             }
-            viewModelScope.launch {
+            val currentTask = viewModelScope.async {
                 val correspondingProductResult =
                     productRepository.getProductByIdFromFireStore(cartItem.productId)
                 if (correspondingProductResult.isFailure) {
@@ -209,21 +213,24 @@ class CartViewModel @Inject constructor(
                         "Error getting product ${cartItem.productId} variant: ",
                         correspondingProductResult.exceptionOrNull()
                     )
-                    return@launch
+                    return@async
                 }
                 val product = correspondingProductResult.getOrNull()
                 if (product == null) {
                     _cartItemInformation.value = _cartItemInformation.value.plus(
                         cartItem.id to Pair(null, null)
                     )
-                    return@launch
+                    return@async
                 }
                 var productVariant = product.variants.find { it.id == cartItem.variantId }
                 _cartItemInformation.value = _cartItemInformation.value.plus(
                     cartItem.id to Pair(product, productVariant)
                 )
             }
+            getItemInfoDeferredTasks.add(currentTask)
         }
+
+        getItemInfoDeferredTasks.awaitAll()
     }
 
 //    // Use this when adding product to cart in other places
