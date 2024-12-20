@@ -1,8 +1,11 @@
 package org.nullgroup.lados.screens.customer
 
+//noinspection UsingMaterialAndMaterial3Libraries
+//noinspection UsingMaterialAndMaterial3Libraries
+//noinspection UsingMaterialAndMaterial3Libraries
+//noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,7 +20,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -25,47 +28,40 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-//noinspection UsingMaterialAndMaterial3Libraries
-import androidx.compose.material.ModalBottomSheetLayout
-//noinspection UsingMaterialAndMaterial3Libraries
-import androidx.compose.material.ModalBottomSheetValue
-//noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.Done
-import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.ShoppingCart
-//noinspection UsingMaterialAndMaterial3Libraries
-import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -76,25 +72,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import kotlinx.coroutines.launch
 import org.nullgroup.lados.R
 import org.nullgroup.lados.compose.common.LoadOnProgress
 import org.nullgroup.lados.data.models.Category
 import org.nullgroup.lados.data.models.Product
 import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.ui.theme.LadosTheme
-import org.nullgroup.lados.ui.theme.OnSurface
-import org.nullgroup.lados.ui.theme.Outline
 import org.nullgroup.lados.ui.theme.Primary
-import org.nullgroup.lados.ui.theme.SurfaceContainerHighest
-import org.nullgroup.lados.ui.theme.Tertiary
 import org.nullgroup.lados.viewmodels.CategoryUiState
 import org.nullgroup.lados.viewmodels.HomeViewModel
 import org.nullgroup.lados.viewmodels.ProductUiState
 import org.nullgroup.lados.viewmodels.SharedViewModel
+import java.text.DecimalFormat
 
 @Composable
 fun SearchBarRow(
@@ -164,12 +155,14 @@ fun SearchBar(
             },
             shape = RoundedCornerShape(50),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = LadosTheme.colorScheme.secondaryContainer,
-                unfocusedContainerColor = LadosTheme.colorScheme.surfaceContainerHighest,
-                disabledContainerColor = LadosTheme.colorScheme.surfaceContainerHighest,
-                focusedBorderColor = LadosTheme.colorScheme.primary, // Consider renaming
-                unfocusedBorderColor = LadosTheme.colorScheme.outline, // Consider renaming
-                disabledBorderColor = LadosTheme.colorScheme.outline,
+                focusedContainerColor = LadosTheme.colorScheme.surfaceContainerHighest,
+                focusedBorderColor = LadosTheme.colorScheme.primary,
+                unfocusedContainerColor = LadosTheme.colorScheme.surfaceContainerHigh,
+                unfocusedBorderColor = if (direct) Primary else LadosTheme.colorScheme.onBackground,
+                errorBorderColor = LadosTheme.colorScheme.error,
+                focusedTextColor = LadosTheme.colorScheme.onBackground,
+                unfocusedTextColor = LadosTheme.colorScheme.onBackground,
+                errorTextColor = LadosTheme.colorScheme.error,
             ),
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
             keyboardActions = KeyboardActions(onSearch = {
@@ -211,7 +204,7 @@ fun TitleTextRow(
     contentLeft: String,
     contentRight: String,
     // note: modify
-    color: Color = LadosTheme.colorScheme.onBackground,
+    color: Color = LadosTheme.colorScheme.tertiary,
     onClick: () -> Unit = {},
 ) {
     Row(
@@ -238,6 +231,11 @@ fun TitleTextRow(
                     // note: modify
                     color = LadosTheme.colorScheme.onBackground,
                 )
+            )
+            Icon(
+                Icons.Outlined.ChevronRight,
+                contentDescription = null,
+                tint = LadosTheme.colorScheme.onBackground,
             )
         }
     }
@@ -317,14 +315,16 @@ fun ProductItem(
     modifier: Modifier = Modifier,
     product: Product,
     onClick: (String) -> Unit,
+    onFavicon: (String) -> Unit = {}
 ) {
+    var isClicked by remember { mutableStateOf(false) }
+
     Box(modifier = modifier
-        .width(160.dp)
-        .height(280.dp)
+        .widthIn(max = 160.dp)
+        .heightIn(min = 300.dp)
         .clip(RoundedCornerShape(8.dp))
         // note: modify
         .background(LadosTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.8f))
-        .padding(bottom = 8.dp)
         .clickable { onClick(product.id) }
     ) {
         AsyncImage(
@@ -335,15 +335,26 @@ fun ProductItem(
                 .height(220.dp),
             contentScale = ContentScale.Crop,
         )
-
         Image(
-            painter = painterResource(R.drawable.favicon),
+            painter = painterResource(
+                if (!isClicked) R.drawable.love
+                else R.drawable.heart
+            ),
             contentDescription = "Image",
             modifier = Modifier
                 .align(Alignment.TopEnd)
                 .padding(8.dp)
+                .background(
+                    Color.Gray.copy(alpha = 0.8f),
+                    CircleShape
+                )
+                .padding(4.dp)
+                .clickable {
+                    isClicked = !isClicked
+                    onFavicon(product.id)
+                }
         )
-
+        Spacer(Modifier.height(4.dp))
         Column(
             modifier = Modifier
                 .align(Alignment.BottomStart)
@@ -359,7 +370,6 @@ fun ProductItem(
                 )
             )
             Row(
-
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
@@ -382,6 +392,38 @@ fun ProductItem(
                     )
                 )
             }
+            Row(
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Star,
+                        contentDescription = "Rating",
+                        tint = LadosTheme.colorScheme.yellow,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(2.dp))
+                    val decimalFormat = DecimalFormat("#.##")
+                    Text(
+                        text = decimalFormat.format(product.engagements.sumOf { it.ratings } * 1.0f / product.engagements.size),
+                        style = TextStyle(
+                            fontSize = 16.sp,
+                            color = LadosTheme.colorScheme.onBackground,
+                        )
+                    )
+                }
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = "(${product.engagements.size})",
+                    style = TextStyle(
+                        fontSize = 16.sp,
+                        color = LadosTheme.colorScheme.onBackground,
+                    )
+                )
+            }
         }
     }
 }
@@ -396,7 +438,6 @@ fun ProductRow(
     LazyRow(
         modifier = modifier.heightIn(min = 280.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
-        contentPadding = PaddingValues(8.dp),
     ) {
         items(items = products, key = { it.id })
         { item ->
@@ -436,86 +477,81 @@ fun DrawProductScreenContent(
         }
 
         is ProductUiState.Success -> {
-            Column(
+            LazyColumn(
                 modifier = modifier
-                    .padding(horizontal = 8.dp)
+                    .fillMaxWidth()
+                    .fillMaxHeight()
                     .padding(top = paddingValues.calculateTopPadding()),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                LazyColumn(
-                    modifier = modifier
-                        .fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                ) {
-                    item {
-                        SearchBarRow(
-                            navController = navController,
-                            direct = true,
-                            modifier = modifier,
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                    }
-                    item {
-                        TitleTextRow(
-                            contentLeft = "Categories",
-                            contentRight = "See all",
-                            onClick = {
-                                sharedViewModel.updateTypeScreen("In Category")
-                                navController.navigate(
-                                    Screen.Customer.CategorySelectScreen.route
-                                )
-                            }
-                        )
-                    }
 
-                    item {
-                        CategoryItems(
-                            sharedViewModel = sharedViewModel,
-                            navController = navController
-                        )
-                    }
+                item {
+                    SearchBarRow(
+                        navController = navController,
+                        direct = true,
+                        modifier = modifier,
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                }
+                item {
+                    TitleTextRow(
+                        contentLeft = "Categories",
+                        contentRight = "See all",
+                        onClick = {
+                            sharedViewModel.updateTypeScreen("In Category")
+                            navController.navigate(
+                                Screen.Customer.CategorySelectScreen.route
+                            )
+                        }
+                    )
+                }
 
-                    item {
-                        TitleTextRow(
-                            contentLeft = "Top Selling",
-                            contentRight = "See all",
-                            onClick = {
-                                sharedViewModel.updateTypeScreen("Top Selling")
-                                navController.navigate(
-                                    Screen.Customer.DisplayProductInCategory.route
-                                )
-                            }
-                        )
-                    }
+                item {
+                    CategoryItems(
+                        sharedViewModel = sharedViewModel,
+                        navController = navController
+                    )
+                }
 
-                    item {
-                        ProductRow(
-                            onProductClick = onProductClick,
-                            products = (productUiState.value as ProductUiState.Success).products.filter { it.engagements.size >= 2 }
-                                .take(5)
-                        )
-                    }
+                item {
+                    TitleTextRow(
+                        contentLeft = "Top Selling",
+                        contentRight = "See all",
+                        onClick = {
+                            sharedViewModel.updateTypeScreen("Top Selling")
+                            navController.navigate(
+                                Screen.Customer.DisplayProductInCategory.route
+                            )
+                        }
+                    )
+                }
 
-                    item {
-                        TitleTextRow(
-                            contentLeft = "New In",
-                            contentRight = "See all",
-                            color = LadosTheme.colorScheme.primary,
-                            onClick = {
-                                sharedViewModel.updateTypeScreen("New In")
-                                navController.navigate(
-                                    Screen.Customer.DisplayProductInCategory.route
-                                )
-                            }
-                        )
-                    }
-                    item {
-                        ProductRow(
-                            onProductClick = onProductClick,
-                            products = (productUiState.value as ProductUiState.Success).products.sortedByDescending { it.createdAt }
-                                .take(1)
-                        )
-                    }
+                item {
+                    ProductRow(
+                        onProductClick = onProductClick,
+                        products = (productUiState.value as ProductUiState.Success).products.filter { it.engagements.size >= 2 }
+                            .take(5)
+                    )
+                }
+
+                item {
+                    TitleTextRow(
+                        contentLeft = "New In",
+                        contentRight = "See all",
+                        onClick = {
+                            sharedViewModel.updateTypeScreen("New In")
+                            navController.navigate(
+                                Screen.Customer.DisplayProductInCategory.route
+                            )
+                        }
+                    )
+                }
+                item {
+                    ProductRow(
+                        onProductClick = onProductClick,
+                        products = (productUiState.value as ProductUiState.Success).products.sortedByDescending { it.createdAt }
+                            .take(1)
+                    )
                 }
             }
         }
@@ -537,7 +573,7 @@ fun BottomSheetContent(
         modifier = Modifier
             .fillMaxHeight(0.5f)
             // note: modify
-            .background(LadosTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.2f))
+            .background(LadosTheme.colorScheme.background)
             .clip(RoundedCornerShape(16.dp))
             .padding(
                 start = 8.dp,
@@ -579,7 +615,8 @@ fun BottomSheetContent(
                 Text(
                     text = title, style = TextStyle(
                         fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        color = LadosTheme.colorScheme.onBackground
                     )
                 )
                 IconButton(onClick = onCloseClick) {
@@ -597,7 +634,7 @@ fun BottomSheetContent(
                         selectedButtonIndex = index
                         if (title == "Sort by")
                             selectedButtonIndex = selectedButtonIndex!! + 2
-                        onCloseClick()
+                        //onCloseClick()
                         onSelectionChanged(option)
                     },
                     modifier = Modifier
@@ -608,7 +645,7 @@ fun BottomSheetContent(
                             (title == "Sort by" && selectedButtonIndex == index + 2)
                         )
                             LadosTheme.colorScheme.primary else
-                            LadosTheme.colorScheme.outline.copy(alpha = 0.3f)
+                            LadosTheme.colorScheme.surfaceContainerHighest
                     )
                 ) {
                     Row(
@@ -624,15 +661,20 @@ fun BottomSheetContent(
                             color = if ((title != "Sort by" && selectedButtonIndex == index) ||
                                 (title == "Sort by" && selectedButtonIndex == index + 2)
                             )
-                                LadosTheme.colorScheme.surfaceContainerHighest
-                            else LadosTheme.colorScheme.onSurface
+                                Color.White else
+                                LadosTheme.colorScheme.onBackground
                         )
                         if ((title != "Sort by" && selectedButtonIndex == index) ||
                             (title == "Sort by" && selectedButtonIndex == index + 2)
                         )
                             Icon(
                                 Icons.Outlined.Done,
-                                contentDescription = null
+                                contentDescription = null,
+                                tint = if ((title != "Sort by" && selectedButtonIndex == index) ||
+                                    (title == "Sort by" && selectedButtonIndex == index + 2)
+                                )
+                                    LadosTheme.colorScheme.primary else
+                                    LadosTheme.colorScheme.surfaceContainerHighest
                             )
                     }
                 }
@@ -642,58 +684,51 @@ fun BottomSheetContent(
 }
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProductScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
-    paddingValues: PaddingValues = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+    paddingValues: PaddingValues = PaddingValues(0.dp),
     sharedViewModel: SharedViewModel = SharedViewModel(),
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     Scaffold(
         modifier = modifier
-            .padding(paddingValues)
+            .padding(
+                top = paddingValues.calculateTopPadding(),
+            )
             .padding(horizontal = 16.dp),
+        containerColor = LadosTheme.colorScheme.background,
         topBar = {
-            Row(
-                modifier = modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight()
-                    .padding(vertical = 16.dp, horizontal = 0.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                IconButton(onClick = {}) {
-                    Image(
-                        painter = painterResource(R.drawable.ic_launcher_background),
-                        contentDescription = "Back",
+            TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = LadosTheme.colorScheme.background
+                ),
+                title = {
+                    Text(
+                        text = "Lados",
+                        style = LadosTheme.typography.headlineSmall.copy(
+                            color = LadosTheme.colorScheme.onBackground,
+                            fontWeight = FontWeight.SemiBold,
+                        ),
+                    )
+                },
+                actions = {
+                    IconButton(
+                        onClick = { navController.navigate(Screen.Customer.CartScreen.route) },
                         modifier = Modifier
-                            .clip(CircleShape)
-                            .size(48.dp)
-                    )
+                            .clip(LadosTheme.shape.full)
+                            .background(LadosTheme.colorScheme.primary),
+                    ) {
+                        Icon(
+                            Icons.Outlined.ShoppingCart,
+                            contentDescription = "Cart",
+                            tint = LadosTheme.colorScheme.surfaceContainerHighest,
+                        )
+                    }
                 }
-
-                Text(
-                    text = "Lados",
-                    style = LadosTheme.typography.headlineSmall.copy(
-                        color = LadosTheme.colorScheme.onBackground,
-                        fontWeight = FontWeight.SemiBold,
-                    ),
-                )
-
-                IconButton(
-                    onClick = { navController.navigate(Screen.Customer.CartScreen.route) },
-                    modifier = Modifier
-                        .clip(LadosTheme.shape.full)
-                        .background(LadosTheme.colorScheme.primary),
-                ) {
-                    Icon(
-                        Icons.Outlined.ShoppingCart,
-                        contentDescription = "Cart",
-                        tint = LadosTheme.colorScheme.surfaceContainerHighest,
-                    )
-                }
-            }
+            )
         }
     ) { it ->
         DrawProductScreenContent(

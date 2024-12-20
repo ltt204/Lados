@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import org.nullgroup.lados.R
+import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.screens.customer.product.Title
 import org.nullgroup.lados.ui.theme.LadosTheme
 
@@ -72,7 +73,10 @@ fun DrawError_FindNotMatch(
         )
         Spacer(modifier = Modifier.height(16.dp))
         Button(
-            onClick = {},
+            onClick = {
+                navController.navigate(
+                    Screen.Customer.Home.route
+                ) },
             // note: modify color
             colors = ButtonDefaults.buttonColors(LadosTheme.colorScheme.primary)
         ) {
@@ -105,7 +109,7 @@ fun Error_FindNotMatchScreen(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 IconButton(
-                    onClick = {},
+                    onClick = { navController.popBackStack() },
                     modifier = Modifier
                         .clip(CircleShape)
                         // note: modify color

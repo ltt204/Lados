@@ -62,3 +62,5 @@ val OnErrorContainerDark = Color(0xFFF9DEDC)
 
 val OutlineDark = Color(0xFF938F99)
 val OnSurfaceDark = Color(0xFFE6E0E9)
+
+val Yellow= Color(0xFFFDCC0D)
