@@ -272,7 +272,7 @@ fun CartScreen(
                                 )
                             }
                         },
-                        enabled = isAnyItemsExisted.value && isAllowedInteracting
+                        enabled = !isLoadingItems && isAnyItemsExisted.value && isAllowedInteracting
                     )
 
 
@@ -286,7 +286,7 @@ fun CartScreen(
                                 contentDescription = "Remove selected items from cart"
                             )
                         },
-                        enabled = selectedItems.isNotEmpty() && isAllowedInteracting
+                        enabled = !isLoadingItems && selectedItems.isNotEmpty() && isAllowedInteracting
                     )
                 }
             )
@@ -408,6 +408,21 @@ fun CartScreen(
         },
         snackbarHost = { SnackbarHost(snackBarHostState.value) }
     )
+
+    if (!isAllowedInteracting) {
+        Box(
+            modifier = Modifier
+                .padding(innerPadding)
+                .background(Color.Gray.copy(alpha = 0.5f))
+                .fillMaxSize()
+        ) {
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .width(64.dp)
+            )
+        }
+    }
 }
 
 @Composable

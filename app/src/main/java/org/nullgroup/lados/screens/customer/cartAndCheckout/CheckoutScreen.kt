@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -27,6 +28,7 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -300,6 +302,21 @@ fun CheckoutScreen(
         },
         snackbarHost = { SnackbarHost(snackBarHostState.value) }
     )
+
+    if (!isAllowedInteracting) {
+        Box(
+            modifier = Modifier
+                .padding(innerPadding)
+                .background(Color.Gray.copy(alpha = 0.5f))
+                .fillMaxSize()
+        ) {
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .width(64.dp)
+            )
+        }
+    }
 }
 
 @Composable
@@ -386,15 +403,20 @@ private fun AddressSelector(
         expanded = expanded,
         onExpandedChange = { setExpanded(it) }
     ) {
-        Box(
+        Row (
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
             modifier = modifier
                 .padding(8.dp)
                 .background(Color.LightGray, RoundedCornerShape(8.dp))
                 .fillMaxWidth()
         ) {
             Column(
-                modifier = Modifier.padding(16.dp),
-                horizontalAlignment = Alignment.Start
+                horizontalAlignment = Alignment.Start,
+                modifier = Modifier
+                    .padding(16.dp)
+                    .padding(end = 8.dp)
+                    .weight(1f)
             ) {
                 Text(
                     text = "Shipping Address",
@@ -415,8 +437,7 @@ private fun AddressSelector(
                     onClickExpander?.invoke() },
                 enabled = selectionEnabled,
                 modifier = Modifier
-                    .padding(start = 8.dp)
-                    .align(Alignment.CenterEnd)
+                    .wrapContentWidth()
                     .menuAnchor(MenuAnchorType.PrimaryNotEditable)
             ) {
                 Icon(

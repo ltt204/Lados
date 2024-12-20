@@ -5,6 +5,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
@@ -74,6 +78,7 @@ class CartViewModel @Inject constructor(
 
     private lateinit var customerId: String
 
+    // TODO: Replace with actual order discount rate and maximum discount
     var orderDiscountRate: Double = 0.0
     var orderMaximumDiscount: Double = 0.0
     val checkoutDetail: () -> CheckoutInfo = {
@@ -150,7 +155,7 @@ class CartViewModel @Inject constructor(
                     _dataRefreshed = true
                     if (_firstInitialization) {
                         _cartItems.value = cartItems
-                        _isLoading.value = false
+                        // _isLoading.value = false
                         _firstInitialization = false
                         return@collect
                     }
@@ -192,7 +197,8 @@ class CartViewModel @Inject constructor(
                 }
         }
     }
-    private fun getItemsInformation(cartItems: List<CartItem>) {
+    private suspend fun getItemsInformation(cartItems: List<CartItem>) {
+        val getItemInfoDeferredTasks = mutableListOf<Deferred<Unit>>()
         for (cartItem in cartItems) {
             if (cartItem.amount == 0) {
                 continue
@@ -200,7 +206,7 @@ class CartViewModel @Inject constructor(
             if (_cartItemInformation.value.containsKey(cartItem.id)) {
                 continue
             }
-            viewModelScope.launch {
+            val currentTask = viewModelScope.async {
                 val correspondingProductResult =
                     productRepository.getProductByIdFromFireStore(cartItem.productId)
                 if (correspondingProductResult.isFailure) {
@@ -209,21 +215,25 @@ class CartViewModel @Inject constructor(
                         "Error getting product ${cartItem.productId} variant: ",
                         correspondingProductResult.exceptionOrNull()
                     )
-                    return@launch
+                    return@async
                 }
                 val product = correspondingProductResult.getOrNull()
                 if (product == null) {
                     _cartItemInformation.value = _cartItemInformation.value.plus(
                         cartItem.id to Pair(null, null)
                     )
-                    return@launch
+                    return@async
                 }
                 var productVariant = product.variants.find { it.id == cartItem.variantId }
                 _cartItemInformation.value = _cartItemInformation.value.plus(
                     cartItem.id to Pair(product, productVariant)
                 )
             }
+            getItemInfoDeferredTasks.add(currentTask)
         }
+
+        getItemInfoDeferredTasks.awaitAll()
+        _isLoading.value = false
     }
 
 //    // Use this when adding product to cart in other places
