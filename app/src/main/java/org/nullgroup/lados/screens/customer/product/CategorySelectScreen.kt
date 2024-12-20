@@ -55,7 +55,7 @@ fun Title(
         fontSize = 24.sp,
         fontWeight = FontWeight.Bold,
         // note: modify
-        color = LadosTheme.colorScheme.outline,
+        color = LadosTheme.colorScheme.onBackground,
     ),
     content: String,
 ) {
@@ -106,7 +106,7 @@ fun CategoryItemSelect(modifier: Modifier = Modifier, category: Category) {
                     fontSize = 16.sp,
                     fontWeight = FontWeight.SemiBold,
                     // note: modify
-                    color = LadosTheme.colorScheme.outline,
+                    color = LadosTheme.colorScheme.onBackground,
                 )
             )
         }
@@ -161,6 +161,7 @@ fun CategorySelectScreen(
         modifier = modifier
             .padding(paddingValues)
             .padding(horizontal = 16.dp),
+        containerColor = LadosTheme.colorScheme.background,
         topBar = {
             Row(
                 modifier = Modifier
