@@ -98,7 +98,7 @@ fun FilterButton(
         enabled = isVisible,
         modifier = modifier,
         colors = ButtonDefaults.buttonColors(
-            if (isSelected) LadosTheme.colorScheme.primaryContainer else LadosTheme.colorScheme.onPrimaryContainer
+            if (isSelected) LadosTheme.colorScheme.onPrimaryContainer else LadosTheme.colorScheme.primaryContainer
         ),
 
         contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
@@ -108,11 +108,11 @@ fun FilterButton(
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             modifier = Modifier.padding(horizontal = 4.dp)
         ) {
-            Text(text = text, color = if (isSelected) LadosTheme.colorScheme.onPrimaryContainer else LadosTheme.colorScheme.primaryContainer)
+            Text(text = text, color = if (isSelected) LadosTheme.colorScheme.primaryContainer else LadosTheme.colorScheme.onPrimaryContainer)
             if (icon != null) {
                 Icon(
                     icon,
-                    tint = if (isSelected) LadosTheme.colorScheme.onPrimaryContainer else LadosTheme.colorScheme.primaryContainer,
+                    tint = if (isSelected) LadosTheme.colorScheme.primaryContainer else LadosTheme.colorScheme.onPrimaryContainer,
                     contentDescription = contentDescription,
                     modifier = Modifier.size(28.dp)
                 )
