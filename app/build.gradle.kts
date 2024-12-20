@@ -25,15 +25,17 @@ android {
             useSupportLibrary = true
         }
     }
+
     buildTypes {
-        release {
+        debug {
             isMinifyEnabled = false
             proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
+                getDefaultProguardFile("proguard-android.txt"),
                 "proguard-rules.pro"
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
@@ -89,10 +91,10 @@ dependencies {
     //Constraint Layout
     implementation(libs.androidx.constraintlayout.compose)
 
-    implementation (libs.java.jwt.v440)
+    implementation(libs.java.jwt.v440)
 
     // Coil for image loading
-    implementation (libs.coil)
+    implementation(libs.coil)
     implementation(libs.coil.compose)
 
     // Image Slider
@@ -114,8 +116,8 @@ dependencies {
     // For Hilt testing
     testImplementation(libs.dagger.hilt.android.testing)
     kaptTest(libs.hilt.android.compiler)
-    kaptTest (libs.hilt.android.compiler)
-    testImplementation (libs.dagger.hilt.android.testing)
+    kaptTest(libs.hilt.android.compiler)
+    testImplementation(libs.dagger.hilt.android.testing)
 
     // For JUnit test Firebase
     testImplementation(libs.firebase.auth.ktx)
@@ -128,13 +130,13 @@ dependencies {
     implementation(libs.kotlinx.coroutines.play.services)
 
     // For JUnit test MockK
-    testImplementation (libs.mockk)
+    testImplementation(libs.mockk)
 
     // For JUnit test Mockito
     testImplementation(libs.mockito.core)
     testImplementation(libs.mockito.inline)
     testImplementation(libs.mockito.junit.jupiter)
-    testImplementation (libs.kotlinx.coroutines.test)
+    testImplementation(libs.kotlinx.coroutines.test)
 
     // For Android Instrumentation test
     debugImplementation(libs.androidx.ui.tooling)
