@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">Lados</string>
-    <string name="web_client_id">818163914647-v68qmtu4m6kr0h3214qeujhnk7o4bkt5.apps.googleusercontent.com</string>
     <string name="encrypt_auth_prefs">SECRET_TOKEN</string>
     <string name="facebook_app_id">991093202823574</string>
     <string name="fb_login_protocol_scheme">fb1234</string>
