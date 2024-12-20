@@ -1,4 +1,4 @@
-package org.nullgroup.lados.compose.cartRelated
+package org.nullgroup.lados.compose.cart
 
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonColors
@@ -6,7 +6,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.window.DialogProperties
 import org.nullgroup.lados.ui.theme.LadosTheme
 
 /** A dialog that prompts the user to confirm an action.

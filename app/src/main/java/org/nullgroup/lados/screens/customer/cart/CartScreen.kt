@@ -1,4 +1,4 @@
-package org.nullgroup.lados.screens.customer.cartAndCheckout
+package org.nullgroup.lados.screens.customer.cart
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -28,7 +28,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonColors
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -42,8 +41,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -56,10 +53,10 @@ import androidx.navigation.NavController
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import org.nullgroup.lados.R
-import org.nullgroup.lados.compose.cartRelated.CartItemBar
-import org.nullgroup.lados.compose.cartRelated.ConfirmDialog
-import org.nullgroup.lados.compose.cartRelated.DialogInfo
-import org.nullgroup.lados.compose.cartRelated.PricingDetails
+import org.nullgroup.lados.compose.cart.CartItemBar
+import org.nullgroup.lados.compose.cart.ConfirmDialog
+import org.nullgroup.lados.compose.cart.DialogInfo
+import org.nullgroup.lados.compose.cart.PricingDetails
 import org.nullgroup.lados.data.models.CartItem
 import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.ui.theme.LadosTheme

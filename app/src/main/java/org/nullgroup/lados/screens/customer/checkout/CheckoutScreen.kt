@@ -1,4 +1,4 @@
-package org.nullgroup.lados.screens.customer.cartAndCheckout
+package org.nullgroup.lados.screens.customer.checkout
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -48,7 +48,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -63,10 +62,10 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import kotlinx.coroutines.launch
 import org.nullgroup.lados.R
-import org.nullgroup.lados.compose.cartRelated.CartItemBar
-import org.nullgroup.lados.compose.cartRelated.ConfirmDialog
-import org.nullgroup.lados.compose.cartRelated.DialogInfo
-import org.nullgroup.lados.compose.cartRelated.PricingDetails
+import org.nullgroup.lados.compose.cart.CartItemBar
+import org.nullgroup.lados.compose.cart.ConfirmDialog
+import org.nullgroup.lados.compose.cart.DialogInfo
+import org.nullgroup.lados.compose.cart.PricingDetails
 import org.nullgroup.lados.data.models.Address
 import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.ui.theme.LadosTheme
@@ -681,12 +680,14 @@ private fun InsufficientStockDialog(
 
     }
 
-    ConfirmDialog(DialogInfo(
+    ConfirmDialog(
+        DialogInfo(
         titleText = "Order creation failed",
         message = dialogMessage,
         onConfirm = onConfirm,
         confirmText = "Close",
-    ))
+    )
+    )
 
 //    AlertDialog(
 //        onDismissRequest = onConfirm,
