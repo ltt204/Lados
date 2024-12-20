@@ -182,7 +182,7 @@ fun OrderProductItem(
                     ) {
                         Text(
                             text = product.name,
-                            style = LadosTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                            style = LadosTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
                         )
                         Column {
                             Text(
@@ -242,8 +242,10 @@ fun OrderProductItem(
                 }
             },
             onClick = {
-                navController?.navigate(
-                    "${Screen.Customer.ProductDetailScreen.route}/${product.id}"
+                buttonAction.second.invoke(
+                    navController!!,
+                    product.id,
+                    variant.id
                 )
             }
         )
