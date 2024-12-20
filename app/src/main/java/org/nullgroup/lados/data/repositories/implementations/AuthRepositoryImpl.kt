@@ -64,8 +64,10 @@ class AuthRepositoryImpl(
     override suspend fun signInWithGoogle(context: Context): ResourceState<User> {
         return try {
             val result =
-                credentialManager.getCredential(context = context, request = credentialRequest)
+                credentialManager.getCredential(context, credentialRequest)
+            Log.d("SignIn", "Credential received")
             val credential = result.credential
+            Log.d("SignIn", "Credential type: ${credential.type}")
 
             val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
             val googleIdToken = googleIdTokenCredential.idToken

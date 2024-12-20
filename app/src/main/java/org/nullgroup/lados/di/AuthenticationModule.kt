@@ -5,10 +5,8 @@ import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.auth.api.identity.SignInClient
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInClient
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import dagger.Module
@@ -35,12 +33,11 @@ object AuthenticationModule {
 
     @Provides
     @Singleton
-    fun provideGoogleSignInClient(@ApplicationContext context: Context): GoogleSignInClient {
-        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(context.getString(R.string.web_client_id))
-            .requestEmail()
+    fun provideGetSignInWithGoogleOption(@ApplicationContext context: Context): GetSignInWithGoogleOption {
+        val gso = GetSignInWithGoogleOption
+            .Builder(context.getString(R.string.default_web_client_id))
             .build()
-        return GoogleSignIn.getClient(context, gso)
+        return gso
     }
 
     @Provides
@@ -48,8 +45,8 @@ object AuthenticationModule {
     fun provideGoogleIdOption(@ApplicationContext context: Context): GetGoogleIdOption =
         GetGoogleIdOption.Builder()
             .setFilterByAuthorizedAccounts(false)
-            .setServerClientId(context.getString(R.string.web_client_id))
-            .setAutoSelectEnabled(true)
+            .setServerClientId(context.getString(R.string.default_web_client_id))
+            .setAutoSelectEnabled(false)
             .build()
 
     @Provides
@@ -59,7 +56,7 @@ object AuthenticationModule {
 
     @Provides
     @Singleton
-    fun provideCredentialRequest(googleIdOption: GetGoogleIdOption): GetCredentialRequest =
+    fun provideCredentialRequest(googleIdOption: GetSignInWithGoogleOption): GetCredentialRequest =
         GetCredentialRequest.Builder()
             .addCredentialOption(googleIdOption)
             .build()

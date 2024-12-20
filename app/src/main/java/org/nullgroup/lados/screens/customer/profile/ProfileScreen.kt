@@ -127,7 +127,8 @@ fun ProfileScreen(
                                 fontSize = 16.sp
                             )
                             Text(
-                                modifier = Modifier, text = currentUser.value.phoneNumber,
+                                modifier = Modifier,
+                                text = currentUser.value.phoneNumber.ifEmpty { "No phone number provided" },
                                 color = Color.Gray,
                                 fontSize = 16.sp
                             )
