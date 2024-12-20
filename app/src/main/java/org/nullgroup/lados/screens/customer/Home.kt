@@ -1,5 +1,9 @@
 package org.nullgroup.lados.screens.customer
 
+//noinspection UsingMaterialAndMaterial3Libraries
+//noinspection UsingMaterialAndMaterial3Libraries
+//noinspection UsingMaterialAndMaterial3Libraries
+//noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -16,7 +20,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -24,23 +28,18 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-//noinspection UsingMaterialAndMaterial3Libraries
-//noinspection UsingMaterialAndMaterial3Libraries
-//noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.outlined.ArrowRight
 import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.Done
-import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.ShoppingCart
-//noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -48,6 +47,8 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -319,12 +320,11 @@ fun ProductItem(
     var isClicked by remember { mutableStateOf(false) }
 
     Box(modifier = modifier
-        .width(160.dp)
-        .height(300.dp)
+        .widthIn(max = 160.dp)
+        .heightIn(min = 300.dp)
         .clip(RoundedCornerShape(8.dp))
         // note: modify
         .background(LadosTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.8f))
-        .padding(bottom = 8.dp)
         .clickable { onClick(product.id) }
     ) {
         AsyncImage(
@@ -345,9 +345,10 @@ fun ProductItem(
                 .align(Alignment.TopEnd)
                 .padding(8.dp)
                 .background(
-                    Color.Gray.copy(alpha=0.8f),
+                    Color.Gray.copy(alpha = 0.8f),
                     CircleShape
-                ).padding(4.dp)
+                )
+                .padding(4.dp)
                 .clickable {
                     isClicked = !isClicked
                     onFavicon(product.id)
@@ -437,7 +438,6 @@ fun ProductRow(
     LazyRow(
         modifier = modifier.heightIn(min = 280.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
-        contentPadding = PaddingValues(8.dp),
     ) {
         items(items = products, key = { it.id })
         { item ->
@@ -480,7 +480,7 @@ fun DrawProductScreenContent(
             LazyColumn(
                 modifier = modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 8.dp)
+                    .fillMaxHeight()
                     .padding(top = paddingValues.calculateTopPadding()),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
@@ -679,6 +679,7 @@ fun BottomSheetContent(
 }
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProductScreen(
     modifier: Modifier = Modifier,
@@ -689,39 +690,41 @@ fun ProductScreen(
 ) {
     Scaffold(
         modifier = modifier
-            .padding(top=paddingValues.calculateTopPadding())
+            .padding(
+                top = paddingValues.calculateTopPadding(),
+                bottom = paddingValues.calculateBottomPadding()
+            )
             .padding(horizontal = 16.dp),
         containerColor = LadosTheme.colorScheme.background,
         topBar = {
-            Row(
-                modifier = modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight()
-                    .padding(vertical = 16.dp, horizontal = 0.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = "Lados",
-                    style = LadosTheme.typography.headlineSmall.copy(
-                        color = LadosTheme.colorScheme.onBackground,
-                        fontWeight = FontWeight.SemiBold,
-                    ),
-                )
-
-                IconButton(
-                    onClick = { navController.navigate(Screen.Customer.CartScreen.route) },
-                    modifier = Modifier
-                        .clip(LadosTheme.shape.full)
-                        .background(LadosTheme.colorScheme.primary),
-                ) {
-                    Icon(
-                        Icons.Outlined.ShoppingCart,
-                        contentDescription = "Cart",
-                        tint = LadosTheme.colorScheme.surfaceContainerHighest,
+            TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = LadosTheme.colorScheme.background
+                ),
+                title = {
+                    Text(
+                        text = "Lados",
+                        style = LadosTheme.typography.headlineSmall.copy(
+                            color = LadosTheme.colorScheme.onBackground,
+                            fontWeight = FontWeight.SemiBold,
+                        ),
                     )
+                },
+                actions = {
+                    IconButton(
+                        onClick = { navController.navigate(Screen.Customer.CartScreen.route) },
+                        modifier = Modifier
+                            .clip(LadosTheme.shape.full)
+                            .background(LadosTheme.colorScheme.primary),
+                    ) {
+                        Icon(
+                            Icons.Outlined.ShoppingCart,
+                            contentDescription = "Cart",
+                            tint = LadosTheme.colorScheme.surfaceContainerHighest,
+                        )
+                    }
                 }
-            }
+            )
         }
     ) { it ->
         DrawProductScreenContent(
