@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,14 +15,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Scaffold
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -35,6 +30,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -44,11 +40,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
+import org.nullgroup.lados.R
 import org.nullgroup.lados.compose.common.LoadOnProgress
 import org.nullgroup.lados.compose.common.ProfileTopAppBar
 import org.nullgroup.lados.compose.common.TwoColsItem
-import org.nullgroup.lados.data.models.User
 import org.nullgroup.lados.screens.Screen
+import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.ui.theme.Typography
 import org.nullgroup.lados.viewmodels.customer.ProfileViewModel
 
@@ -119,17 +116,17 @@ fun ProfileScreen(
                             Text(
                                 modifier = Modifier, text = currentUser.value.name,
                                 fontSize = 18.sp,
+                                color = LadosTheme.colorScheme.onBackground,
                                 fontWeight = FontWeight.SemiBold,
                             )
                             Text(
                                 modifier = Modifier, text = currentUser.value.email,
-                                color = Color.Gray,
+                                color = LadosTheme.colorScheme.onBackground.copy(alpha = 0.8f),
                                 fontSize = 16.sp
                             )
                             Text(
-                                modifier = Modifier,
-                                text = currentUser.value.phoneNumber.ifEmpty { "No phone number provided" },
-                                color = Color.Gray,
+                                modifier = Modifier, text = currentUser.value.phoneNumber,
+                                color = LadosTheme.colorScheme.onBackground.copy(alpha = 0.8f),
                                 fontSize = 16.sp
                             )
                         }
@@ -139,7 +136,12 @@ fun ProfileScreen(
                         TextButton(onClick = {
                             navController?.navigate(Screen.Customer.EditProfile.route)
                         }) {
-                            Text(text = "Edit", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+                            Text(
+                                text = "Edit",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = LadosTheme.colorScheme.primary.copy(alpha = 0.8f)
+                            )
                         }
                     }, onClick = {
                     })
@@ -154,7 +156,7 @@ fun ProfileScreen(
                         content = {
                             Text(
                                 text = "Address",
-                                color = Color.Gray,
+                                color = LadosTheme.colorScheme.onBackground.copy(alpha = 0.8f),
                                 style = Typography.bodyLarge
                             )
                         },
@@ -163,7 +165,8 @@ fun ProfileScreen(
                                 modifier = Modifier
                                     .fillMaxHeight()
                                     .height(20.dp),
-                                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                                painter = painterResource(id = R.drawable.arrowright2),
+                                tint = LadosTheme.colorScheme.outline,
                                 contentDescription = "Arrow",
                             )
                         }, onClick = {
@@ -178,7 +181,7 @@ fun ProfileScreen(
                         content = {
                             Text(
                                 text = "Wishlist",
-                                color = Color.Gray,
+                                color = LadosTheme.colorScheme.onBackground.copy(alpha = 0.8f),
                                 style = Typography.bodyLarge
                             )
                         },
@@ -187,7 +190,8 @@ fun ProfileScreen(
                                 modifier = Modifier
                                     .fillMaxHeight()
                                     .height(20.dp),
-                                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                                painter = painterResource(id = R.drawable.arrowright2),
+                                tint = LadosTheme.colorScheme.outline,
                                 contentDescription = "Arrow",
                             )
                         }, onClick = {
@@ -198,7 +202,7 @@ fun ProfileScreen(
                         content = {
                             Text(
                                 text = "Privacy",
-                                color = Color.Gray,
+                                color = LadosTheme.colorScheme.onBackground.copy(alpha = 0.8f),
                                 style = Typography.bodyLarge
                             )
                         },
@@ -207,7 +211,8 @@ fun ProfileScreen(
                                 modifier = Modifier
                                     .fillMaxHeight()
                                     .height(20.dp),
-                                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                                painter = painterResource(id = R.drawable.arrowright2),
+                                tint = LadosTheme.colorScheme.outline,
                                 contentDescription = "Arrow",
                             )
                         }, onClick = {
@@ -218,7 +223,7 @@ fun ProfileScreen(
                         content = {
                             Text(
                                 text = "Help",
-                                color = Color.Gray,
+                                color = LadosTheme.colorScheme.onBackground.copy(alpha = 0.8f),
                                 style = Typography.bodyLarge
                             )
                         },
@@ -227,7 +232,8 @@ fun ProfileScreen(
                                 modifier = Modifier
                                     .fillMaxHeight()
                                     .height(20.dp),
-                                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                                painter = painterResource(id = R.drawable.arrowright2),
+                                tint = LadosTheme.colorScheme.outline,
                                 contentDescription = "Arrow",
                             )
                         }, onClick = {
@@ -238,7 +244,7 @@ fun ProfileScreen(
                         content = {
                             Text(
                                 text = "About",
-                                color = Color.Gray,
+                                color = LadosTheme.colorScheme.onBackground.copy(alpha = 0.8f),
                                 style = Typography.bodyLarge
                             )
                         },
@@ -247,7 +253,8 @@ fun ProfileScreen(
                                 modifier = Modifier
                                     .fillMaxHeight()
                                     .height(20.dp),
-                                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                                painter = painterResource(id = R.drawable.arrowright2),
+                                tint = LadosTheme.colorScheme.outline,
                                 contentDescription = "Arrow",
                             )
                         }, onClick = {
@@ -264,40 +271,12 @@ fun ProfileScreen(
                     text = "Sign out",
                     color = Color.Red,
                     fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.SemiBold
                 )
             }
         }
     }
 }
-
-@Composable
-fun Detail(
-    modifier: Modifier = Modifier,
-    currentUser: User,
-    onEditProfileClicked: () -> Unit = {}
-) {
-
-    Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(112.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = androidx.compose.material3.MaterialTheme.colorScheme.surfaceBright,
-        ),
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-
-        }
-    }
-}
-
 
 @Preview
 @Composable

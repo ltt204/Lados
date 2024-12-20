@@ -42,6 +42,7 @@ val darkColorScheme = AppColorScheme(
     onTertiary = OnTertiaryDark,
     tertiaryContainer = TertiaryContainerDark,
     onTertiaryContainer = OnTertiaryContainerDark,
+    yellow = Yellow
 )
 
 val lightColorScheme = AppColorScheme(
@@ -70,6 +71,7 @@ val lightColorScheme = AppColorScheme(
     onTertiary = OnTertiary,
     tertiaryContainer = TertiaryContainer,
     onTertiaryContainer = OnTertiaryContainer,
+    yellow = Yellow
 )
 
 private val typography = AppTypography(

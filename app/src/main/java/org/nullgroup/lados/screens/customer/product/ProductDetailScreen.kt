@@ -142,6 +142,7 @@ fun ProductDetailScreen(
                         onNavigateBack = { navController.navigateUp() }
                     )
                 },
+                containerColor = LadosTheme.colorScheme.background,
                 bottomBar = {
                     ProductDetailBottomBar(
                         title = "Add to Cart",

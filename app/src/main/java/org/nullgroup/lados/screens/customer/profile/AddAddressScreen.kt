@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -31,6 +32,7 @@ import org.nullgroup.lados.compose.common.LoadOnProgress
 import org.nullgroup.lados.compose.profile.AddressForm
 import org.nullgroup.lados.compose.profile.ConfirmDialog
 import org.nullgroup.lados.compose.common.ProfileTopAppBar
+import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.viewmodels.customer.AddAddressViewModel
 import org.nullgroup.lados.viewmodels.customer.SavingResult
 
@@ -107,7 +109,12 @@ fun AddAddressScreen(
                 enabled = viewModel.isInfoChanged.value,
                 onClick = {
                     saveConfirmation = true
-                }) {
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = LadosTheme.colorScheme.primary,
+                    contentColor = LadosTheme.colorScheme.onPrimary,
+                    disabledContainerColor = LadosTheme.colorScheme.outline,
+                ),) {
                 Text(text = "Save")
             }
         }

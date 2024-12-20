@@ -17,17 +17,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Scaffold
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.OutlinedIconButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -46,11 +45,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
-import org.nullgroup.lados.compose.profile.ConfirmDialog
 import org.nullgroup.lados.compose.SignIn.CustomTextField
 import org.nullgroup.lados.compose.common.LoadOnProgress
 import org.nullgroup.lados.compose.common.ProfileTopAppBar
+import org.nullgroup.lados.compose.profile.ConfirmDialog
 import org.nullgroup.lados.data.models.User
+import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.ui.theme.Typography
 import org.nullgroup.lados.utilities.toByteArray
 import org.nullgroup.lados.utilities.toDrawable
@@ -214,7 +214,8 @@ fun SuccessContent(
             Text(
                 modifier = Modifier.padding(bottom = 32.dp),
                 text = userInfo.user.email,
-                style = Typography.headlineSmall
+                style = Typography.headlineSmall,
+                color = LadosTheme.colorScheme.onBackground
             )
         }
         CustomTextField(
@@ -242,6 +243,11 @@ fun SuccessContent(
                 .fillMaxWidth()
                 .height(56.dp),
             onClick = onSaveClick,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = LadosTheme.colorScheme.primary,
+                contentColor = LadosTheme.colorScheme.onPrimary,
+                disabledContentColor = LadosTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+            ),
             enabled = isInfoChanged
         ) {
             Text(text = "Save")

@@ -312,6 +312,7 @@ fun FilterScreen(
 ) {
     Scaffold(
         modifier = modifier,
+        containerColor = LadosTheme.colorScheme.background,
         topBar = {
             Row(
                 modifier = Modifier

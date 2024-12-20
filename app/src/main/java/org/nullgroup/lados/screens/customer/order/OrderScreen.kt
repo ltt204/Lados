@@ -1,19 +1,18 @@
 package org.nullgroup.lados.screens.customer.order
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.CircularProgressIndicator
@@ -114,21 +113,45 @@ fun OrderScreen(
                 }
 
                 is OrderState.Success -> {
-                    orderViewModel.filterOrderByStatus(OrderStatus.entries[tabSelectedIndex])
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(LadosTheme.size.medium),
-                        verticalArrangement = Arrangement.spacedBy(LadosTheme.size.small),
-                    ) {
-                        items(items = orderUiState.orders, key = { it.orderId }) { order ->
-                            OrderCard(
-                                modifier = Modifier.fillMaxWidth(),
-                                order = order,
-                                onItemClick = {
-                                    navController?.navigate("${Screen.Customer.Order.OrderDetail.route}/$it")
-                                }
+                    val orders = orderUiState.orders
+                    if (orders.isEmpty()) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize(),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Image(
+                                painter = painterResource(id = R.drawable.check_out_1),
+                                contentDescription = "Order Icon",
                             )
+                            Spacer(modifier = Modifier.height(LadosTheme.size.medium))
+                            Text(
+                                text = "No orders yet",
+                                style = LadosTheme.typography.titleLarge.copy(
+                                    fontWeight = FontWeight.SemiBold,
+                                    fontSize = 24.sp
+                                ),
+                                color = LadosTheme.colorScheme.primary
+                            )
+                        }
+                    } else {
+                        orderViewModel.filterOrderByStatus(OrderStatus.entries[tabSelectedIndex])
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(LadosTheme.size.medium),
+                            verticalArrangement = Arrangement.spacedBy(LadosTheme.size.small),
+                        ) {
+                            items(items = orders, key = { it.orderId }) { order ->
+                                OrderCard(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    order = order,
+                                    onItemClick = {
+                                        navController?.navigate("${Screen.Customer.Order.OrderDetail.route}/$it")
+                                    }
+                                )
+                            }
                         }
                     }
                 }
@@ -164,9 +187,8 @@ fun OrderCard(
         ) {
             Icon(
                 modifier = Modifier
-                    .padding(LadosTheme.size.small)
-                    .width(LadosTheme.size.extraExtraLarge),
-                painter = painterResource(id = R.drawable.baseline_receipt_long_24),
+                    .padding(LadosTheme.size.small),
+                painter = painterResource(id = R.drawable.frame_67),
                 contentDescription = "Order Icon",
             )
             Column(
@@ -182,6 +204,7 @@ fun OrderCard(
                         fontSize = 18.sp
                     ),
                 )
+                Spacer(modifier = Modifier.height(LadosTheme.size.small))
                 Text(
                     text = "$${order.orderTotal}",
                     style = LadosTheme.typography.bodyMedium.copy(
@@ -193,7 +216,10 @@ fun OrderCard(
                 onItemClick(order.orderId)
             }) {
                 Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                    modifier = Modifier
+                        .padding(LadosTheme.size.small)
+                        .height(20.dp),
+                    painter = painterResource(id = R.drawable.arrowright2),
                     contentDescription = null
                 )
             }

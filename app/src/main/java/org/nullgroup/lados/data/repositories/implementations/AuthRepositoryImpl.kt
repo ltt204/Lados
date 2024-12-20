@@ -102,7 +102,7 @@ class AuthRepositoryImpl(
 
     override suspend fun autoSignIn(): ResourceState<User> {
         val tokens =
-            sharedPreferences.getAuthTokens() ?: return ResourceState.Error("No saved tokens")
+            sharedPreferences.getAuthTokens() ?: return ResourceState.Idle
 
         return try {
             val user = firebaseAuth.currentUser
@@ -219,35 +219,13 @@ class AuthRepositoryImpl(
                 return ResourceState.Error("Failed to create user")
             }
 
-            val googleSignInAccount = GoogleSignIn.getLastSignedInAccount(context)
-
-            if (googleSignInAccount != null) {
-                val credential = GoogleAuthProvider.getCredential(
-                    googleSignInAccount.idToken,
-                    null
-                )
-
-                val linkResult = suspendCoroutine<Boolean> { continuation ->
-                    result.user?.linkWithCredential(credential)
-                        ?.addOnCompleteListener { task ->
-                            if (task.isSuccessful) {
-                                Log.d("SignUp", "Credential linked successfully")
-                                continuation.resume(true)
-                            } else {
-                                Log.e("SignUp", "Credential linking failed", task.exception)
-                                continuation.resume(false)
-                            }
-                        }
-                }
-
-                if (!linkResult) {
-                    return ResourceState.Error("Failed to link Google account")
-                }
-            }
-
             val user = mapToUser(result.user!!, "password")
 
-            userRepository.saveUserToFirestore(user)
+            userRepository.saveUserToFirestore(user.copy(
+                name = fullName,
+                email = email,
+                phoneNumber = phone,
+            ))
 
             firebaseAuth.currentUser?.sendEmailVerification()?.await()
 
