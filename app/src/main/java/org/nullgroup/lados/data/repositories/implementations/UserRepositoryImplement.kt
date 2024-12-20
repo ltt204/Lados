@@ -168,13 +168,4 @@ class UserRepositoryImplement(
             Result.failure(e)
         }
     }
-
-    override suspend fun signOut(): Result<Boolean> {
-        return try {
-            firebaseAuth.signOut()
-            Result.success(true)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
 }

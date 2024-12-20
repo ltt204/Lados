@@ -7,14 +7,14 @@ import androidx.navigation.NavController
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import org.nullgroup.lados.data.repositories.interfaces.EmailAuthRepository
+import org.nullgroup.lados.data.repositories.interfaces.AuthRepository
 import org.nullgroup.lados.viewmodels.common.states.ResourceState
 import org.nullgroup.lados.viewmodels.common.events.ForgotPasswordScreenEvent
 import javax.inject.Inject
 
 @HiltViewModel
 class ForgotPasswordScreenViewModel @Inject constructor(
-    private val emailAuth: EmailAuthRepository,
+    private val auth: AuthRepository,
 ) : ViewModel() {
     var forgotPasswordState =
         MutableStateFlow<ResourceState<Boolean>>(ResourceState.Idle)
@@ -27,7 +27,7 @@ class ForgotPasswordScreenViewModel @Inject constructor(
     private fun handleResetPassword(email: String) {
         viewModelScope.launch {
             try {
-                emailAuth.resetPassword(email).let {
+                auth.resetPassword(email).let {
                     forgotPasswordState.value = it
                 }
             } catch (e: Exception) {

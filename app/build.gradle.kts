@@ -25,15 +25,7 @@ android {
             useSupportLibrary = true
         }
     }
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-        }
-    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
@@ -82,16 +74,17 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+    implementation(libs.googleid)
     kapt(libs.hilt.android.compiler.v2511)
     ksp(libs.androidx.hilt.compiler)
 
     //Constraint Layout
     implementation(libs.androidx.constraintlayout.compose)
 
-    implementation (libs.java.jwt.v440)
+    implementation(libs.java.jwt.v440)
 
     // Coil for image loading
-    implementation (libs.coil)
+    implementation(libs.coil)
     implementation(libs.coil.compose)
 
     // Image Slider
@@ -113,8 +106,8 @@ dependencies {
     // For Hilt testing
     testImplementation(libs.dagger.hilt.android.testing)
     kaptTest(libs.hilt.android.compiler)
-    kaptTest (libs.hilt.android.compiler)
-    testImplementation (libs.dagger.hilt.android.testing)
+    kaptTest(libs.hilt.android.compiler)
+    testImplementation(libs.dagger.hilt.android.testing)
 
     // For JUnit test Firebase
     testImplementation(libs.firebase.auth.ktx)
@@ -127,13 +120,13 @@ dependencies {
     implementation(libs.kotlinx.coroutines.play.services)
 
     // For JUnit test MockK
-    testImplementation (libs.mockk)
+    testImplementation(libs.mockk)
 
     // For JUnit test Mockito
     testImplementation(libs.mockito.core)
     testImplementation(libs.mockito.inline)
     testImplementation(libs.mockito.junit.jupiter)
-    testImplementation (libs.kotlinx.coroutines.test)
+    testImplementation(libs.kotlinx.coroutines.test)
 
     // For Android Instrumentation test
     debugImplementation(libs.androidx.ui.tooling)
@@ -141,7 +134,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     // For fetching online images
-    implementation("io.coil-kt:coil-compose:2.4.0")
+    implementation(libs.coil.compose)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
@@ -149,7 +142,11 @@ dependencies {
 
     androidTestImplementation(platform(libs.androidx.compose.bom))
 
-    implementation("androidx.datastore:datastore-preferences:1.1.1")
+    implementation(libs.androidx.datastore.preferences)
+
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.androidx.security.crypto)
 }
 
 kapt {

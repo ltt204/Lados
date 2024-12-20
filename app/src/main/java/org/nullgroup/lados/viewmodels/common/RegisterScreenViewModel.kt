@@ -8,7 +8,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import org.nullgroup.lados.data.models.User
-import org.nullgroup.lados.data.repositories.interfaces.EmailAuthRepository
+import org.nullgroup.lados.data.repositories.interfaces.AuthRepository
 import org.nullgroup.lados.utilities.EmailValidator
 import org.nullgroup.lados.utilities.NotEmptyValidator
 import org.nullgroup.lados.utilities.PasswordValidator
@@ -20,7 +20,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class RegisterScreenViewModel @Inject constructor(
-    private val emailAuth: EmailAuthRepository,
+    private val auth: AuthRepository,
 ) : ViewModel() {
     var registerState = MutableStateFlow<ResourceState<User>>(ResourceState.Idle)
         private set
@@ -79,7 +79,7 @@ class RegisterScreenViewModel @Inject constructor(
 
         viewModelScope.launch {
             try {
-                emailAuth.signUp("$firstName $lastName", email, password, phone, context).let {
+                auth.signUp("$firstName $lastName", email, password, phone, context).let {
                     registerState.value = it
                     when (it) {
                         is ResourceState.Error -> {}
