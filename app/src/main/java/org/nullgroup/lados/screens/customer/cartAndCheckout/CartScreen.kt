@@ -27,6 +27,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
@@ -34,6 +35,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -41,9 +43,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
@@ -57,8 +62,15 @@ import org.nullgroup.lados.compose.cartRelated.DialogInfo
 import org.nullgroup.lados.compose.cartRelated.PricingDetails
 import org.nullgroup.lados.data.models.CartItem
 import org.nullgroup.lados.screens.Screen
+import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.utilities.toUSDCurrency
 import org.nullgroup.lados.viewmodels.customer.CartViewModel
+
+enum class ItemState {
+    SELECTED,
+    UNSELECTED,
+    INVALID,
+}
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -119,8 +131,8 @@ fun CartScreen(
 
     val onItemRemove = { cartItem: CartItem ->
         currentDialogState.value = DialogInfo(
-            title = "Remove item",
-            message = "Are you sure you want to remove the item from the cart?",
+            titleText = "Remove item",
+            messageText = "Are you sure you want to remove the item from the cart?",
             onConfirm = {
                 onItemAmountChanged(cartItem, -cartItem.amount)
                 currentDialogState.value = null
@@ -133,8 +145,8 @@ fun CartScreen(
 
     val onSelectedItemsRemoved = {
         currentDialogState.value = DialogInfo(
-            title = "Remove selected item(s)",
-            message = "Are you sure you want to remove the selected item(s) from the cart?",
+            titleText = "Remove selected item(s)",
+            messageText = "Are you sure you want to remove the selected item(s) from the cart?",
             onConfirm = {
                 cartViewModel.removeSelectedCartItemLocally()
                 currentDialogState.value = null
@@ -179,8 +191,8 @@ fun CartScreen(
         // Don't question about the ugly } at the start of the line
         // It helps with line continuation so that the actual code line not becomes too long
         currentDialogState.value = DialogInfo(
-            title = "Checkout Confirmation",
-            message =
+            titleText = "Checkout Confirmation",
+            messageText =
                 """
                 There ${if (invalidCount > 1) "are" else "is"
                 } ${selectedItems.size - validSelectedItems.size
@@ -235,18 +247,46 @@ fun CartScreen(
     val defaultTitle = "Unknown Product"
     val defaultValue = "???"
 
+    val iconButtonColors = IconButtonColors(
+        contentColor = LadosTheme.colorScheme.onSecondaryContainer,
+        containerColor = LadosTheme.colorScheme.secondaryContainer,
+        disabledContentColor = LadosTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.38f),
+        disabledContainerColor = LadosTheme.colorScheme.secondaryContainer.copy(alpha = 0.38f),
+    )
+    val iconTintColor = LadosTheme.colorScheme.onSecondaryContainer
+    val topAppBarColor = TopAppBarColors(
+        containerColor = LadosTheme.colorScheme.surfaceContainerLowest,
+        scrolledContainerColor = LadosTheme.colorScheme.surfaceContainerLow,
+        navigationIconContentColor = LadosTheme.colorScheme.onSurface,
+        actionIconContentColor = LadosTheme.colorScheme.onSurface,
+        titleContentColor = LadosTheme.colorScheme.onSurface,
+    )
+
     Scaffold(
+        containerColor = LadosTheme.colorScheme.background,
         modifier = modifier.padding(innerPadding),
         topBar = {
             TopAppBar(
                 title = {
-                    Text("Cart", textAlign = TextAlign.Center)
+                    Text(
+                        text = "Cart",
+                        textAlign = TextAlign.Center,
+                        style = LadosTheme.typography.titleLarge.copy(
+                            fontWeight = FontWeight.Bold
+                        ),
+                        color = LadosTheme.colorScheme.onSurface,
+                        )
                 },
                 navigationIcon = {
-                    IconButton(onClick = { onNavigateBack() }, enabled = isAllowedInteracting) {
+                    IconButton(
+                        onClick = { onNavigateBack() },
+                        enabled = isAllowedInteracting,
+                        colors = iconButtonColors
+                    ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Default.KeyboardArrowLeft,
-                            contentDescription = "Back"
+                            contentDescription = "Back",
+                            tint = iconTintColor
                         )
                     }
                 },
@@ -263,16 +303,19 @@ fun CartScreen(
                             if (isAllItemSelected()) {
                                 Icon(
                                     painter = painterResource(id = R.drawable.icon_deselect),
-                                    contentDescription = "Unselected all items from cart"
+                                    contentDescription = "Unselected all items from cart",
+                                    tint = iconTintColor,
                                 )
                             } else {
                                 Icon(
                                     painter = painterResource(id = R.drawable.icon_select_all),
-                                    contentDescription = "Selected all items from cart"
+                                    contentDescription = "Selected all items from cart",
+                                    tint = iconTintColor,
                                 )
                             }
                         },
-                        enabled = !isLoadingItems && isAnyItemsExisted.value && isAllowedInteracting
+                        enabled = !isLoadingItems && isAnyItemsExisted.value && isAllowedInteracting,
+                        colors = iconButtonColors,
                     )
 
 
@@ -283,12 +326,15 @@ fun CartScreen(
                         content = {
                             Icon(
                                 imageVector = Icons.Default.Delete,
-                                contentDescription = "Remove selected items from cart"
+                                contentDescription = "Remove selected items from cart",
+                                tint = iconTintColor,
                             )
                         },
-                        enabled = !isLoadingItems && selectedItems.isNotEmpty() && isAllowedInteracting
+                        enabled = !isLoadingItems && selectedItems.isNotEmpty() && isAllowedInteracting,
+                        colors = iconButtonColors
                     )
-                }
+                },
+                colors = topAppBarColor,
             )
         },
         bottomBar = {
@@ -315,8 +361,10 @@ fun CartScreen(
                         .padding(innerScaffoldPadding)
                         .padding(horizontal = 20.dp)
                         .fillMaxSize()
+                        .background(LadosTheme.colorScheme.background)
                 ) {
                     CircularProgressIndicator(
+                        color = LadosTheme.colorScheme.onSurface,
                         modifier = Modifier
                             .align(Alignment.Center)
                             .width(64.dp)
@@ -328,20 +376,23 @@ fun CartScreen(
                     modifier = Modifier
                         .padding(innerScaffoldPadding)
                         .padding(horizontal = 20.dp)
-                        .fillMaxSize(),
+                        .fillMaxSize()
+                        .background(LadosTheme.colorScheme.background),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
                     Image(
                         painter = painterResource(id = R.drawable.empty_cart_image),
                         contentDescription = "Empty cart",
-                        modifier = Modifier.width(120.dp)
+                        modifier = Modifier.width(120.dp),
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
                         text = "Your cart is empty",
-                        style = MaterialTheme.typography.displaySmall.copy(
-//                            fontWeight = FontWeight.Bold
+                        style = LadosTheme.typography.bodyLarge.copy(
+                            color = LadosTheme.colorScheme.onSurface,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 32.sp
                         )
                     )
                 }
@@ -352,6 +403,7 @@ fun CartScreen(
                         .padding(innerScaffoldPadding)
                         .padding(horizontal = 20.dp)
                         .fillMaxSize()
+                        .background(LadosTheme.colorScheme.background)
                 ) {
                     itemsIndexed(cartItems.value) { _, cartItem ->
                         if (cartItem.amount <= 0) {
@@ -359,6 +411,13 @@ fun CartScreen(
                         }
                         val (product, productVariant) =
                             cartItemInformation.value[cartItem.id] ?: Pair(null, null)
+                        val itemState = if (cartItem in validSelectedItems) {
+                            ItemState.SELECTED
+                        } else if (cartItem in selectedItems || productVariant == null) {
+                            ItemState.INVALID
+                        } else {
+                            ItemState.UNSELECTED
+                        }
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -371,9 +430,14 @@ fun CartScreen(
                                     }
                                 )
                                 .background(
-                                    if (cartItem !in selectedItems) Color.Transparent
-                                    else if (productVariant == null) Color(0xFFFA7F7F)
-                                    else Color.LightGray,
+//                                    if (cartItem !in selectedItems) LadosTheme.colorScheme.secondaryContainer
+//                                    else if (productVariant == null) LadosTheme.colorScheme.errorContainer
+//                                    else LadosTheme.colorScheme.primaryContainer,
+                                    when (itemState) {
+                                        ItemState.SELECTED -> LadosTheme.colorScheme.primaryContainer
+                                        ItemState.UNSELECTED -> LadosTheme.colorScheme.secondaryContainer
+                                        ItemState.INVALID -> LadosTheme.colorScheme.errorContainer
+                                    },
                                     shape = RoundedCornerShape(8.dp)
                                 )
                         ) {
@@ -397,6 +461,7 @@ fun CartScreen(
                                         onItemAmountChanged(cartItem, -1)
                                     }
                                 },
+                                itemState = itemState,
                                 modifier = Modifier.fillMaxWidth()
                             )
                         }
@@ -413,10 +478,11 @@ fun CartScreen(
         Box(
             modifier = Modifier
                 .padding(innerPadding)
-                .background(Color.Gray.copy(alpha = 0.5f))
+                .background(LadosTheme.colorScheme.background.copy(alpha = 0.5f))
                 .fillMaxSize()
         ) {
             CircularProgressIndicator(
+                color = LadosTheme.colorScheme.onSurface,
                 modifier = Modifier
                     .align(Alignment.Center)
                     .width(64.dp)
@@ -451,10 +517,10 @@ fun CartBottomBar(
         }
 
         val buttonColors = ButtonColors(
-            containerColor = Color(0xFF8E6CEF),
-            contentColor = Color.White,
-            disabledContentColor = Color(0xFFAFAFAF),
-            disabledContainerColor = Color(0xFFE0E0E0)
+            containerColor = LadosTheme.colorScheme.primary,
+            contentColor = LadosTheme.colorScheme.onPrimary,
+            disabledContentColor = LadosTheme.colorScheme.onPrimary.copy(alpha = 0.38f),
+            disabledContainerColor = LadosTheme.colorScheme.primary.copy(alpha = 0.38f),
         )
         Button(
             onClick = { onCheckout() },

@@ -3,8 +3,6 @@ package org.nullgroup.lados.screens.customer.cartAndCheckout
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,7 +23,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.CircularProgressIndicator
@@ -35,7 +32,7 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
@@ -44,15 +41,15 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -67,9 +64,12 @@ import androidx.navigation.NavController
 import kotlinx.coroutines.launch
 import org.nullgroup.lados.R
 import org.nullgroup.lados.compose.cartRelated.CartItemBar
+import org.nullgroup.lados.compose.cartRelated.ConfirmDialog
+import org.nullgroup.lados.compose.cartRelated.DialogInfo
 import org.nullgroup.lados.compose.cartRelated.PricingDetails
 import org.nullgroup.lados.data.models.Address
 import org.nullgroup.lados.screens.Screen
+import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.utilities.toUSDCurrency
 import org.nullgroup.lados.viewmodels.customer.CheckoutError
 import org.nullgroup.lados.viewmodels.customer.CheckoutViewModel
@@ -193,21 +193,50 @@ fun CheckoutScreen(
         return
     }
 
+    val iconButtonColors = IconButtonColors(
+        contentColor = LadosTheme.colorScheme.onSecondaryContainer,
+        containerColor = LadosTheme.colorScheme.secondaryContainer,
+        disabledContentColor = LadosTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.38f),
+        disabledContainerColor = LadosTheme.colorScheme.secondaryContainer.copy(alpha = 0.38f),
+    )
+    val iconTintColor = LadosTheme.colorScheme.onSecondaryContainer
+    val topAppBarColor = TopAppBarColors(
+        containerColor = LadosTheme.colorScheme.surfaceContainerLowest,
+        scrolledContainerColor = LadosTheme.colorScheme.surfaceContainerLow,
+        navigationIconContentColor = LadosTheme.colorScheme.onSurface,
+        actionIconContentColor = LadosTheme.colorScheme.onSurface,
+        titleContentColor = LadosTheme.colorScheme.onSurface,
+    )
+
     Scaffold (
+        containerColor = LadosTheme.colorScheme.surfaceContainerLowest,
         modifier = modifier.padding(innerPadding),
         topBar = {
             TopAppBar(
                 title = {
-                    Text("Checkout", textAlign = TextAlign.Center)
+                    Text(
+                        "Checkout",
+                        textAlign = TextAlign.Center,
+                        style = LadosTheme.typography.titleLarge.copy(
+                            color = LadosTheme.colorScheme.onSurface,
+                            fontWeight = FontWeight.Bold
+                        ),
+                    )
                 },
                 navigationIcon = {
-                    IconButton(onClick = { onNavigateBack() }, enabled = isAllowedInteracting) {
+                    IconButton(
+                        onClick = { onNavigateBack() },
+                        enabled = isAllowedInteracting,
+                        colors = iconButtonColors,
+                        ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Default.KeyboardArrowLeft,
-                            contentDescription = "Back"
+                            contentDescription = "Back",
+                            tint = iconTintColor,
                         )
                     }
-                }
+                },
+                colors = topAppBarColor,
             )
         },
         bottomBar = {
@@ -250,6 +279,8 @@ fun CheckoutScreen(
                     modifier = Modifier.fillMaxWidth()
                 )
 
+                Spacer(modifier = Modifier.height(8.dp))
+
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
@@ -262,16 +293,16 @@ fun CheckoutScreen(
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .combinedClickable(
-                                    interactionSource = remember { MutableInteractionSource() },
-                                    indication = null,
-                                    onClick = {
-                                        // Prevent click if interacting with child components
-//                                    onItemSelected(cartItem)
-                                    }
-                                )
+//                                .combinedClickable(
+//                                    interactionSource = remember { MutableInteractionSource() },
+//                                    indication = null,
+//                                    onClick = {
+//                                        // Prevent click if interacting with child components
+////                                    onItemSelected(cartItem)
+//                                    }
+//                                )
                                 .background(
-                                    color = Color.Transparent,
+                                    color = LadosTheme.colorScheme.secondaryContainer,
                                     shape = RoundedCornerShape(8.dp)
                                 )
                         ) {
@@ -294,7 +325,7 @@ fun CheckoutScreen(
                 if (insufficientOrderItems.value.isNotEmpty()) {
                     InsufficientStockDialog(
                         insufficientOrderItems = insufficientOrderItems.value,
-                        onDismiss = { checkoutViewModel.clearInsufficientOrderItems.invoke() }
+                        onConfirm = { checkoutViewModel.clearInsufficientOrderItems.invoke() }
                     )
                 }
             }
@@ -307,10 +338,11 @@ fun CheckoutScreen(
         Box(
             modifier = Modifier
                 .padding(innerPadding)
-                .background(Color.Gray.copy(alpha = 0.5f))
+                .background(LadosTheme.colorScheme.background.copy(alpha = 0.5f))
                 .fillMaxSize()
         ) {
             CircularProgressIndicator(
+                color = LadosTheme.colorScheme.onSurface,
                 modifier = Modifier
                     .align(Alignment.Center)
                     .width(64.dp)
@@ -342,18 +374,24 @@ private fun CheckoutBottomBar(
             Spacer(modifier = Modifier.height(16.dp))
         }
 
+        val buttonColors = ButtonColors(
+            containerColor = LadosTheme.colorScheme.primary,
+            contentColor = LadosTheme.colorScheme.onPrimary,
+            disabledContentColor = LadosTheme.colorScheme.onPrimary.copy(alpha = 0.38f),
+            disabledContainerColor = LadosTheme.colorScheme.primary.copy(alpha = 0.38f),
+        )
+        val textStyle = LadosTheme.typography.labelLarge.copy(
+            color = LadosTheme.colorScheme.onPrimary,
+            fontWeight = FontWeight.Bold
+        )
+
         OutlinedButton(
             onClick = { onCheckout() },
             enabled = isEnabled && checkoutEnabled,
             modifier = Modifier
                 .fillMaxWidth()
             ,
-            colors = ButtonColors (
-                containerColor = Color(0xFF8E6CEF), // Lavender color
-                contentColor = Color.White,
-                disabledContentColor = Color.Gray,
-                disabledContainerColor = Color.LightGray,
-            )
+            colors = buttonColors,
         ) {
             Row(
                 modifier = Modifier
@@ -365,20 +403,12 @@ private fun CheckoutBottomBar(
             ) {
                 Text(
                     text = total,
-                    style = TextStyle(
-                        color = Color.White,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+                    style = textStyle
                 )
 
                 Text(
                     text = "Place Order",
-                    style = TextStyle(
-                        color = Color.White,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Normal
-                    )
+                    style = textStyle
                 )
             }
         }
@@ -408,7 +438,10 @@ private fun AddressSelector(
             verticalAlignment = Alignment.CenterVertically,
             modifier = modifier
                 .padding(8.dp)
-                .background(Color.LightGray, RoundedCornerShape(8.dp))
+                .background(
+                    color = LadosTheme.colorScheme.primaryContainer,
+                    RoundedCornerShape(8.dp),
+                    )
                 .fillMaxWidth()
         ) {
             Column(
@@ -420,14 +453,16 @@ private fun AddressSelector(
             ) {
                 Text(
                     text = "Shipping Address",
-                    color = Color.Gray,
-                    style = MaterialTheme.typography.bodySmall
+                    color = LadosTheme.colorScheme.onPrimaryContainer,
+                    style = LadosTheme.typography.bodySmall
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = selectedAddress?.toString() ?: "Select Address",
-                    color = Color.Black,
-                    style = MaterialTheme.typography.bodyMedium
+                    color = LadosTheme.colorScheme.onPrimaryContainer,
+                    style = LadosTheme.typography.bodyMedium.copy(
+                        fontWeight = FontWeight.Bold
+                    )
                 )
             }
 
@@ -442,7 +477,8 @@ private fun AddressSelector(
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                    contentDescription = "Expand"
+                    contentDescription = "Expand",
+                    tint = LadosTheme.colorScheme.onPrimaryContainer
                 )
             }
         }
@@ -460,7 +496,8 @@ private fun AddressSelector(
 
         ExposedDropdownMenu(
             expanded = expanded && selectionEnabled,
-            onDismissRequest = { setExpanded(false) }
+            onDismissRequest = { setExpanded(false) },
+            containerColor = LadosTheme.colorScheme.secondaryContainer,
         ) {
             addresses.forEach { address ->
                 DropdownMenuItem(
@@ -469,10 +506,13 @@ private fun AddressSelector(
                         setExpanded(false)
                     },
                     text = {
-                        Text(address.toString())
+                        Text(address.toString(), color = LadosTheme.colorScheme.onSecondaryContainer)
                     }
                 )
-                HorizontalDivider()
+                HorizontalDivider(
+                    color = LadosTheme.colorScheme.outline,
+                    thickness = 1.dp
+                )
             }
         }
     }
@@ -486,7 +526,7 @@ private fun PhoneNumberCard(
     Box(
         modifier = modifier
             .padding(8.dp)
-            .background(Color.LightGray, RoundedCornerShape(8.dp))
+            .background(LadosTheme.colorScheme.primaryContainer, RoundedCornerShape(8.dp))
             .fillMaxWidth()
     ) {
         Column(
@@ -494,14 +534,14 @@ private fun PhoneNumberCard(
         ) {
             Text(
                 text = "Contact Phone Number",
-                color = Color.Gray,
-                style = MaterialTheme.typography.bodySmall
+                color = LadosTheme.colorScheme.onPrimaryContainer,
+                style = LadosTheme.typography.bodySmall
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = phoneNumber,
-                color = Color.Black,
-                style = MaterialTheme.typography.bodyMedium
+                color = LadosTheme.colorScheme.onPrimaryContainer,
+                style = LadosTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold)
             )
         }
     }
@@ -512,16 +552,22 @@ private fun ProductItemWithStockComparison(
     productInfo: InsufficientOrderProductInfo,
     modifier: Modifier = Modifier
 ) {
+    val containerColor = LadosTheme.colorScheme.surfaceContainerHigh
+    val bodyMediumTypo = LadosTheme.typography.bodyMedium
+    val bodySmallTypo = LadosTheme.typography.bodySmall
+
     Column (
         verticalArrangement = Arrangement.spacedBy(0.dp),
         modifier = modifier
-            .background(Color.LightGray, RoundedCornerShape(8.dp))
+            .background(
+                color = containerColor,
+                shape = RoundedCornerShape(8.dp)
+            )
             .fillMaxWidth()
     ) {
         Text(
             text = productInfo.productName,
-            color = Color.Black,
-            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+            style = bodyMediumTypo.copy(fontWeight = FontWeight.Bold),
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier
@@ -534,13 +580,10 @@ private fun ProductItemWithStockComparison(
             ,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            val specialStyle = MaterialTheme.typography.bodySmall.toSpanStyle().copy(
-                color = Color.Black,
+            val specialStyle = bodySmallTypo.toSpanStyle().copy(
                 fontWeight = FontWeight.Bold
             )
-            val normalStyle = MaterialTheme.typography.bodySmall.toSpanStyle().copy(
-                color = Color.Gray
-            )
+            val normalStyle = bodySmallTypo.toSpanStyle()
 
             Column(
                 modifier = Modifier
@@ -585,8 +628,9 @@ private fun ProductItemWithStockComparison(
                             append(productInfo.orderedAmount.toString())
                         }
                     },
-                    style = MaterialTheme.typography.bodyMedium
+                    style = bodyMediumTypo
                 )
+                Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = buildAnnotatedString {
                         withStyle(normalStyle) {
@@ -596,7 +640,7 @@ private fun ProductItemWithStockComparison(
                             append(productInfo.availableStock.toString())
                         }
                     },
-                    style = MaterialTheme.typography.bodyMedium
+                    style = bodyMediumTypo
                 )
             }
 
@@ -608,50 +652,83 @@ private fun ProductItemWithStockComparison(
 @Composable
 private fun InsufficientStockDialog(
     insufficientOrderItems: List<InsufficientOrderProductInfo>,
-    onDismiss: () -> Unit,
-    modifier: Modifier = Modifier
+    onConfirm: () -> Unit,
 ) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = {
-            Text("Order creation failed")
-        },
-        text = {
-            Column (
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.padding(8.dp)
-            ) {
-                Text(
-                    text = "The following item(s) have insufficient stock:",
-                    style = MaterialTheme.typography.bodyMedium
-                )
+    val dialogMessage = @Composable {
+        Column (
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.padding(8.dp)
+        ) {
+            Text(
+                text = "The following item(s) have insufficient stock:",
+                style = LadosTheme.typography.bodyMedium
+            )
 
-                LazyColumn (
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    itemsIndexed(insufficientOrderItems) { _, productInfo ->
-                        ProductItemWithStockComparison(productInfo)
-                    }
+            LazyColumn (
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                itemsIndexed(insufficientOrderItems) { _, productInfo ->
+                    ProductItemWithStockComparison(productInfo)
                 }
-
-                Text (
-                    text = "Please adjust the quantity of the item(s) in your cart and try again later.",
-                    style = MaterialTheme.typography.bodyMedium
-                )
             }
 
-        },
-        confirmButton = {
-            OutlinedButton(
-                onClick = onDismiss,
-                modifier = Modifier.padding(8.dp)
-            ) {
-                Text("Close")
-            }
-        },
-        modifier = modifier
-    )
+            Text (
+                text = "Please adjust the quantity of the item(s) in your cart and try again later.",
+                style = LadosTheme.typography.bodyMedium
+            )
+        }
+
+    }
+
+    ConfirmDialog(DialogInfo(
+        titleText = "Order creation failed",
+        message = dialogMessage,
+        onConfirm = onConfirm,
+        confirmText = "Close",
+    ))
+
+//    AlertDialog(
+//        onDismissRequest = onConfirm,
+//        title = {
+//            Text("Order creation failed")
+//        },
+//        text = {
+//            Column (
+//                verticalArrangement = Arrangement.spacedBy(8.dp),
+//                modifier = Modifier.padding(8.dp)
+//            ) {
+//                Text(
+//                    text = "The following item(s) have insufficient stock:",
+//                    style = MaterialTheme.typography.bodyMedium
+//                )
+//
+//                LazyColumn (
+//                    verticalArrangement = Arrangement.spacedBy(4.dp),
+//                    modifier = Modifier.fillMaxWidth()
+//                ) {
+//                    itemsIndexed(insufficientOrderItems) { _, productInfo ->
+//                        ProductItemWithStockComparison(productInfo)
+//                    }
+//                }
+//
+//                Text (
+//                    text = "Please adjust the quantity of the item(s) in your cart and try again later.",
+//                    style = MaterialTheme.typography.bodyMedium
+//                )
+//            }
+//
+//        },
+//        confirmButton = {
+//            OutlinedButton(
+//                onClick = onConfirm,
+//                modifier = Modifier.padding(8.dp)
+//            ) {
+//                Text("Close")
+//            }
+//        },
+//        modifier = modifier
+//    )
 }
 
 @Composable
@@ -662,7 +739,25 @@ private fun CheckoutCompleteScreen(
     nextScreenText: String = "View Order",
     modifier: Modifier = Modifier
 ) {
-    val purpleColor = Color(0xFF8E6CEF)
+    val topHalfColor = LadosTheme.colorScheme.primary
+    val bottomHalfColor = LadosTheme.colorScheme.background
+
+    val orderPlacedTitleStyle = LadosTheme.typography.bodyLarge.copy(
+        color = LadosTheme.colorScheme.onBackground,
+        fontWeight = FontWeight.Bold,
+        fontSize = 32.sp,
+        lineHeight = 40.sp
+    )
+    val orderPlacedNoteStyle = LadosTheme.typography.bodyLarge.copy(
+        color = LadosTheme.colorScheme.onBackground
+    )
+
+    val buttonColors = ButtonColors(
+        containerColor = LadosTheme.colorScheme.primary,
+        contentColor = LadosTheme.colorScheme.onPrimary,
+        disabledContentColor = LadosTheme.colorScheme.onPrimary.copy(alpha = 0.38f),
+        disabledContainerColor = LadosTheme.colorScheme.primary.copy(alpha = 0.38f),
+    )
 
     Box(
         modifier = modifier.fillMaxSize(),
@@ -676,7 +771,7 @@ private fun CheckoutCompleteScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(0.6f)
-                    .background(purpleColor)
+                    .background(topHalfColor)
             ) {
                 Image(
                     painter = painterResource(id = R.drawable.checkout_complete_image),
@@ -709,7 +804,7 @@ private fun CheckoutCompleteScreen(
                             topEnd = 16.dp
                         )
                     )
-                    .background(Color.White)
+                    .background(bottomHalfColor)
             ) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -725,16 +820,15 @@ private fun CheckoutCompleteScreen(
                     ) {
                         Text(
                             text = "Order Placed\nSuccessfully",
-                            style = MaterialTheme.typography.displaySmall.copy(
-                                fontWeight = FontWeight.Bold,
-                            )
+                            style = orderPlacedTitleStyle,
                         )
                     }
 
                     Text(
                         text = "Your order has been successfully created",
                         textAlign = TextAlign.Start,
-                        style = MaterialTheme.typography.bodyMedium,
+                        lineHeight = 40.sp,
+                        style = orderPlacedNoteStyle,
                         modifier = Modifier.weight(0.3f)
                     )
                     Row(
@@ -745,18 +839,14 @@ private fun CheckoutCompleteScreen(
                             .padding(8.dp)
                             .weight(0.2f)
                     ) {
-                        val buttonColors = ButtonColors(
-                            containerColor = purpleColor,
-                            contentColor = Color.White,
-                            disabledContentColor = Color.Gray,
-                            disabledContainerColor = Color.LightGray
-                        )
                         Button(
                             onClick = { onNavigateBack?.invoke() },
                             colors = buttonColors,
                             modifier = Modifier.weight(1f)
                         ) {
-                            Text(backScreenText)
+                            Text(backScreenText, style = LadosTheme.typography.labelLarge.copy(
+                                fontWeight = FontWeight.Bold
+                            ))
                         }
                         Spacer(modifier = Modifier.width(8.dp))
                         Button(
@@ -764,7 +854,9 @@ private fun CheckoutCompleteScreen(
                             colors = buttonColors,
                             modifier = Modifier.weight(1f)
                         ) {
-                            Text(nextScreenText)
+                            Text(nextScreenText, style = LadosTheme.typography.labelLarge.copy(
+                                fontWeight = FontWeight.Bold
+                            ))
                         }
                     }
                 }

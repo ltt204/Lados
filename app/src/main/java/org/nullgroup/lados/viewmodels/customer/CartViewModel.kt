@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -107,7 +106,7 @@ class CartViewModel @Inject constructor(
         refreshCartInformation()
     }
 
-    private var _dataRefreshed = false
+    // private var _dataRefreshed = false
     private var _firstInitialization = true
     // This one is rather for errors
     var onRefreshError: ((String) -> Unit)? = null
@@ -152,47 +151,46 @@ class CartViewModel @Inject constructor(
 //                    }
 //                    _cartItems.value = _cartItems.value.plus(newItems)
 
-                    _dataRefreshed = true
+                    // _dataRefreshed = true
                     if (_firstInitialization) {
                         _cartItems.value = cartItems
-                        // _isLoading.value = false
                         _firstInitialization = false
-                        return@collect
+//                        if (cartItems.isEmpty()) {
+//                            _isLoading.value = false
+//                        }
+                    } else {
+                        // Assume that the value collected is the final items in cart
+                        // Assume that the only changes allowed with items with the same id is amount count
+                        val newItems = cartItems.toMutableList()
+                        _cartItems.value = _cartItems.value.mapNotNull {
+                            val matchingItem = cartItems.find { item -> item.id == it.id }
+                            if (matchingItem == null) {
+                                // Just being cautious
+                                _originalAmount.remove(it.id)
+
+                                // _selectedCartItemIds.value = _selectedCartItemIds.value.minus(it.id)
+                                null
+                            } else if (it.amount != matchingItem.amount) {
+                                // Just being cautious
+                                _originalAmount.remove(it.id)
+
+                                // _selectedCartItemIds.value = _selectedCartItemIds.value.minus(it.id)
+                                newItems.remove(matchingItem)
+                                matchingItem
+                            } else {
+                                newItems.remove(matchingItem)
+                                it
+                            }
+                        }.plus(newItems)
                     }
 
-                    // Assume that the value collected is the final items in cart
-                    // Assume that the only changes allowed with items with the same id is amount count
-                    val newItems = cartItems.toMutableList()
-                    _cartItems.value = _cartItems.value.mapNotNull {
-                        val matchingItem = cartItems.find { item -> item.id == it.id }
-                        if (matchingItem == null) {
-                            // Just being cautious
-                            _originalAmount.remove(it.id)
-
-                            // _selectedCartItemIds.value = _selectedCartItemIds.value.minus(it.id)
-                            null
-                        } else if (it.amount != matchingItem.amount) {
-                            // Just being cautious
-                            _originalAmount.remove(it.id)
-
-                            // _selectedCartItemIds.value = _selectedCartItemIds.value.minus(it.id)
-                            newItems.remove(matchingItem)
-                            matchingItem
-                        } else {
-                            newItems.remove(matchingItem)
-                            it
-                        }
-                    }.plus(newItems)
-                }
-        }
-
-        viewModelScope.launch {
-            _cartItems
-                .filterNotNull()
-                .collect { cartItems ->
-                    if (_dataRefreshed) {
-                        _dataRefreshed = false
-                        getItemsInformation(cartItems)
+                    viewModelScope.launch {
+                        _cartItems
+                            .filterNotNull()
+                            .collect { cartItems ->
+                                getItemsInformation(cartItems)
+                                _isLoading.value = false
+                            }
                     }
                 }
         }
@@ -233,7 +231,6 @@ class CartViewModel @Inject constructor(
         }
 
         getItemInfoDeferredTasks.awaitAll()
-        _isLoading.value = false
     }
 
 //    // Use this when adding product to cart in other places

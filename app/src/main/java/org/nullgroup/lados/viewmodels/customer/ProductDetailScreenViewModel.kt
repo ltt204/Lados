@@ -207,7 +207,8 @@ class ProductDetailScreenViewModel @Inject constructor(
             val correspondingVariant =
                 if (selectedColor != null && selectedSize != null)
                     product.variants.find {
-                        it.color.id == selectedColor.id && it.size.id == selectedSize.id
+                        it.color.hexCode == selectedColor.hexCode
+                                && it.size.sizeName == selectedSize.sizeName
                     }
                 else null
 

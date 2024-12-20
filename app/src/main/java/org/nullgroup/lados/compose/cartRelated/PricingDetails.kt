@@ -1,5 +1,6 @@
 package org.nullgroup.lados.compose.cartRelated
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import org.nullgroup.lados.ui.theme.LadosTheme
 
 @Composable
 fun PricingDetails(
@@ -21,7 +23,10 @@ fun PricingDetails(
     orderDiscount: String? = null,
     total: String,
 ) {
-    Column(modifier = Modifier.fillMaxWidth()) {
+    Column(modifier = Modifier
+        .fillMaxWidth()
+//        .background(LadosTheme.colorScheme.surfaceContainerLow)
+    ) {
         // Subtotal
         PricingRow(label = "Subtotal", value = subtotal)
         Spacer(modifier = Modifier.height(8.dp))
@@ -46,11 +51,11 @@ fun PricingRow(label: String, value: String, isBold: Boolean = false) {
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        val defaultLabelStyle = MaterialTheme.typography.bodyLarge.copy(
-            color = Color.Gray,
+        val defaultLabelStyle = LadosTheme.typography.bodyLarge.copy(
+            color = LadosTheme.colorScheme.onSurface,
         )
-        val defaultValueStyle = MaterialTheme.typography.bodyLarge.copy(
-            color = Color.Black,
+        val defaultValueStyle = LadosTheme.typography.bodyLarge.copy(
+            color = LadosTheme.colorScheme.onSurface,
         )
         Text(
             text = label,
