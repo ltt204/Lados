@@ -644,8 +644,8 @@ fun BottomSheetContent(
                         if ((title != "Sort by" && selectedButtonIndex == index) ||
                             (title == "Sort by" && selectedButtonIndex == index + 2)
                         )
-                            LadosTheme.colorScheme.primaryContainer else
-                            LadosTheme.colorScheme.onPrimaryContainer
+                            LadosTheme.colorScheme.primary else
+                            LadosTheme.colorScheme.surfaceContainerHighest
                     )
                 ) {
                     Row(
@@ -661,8 +661,8 @@ fun BottomSheetContent(
                             color = if ((title != "Sort by" && selectedButtonIndex == index) ||
                                 (title == "Sort by" && selectedButtonIndex == index + 2)
                             )
-                                LadosTheme.colorScheme.onPrimaryContainer
-                            else LadosTheme.colorScheme.primaryContainer
+                                Color.White else
+                                LadosTheme.colorScheme.onBackground
                         )
                         if ((title != "Sort by" && selectedButtonIndex == index) ||
                             (title == "Sort by" && selectedButtonIndex == index + 2)
@@ -673,8 +673,8 @@ fun BottomSheetContent(
                                 tint = if ((title != "Sort by" && selectedButtonIndex == index) ||
                                     (title == "Sort by" && selectedButtonIndex == index + 2)
                                 )
-                                    LadosTheme.colorScheme.onPrimaryContainer
-                                else LadosTheme.colorScheme.primaryContainer
+                                    LadosTheme.colorScheme.primary else
+                                    LadosTheme.colorScheme.surfaceContainerHighest
                             )
                     }
                 }
