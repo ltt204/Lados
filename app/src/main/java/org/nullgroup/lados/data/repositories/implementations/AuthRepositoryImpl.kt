@@ -102,7 +102,7 @@ class AuthRepositoryImpl(
 
     override suspend fun autoSignIn(): ResourceState<User> {
         val tokens =
-            sharedPreferences.getAuthTokens() ?: return ResourceState.Error("No saved tokens")
+            sharedPreferences.getAuthTokens() ?: return ResourceState.Idle
 
         return try {
             val user = firebaseAuth.currentUser

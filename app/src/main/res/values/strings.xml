@@ -1,7 +1,4 @@
 <resources>
     <string name="app_name">Lados</string>
     <string name="encrypt_auth_prefs">SECRET_TOKEN</string>
-    <string name="facebook_app_id">991093202823574</string>
-    <string name="fb_login_protocol_scheme">fb1234</string>
-    <string name="facebook_client_token">e4f8a777366008b272d7463918a3c685</string>
 </resources>
