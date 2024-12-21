@@ -34,8 +34,22 @@ To set up Firebase for your local development:
     - `Authentication`:  with two methods which are `Email/Password` and `Google`
     - `Cloud FireStore`
     - `FireStorage`
-
-
+- After those steps above, if you want to use Signin With Google. You need to:
+    1. Open terminal at project folder, run this command: `./gradlew signingreport` and this is what you get:
+        ```cli
+        > Task :app:signingReport
+        Variant: debug
+        Config: debug
+        Store: C:\Users\trong\.android\debug.keystore
+        Alias: AndroidDebugKey
+        MD5: XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX
+        Alias: AndroidDebugKey
+        MD5: XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX
+        SHA1: XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX // Copy this line
+        SHA-256:        XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX
+        Valid until: Sunday, March 29, 2054
+        ```
+    2. After you got the SHA1 key, you will need to go to Firebase project. At project setting, scroll down and you will see **Your apps** part (make sure you have enable the Google provider), add SHA1 to SHA1 finger print.
 ## Naming convention
 We strictly follow [Kotlin style guide](https://developer.android.com/kotlin/style-guide) provided by `Google`
 

@@ -125,7 +125,7 @@ fun ProfileScreen(
                                 fontSize = 16.sp
                             )
                             Text(
-                                modifier = Modifier, text = currentUser.value.phoneNumber,
+                                modifier = Modifier, text = currentUser.value.phoneNumber.ifEmpty { "No phone number provided!" },
                                 color = LadosTheme.colorScheme.onBackground.copy(alpha = 0.8f),
                                 fontSize = 16.sp
                             )
