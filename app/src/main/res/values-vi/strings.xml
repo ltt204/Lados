@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Lados</string>
+    <string name="home_title">Trang chủ</string>
+    <string name="profile_title">Trang cá nhân</string>
+    <string name="edit_profile_title">Chỉnh sửa</string>
+    <string name="address_title">Địa chỉ</string>
+    <string name="edit_address_title">Chỉnh sửa</string>
+    <string name="add_address_title">Thêm</string>
+    <string name="order_title">Hóa đơn</string>
+    <string name="order_detail_title">Chi tiết</string>
+    <string name="order_products_title">Danh sách sản phẩm</string>
+    <string name="order_items_header">%1$s món</string>
+    <string name="delivery_address">Địa chỉ giao hàng:</string>
+    <string name="customer_phone">Số điện thoại</string>
+    <string name="view_all">Tất cả</string>
+    <string name="time_not_updated">Chưa cập nhật</string>
+    <string name="order_items">Đơn của bạn</string>
+    <string name="search_place_holder">Tìm kiếm</string>
+    <string name="home_categories_header">Loại</string>
+    <string name="home_see_all">Tất cả</string>
+    <string name="home_top_selling">Bán chạy</string>
+    <string name="home_new_in">Hàng mới</string>
+    <string name="profile_sign_out">Đăng xuất</string>
+    <string name="profile_wishlist">Yêu thích</string>
+    <string name="profile_privacy">Chính sách</string>
+    <string name="profile_help">Hỗ trợ</string>
+    <string name="profile_settings">Cài đặt</string>
+    <string name="profile_edit_button">Chỉnh sửa</string>
+    <string name="cart_title">Giỏ hàng</string>
+    <string name="cart_empty_message">Giỏ hàng của bạn đang trống</string>
+    <string name="add_to_cart">"Thêm vào giỏ hàng "</string>
+    <string name="product_size">Kích thước</string>
+    <string name="product_color">Màu sắc</string>
+    <string name="product_quantity">Số lượng</string>
+    <string name="product_reviews">Lượt đánh giá</string>
+    <string name="product_ratings">%1$s đánh giá</string>
+    <string name="profile_setting">Cài đặt</string>
+    <string name="profile_setting_regions">Khu vực</string>
+    <string name="profile_setting_color_scheme">Chế độ hiển thị</string>
+</resources>

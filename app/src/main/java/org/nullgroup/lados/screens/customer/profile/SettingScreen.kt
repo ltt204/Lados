@@ -1,5 +1,7 @@
 package org.nullgroup.lados.screens.customer.profile
 
+import android.app.Activity
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -20,22 +22,29 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import org.nullgroup.lados.R
 import org.nullgroup.lados.compose.common.CustomExposedDropDownMenu
 import org.nullgroup.lados.compose.common.ProfileTopAppBar
 import org.nullgroup.lados.ui.theme.LadosTheme
+import org.nullgroup.lados.utilities.SupportedRegion
+import org.nullgroup.lados.utilities.capitalizeWords
+import org.nullgroup.lados.utilities.updateLocale
+import org.nullgroup.lados.viewmodels.common.SettingViewModel
 import org.nullgroup.lados.viewmodels.customer.MenuItemsUIState
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -44,35 +53,52 @@ fun SettingScreen(
     modifier: Modifier = Modifier,
     onBack: () -> Unit,
     paddingValues: PaddingValues = PaddingValues(0.dp),
-    themeSwitched: () -> Unit
+    themeSwitched: () -> Unit,
+    settingViewModel: SettingViewModel = hiltViewModel()
 ) {
-    var itemsUiState = MenuItemsUIState.Success(
-        data = listOf("en", "vn")
+    val itemsUiState = MenuItemsUIState.Success(
+        data = SupportedRegion.entries.map { it.name.capitalizeWords() },
     )
+    val context = LocalContext.current
+    val region = settingViewModel.locale.collectAsState().value
 
     Scaffold(
         modifier = modifier,
         containerColor = Color.Transparent,
         topBar = {
-            ProfileTopAppBar(onBackClick = { onBack() }, content = "Setting")
+            ProfileTopAppBar(
+                onBackClick = { onBack() },
+                content = stringResource(R.string.profile_setting)
+            )
         },
     ) { innerPadding ->
         Column(
             modifier = Modifier.padding(top = innerPadding.calculateTopPadding())
         ) {
             Text(
-                text = "Regions",
+                text = stringResource(R.string.profile_setting_regions),
                 style = LadosTheme.typography.titleMedium.copy(
                     fontWeight = FontWeight.SemiBold,
                 ),
                 color = LadosTheme.colorScheme.onBackground,
             )
             Spacer(modifier = Modifier.padding(bottom = LadosTheme.size.small))
-            CustomExposedDropDownMenu(itemsUiState = itemsUiState, placeHolder = "Language")
+            CustomExposedDropDownMenu(
+                itemsUiState = itemsUiState,
+                placeHolder = "Language",
+                onItemSelected = { _, index ->
+                    val locale = SupportedRegion.entries[index].locale
+                    Log.d("SettingScreen", "locale: $locale")
+                    settingViewModel.saveLocale(locale)
+                    updateLocale(context, locale)
+                    (context as? Activity)?.recreate()
+                },
+                currentItem = region.name.capitalizeWords(),
+            )
 
             Spacer(modifier = Modifier.padding(bottom = LadosTheme.size.medium))
             Text(
-                text = "Color Scheme",
+                text = stringResource(R.string.profile_setting_color_scheme),
                 style = LadosTheme.typography.titleMedium.copy(
                     fontWeight = FontWeight.SemiBold,
                 ),
@@ -83,7 +109,8 @@ fun SettingScreen(
                 modifier = Modifier.fillMaxWidth(),
                 onColorSelected = {
                     themeSwitched()
-                }
+                },
+                isDarkMode = settingViewModel.darkMode.collectAsState().value
             )
         }
     }
@@ -92,11 +119,9 @@ fun SettingScreen(
 @Composable
 fun ThemeModeCards(
     modifier: Modifier = Modifier,
-    onColorSelected: () -> Unit = {}
+    onColorSelected: () -> Unit = {},
+    isDarkMode: Boolean
 ) {
-    var isLightMode by rememberSaveable {
-        mutableStateOf(true)
-    }
     Row(
         modifier = modifier
             .fillMaxWidth(),
@@ -105,11 +130,10 @@ fun ThemeModeCards(
         // Light Mode Card
         LadosTheme(darkTheme = false) {
             ThemeCard(
-                isLightMode = isLightMode,
+                isDarkMode = isDarkMode,
                 modifier = Modifier.weight(1f),
                 text = "Light mode",
                 onColorSelected = {
-                    isLightMode = isLightMode.not()
                     onColorSelected()
                 }
             )
@@ -118,11 +142,10 @@ fun ThemeModeCards(
         // Dark Mode Card
         LadosTheme(darkTheme = true) {
             ThemeCard(
-                isLightMode = !isLightMode,
+                isDarkMode = !isDarkMode,
                 modifier = Modifier.weight(1f),
                 text = "Dark mode",
                 onColorSelected = {
-                    isLightMode = isLightMode.not()
                     onColorSelected()
                 }
             )
@@ -132,7 +155,7 @@ fun ThemeModeCards(
 
 @Composable
 fun ThemeCard(
-    isLightMode: Boolean,
+    isDarkMode: Boolean,
     modifier: Modifier = Modifier,
     text: String,
     onColorSelected: () -> Unit = {}
@@ -157,8 +180,9 @@ fun ThemeCard(
             modifier = Modifier
                 .border(
                     BorderStroke(
-                        if (isLightMode) 5.dp else 0.dp ,
-                        LadosTheme.colorScheme.primary.copy(alpha = 0.5f)),
+                        if (!isDarkMode) 5.dp else 0.dp,
+                        LadosTheme.colorScheme.primary.copy(alpha = 0.5f)
+                    ),
                     RoundedCornerShape(24.dp)
                 )
                 .fillMaxWidth()
@@ -203,6 +227,8 @@ fun ThemeCard(
 @Composable
 fun SettingScreenPreview() {
     Surface {
-        ThemeModeCards()
+        ThemeModeCards(
+            isDarkMode = false
+        )
     }
 }

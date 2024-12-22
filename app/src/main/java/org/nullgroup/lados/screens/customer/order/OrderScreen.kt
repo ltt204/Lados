@@ -10,9 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
@@ -32,6 +30,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -78,7 +77,7 @@ fun OrderScreen(
             ) {
                 ProfileTopAppBar(
                     onBackClick = { navController?.navigateUp() },
-                    content = "Orders",
+                    content = stringResource(id = R.string.order_title),
                 )
                 OrderScreenTopAppBar(
                     modifier = modifier
@@ -199,7 +198,10 @@ fun OrderCard(
                 verticalArrangement = Arrangement.SpaceEvenly
             ) {
                 Text(
-                    text = "${order.orderProducts.size} items",
+                    text = stringResource(
+                        id = R.string.order_items_header,
+                        order.orderProducts.size
+                    ),
                     style = LadosTheme.typography.bodyLarge.copy(
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 18.sp

@@ -55,6 +55,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
@@ -145,7 +146,7 @@ fun ProductDetailScreen(
                 containerColor = LadosTheme.colorScheme.background,
                 bottomBar = {
                     ProductDetailBottomBar(
-                        title = "Add to Cart",
+                        title = stringResource(R.string.add_to_cart),
                         enabled = uiState.quantityInStock > 0,
                         price = "$${uiState.product.variants.first().salePrice}",
                         onClick = onAddToCart
@@ -374,14 +375,14 @@ fun ProductDetailsSection(
     ) {
         // Size Selection
         SelectableDetailRow(
-            title = "Size",
+            title = stringResource(R.string.product_size),
             currentSelection = size,
             onClick = onSizeClick
         )
 
         // Color Selection
         SelectableDetailRow(
-            title = "Color",
+            title = stringResource(R.string.product_color),
             currentSelection = color.colorName,
             additionalContent = {
                 Box(
@@ -472,7 +473,7 @@ fun QuantitySelector(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = "Quantity",
+            text = stringResource(R.string.product_quantity),
             fontSize = 15.sp,
             color = LadosTheme.colorScheme.onBackground
         )
@@ -544,7 +545,7 @@ fun ProductReviewSection(
     ) {
 
         Text(
-            text = "Reviews",
+            text = stringResource(R.string.product_reviews),
             fontWeight = FontWeight.Bold,
             fontSize = 20.sp,
             color = LadosTheme.colorScheme.onBackground
@@ -555,7 +556,10 @@ fun ProductReviewSection(
             horizontalAlignment = Alignment.Start
         ) {
             Text(
-                text = "${String.format(Locale.getDefault(), "%.2f", averageRating)} Ratings",
+                text = stringResource(
+                    R.string.product_ratings,
+                    String.format(Locale.getDefault(), "%.2f", averageRating)
+                ),
                 fontWeight = FontWeight.Bold,
                 fontSize = 25.sp,
                 color = LadosTheme.colorScheme.primary
@@ -564,7 +568,7 @@ fun ProductReviewSection(
             Spacer(modifier = Modifier.width(8.dp))
 
             Text(
-                text = "$numOfReviews Reviews",
+                text = "$numOfReviews ${stringResource(id = R.string.product_reviews)}",
                 fontWeight = FontWeight.Medium,
                 fontSize = 15.sp,
                 color = LadosTheme.colorScheme.outline
@@ -629,7 +633,7 @@ fun ReviewCard(
                         text = name,
                         fontWeight = FontWeight.Bold,
                         fontSize = 15.sp,
-                        color =LadosTheme.colorScheme.onBackground,
+                        color = LadosTheme.colorScheme.onBackground,
                         modifier = Modifier.fillMaxWidth()
                     )
                 }

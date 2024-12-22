@@ -31,6 +31,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -63,7 +64,9 @@ fun ProfileScreen(
             bottom = paddingValues.calculateBottomPadding()
         ),
         topBar = {
-            ProfileTopAppBar(onBackClick = { navController?.navigateUp() }, content = "Profile")
+            ProfileTopAppBar(onBackClick = { navController?.navigateUp() }, content = stringResource(
+                id = R.string.profile_title
+            ))
         },
         containerColor = Color.Transparent
     ) { innerPadding ->
@@ -136,7 +139,7 @@ fun ProfileScreen(
                             navController?.navigate(Screen.Customer.EditProfile.route)
                         }) {
                             Text(
-                                text = "Edit",
+                                text = stringResource(R.string.profile_edit_button),
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.SemiBold,
                                 color = LadosTheme.colorScheme.primary.copy(alpha = 0.8f)
@@ -154,7 +157,7 @@ fun ProfileScreen(
                         modifier = Modifier.height(56.dp),
                         content = {
                             Text(
-                                text = "Address",
+                                text = stringResource(R.string.address_title),
                                 color = LadosTheme.colorScheme.onBackground.copy(alpha = 0.8f),
                                 style = Typography.bodyLarge
                             )
@@ -179,7 +182,7 @@ fun ProfileScreen(
                         modifier = Modifier.height(56.dp),
                         content = {
                             Text(
-                                text = "Wishlist",
+                                text = stringResource(R.string.profile_wishlist),
                                 color = LadosTheme.colorScheme.onBackground.copy(alpha = 0.8f),
                                 style = Typography.bodyLarge
                             )
@@ -200,7 +203,7 @@ fun ProfileScreen(
                         modifier = Modifier.height(56.dp),
                         content = {
                             Text(
-                                text = "Privacy",
+                                text = stringResource(R.string.profile_privacy),
                                 color = LadosTheme.colorScheme.onBackground.copy(alpha = 0.8f),
                                 style = Typography.bodyLarge
                             )
@@ -221,7 +224,7 @@ fun ProfileScreen(
                         modifier = Modifier.height(56.dp),
                         content = {
                             Text(
-                                text = "Help",
+                                text = stringResource(R.string.profile_help),
                                 color = LadosTheme.colorScheme.onBackground.copy(alpha = 0.8f),
                                 style = Typography.bodyLarge
                             )
@@ -242,7 +245,7 @@ fun ProfileScreen(
                         modifier = Modifier.height(56.dp),
                         content = {
                             Text(
-                                text = "Settings",
+                                text = stringResource(R.string.profile_settings),
                                 color = LadosTheme.colorScheme.onBackground.copy(alpha = 0.8f),
                                 style = Typography.bodyLarge
                             )
@@ -267,7 +270,7 @@ fun ProfileScreen(
             }) {
                 Text(
                     textAlign = TextAlign.Center,
-                    text = "Sign out",
+                    text = stringResource(R.string.profile_sign_out),
                     color = Color.Red,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.SemiBold

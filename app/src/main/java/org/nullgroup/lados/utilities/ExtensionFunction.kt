@@ -1,12 +1,14 @@
 package org.nullgroup.lados.utilities
 
 import android.content.Context
+import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.navigation.NavController
 import com.google.firebase.Timestamp
@@ -126,6 +128,10 @@ fun String.capitalizeWords(): String {
     }
 }
 
+fun String.toLocale(): Locale {
+
+    return Locale.forLanguageTag(this)
+}
 
 fun getFirstFourOrderStatuses(): List<OrderStatus> {
     return OrderStatus.entries.toTypedArray().take(4)
@@ -143,4 +149,12 @@ fun Long.toDateTimeString(
 
 fun getStatusByName(name: String): OrderStatus {
     return OrderStatus.valueOf(name.uppercase())
+}
+
+fun updateLocale(context: Context, locale: Locale) {
+    Log.d("updateLocale", "locale: $locale")
+    Locale.setDefault(locale)
+    val config = Configuration()
+    config.setLocale(locale)
+    context.resources.updateConfiguration(config, context.resources.displayMetrics)
 }

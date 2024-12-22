@@ -63,6 +63,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -138,7 +139,7 @@ fun SearchBar(
             singleLine = true,
             placeholder = {
                 Text(
-                    "Search",
+                    stringResource(R.string.search_place_holder),
                     style = LadosTheme.typography.bodyLarge.copy(
                         color = LadosTheme.colorScheme.onBackground
                     )
@@ -495,8 +496,8 @@ fun DrawProductScreenContent(
                 }
                 item {
                     TitleTextRow(
-                        contentLeft = "Categories",
-                        contentRight = "See all",
+                        contentLeft = stringResource(R.string.home_categories_header),
+                        contentRight = stringResource(R.string.home_see_all),
                         onClick = {
                             sharedViewModel.updateTypeScreen("In Category")
                             navController.navigate(
@@ -515,8 +516,8 @@ fun DrawProductScreenContent(
 
                 item {
                     TitleTextRow(
-                        contentLeft = "Top Selling",
-                        contentRight = "See all",
+                        contentLeft = stringResource(R.string.home_top_selling),
+                        contentRight = stringResource(R.string.home_see_all),
                         onClick = {
                             sharedViewModel.updateTypeScreen("Top Selling")
                             navController.navigate(
@@ -536,8 +537,8 @@ fun DrawProductScreenContent(
 
                 item {
                     TitleTextRow(
-                        contentLeft = "New In",
-                        contentRight = "See all",
+                        contentLeft = stringResource(R.string.home_new_in),
+                        contentRight = stringResource(R.string.home_see_all),
                         onClick = {
                             sharedViewModel.updateTypeScreen("New In")
                             navController.navigate(

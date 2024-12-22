@@ -39,12 +39,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
+import org.nullgroup.lados.R
 import org.nullgroup.lados.compose.SignIn.CustomTextField
 import org.nullgroup.lados.compose.common.LoadOnProgress
 import org.nullgroup.lados.compose.common.ProfileTopAppBar
@@ -93,7 +95,7 @@ fun EditProfileScreen(
         topBar = {
             ProfileTopAppBar(
                 onBackClick = { cancelConfirmation = true },
-                content = "Edit profile"
+                content = stringResource(R.string.edit_profile_title)
             )
         },
         containerColor = Color.Transparent

@@ -12,9 +12,9 @@ import dagger.hilt.components.SingletonComponent
 import org.nullgroup.lados.data.repositories.UserPreferencesRepository
 import javax.inject.Singleton
 
-private const val DARK_MODE_PREFERENCE_NAME = "dark_mode_preferences"
+private const val USER_PREFERENCES = "user_preferences"
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(
-    DARK_MODE_PREFERENCE_NAME
+    USER_PREFERENCES
 )
 
 @Module

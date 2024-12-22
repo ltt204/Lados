@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
@@ -35,6 +36,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
+import org.nullgroup.lados.R
 import org.nullgroup.lados.compose.common.LoadOnProgress
 import org.nullgroup.lados.compose.common.ProfileTopAppBar
 import org.nullgroup.lados.compose.common.TwoColsItem
@@ -70,7 +72,7 @@ fun OrderProductsViewScreen(
                 onBackClick = {
                     navController?.navigateUp()
                 },
-                content = "Order Products"
+                content = stringResource(id = R.string.order_products_title)
             )
         },
         backgroundColor = LadosTheme.colorScheme.background

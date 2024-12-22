@@ -53,7 +53,7 @@ fun CustomExposedDropDownMenu(
     )
 
     ExposedDropdownMenuBox(
-        modifier = modifier,
+        modifier = modifier.fillMaxWidth(),
         expanded = isExpanded,
         onExpandedChange = {
             isExpanded = !isExpanded
@@ -67,19 +67,8 @@ fun CustomExposedDropDownMenu(
             trailingIcon = {
                 ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded)
             },
+            isReadonly = true
         )
-//        OutlinedTextField(
-//            modifier = Modifier.fillMaxWidth(),
-//            value = selectedItem,
-//            label = { Text(text = placeHolder) },
-//            placeholder = { Text(text = placeHolder, color = Color.Gray) },
-//            onValueChange = { },
-//            readOnly = true,
-//            trailingIcon = {
-//                ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded)
-//            },
-//            singleLine = true
-//        )
         ExposedDropdownMenu(
             modifier = Modifier
                 .fillMaxWidth()
@@ -114,7 +103,7 @@ fun CustomExposedDropDownMenu(
                     )
                 }
 
-                is MenuItemsUIState.Failed ->
+                is MenuItemsUIState.Failed -> {
                     DropdownMenuItem(
                         text = {
                             LoadOnError(
@@ -125,13 +114,14 @@ fun CustomExposedDropDownMenu(
                         },
                         onClick = { /* No action */ },
                     )
+                }
 
                 is MenuItemsUIState.Success -> {
                     menuHeight = (itemsUiState.data.size * 48).coerceAtMost(192)
                     LazyColumn(
                         modifier = Modifier
                             .width(400.dp)
-                            .height(300.dp)
+                            .height(menuHeight.dp)
                     ) {
                         itemsIndexed(itemsUiState.data) { index, value ->
                             val isSelected = value == selectedItem
@@ -170,7 +160,7 @@ fun AddressExposedDropDownMenuPreview() {
     Surface(modifier = Modifier.fillMaxSize()) {
         CustomExposedDropDownMenu(
             placeHolder = "Province",
-            itemsUiState = MenuItemsUIState.Failed("123"),
+            itemsUiState = MenuItemsUIState.Success(listOf("123", "123", "123")),
         )
     }
 }
