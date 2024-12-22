@@ -56,7 +56,7 @@ fun OrderDetailScreen(
 ) {
     val uiState = viewModel.orderDetailState.collectAsState()
     Scaffold(
-        modifier = modifier.padding(top = paddingValues.calculateTopPadding()),
+        modifier = modifier,
         topBar = {
             ProfileTopAppBar(
                 onBackClick = {

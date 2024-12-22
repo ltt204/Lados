@@ -306,6 +306,7 @@ fun PasswordScreen(
 fun LoginScreen(
     navController: NavHostController,
     modifier: Modifier = Modifier,
+    themeSwitched: () -> Unit = {}
 ) {
     val loginScreenViewModel = hiltViewModel<LoginScreenViewModel>()
     val loginStep by loginScreenViewModel.loginStep.collectAsState()
@@ -348,7 +349,7 @@ fun LoginScreen(
             val userRole = (loginStep as LoginScreenStepState.Home).user.role
             when (userRole) {
                 UserRole.CUSTOMER.name -> {
-                    CustomerGraph(modifier = modifier)
+                    CustomerGraph(modifier = modifier, themeSwitched = themeSwitched)
                 }
 
                 UserRole.ADMIN.name -> {

@@ -45,7 +45,7 @@ fun AddressList(
     val viewModel = hiltViewModel<AddressListViewModel>()
     val addressList = viewModel.userAddresses.collectAsState()
     Scaffold(
-        modifier = modifier.padding(vertical = paddingValues.calculateTopPadding()),
+        modifier = modifier,
         containerColor = Color.Transparent,
         topBar = {
             ProfileTopAppBar(

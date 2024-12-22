@@ -89,7 +89,7 @@ fun EditProfileScreen(
     }
 
     Scaffold(
-        modifier = modifier.padding(top = paddingValues.calculateTopPadding()),
+        modifier = modifier,
         topBar = {
             ProfileTopAppBar(
                 onBackClick = { cancelConfirmation = true },

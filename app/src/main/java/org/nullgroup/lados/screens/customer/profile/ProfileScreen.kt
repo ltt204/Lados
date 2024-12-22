@@ -60,11 +60,10 @@ fun ProfileScreen(
     val currentUser = viewModel.currentUser.collectAsState()
     Scaffold(
         modifier = modifier.padding(
-            top = paddingValues.calculateTopPadding(),
             bottom = paddingValues.calculateBottomPadding()
         ),
         topBar = {
-            ProfileTopAppBar(onBackClick = { /*TODO*/ }, content = "Profile")
+            ProfileTopAppBar(onBackClick = { navController?.navigateUp() }, content = "Profile")
         },
         containerColor = Color.Transparent
     ) { innerPadding ->
@@ -243,7 +242,7 @@ fun ProfileScreen(
                         modifier = Modifier.height(56.dp),
                         content = {
                             Text(
-                                text = "About",
+                                text = "Settings",
                                 color = LadosTheme.colorScheme.onBackground.copy(alpha = 0.8f),
                                 style = Typography.bodyLarge
                             )
@@ -258,7 +257,7 @@ fun ProfileScreen(
                                 contentDescription = "Arrow",
                             )
                         }, onClick = {
-//                            navController?.navigate(Screen.Customer.Address.AddressList.route)
+                            navController?.navigate(Screen.Customer.Setting.route)
                         })
                 }
             }

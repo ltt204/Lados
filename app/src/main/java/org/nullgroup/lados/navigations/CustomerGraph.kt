@@ -5,6 +5,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -58,6 +59,7 @@ import org.nullgroup.lados.screens.customer.profile.AddressList
 import org.nullgroup.lados.screens.customer.profile.EditAddressScreen
 import org.nullgroup.lados.screens.customer.profile.EditProfileScreen
 import org.nullgroup.lados.screens.customer.profile.ProfileScreen
+import org.nullgroup.lados.screens.customer.profile.SettingScreen
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.viewmodels.SharedViewModel
 
@@ -67,12 +69,13 @@ fun CustomerGraph(
     navController: NavHostController = rememberNavController(),
     sharedViewModel: SharedViewModel = hiltViewModel(),
     startDestination: String = Screen.Customer.Home.route,
+    themeSwitched: () -> Unit = {}
 ) {
 
     var isVisibility by remember { mutableStateOf(true) }
 
     Scaffold(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth().fillMaxHeight(),
         containerColor = LadosTheme.colorScheme.background,
         bottomBar = {
             AnimatedVisibility(
@@ -274,6 +277,16 @@ fun CustomerGraph(
                     modifier = modifier,
                     paddingValues = innerPadding,
                     navController = navController
+                )
+            }
+
+            composable(route = Screen.Customer.Setting.route) {
+                isVisibility = false
+                SettingScreen(
+                    modifier = modifier.padding(horizontal = 16.dp),
+                    paddingValues = innerPadding,
+                    onBack = { navController.navigateUp() },
+                    themeSwitched = themeSwitched
                 )
             }
 

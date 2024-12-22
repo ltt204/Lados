@@ -25,26 +25,26 @@ fun RoleBasedNavigation(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
     startDestination: String = Screen.Common.LoginScreen.route,
+    isDarkTheme: Boolean = false,
+    themeSwitched: () -> Unit = {}
 ) {
-    val darkTheme = isSystemInDarkTheme()
     val view = LocalView.current
 
     if (!view.isInEditMode) {
-        val colorScheme = if (darkTheme) darkColorScheme else lightColorScheme
+        val colorScheme = if (isDarkTheme) darkColorScheme else lightColorScheme
         SideEffect {
             val window = (view.context as Activity).window
             window.statusBarColor = colorScheme.background.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !isDarkTheme
         }
     }
-
 
     NavHost(navController = navController, startDestination = startDestination) {
         Screen.Common.getAllScreens().forEach { screen ->
             composable(screen.route) {
                 when (screen.route) {
                     Screen.Common.LoginScreen.route -> {
-                        LoginScreen(navController, modifier)
+                        LoginScreen(navController, modifier, themeSwitched)
                     }
 
                     Screen.Common.RegisterScreen.route -> {

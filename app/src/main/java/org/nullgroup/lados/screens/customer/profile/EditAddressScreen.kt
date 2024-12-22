@@ -58,8 +58,7 @@ fun EditAddressScreen(
 
     Scaffold(
         modifier = modifier
-            .fillMaxSize()
-            .padding(vertical = paddingValues.calculateTopPadding()),
+            .fillMaxSize(),
         topBar = {
             ProfileTopAppBar(
                 onBackClick = {

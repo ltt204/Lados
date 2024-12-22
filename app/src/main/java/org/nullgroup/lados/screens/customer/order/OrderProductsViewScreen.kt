@@ -64,8 +64,7 @@ fun OrderProductsViewScreen(
     val orderProducts = orderProductsViewModel.orderProducts.collectAsState()
     Log.d("OrderProductsViewScreen", "OrderProductsViewScreen: $orderProducts")
     Scaffold(
-        modifier = modifier
-            .padding(top = paddingValues.calculateTopPadding()),
+        modifier = modifier,
         topBar = {
             ProfileTopAppBar(
                 onBackClick = {
