@@ -44,6 +44,7 @@ import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.utilities.SupportedRegion
 import org.nullgroup.lados.utilities.capitalizeWords
 import org.nullgroup.lados.utilities.updateLocale
+import org.nullgroup.lados.viewmodels.HomeViewModel
 import org.nullgroup.lados.viewmodels.common.SettingViewModel
 import org.nullgroup.lados.viewmodels.customer.MenuItemsUIState
 
@@ -54,7 +55,7 @@ fun SettingScreen(
     onBack: () -> Unit,
     paddingValues: PaddingValues = PaddingValues(0.dp),
     themeSwitched: () -> Unit,
-    settingViewModel: SettingViewModel = hiltViewModel()
+    settingViewModel: SettingViewModel = hiltViewModel(),
 ) {
     val itemsUiState = MenuItemsUIState.Success(
         data = SupportedRegion.entries.map { it.name.capitalizeWords() },

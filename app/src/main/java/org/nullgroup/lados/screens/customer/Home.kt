@@ -389,7 +389,10 @@ fun ProductItem(
                     )
                 }
                 Text(
-                    text = "$${product.variants.first().originalPrice}",
+                    text = stringResource(
+                        id = R.string.product_price,
+                        product.variants.first().originalPrice
+                    ),
                     style = TextStyle(
                         fontSize = 16.sp,
                         color = LadosTheme.colorScheme.onSurface.copy(

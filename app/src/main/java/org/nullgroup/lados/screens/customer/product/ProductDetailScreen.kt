@@ -344,8 +344,8 @@ fun ProductInformationSection(
             }
 
             Text(
-                text = "$${originalPrice}",
-                color = LadosTheme.colorScheme.outline,
+                text = stringResource(R.string.product_price, originalPrice),
+                color = if (isSale) LadosTheme.colorScheme.outline else LadosTheme.colorScheme.primary,
                 fontWeight = FontWeight.Medium,
                 textDecoration = if (isSale) TextDecoration.LineThrough else TextDecoration.None,
                 fontSize = if (isSale) 18.sp else 22.sp
@@ -705,7 +705,7 @@ fun ProductDetailBottomBar(
                 .padding(vertical = 10.dp, horizontal = 16.dp)
         ) {
             Text(
-                text = price,
+                text = stringResource(R.string.product_price, price),
                 color = Color.White,
                 fontWeight = FontWeight.Bold,
                 fontSize = 18.sp
