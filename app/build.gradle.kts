@@ -125,6 +125,7 @@ dependencies {
     // For JUnit test Mockito
     testImplementation(libs.mockito.core)
     testImplementation(libs.mockito.inline)
+    testImplementation(libs.mockito.kotlin)
     testImplementation(libs.mockito.junit.jupiter)
     testImplementation(libs.kotlinx.coroutines.test)
 
