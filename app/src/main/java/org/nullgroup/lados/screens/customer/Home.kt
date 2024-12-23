@@ -373,23 +373,29 @@ fun ProductItem(
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Text(
-                    text = "$${product.variants.first().salePrice}",
-                    style = TextStyle(
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        // note: modify
-                        color = LadosTheme.colorScheme.onBackground,
+                val isSale = product.variants.first().salePrice != null
+                if (isSale) {
+                    Text(
+                        text = stringResource(
+                            id = R.string.product_price,
+                            product.variants.first().salePrice!!
+                        ),
+                        style = TextStyle(
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            // note: modify
+                            color = LadosTheme.colorScheme.onBackground,
+                        )
                     )
-                )
+                }
                 Text(
                     text = "$${product.variants.first().originalPrice}",
                     style = TextStyle(
                         fontSize = 16.sp,
                         color = LadosTheme.colorScheme.onSurface.copy(
-                            alpha = 0.5f,
+                            alpha = if (isSale) 0.5f else 1.0f,
                         ),
-                        textDecoration = TextDecoration.LineThrough
+                        textDecoration = if (isSale) TextDecoration.LineThrough else TextDecoration.None
                     )
                 )
             }

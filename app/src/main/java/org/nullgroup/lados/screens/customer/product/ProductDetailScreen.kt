@@ -148,7 +148,7 @@ fun ProductDetailScreen(
                     ProductDetailBottomBar(
                         title = stringResource(R.string.add_to_cart),
                         enabled = uiState.quantityInStock > 0,
-                        price = "$${uiState.product.variants.first().salePrice}",
+                        price = "$${uiState.product.variants.first().salePrice ?: uiState.product.variants.first().originalPrice}",
                         onClick = onAddToCart
                     )
                 }
@@ -165,7 +165,7 @@ fun ProductDetailScreen(
                     ProductInformationSection(
                         name = uiState.product.name,
                         originalPrice = uiState.product.variants.first().originalPrice,
-                        salePrice = uiState.product.variants.first().salePrice ?: 0.0,
+                        salePrice = uiState.product.variants.first().salePrice,
                         productImages = uiState.product.variants.first().images,
                         quantityInStock = uiState.quantityInStock
                     )
@@ -278,7 +278,7 @@ fun ProductInformationSection(
     modifier: Modifier = Modifier,
     name: String,
     originalPrice: Double,
-    salePrice: Double,
+    salePrice: Double?,
     productImages: List<Image> = emptyList(),
     quantityInStock: Int = 0
 ) {
@@ -332,19 +332,23 @@ fun ProductInformationSection(
 
 
         ) {
-            Text(
-                text = "$$salePrice",
-                fontWeight = FontWeight.Bold,
-                fontSize = 22.sp,
-                color = LadosTheme.colorScheme.primary
-            )
+            val isSale = salePrice != null
+
+            if (isSale) {
+                Text(
+                    text = stringResource(R.string.product_price, salePrice!!),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 22.sp,
+                    color = LadosTheme.colorScheme.primary
+                )
+            }
 
             Text(
                 text = "$${originalPrice}",
                 color = LadosTheme.colorScheme.outline,
                 fontWeight = FontWeight.Medium,
-                textDecoration = TextDecoration.LineThrough,
-                fontSize = 15.sp
+                textDecoration = if (isSale) TextDecoration.LineThrough else TextDecoration.None,
+                fontSize = if (isSale) 18.sp else 22.sp
             )
 
         }
