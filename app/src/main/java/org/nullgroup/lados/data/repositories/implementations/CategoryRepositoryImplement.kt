@@ -8,7 +8,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import org.nullgroup.lados.data.models.Category
+import org.nullgroup.lados.data.remote.models.CategoryRemoteModel
 import org.nullgroup.lados.data.repositories.interfaces.CategoryRepository
+import org.nullgroup.lados.utilities.toLocalCategory
 
 class CategoryRepositoryImplement(
     private val firestore: FirebaseFirestore
@@ -19,7 +21,8 @@ class CategoryRepositoryImplement(
             val categoryList = if (snapshots.isEmpty) {
                 emptyList()
             } else {
-                snapshots.documents.mapNotNull { it.toObject(Category::class.java) }
+                snapshots.documents.mapNotNull { it.toObject(CategoryRemoteModel::class.java) }
+                    .map { it.toLocalCategory() }
             }
             Result.success(categoryList)
         } catch (e: FirebaseFirestoreException) {
@@ -34,8 +37,8 @@ class CategoryRepositoryImplement(
                 .get()
                 .await()
 
-            val category = categoryDoc.toObject(Category::class.java)
-            Result.success(category)
+            val category = categoryDoc.toObject(CategoryRemoteModel::class.java)
+            Result.success(category?.toLocalCategory())
         } catch (e: Exception) {
             Result.failure(e)
         }

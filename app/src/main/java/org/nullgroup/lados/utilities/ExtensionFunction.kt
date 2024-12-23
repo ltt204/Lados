@@ -12,10 +12,12 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.navigation.NavController
 import com.google.firebase.Timestamp
+import org.nullgroup.lados.data.models.Category
 import org.nullgroup.lados.data.models.Color
 import org.nullgroup.lados.data.models.Product
 import org.nullgroup.lados.data.models.ProductVariant
 import org.nullgroup.lados.data.models.Size
+import org.nullgroup.lados.data.remote.models.CategoryRemoteModel
 import org.nullgroup.lados.data.remote.models.ProductRemoteModel
 import org.nullgroup.lados.screens.Screen
 import java.io.ByteArrayOutputStream
@@ -166,6 +168,7 @@ fun updateLocale(context: Context, locale: Locale) {
 
 fun ProductRemoteModel.toLocalProduct(): Product {
     val locale = Locale.getDefault()
+    Log.d("toLocalProduct", "locale language: ${locale.language}")
     val productVariants: MutableList<ProductVariant> = mutableListOf()
 
     this.variants.forEach { variant ->
@@ -209,5 +212,22 @@ fun ProductRemoteModel.toLocalProduct(): Product {
         variants = productVariants,
         createdAt = this.createdAt,
         engagements = this.engagements
+    )
+}
+
+fun CategoryRemoteModel.toLocalCategory(): Category {
+    val locale = Locale.getDefault()
+    Log.d("toLocalProduct", "locale language: ${locale.language}")
+
+    return Category(
+        categoryId = this.categoryId,
+        categoryImage = this.categoryImage,
+        categoryName = if (this.categoryName.containsKey(locale.language))
+            this.categoryName.getValue(locale.language)
+        else
+            this.categoryName.getValue(
+                SupportedRegion.entries.first().locale.language
+            ),
+        parentCategoryId = this.parentCategoryId
     )
 }

@@ -1,6 +1,6 @@
 package org.nullgroup.lados.data.remote.models
 
-data class Category(
+data class CategoryRemoteModel(
     var categoryId: String = "",
     val categoryImage: String = "",
     val categoryName: Map<String, String> = emptyMap(),
