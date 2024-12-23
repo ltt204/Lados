@@ -12,7 +12,11 @@ import org.nullgroup.lados.data.models.Image
 import org.nullgroup.lados.data.models.Product
 import org.nullgroup.lados.data.models.ProductVariant
 import org.nullgroup.lados.data.models.UserEngagement
+import org.nullgroup.lados.data.remote.models.ProductRemoteModel
+import org.nullgroup.lados.data.remote.models.ProductVariantRemoteModel
 import org.nullgroup.lados.data.repositories.interfaces.ProductRepository
+import org.nullgroup.lados.utilities.toLocalProduct
+import java.util.Locale
 
 class ProductRepositoryImplement(
     private val firestore: FirebaseFirestore
@@ -25,7 +29,9 @@ class ProductRepositoryImplement(
                 }
 
                 val products = value?.documents?.mapNotNull { document ->
-                    document.toObject(Product::class.java)
+                    val remoteProduct = document.toObject(ProductRemoteModel::class.java)
+                    remoteProduct?.toLocalProduct()
+//                    document.toObject(Product::class.java)
                 } ?: emptyList()
 
                 trySend(products).isSuccess
@@ -44,7 +50,8 @@ class ProductRepositoryImplement(
                     }
 
                     val products = value?.documents?.mapNotNull { document ->
-                        document.toObject(Product::class.java)
+                        val remoteProduct = document.toObject(ProductRemoteModel::class.java)
+                        remoteProduct?.toLocalProduct()
                     } ?: emptyList()
 
                     products.forEach { product ->
@@ -67,10 +74,12 @@ class ProductRepositoryImplement(
             .document(id)
             .collection("variants")
 
-        val product = productRef.get().await().toObject(Product::class.java)
+        val product = productRef.get().await().toObject(ProductRemoteModel::class.java)
+
+        Log.d("ProductRepositoryImplement", "product: ${product?.variants}")
 
         val variants = variantRef.get().await().documents.mapNotNull { variantDoc ->
-            variantDoc.toObject(ProductVariant::class.java)
+            variantDoc.toObject(ProductVariantRemoteModel::class.java)
         }
         for (variant in variants) {
             val variantImagesRef = firestore.collection("products")
@@ -87,7 +96,7 @@ class ProductRepositoryImplement(
 
         product?.variants = variants
 
-        trySend(product).isSuccess
+        trySend(product?.toLocalProduct()).isSuccess
 
         awaitClose { }
     }
@@ -164,9 +173,8 @@ class ProductRepositoryImplement(
                 .await()
                 .documents
                 .mapNotNull { document ->
-                    val product = document.toObject(Product::class.java)
+                    val product = document.toObject(ProductRemoteModel::class.java)
                     product?.let {
-
                         val variants = firestore.collection("products")
                             .document(it.id)
                             .collection("variants")
@@ -174,9 +182,8 @@ class ProductRepositoryImplement(
                             .await()
                             .documents
                             .mapNotNull { variantDoc ->
-                                val variant = variantDoc.toObject(ProductVariant::class.java)
+                                val variant = variantDoc.toObject(ProductVariantRemoteModel::class.java)
                                 variant?.let { v ->
-
                                     val images = firestore.collection("products")
                                         .document(it.id)
                                         .collection("variants")
@@ -194,7 +201,6 @@ class ProductRepositoryImplement(
                             }
                         it.variants = variants
 
-
                         val engagements = firestore.collection("products")
                             .document(it.id)
                             .collection("engagements")
@@ -206,12 +212,13 @@ class ProductRepositoryImplement(
                             }
                         it.engagements = engagements
 
-                        it
+                        it.toLocalProduct()
                     }
                 }
 
             Result.success(productList)
         } catch (e: Exception) {
+            Log.d("ProductRepositoryImplement", "getAllProductsFromFireStore: ${e.message}")
             Result.failure(e)
         }
     }
@@ -287,9 +294,11 @@ class ProductRepositoryImplement(
                 .get()
                 .await()
 
-            val product = productDoc.toObject(Product::class.java)
-            product?.let {
+            val product = productDoc.toObject(ProductRemoteModel::class.java)
 
+            Log.d("ProductRepositoryImplement", "product: $product")
+
+            product?.let {
                 val variants = firestore.collection("products")
                     .document(it.id)
                     .collection("variants")
@@ -297,7 +306,7 @@ class ProductRepositoryImplement(
                     .await()
                     .documents
                     .mapNotNull { variantDoc ->
-                        val variant = variantDoc.toObject(ProductVariant::class.java)
+                        val variant = variantDoc.toObject(ProductVariantRemoteModel::class.java)
                         variant?.let { v ->
                             val images = firestore.collection("products")
                                 .document(it.id)
@@ -328,7 +337,7 @@ class ProductRepositoryImplement(
                 it.engagements = engagements
             }
 
-            Result.success(product)
+            Result.success(product?.toLocalProduct())
         } catch (e: Exception) {
             Result.failure(e)
         }

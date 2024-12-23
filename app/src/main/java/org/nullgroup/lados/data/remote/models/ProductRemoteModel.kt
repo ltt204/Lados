@@ -2,65 +2,39 @@ package org.nullgroup.lados.data.remote.models
 
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.DocumentId
+import org.nullgroup.lados.data.models.Image
+import org.nullgroup.lados.data.models.UserEngagement
 
-data class Product(
-@DocumentId
-var id: String = "",
-val categoryId: String = "",
-val name: Map<String, String> = emptyMap(),
-val description: String = "",
-val createdAt: Timestamp = Timestamp.now(),
-var variants: List<ProductVariant> = emptyList(),
-var engagements: List<UserEngagement> = emptyList()
+data class ProductRemoteModel(
+    @DocumentId
+    var id: String = "",
+    val categoryId: String = "",
+    val name: Map<String, String> = emptyMap(),
+    val description: Map<String, String> = emptyMap(),
+    val createdAt: Timestamp = Timestamp.now(),
+    var variants: List<ProductVariantRemoteModel> = emptyList(),
+    var engagements: List<UserEngagement> = emptyList()
 )
 
-data class ProductVariant(
-    @DocumentId val id: String= "",
-    val productId: String= "",
-    val size: Size = Size(),
-    val color: Color = Color(),
+data class ProductVariantRemoteModel(
+    @DocumentId val id: String = "",
+    val productId: String = "",
+    val size: SizeRemoteModel = SizeRemoteModel(),
+    val color: ColorRemoteModel = ColorRemoteModel(),
     val quantityInStock: Int = 0,
     val originalPrice: Map<String, Double?> = emptyMap(),
-    val salePrice: Map<String, Double?> = emptyMap(),
+    val salePrice: Map<String, Double?>? = emptyMap(),
     var images: List<Image> = emptyList()
 )
 
-data class Size(
+data class SizeRemoteModel(
     val id: Int = 0,
     val sizeName: Map<String, String> = emptyMap(),
     val sortOrder: Boolean = true
 )
 
-data class Color(
+data class ColorRemoteModel(
     val id: Int = 0,
     val colorName: Map<String, String> = emptyMap(),
     val hexCode: String = ""
 )
-
-data class Image(
-    @DocumentId val id: String = "",
-    val productVariantId: String = "",
-    val link: String = "",
-    val fileName: String = ""
-)
-
-data class UserEngagement(
-    @DocumentId val id: String = "",
-    val userId: String = "",
-    val productId: String = "",
-    val ratings: Int = 1,
-    val reviews: String = "",
-    val createdAt: Timestamp = Timestamp.now()
-)
-
-data class ProductAttribute(
-    @DocumentId val id: String = "",
-    val type: AttributeType,
-    val value: String = "",
-    val createdAt: Timestamp = Timestamp.now()
-)
-
-enum class AttributeType {
-    SIZE, // Tương ứng với Size
-    COLOR // Tương ứng với Color
-}

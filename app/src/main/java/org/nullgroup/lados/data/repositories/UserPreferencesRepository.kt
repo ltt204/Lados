@@ -59,11 +59,10 @@ class UserPreferencesRepository(
         }
     }
 
-    private companion object {
-        const val TAG = "UserPreferencesRepo"
-
-        val DARK_MODE = booleanPreferencesKey("DARK_MODE")
-        val REGION = stringPreferencesKey("REGION")
+    companion object {
+        private const val TAG = "UserPreferencesRepo"
+        private val DARK_MODE = booleanPreferencesKey("DARK_MODE")
+        private val REGION = stringPreferencesKey("REGION")
     }
 
     suspend fun modifyTheme(isDarkMode: Boolean) {
