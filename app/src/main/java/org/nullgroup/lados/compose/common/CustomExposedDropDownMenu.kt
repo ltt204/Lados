@@ -3,11 +3,13 @@ package org.nullgroup.lados.compose.common
 import android.util.Log
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
@@ -29,6 +31,8 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.nullgroup.lados.viewmodels.customer.MenuItemsUIState
@@ -43,6 +47,8 @@ fun CustomExposedDropDownMenu(
     onItemSelected: (String, Int) -> Unit = { _, _ -> },
     currentItem: String = ""
 ) {
+    var windowWidth = LocalConfiguration.current.screenWidthDp
+    Log.d("ExposedDropDown", "${windowWidth}")
     var menuHeight by remember { mutableIntStateOf(62) }
 
     var isExpanded by remember { mutableStateOf(false) }
@@ -53,7 +59,7 @@ fun CustomExposedDropDownMenu(
     )
 
     ExposedDropdownMenuBox(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier.widthIn(min = windowWidth.dp),
         expanded = isExpanded,
         onExpandedChange = {
             isExpanded = !isExpanded
@@ -70,8 +76,7 @@ fun CustomExposedDropDownMenu(
             isReadonly = true
         )
         ExposedDropdownMenu(
-            modifier = Modifier
-                .fillMaxWidth()
+            modifier = Modifier.widthIn(min = windowWidth.dp)
                 .height(menuHeight.dp),
             scrollState = scrollState,
             expanded = isExpanded,
@@ -117,20 +122,20 @@ fun CustomExposedDropDownMenu(
                 }
 
                 is MenuItemsUIState.Success -> {
-                    menuHeight = (itemsUiState.data.size * 48).coerceAtMost(192)
+                    menuHeight = (itemsUiState.data.size * 56).coerceAtMost(192)
                     LazyColumn(
                         modifier = Modifier
-                            .width(400.dp)
+                            .width(windowWidth.dp)
                             .height(menuHeight.dp)
                     ) {
                         itemsIndexed(itemsUiState.data) { index, value ->
                             val isSelected = value == selectedItem
                             DropdownMenuItem(
                                 modifier = Modifier
+                                    .widthIn(min = windowWidth.dp)
                                     .background(
                                         if (isSelected) Color.Gray.copy(alpha = 0.1f) else Color.Transparent
-                                    )
-                                    .fillMaxWidth(),
+                                    ),
                                 text = { Text(text = value) },
                                 onClick = {
                                     onItemSelected(value, index)

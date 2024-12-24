@@ -414,7 +414,6 @@ fun ProductItem(
                         )
                     )
                 }
-
             }
             Row(
                 modifier = Modifier.weight(0.5f),

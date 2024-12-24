@@ -24,6 +24,6 @@ enum class UserRole {
 }
 
 enum class SupportedRegion(val locale: Locale) {
-    US(locale = Locale.ENGLISH),
-    VIETNAM(locale = Locale("vi", "VN"))
+    US(locale = Locale("en", "United States")),
+    VIETNAM(locale = Locale("vi", "Vietnam"))
 }

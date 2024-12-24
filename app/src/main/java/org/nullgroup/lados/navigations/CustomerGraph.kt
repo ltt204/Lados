@@ -66,7 +66,7 @@ import org.nullgroup.lados.screens.customer.profile.SettingScreen
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.viewmodels.SharedViewModel
 
-@Composable
+    @Composable
 fun CustomerGraph(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),

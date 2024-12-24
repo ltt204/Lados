@@ -27,7 +27,7 @@ class SettingViewModel @Inject constructor(
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = SupportedRegion.US
+            initialValue = SupportedRegion.entries.first()
         )
 
     fun modifyTheme() {

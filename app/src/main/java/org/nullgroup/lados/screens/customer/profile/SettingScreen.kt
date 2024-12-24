@@ -23,6 +23,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
@@ -37,6 +41,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import org.nullgroup.lados.R
 import org.nullgroup.lados.compose.common.CustomExposedDropDownMenu
 import org.nullgroup.lados.compose.common.DefaultCenterTopAppBar
+import org.nullgroup.lados.compose.profile.ConfirmDialog
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.utilities.SupportedRegion
 import org.nullgroup.lados.utilities.capitalizeWords
@@ -53,11 +58,18 @@ fun SettingScreen(
     themeSwitched: () -> Unit,
     settingViewModel: SettingViewModel = hiltViewModel(),
 ) {
+    var isRegionChanged by remember {
+        mutableStateOf(false)
+    }
+
     val itemsUiState = MenuItemsUIState.Success(
-        data = SupportedRegion.entries.map { it.name.capitalizeWords() },
+        data = SupportedRegion.entries.map { it.locale.country.capitalizeWords() },
     )
     val context = LocalContext.current
-    val region = settingViewModel.locale.collectAsState().value
+    var currentRegion = settingViewModel.locale.collectAsState().value
+    var region by remember {
+        mutableStateOf(currentRegion.locale)
+    }
 
     Scaffold(
         modifier = modifier,
@@ -70,12 +82,15 @@ fun SettingScreen(
         },
     ) { innerPadding ->
         Column(
-            modifier = Modifier.padding(top = innerPadding.calculateTopPadding())
+            modifier = Modifier
+                .padding(top = innerPadding.calculateTopPadding())
+                .padding(vertical = 16.dp)
         ) {
             Text(
                 text = stringResource(R.string.profile_setting_regions),
                 style = LadosTheme.typography.titleMedium.copy(
                     fontWeight = FontWeight.SemiBold,
+                    fontSize = 18.sp
                 ),
                 color = LadosTheme.colorScheme.onBackground,
             )
@@ -85,12 +100,10 @@ fun SettingScreen(
                 placeHolder = "Language",
                 onItemSelected = { _, index ->
                     val locale = SupportedRegion.entries[index].locale
-                    Log.d("SettingScreen", "locale: $locale")
-                    settingViewModel.saveLocale(locale)
-                    updateLocale(context, locale)
-                    (context as? Activity)?.recreate()
+                    isRegionChanged = isRegionChanged.not()
+                    region = locale
                 },
-                currentItem = region.name.capitalizeWords(),
+                currentItem = currentRegion.locale.country.capitalizeWords(),
             )
 
             Spacer(modifier = Modifier.padding(bottom = LadosTheme.size.medium))
@@ -98,6 +111,7 @@ fun SettingScreen(
                 text = stringResource(R.string.profile_setting_color_scheme),
                 style = LadosTheme.typography.titleMedium.copy(
                     fontWeight = FontWeight.SemiBold,
+                    fontSize = 18.sp
                 ),
                 color = LadosTheme.colorScheme.onBackground,
             )
@@ -110,6 +124,28 @@ fun SettingScreen(
                 isDarkMode = settingViewModel.darkMode.collectAsState().value
             )
         }
+    }
+
+    if (isRegionChanged) {
+        ConfirmDialog(
+            title = { Text(text = stringResource(
+                R.string.dialog_title_region_change,
+                region.country.capitalizeWords()
+            )) },
+            message = { Text(text = stringResource(R.string.dialog_message_region_change)) },
+            onDismissRequest = {
+                isRegionChanged = isRegionChanged.not()
+                region = currentRegion.locale
+            },
+            confirmButton = {
+                Log.d("SettingScreen", "locale: ${region}")
+                settingViewModel.saveLocale(region)
+                updateLocale(context, region)
+                (context as? Activity)?.recreate()
+            },
+            primaryButtonText = stringResource(R.string.dialog_agree),
+            secondaryButtonText = stringResource(R.string.dialog_cancel)
+        )
     }
 }
 
