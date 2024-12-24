@@ -9,7 +9,9 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Surface
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -48,10 +50,10 @@ class MainActivity : ComponentActivity() {
             Log.d("MainActivity", "locale: ${locale.value.locale}")
             var isDarkTheme = settingViewModel.darkMode.collectAsState()
             LadosTheme(darkTheme = isDarkTheme.value) {
-                Surface(
+                Scaffold(
                     modifier = Modifier.fillMaxSize(),
-                    color = androidx.compose.ui.graphics.Color.Transparent
-                ) {
+                    containerColor = androidx.compose.ui.graphics.Color.Transparent
+                ) { innerPadding ->
 
                     var showSplash by remember { mutableStateOf(true) }
 
@@ -65,6 +67,7 @@ class MainActivity : ComponentActivity() {
                     } else {
                         RoleBasedNavigation(
                             modifier = Modifier
+                                .padding(top = innerPadding.calculateTopPadding(), bottom = innerPadding.calculateBottomPadding())
                                 .background(
                                     LadosTheme.colorScheme.background
                                 ),
