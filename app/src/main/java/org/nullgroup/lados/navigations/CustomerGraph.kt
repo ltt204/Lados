@@ -288,7 +288,7 @@ fun CustomerGraph(
             composable(route = Screen.Customer.Setting.route) {
                 isVisibility = false
                 SettingScreen(
-                    modifier = modifier.padding(horizontal = 16.dp),
+                    modifier = modifier,
                     paddingValues = innerPadding,
                     onBack = { navController.navigateUp() },
                     themeSwitched = themeSwitched

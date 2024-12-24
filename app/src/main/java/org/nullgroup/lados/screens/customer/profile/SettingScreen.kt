@@ -66,7 +66,7 @@ fun SettingScreen(
         data = SupportedRegion.entries.map { it.locale.country.capitalizeWords() },
     )
     val context = LocalContext.current
-    var currentRegion = settingViewModel.locale.collectAsState().value
+    val currentRegion = settingViewModel.locale.collectAsState().value
     var region by remember {
         mutableStateOf(currentRegion.locale)
     }
@@ -84,7 +84,7 @@ fun SettingScreen(
         Column(
             modifier = Modifier
                 .padding(top = innerPadding.calculateTopPadding())
-                .padding(vertical = 16.dp)
+                .padding(16.dp)
         ) {
             Text(
                 text = stringResource(R.string.profile_setting_regions),
@@ -139,6 +139,7 @@ fun SettingScreen(
             },
             confirmButton = {
                 Log.d("SettingScreen", "locale: ${region}")
+                isRegionChanged = isRegionChanged.not()
                 settingViewModel.saveLocale(region)
                 updateLocale(context, region)
                 (context as? Activity)?.recreate()

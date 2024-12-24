@@ -1,6 +1,7 @@
 package org.nullgroup.lados.compose.common
 
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
@@ -21,14 +22,14 @@ import org.nullgroup.lados.ui.theme.Typography
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DefaultCenterTopAppBar(
+    modifier: Modifier = Modifier,
     onBackClick: () -> Unit,
     content: String,
     textWeight: FontWeight = FontWeight.SemiBold,
-    modifier: Modifier = Modifier,
     scrollBehavior: TopAppBarScrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(),
 ) {
     CenterAlignedTopAppBar(
-        modifier = modifier.heightIn(min = 56.dp, max = 64.dp),
+        modifier = modifier.wrapContentHeight().heightIn(min = 56.dp, max = 72.dp),
         title = {
             Text(
                 text = content,
