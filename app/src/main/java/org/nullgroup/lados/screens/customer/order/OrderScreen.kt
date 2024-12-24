@@ -39,7 +39,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import org.nullgroup.lados.R
 import org.nullgroup.lados.compose.common.LoadOnProgress
-import org.nullgroup.lados.compose.common.ProfileTopAppBar
+import org.nullgroup.lados.compose.common.DefaultCenterTopAppBar
 import org.nullgroup.lados.compose.order.OrderScreenTopAppBar
 import org.nullgroup.lados.data.models.Order
 import org.nullgroup.lados.screens.Screen
@@ -63,9 +63,7 @@ fun OrderScreen(
     Scaffold(
         modifier = modifier
             .fillMaxSize()
-            .padding(
-                bottom = paddingValues.calculateBottomPadding()
-            ),
+            .padding(bottom = paddingValues.calculateBottomPadding()),
         containerColor = LadosTheme.colorScheme.background,
         topBar = {
             Column(
@@ -75,7 +73,7 @@ fun OrderScreen(
                         color = LadosTheme.colorScheme.background
                     )
             ) {
-                ProfileTopAppBar(
+                DefaultCenterTopAppBar(
                     onBackClick = { navController?.navigateUp() },
                     content = stringResource(id = R.string.order_title),
                 )

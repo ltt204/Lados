@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -43,12 +44,14 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -68,6 +71,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -320,60 +324,82 @@ fun ProductItem(
 ) {
     var isClicked by remember { mutableStateOf(false) }
 
-    Box(modifier = modifier
+    Column(modifier = modifier
+        .wrapContentHeight()
         .widthIn(max = 160.dp)
-        .heightIn(min = 300.dp)
+        .heightIn(min = 320.dp)
         .clip(RoundedCornerShape(8.dp))
         // note: modify
         .background(LadosTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.8f))
         .clickable { onClick(product.id) }
     ) {
-        AsyncImage(
-            model = product.variants.first().images.first().link,
-            contentDescription = "Image",
-            modifier = modifier
-                .fillMaxWidth()
-                .height(220.dp),
-            contentScale = ContentScale.Crop,
-        )
-        Image(
-            painter = painterResource(
-                if (!isClicked) R.drawable.love
-                else R.drawable.heart
-            ),
-            contentDescription = "Image",
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(8.dp)
-                .background(
-                    Color.Gray.copy(alpha = 0.8f),
-                    CircleShape
-                )
-                .padding(4.dp)
-                .clickable {
-                    isClicked = !isClicked
-                    onFavicon(product.id)
-                }
-        )
+        Box(modifier = Modifier.weight(1f)) {
+            AsyncImage(
+                model = product.variants.first().images.first().link,
+                contentDescription = "Image",
+                modifier = modifier
+                    .fillMaxWidth()
+                    .height(220.dp),
+                contentScale = ContentScale.Crop,
+            )
+            Image(
+                painter = painterResource(
+                    if (!isClicked) R.drawable.love
+                    else R.drawable.heart
+                ),
+                contentDescription = "Image",
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(8.dp)
+                    .background(
+                        Color.Gray.copy(alpha = 0.8f),
+                        CircleShape
+                    )
+                    .padding(4.dp)
+                    .clickable {
+                        isClicked = !isClicked
+                        onFavicon(product.id)
+                    }
+            )
+        }
         Spacer(Modifier.height(4.dp))
         Column(
             modifier = Modifier
-                .align(Alignment.BottomStart)
-                .padding(8.dp, top = 16.dp),
+                .weight(0.5f)
+                .wrapContentHeight()
+                .padding(8.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Text(
+                modifier = Modifier.weight(0.5f),
                 text = product.name,
+                softWrap = true,
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 1,
                 style = TextStyle(
                     fontSize = 16.sp,
                     // note: modify
                     color = LadosTheme.colorScheme.onBackground,
                 )
             )
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.Center
             ) {
                 val isSale = product.variants.first().salePrice != null
+                Text(
+                    text = stringResource(
+                        id = R.string.product_price,
+                        product.variants.first().originalPrice
+                    ),
+                    style = TextStyle(
+                        fontSize = 16.sp,
+                        color = LadosTheme.colorScheme.onSurface.copy(
+                            alpha = if (isSale) 0.5f else 1.0f,
+                        ),
+                        textDecoration = if (isSale) TextDecoration.LineThrough else TextDecoration.None
+                    )
+                )
                 if (isSale) {
                     Text(
                         text = stringResource(
@@ -388,21 +414,10 @@ fun ProductItem(
                         )
                     )
                 }
-                Text(
-                    text = stringResource(
-                        id = R.string.product_price,
-                        product.variants.first().originalPrice
-                    ),
-                    style = TextStyle(
-                        fontSize = 16.sp,
-                        color = LadosTheme.colorScheme.onSurface.copy(
-                            alpha = if (isSale) 0.5f else 1.0f,
-                        ),
-                        textDecoration = if (isSale) TextDecoration.LineThrough else TextDecoration.None
-                    )
-                )
+
             }
             Row(
+                modifier = Modifier.weight(0.5f),
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -705,9 +720,7 @@ fun ProductScreen(
 ) {
     Scaffold(
         modifier = modifier
-            .padding(
-                bottom = paddingValues.calculateBottomPadding(),
-            )
+            .padding(bottom = paddingValues.calculateBottomPadding())
             .padding(horizontal = 16.dp),
         containerColor = LadosTheme.colorScheme.background,
         topBar = {

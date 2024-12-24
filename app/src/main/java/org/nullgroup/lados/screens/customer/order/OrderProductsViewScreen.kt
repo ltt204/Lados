@@ -38,7 +38,7 @@ import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import org.nullgroup.lados.R
 import org.nullgroup.lados.compose.common.LoadOnProgress
-import org.nullgroup.lados.compose.common.ProfileTopAppBar
+import org.nullgroup.lados.compose.common.DefaultCenterTopAppBar
 import org.nullgroup.lados.compose.common.TwoColsItem
 import org.nullgroup.lados.data.models.Color
 import org.nullgroup.lados.data.models.Image
@@ -46,7 +46,6 @@ import org.nullgroup.lados.data.models.OrderProduct
 import org.nullgroup.lados.data.models.Product
 import org.nullgroup.lados.data.models.ProductVariant
 import org.nullgroup.lados.data.models.Size
-import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.utilities.OrderStatus
 import org.nullgroup.lados.utilities.getActionForButtonOfOrderProduct
@@ -68,7 +67,7 @@ fun OrderProductsViewScreen(
     Scaffold(
         modifier = modifier,
         topBar = {
-            ProfileTopAppBar(
+            DefaultCenterTopAppBar(
                 onBackClick = {
                     navController?.navigateUp()
                 },

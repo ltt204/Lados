@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import org.nullgroup.lados.compose.common.ProfileTopAppBar
+import org.nullgroup.lados.compose.common.DefaultCenterTopAppBar
 import org.nullgroup.lados.compose.common.TwoColsItem
 import org.nullgroup.lados.compose.profile.SwipeToDeleteContainer
 import org.nullgroup.lados.screens.Screen
@@ -48,7 +48,7 @@ fun AddressList(
         modifier = modifier,
         containerColor = Color.Transparent,
         topBar = {
-            ProfileTopAppBar(
+            DefaultCenterTopAppBar(
                 onBackClick = { navController?.navigateUp() },
                 content = "Address"
             )

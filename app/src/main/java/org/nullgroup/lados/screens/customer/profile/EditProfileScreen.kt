@@ -49,7 +49,7 @@ import coil.request.ImageRequest
 import org.nullgroup.lados.R
 import org.nullgroup.lados.compose.SignIn.CustomTextField
 import org.nullgroup.lados.compose.common.LoadOnProgress
-import org.nullgroup.lados.compose.common.ProfileTopAppBar
+import org.nullgroup.lados.compose.common.DefaultCenterTopAppBar
 import org.nullgroup.lados.compose.profile.ConfirmDialog
 import org.nullgroup.lados.data.models.User
 import org.nullgroup.lados.ui.theme.LadosTheme
@@ -93,7 +93,7 @@ fun EditProfileScreen(
     Scaffold(
         modifier = modifier,
         topBar = {
-            ProfileTopAppBar(
+            DefaultCenterTopAppBar(
                 onBackClick = { cancelConfirmation = true },
                 content = stringResource(R.string.edit_profile_title)
             )
@@ -343,7 +343,7 @@ fun ProfileImagePreview() {
 fun SuccessContentPreview() {
     Scaffold(
         topBar = {
-            ProfileTopAppBar(
+            DefaultCenterTopAppBar(
                 onBackClick = {},
                 content = "Edit profile"
             )

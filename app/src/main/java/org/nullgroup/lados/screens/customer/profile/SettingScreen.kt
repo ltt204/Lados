@@ -23,9 +23,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
@@ -39,12 +36,11 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import org.nullgroup.lados.R
 import org.nullgroup.lados.compose.common.CustomExposedDropDownMenu
-import org.nullgroup.lados.compose.common.ProfileTopAppBar
+import org.nullgroup.lados.compose.common.DefaultCenterTopAppBar
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.utilities.SupportedRegion
 import org.nullgroup.lados.utilities.capitalizeWords
 import org.nullgroup.lados.utilities.updateLocale
-import org.nullgroup.lados.viewmodels.HomeViewModel
 import org.nullgroup.lados.viewmodels.common.SettingViewModel
 import org.nullgroup.lados.viewmodels.customer.MenuItemsUIState
 
@@ -67,7 +63,7 @@ fun SettingScreen(
         modifier = modifier,
         containerColor = Color.Transparent,
         topBar = {
-            ProfileTopAppBar(
+            DefaultCenterTopAppBar(
                 onBackClick = { onBack() },
                 content = stringResource(R.string.profile_setting)
             )

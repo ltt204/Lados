@@ -92,13 +92,10 @@ fun DrawError_FindNotMatch(
 fun Error_FindNotMatchScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
-    paddingValues: PaddingValues = PaddingValues(
-        horizontal = 16.dp,
-        vertical = 8.dp
-    ),
+    paddingValues: PaddingValues = PaddingValues(0.dp),
 ) {
     Scaffold(
-        modifier = modifier,
+        modifier = modifier.padding(bottom = paddingValues.calculateBottomPadding()),
         topBar = {
             Row(
                 modifier = Modifier

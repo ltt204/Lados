@@ -241,10 +241,7 @@ fun DrawProductInCategoryScreenContent(
 fun ProductInCategoryScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
-    paddingValues: PaddingValues = PaddingValues(
-        horizontal = 16.dp,
-        vertical = 8.dp
-    ),
+    paddingValues: PaddingValues = PaddingValues(0.dp),
     sharedViewModel: SharedViewModel = SharedViewModel(),
     viewModel: HomeViewModel = hiltViewModel(),
     context: Context
@@ -284,7 +281,7 @@ fun ProductInCategoryScreen(
     ) {
         Scaffold(
             modifier = modifier
-                .padding(paddingValues)
+                .padding(bottom = paddingValues.calculateBottomPadding())
                 .padding(horizontal = 16.dp),
             containerColor = LadosTheme.colorScheme.background,
             topBar = {

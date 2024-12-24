@@ -39,20 +39,20 @@ fun RoleBasedNavigation(
         }
     }
 
-    NavHost(navController = navController, startDestination = startDestination) {
+    NavHost(modifier = modifier, navController = navController, startDestination = startDestination) {
         Screen.Common.getAllScreens().forEach { screen ->
             composable(screen.route) {
                 when (screen.route) {
                     Screen.Common.LoginScreen.route -> {
-                        LoginScreen(navController, modifier, themeSwitched)
+                        LoginScreen(navController, Modifier, themeSwitched)
                     }
 
                     Screen.Common.RegisterScreen.route -> {
-                        RegisterScreen(navController, modifier)
+                        RegisterScreen(navController, Modifier)
                     }
 
                     Screen.Common.ForgotPasswordScreen.route -> {
-                        ForgotPasswordScreen(navController, modifier)
+                        ForgotPasswordScreen(navController, Modifier)
                     }
                 }
             }
