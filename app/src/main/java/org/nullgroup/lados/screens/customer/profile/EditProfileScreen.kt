@@ -39,15 +39,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
+import org.nullgroup.lados.R
 import org.nullgroup.lados.compose.SignIn.CustomTextField
 import org.nullgroup.lados.compose.common.LoadOnProgress
-import org.nullgroup.lados.compose.common.ProfileTopAppBar
+import org.nullgroup.lados.compose.common.DefaultCenterTopAppBar
 import org.nullgroup.lados.compose.profile.ConfirmDialog
 import org.nullgroup.lados.data.models.User
 import org.nullgroup.lados.ui.theme.LadosTheme
@@ -89,11 +91,11 @@ fun EditProfileScreen(
     }
 
     Scaffold(
-        modifier = modifier.padding(top = paddingValues.calculateTopPadding()),
+        modifier = modifier,
         topBar = {
-            ProfileTopAppBar(
+            DefaultCenterTopAppBar(
                 onBackClick = { cancelConfirmation = true },
-                content = "Edit profile"
+                content = stringResource(R.string.edit_profile_title)
             )
         },
         containerColor = Color.Transparent
@@ -341,7 +343,7 @@ fun ProfileImagePreview() {
 fun SuccessContentPreview() {
     Scaffold(
         topBar = {
-            ProfileTopAppBar(
+            DefaultCenterTopAppBar(
                 onBackClick = {},
                 content = "Edit profile"
             )

@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import org.nullgroup.lados.compose.common.LoadOnProgress
-import org.nullgroup.lados.compose.common.ProfileTopAppBar
+import org.nullgroup.lados.compose.common.DefaultCenterTopAppBar
 import org.nullgroup.lados.compose.profile.AddressForm
 import org.nullgroup.lados.compose.profile.ConfirmDialog
 import org.nullgroup.lados.viewmodels.customer.EditAddressViewModel
@@ -58,10 +58,9 @@ fun EditAddressScreen(
 
     Scaffold(
         modifier = modifier
-            .fillMaxSize()
-            .padding(vertical = paddingValues.calculateTopPadding()),
+            .fillMaxSize(),
         topBar = {
-            ProfileTopAppBar(
+            DefaultCenterTopAppBar(
                 onBackClick = {
                     cancelConfirmation = true
                 },

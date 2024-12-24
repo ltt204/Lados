@@ -30,6 +30,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -38,7 +39,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import org.nullgroup.lados.R
 import org.nullgroup.lados.compose.common.LoadOnProgress
-import org.nullgroup.lados.compose.common.ProfileTopAppBar
+import org.nullgroup.lados.compose.common.DefaultCenterTopAppBar
 import org.nullgroup.lados.compose.order.OrderScreenTopAppBar
 import org.nullgroup.lados.data.models.Order
 import org.nullgroup.lados.screens.Screen
@@ -62,10 +63,7 @@ fun OrderScreen(
     Scaffold(
         modifier = modifier
             .fillMaxSize()
-            .padding(
-                top = paddingValues.calculateTopPadding(),
-                bottom = paddingValues.calculateBottomPadding()
-            ),
+            .padding(bottom = paddingValues.calculateBottomPadding()),
         containerColor = LadosTheme.colorScheme.background,
         topBar = {
             Column(
@@ -75,9 +73,9 @@ fun OrderScreen(
                         color = LadosTheme.colorScheme.background
                     )
             ) {
-                ProfileTopAppBar(
+                DefaultCenterTopAppBar(
                     onBackClick = { navController?.navigateUp() },
-                    content = "Orders",
+                    content = stringResource(id = R.string.order_title),
                 )
                 OrderScreenTopAppBar(
                     modifier = modifier
@@ -198,7 +196,10 @@ fun OrderCard(
                 verticalArrangement = Arrangement.SpaceEvenly
             ) {
                 Text(
-                    text = "${order.orderProducts.size} items",
+                    text = stringResource(
+                        id = R.string.order_items_header,
+                        order.orderProducts.size
+                    ),
                     style = LadosTheme.typography.bodyLarge.copy(
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 18.sp

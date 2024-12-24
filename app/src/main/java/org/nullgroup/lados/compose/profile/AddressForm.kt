@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.nullgroup.lados.compose.SignIn.CustomTextField
+import org.nullgroup.lados.compose.common.CustomExposedDropDownMenu
 import org.nullgroup.lados.data.models.Address
 import org.nullgroup.lados.viewmodels.customer.MenuItemsUIState
 
@@ -49,7 +50,7 @@ fun AddressForm(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        AddressExposedDropDownMenu(
+        CustomExposedDropDownMenu(
             modifier = Modifier,
             itemsUiState = provincesUiState,
             placeHolder = "Province",
@@ -60,7 +61,7 @@ fun AddressForm(
         Row(
             modifier = Modifier.fillMaxWidth()
         ) {
-            AddressExposedDropDownMenu(
+            CustomExposedDropDownMenu(
                 modifier = Modifier.weight(1f),
                 itemsUiState = districtsUiState,
                 placeHolder = "District",
@@ -68,7 +69,7 @@ fun AddressForm(
                 currentItem = address.district
             )
             Spacer(modifier = Modifier.width(8.dp))
-            AddressExposedDropDownMenu(
+            CustomExposedDropDownMenu(
                 modifier = Modifier.weight(1f),
                 itemsUiState = wardsUiState,
                 placeHolder = "Ward",

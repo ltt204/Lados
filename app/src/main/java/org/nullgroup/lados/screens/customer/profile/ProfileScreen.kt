@@ -31,8 +31,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -42,7 +44,7 @@ import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import org.nullgroup.lados.R
 import org.nullgroup.lados.compose.common.LoadOnProgress
-import org.nullgroup.lados.compose.common.ProfileTopAppBar
+import org.nullgroup.lados.compose.common.DefaultCenterTopAppBar
 import org.nullgroup.lados.compose.common.TwoColsItem
 import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.ui.theme.LadosTheme
@@ -59,12 +61,24 @@ fun ProfileScreen(
 ) {
     val currentUser = viewModel.currentUser.collectAsState()
     Scaffold(
-        modifier = modifier.padding(
-            top = paddingValues.calculateTopPadding(),
-            bottom = paddingValues.calculateBottomPadding()
-        ),
+        modifier = modifier.padding(bottom = paddingValues.calculateBottomPadding()),
         topBar = {
-            ProfileTopAppBar(onBackClick = { /*TODO*/ }, content = "Profile")
+            DefaultCenterTopAppBar(onBackClick = { navController?.navigateUp() }, content = stringResource(
+                id = R.string.profile_title
+            ))
+        },
+        bottomBar = {
+            TextButton(modifier = Modifier.fillMaxWidth(), onClick = {
+                viewModel.signOut(navController)
+            }) {
+                Text(
+                    textAlign = TextAlign.Center,
+                    text = stringResource(R.string.profile_sign_out),
+                    color = Color.Red,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
         },
         containerColor = Color.Transparent
     ) { innerPadding ->
@@ -72,6 +86,7 @@ fun ProfileScreen(
             modifier = Modifier
                 .padding(
                     top = innerPadding.calculateTopPadding(),
+                    bottom = innerPadding.calculateBottomPadding(),
                     start = 16.dp,
                     end = 16.dp
                 ),
@@ -116,16 +131,25 @@ fun ProfileScreen(
                             Text(
                                 modifier = Modifier, text = currentUser.value.name,
                                 fontSize = 18.sp,
+                                softWrap = true,
+                                overflow = TextOverflow.Ellipsis,
+                                maxLines = 1,
                                 color = LadosTheme.colorScheme.onBackground,
                                 fontWeight = FontWeight.SemiBold,
                             )
                             Text(
                                 modifier = Modifier, text = currentUser.value.email,
+                                softWrap = true,
+                                overflow = TextOverflow.Ellipsis,
+                                maxLines = 1,
                                 color = LadosTheme.colorScheme.onBackground.copy(alpha = 0.8f),
                                 fontSize = 16.sp
                             )
                             Text(
                                 modifier = Modifier, text = currentUser.value.phoneNumber.ifEmpty { "No phone number provided!" },
+                                softWrap = true,
+                                overflow = TextOverflow.Ellipsis,
+                                maxLines = 1,
                                 color = LadosTheme.colorScheme.onBackground.copy(alpha = 0.8f),
                                 fontSize = 16.sp
                             )
@@ -137,7 +161,7 @@ fun ProfileScreen(
                             navController?.navigate(Screen.Customer.EditProfile.route)
                         }) {
                             Text(
-                                text = "Edit",
+                                text = stringResource(R.string.profile_edit_button),
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.SemiBold,
                                 color = LadosTheme.colorScheme.primary.copy(alpha = 0.8f)
@@ -155,7 +179,10 @@ fun ProfileScreen(
                         modifier = Modifier.height(56.dp),
                         content = {
                             Text(
-                                text = "Address",
+                                text = stringResource(R.string.address_title),
+                                softWrap = true,
+                                overflow = TextOverflow.Ellipsis,
+                                maxLines = 1,
                                 color = LadosTheme.colorScheme.onBackground.copy(alpha = 0.8f),
                                 style = Typography.bodyLarge
                             )
@@ -180,7 +207,7 @@ fun ProfileScreen(
                         modifier = Modifier.height(56.dp),
                         content = {
                             Text(
-                                text = "Wishlist",
+                                text = stringResource(R.string.profile_wishlist),
                                 color = LadosTheme.colorScheme.onBackground.copy(alpha = 0.8f),
                                 style = Typography.bodyLarge
                             )
@@ -201,7 +228,7 @@ fun ProfileScreen(
                         modifier = Modifier.height(56.dp),
                         content = {
                             Text(
-                                text = "Privacy",
+                                text = stringResource(R.string.profile_privacy),
                                 color = LadosTheme.colorScheme.onBackground.copy(alpha = 0.8f),
                                 style = Typography.bodyLarge
                             )
@@ -222,7 +249,7 @@ fun ProfileScreen(
                         modifier = Modifier.height(56.dp),
                         content = {
                             Text(
-                                text = "Help",
+                                text = stringResource(R.string.profile_help),
                                 color = LadosTheme.colorScheme.onBackground.copy(alpha = 0.8f),
                                 style = Typography.bodyLarge
                             )
@@ -243,7 +270,7 @@ fun ProfileScreen(
                         modifier = Modifier.height(56.dp),
                         content = {
                             Text(
-                                text = "About",
+                                text = stringResource(R.string.profile_settings),
                                 color = LadosTheme.colorScheme.onBackground.copy(alpha = 0.8f),
                                 style = Typography.bodyLarge
                             )
@@ -258,21 +285,9 @@ fun ProfileScreen(
                                 contentDescription = "Arrow",
                             )
                         }, onClick = {
-//                            navController?.navigate(Screen.Customer.Address.AddressList.route)
+                            navController?.navigate(Screen.Customer.Setting.route)
                         })
                 }
-            }
-
-            TextButton(modifier = Modifier.fillMaxWidth(), onClick = {
-                viewModel.signOut(navController)
-            }) {
-                Text(
-                    textAlign = TextAlign.Center,
-                    text = "Sign out",
-                    color = Color.Red,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
             }
         }
     }

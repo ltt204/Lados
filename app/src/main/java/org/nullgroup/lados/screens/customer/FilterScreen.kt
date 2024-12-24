@@ -311,7 +311,7 @@ fun FilterScreen(
     sharedViewModel: SharedViewModel = SharedViewModel(),
 ) {
     Scaffold(
-        modifier = modifier,
+        modifier = modifier.padding(bottom = paddingValues.calculateBottomPadding()),
         containerColor = LadosTheme.colorScheme.background,
         topBar = {
             Row(

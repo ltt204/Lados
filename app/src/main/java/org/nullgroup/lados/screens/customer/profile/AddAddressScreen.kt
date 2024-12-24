@@ -31,7 +31,7 @@ import androidx.navigation.NavController
 import org.nullgroup.lados.compose.common.LoadOnProgress
 import org.nullgroup.lados.compose.profile.AddressForm
 import org.nullgroup.lados.compose.profile.ConfirmDialog
-import org.nullgroup.lados.compose.common.ProfileTopAppBar
+import org.nullgroup.lados.compose.common.DefaultCenterTopAppBar
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.viewmodels.customer.AddAddressViewModel
 import org.nullgroup.lados.viewmodels.customer.SavingResult
@@ -63,7 +63,7 @@ fun AddAddressScreen(
             .fillMaxSize()
             .padding(vertical = paddingValues.calculateTopPadding()),
         topBar = {
-            ProfileTopAppBar(onBackClick = {
+            DefaultCenterTopAppBar(onBackClick = {
                 cancelConfirmation = true
             }, content = "Address")
         },

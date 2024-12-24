@@ -1,31 +1,25 @@
-package org.nullgroup.lados.compose.profile
+package org.nullgroup.lados.compose.common
 
 import android.util.Log
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material.ExposedDropdownMenuBox
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MenuItemColors
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37,21 +31,15 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import org.nullgroup.lados.compose.common.LoadOnError
-import org.nullgroup.lados.compose.common.LoadOnProgress
-import org.nullgroup.lados.ui.theme.LadosTheme
-import org.nullgroup.lados.utilities.PasswordValidator
 import org.nullgroup.lados.viewmodels.customer.MenuItemsUIState
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
-fun AddressExposedDropDownMenu(
+fun CustomExposedDropDownMenu(
     modifier: Modifier = Modifier,
     itemsUiState: MenuItemsUIState,
     scrollState: ScrollState = rememberScrollState(),
@@ -59,6 +47,8 @@ fun AddressExposedDropDownMenu(
     onItemSelected: (String, Int) -> Unit = { _, _ -> },
     currentItem: String = ""
 ) {
+    var windowWidth = LocalConfiguration.current.screenWidthDp
+    Log.d("ExposedDropDown", "${windowWidth}")
     var menuHeight by remember { mutableIntStateOf(62) }
 
     var isExpanded by remember { mutableStateOf(false) }
@@ -69,7 +59,7 @@ fun AddressExposedDropDownMenu(
     )
 
     ExposedDropdownMenuBox(
-        modifier = modifier,
+        modifier = modifier.widthIn(min = windowWidth.dp),
         expanded = isExpanded,
         onExpandedChange = {
             isExpanded = !isExpanded
@@ -83,22 +73,10 @@ fun AddressExposedDropDownMenu(
             trailingIcon = {
                 ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded)
             },
+            isReadonly = true
         )
-//        OutlinedTextField(
-//            modifier = Modifier.fillMaxWidth(),
-//            value = selectedItem,
-//            label = { Text(text = placeHolder) },
-//            placeholder = { Text(text = placeHolder, color = Color.Gray) },
-//            onValueChange = { },
-//            readOnly = true,
-//            trailingIcon = {
-//                ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded)
-//            },
-//            singleLine = true
-//        )
         ExposedDropdownMenu(
-            modifier = Modifier
-                .fillMaxWidth()
+            modifier = Modifier.widthIn(min = windowWidth.dp)
                 .height(menuHeight.dp),
             scrollState = scrollState,
             expanded = isExpanded,
@@ -130,7 +108,7 @@ fun AddressExposedDropDownMenu(
                     )
                 }
 
-                is MenuItemsUIState.Failed ->
+                is MenuItemsUIState.Failed -> {
                     DropdownMenuItem(
                         text = {
                             LoadOnError(
@@ -141,22 +119,23 @@ fun AddressExposedDropDownMenu(
                         },
                         onClick = { /* No action */ },
                     )
+                }
 
                 is MenuItemsUIState.Success -> {
-                    menuHeight = (itemsUiState.data.size * 48).coerceAtMost(192)
+                    menuHeight = (itemsUiState.data.size * 56).coerceAtMost(192)
                     LazyColumn(
                         modifier = Modifier
-                            .width(400.dp)
-                            .height(300.dp)
+                            .width(windowWidth.dp)
+                            .height(menuHeight.dp)
                     ) {
                         itemsIndexed(itemsUiState.data) { index, value ->
                             val isSelected = value == selectedItem
                             DropdownMenuItem(
                                 modifier = Modifier
+                                    .widthIn(min = windowWidth.dp)
                                     .background(
                                         if (isSelected) Color.Gray.copy(alpha = 0.1f) else Color.Transparent
-                                    )
-                                    .fillMaxWidth(),
+                                    ),
                                 text = { Text(text = value) },
                                 onClick = {
                                     onItemSelected(value, index)
@@ -184,9 +163,9 @@ fun AddressExposedDropDownMenu(
 @Composable
 fun AddressExposedDropDownMenuPreview() {
     Surface(modifier = Modifier.fillMaxSize()) {
-        AddressExposedDropDownMenu(
+        CustomExposedDropDownMenu(
             placeHolder = "Province",
-            itemsUiState = MenuItemsUIState.Failed("123"),
+            itemsUiState = MenuItemsUIState.Success(listOf("123", "123", "123")),
         )
     }
 }

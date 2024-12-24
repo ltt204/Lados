@@ -188,6 +188,7 @@ class OrderRepositoryImplement(
 
             if (snapshot != null) {
                 val order = snapshot.toObject(Order::class.java)
+                Log.d("OrderRepositoryImplement", "getOrderById: $order")
                 trySend(order!!).isSuccess
             }
         }

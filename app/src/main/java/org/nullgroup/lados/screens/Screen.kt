@@ -49,6 +49,8 @@ sealed class Screen(
         data object HomeScreen : Customer("Home", "customer_home", Icons.Default.Home)
         data object ChatScreen : Customer("Chat", "customer_chat", Icons.Default.MailOutline)
         data object Profile : Customer("Profile", "customer_profile", Icons.Default.AccountCircle)
+        data object Setting : Customer("Setting", "customer_setting", Icons.Default.AccountCircle)
+
 
         data object Home : Customer("Home", "customer_home", Icons.Default.Home)
         data object SearchScreen : Customer("Search", "customer_search", Icons.Default.Search)

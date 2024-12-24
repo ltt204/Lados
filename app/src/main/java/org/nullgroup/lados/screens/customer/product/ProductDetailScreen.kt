@@ -55,6 +55,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
@@ -145,9 +146,9 @@ fun ProductDetailScreen(
                 containerColor = LadosTheme.colorScheme.background,
                 bottomBar = {
                     ProductDetailBottomBar(
-                        title = "Add to Cart",
+                        title = stringResource(R.string.add_to_cart),
                         enabled = uiState.quantityInStock > 0,
-                        price = "$${uiState.product.variants.first().salePrice}",
+                        price = "$${uiState.product.variants.first().salePrice ?: uiState.product.variants.first().originalPrice}",
                         onClick = onAddToCart
                     )
                 }
@@ -164,7 +165,7 @@ fun ProductDetailScreen(
                     ProductInformationSection(
                         name = uiState.product.name,
                         originalPrice = uiState.product.variants.first().originalPrice,
-                        salePrice = uiState.product.variants.first().salePrice ?: 0.0,
+                        salePrice = uiState.product.variants.first().salePrice,
                         productImages = uiState.product.variants.first().images,
                         quantityInStock = uiState.quantityInStock
                     )
@@ -277,7 +278,7 @@ fun ProductInformationSection(
     modifier: Modifier = Modifier,
     name: String,
     originalPrice: Double,
-    salePrice: Double,
+    salePrice: Double?,
     productImages: List<Image> = emptyList(),
     quantityInStock: Int = 0
 ) {
@@ -331,19 +332,23 @@ fun ProductInformationSection(
 
 
         ) {
-            Text(
-                text = "$$salePrice",
-                fontWeight = FontWeight.Bold,
-                fontSize = 22.sp,
-                color = LadosTheme.colorScheme.primary
-            )
+            val isSale = salePrice != null
+
+            if (isSale) {
+                Text(
+                    text = stringResource(R.string.product_price, salePrice!!),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 22.sp,
+                    color = LadosTheme.colorScheme.primary
+                )
+            }
 
             Text(
-                text = "$${originalPrice}",
-                color = LadosTheme.colorScheme.outline,
+                text = stringResource(R.string.product_price, originalPrice),
+                color = if (isSale) LadosTheme.colorScheme.outline else LadosTheme.colorScheme.primary,
                 fontWeight = FontWeight.Medium,
-                textDecoration = TextDecoration.LineThrough,
-                fontSize = 15.sp
+                textDecoration = if (isSale) TextDecoration.LineThrough else TextDecoration.None,
+                fontSize = if (isSale) 18.sp else 22.sp
             )
 
         }
@@ -374,14 +379,14 @@ fun ProductDetailsSection(
     ) {
         // Size Selection
         SelectableDetailRow(
-            title = "Size",
+            title = stringResource(R.string.product_size),
             currentSelection = size,
             onClick = onSizeClick
         )
 
         // Color Selection
         SelectableDetailRow(
-            title = "Color",
+            title = stringResource(R.string.product_color),
             currentSelection = color.colorName,
             additionalContent = {
                 Box(
@@ -472,7 +477,7 @@ fun QuantitySelector(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = "Quantity",
+            text = stringResource(R.string.product_quantity),
             fontSize = 15.sp,
             color = LadosTheme.colorScheme.onBackground
         )
@@ -544,7 +549,7 @@ fun ProductReviewSection(
     ) {
 
         Text(
-            text = "Reviews",
+            text = stringResource(R.string.product_reviews),
             fontWeight = FontWeight.Bold,
             fontSize = 20.sp,
             color = LadosTheme.colorScheme.onBackground
@@ -555,7 +560,10 @@ fun ProductReviewSection(
             horizontalAlignment = Alignment.Start
         ) {
             Text(
-                text = "${String.format(Locale.getDefault(), "%.2f", averageRating)} Ratings",
+                text = stringResource(
+                    R.string.product_ratings,
+                    String.format(Locale.getDefault(), "%.2f", averageRating)
+                ),
                 fontWeight = FontWeight.Bold,
                 fontSize = 25.sp,
                 color = LadosTheme.colorScheme.primary
@@ -564,7 +572,7 @@ fun ProductReviewSection(
             Spacer(modifier = Modifier.width(8.dp))
 
             Text(
-                text = "$numOfReviews Reviews",
+                text = "$numOfReviews ${stringResource(id = R.string.product_reviews)}",
                 fontWeight = FontWeight.Medium,
                 fontSize = 15.sp,
                 color = LadosTheme.colorScheme.outline
@@ -629,7 +637,7 @@ fun ReviewCard(
                         text = name,
                         fontWeight = FontWeight.Bold,
                         fontSize = 15.sp,
-                        color =LadosTheme.colorScheme.onBackground,
+                        color = LadosTheme.colorScheme.onBackground,
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
@@ -697,7 +705,7 @@ fun ProductDetailBottomBar(
                 .padding(vertical = 10.dp, horizontal = 16.dp)
         ) {
             Text(
-                text = price,
+                text = stringResource(R.string.product_price, price),
                 color = Color.White,
                 fontWeight = FontWeight.Bold,
                 fontSize = 18.sp

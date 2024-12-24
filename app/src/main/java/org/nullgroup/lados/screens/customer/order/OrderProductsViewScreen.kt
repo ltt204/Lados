@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
@@ -35,8 +36,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
+import org.nullgroup.lados.R
 import org.nullgroup.lados.compose.common.LoadOnProgress
-import org.nullgroup.lados.compose.common.ProfileTopAppBar
+import org.nullgroup.lados.compose.common.DefaultCenterTopAppBar
 import org.nullgroup.lados.compose.common.TwoColsItem
 import org.nullgroup.lados.data.models.Color
 import org.nullgroup.lados.data.models.Image
@@ -44,7 +46,6 @@ import org.nullgroup.lados.data.models.OrderProduct
 import org.nullgroup.lados.data.models.Product
 import org.nullgroup.lados.data.models.ProductVariant
 import org.nullgroup.lados.data.models.Size
-import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.utilities.OrderStatus
 import org.nullgroup.lados.utilities.getActionForButtonOfOrderProduct
@@ -64,14 +65,13 @@ fun OrderProductsViewScreen(
     val orderProducts = orderProductsViewModel.orderProducts.collectAsState()
     Log.d("OrderProductsViewScreen", "OrderProductsViewScreen: $orderProducts")
     Scaffold(
-        modifier = modifier
-            .padding(top = paddingValues.calculateTopPadding()),
+        modifier = modifier,
         topBar = {
-            ProfileTopAppBar(
+            DefaultCenterTopAppBar(
                 onBackClick = {
                     navController?.navigateUp()
                 },
-                content = "Order Products"
+                content = stringResource(id = R.string.order_products_title)
             )
         },
         backgroundColor = LadosTheme.colorScheme.background

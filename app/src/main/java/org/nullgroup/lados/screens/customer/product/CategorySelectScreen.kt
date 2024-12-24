@@ -159,7 +159,7 @@ fun CategorySelectScreen(
 ) {
     Scaffold(
         modifier = modifier
-            .padding(paddingValues)
+            .padding(bottom = paddingValues.calculateBottomPadding())
             .padding(horizontal = 16.dp),
         containerColor = LadosTheme.colorScheme.background,
         topBar = {

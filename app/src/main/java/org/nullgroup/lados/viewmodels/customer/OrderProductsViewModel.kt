@@ -53,6 +53,7 @@ class OrderProductsViewModel @Inject constructor(
                     currentOrder.value = order
                     _orderProducts.emit(order.orderProducts)
                     val currentList = mutableListOf<Pair<Product, ProductVariant>>()
+                    Log.d("OrderProductsViewModel", "Before fetching products \n ${order.orderProducts}")
                     order.orderProducts.forEach { orderProduct ->
                         try {
                             val data =
@@ -68,6 +69,7 @@ class OrderProductsViewModel @Inject constructor(
                                     data.variants.first { it.id == orderProduct.variantId })
                             )
                         } catch (e: Exception) {
+                            Log.d("OrderProductsViewModel", "Error: ${e.message}")
                             _productVariantsState.value =
                                 OrderProductsState.Error(e.message ?: "Failed to fetch products")
                         }
