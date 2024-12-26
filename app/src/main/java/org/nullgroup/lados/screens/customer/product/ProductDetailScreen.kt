@@ -148,7 +148,7 @@ fun ProductDetailScreen(
                     ProductDetailBottomBar(
                         title = stringResource(R.string.add_to_cart),
                         enabled = uiState.quantityInStock > 0,
-                        price = "$${uiState.product.variants.first().salePrice ?: uiState.product.variants.first().originalPrice}",
+                        price = "${uiState.product.variants.first().salePrice ?: uiState.product.variants.first().originalPrice}",
                         onClick = onAddToCart
                     )
                 }

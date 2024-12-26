@@ -23,9 +23,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import org.nullgroup.lados.R
 import org.nullgroup.lados.compose.common.LoadOnProgress
 import org.nullgroup.lados.compose.common.DefaultCenterTopAppBar
 import org.nullgroup.lados.compose.profile.AddressForm
@@ -64,7 +66,7 @@ fun EditAddressScreen(
                 onBackClick = {
                     cancelConfirmation = true
                 },
-                content = "Edit Address"
+                content = stringResource(id = R.string.edit_address_title)
             )
         },
         containerColor = Color.Transparent
@@ -72,7 +74,7 @@ fun EditAddressScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 8.dp)
+                .padding(horizontal = 16.dp, vertical = 8.dp)
                 .padding(top = innerPadding.calculateTopPadding())
         ) {
             AddressForm(
@@ -105,7 +107,7 @@ fun EditAddressScreen(
                 },
                 enabled = viewModel.isInfoChanged.value
             ) {
-                Text(text = "Save")
+                Text(text = stringResource(R.string.save_button))
             }
         }
     }

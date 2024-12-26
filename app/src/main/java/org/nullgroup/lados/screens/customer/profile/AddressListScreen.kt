@@ -23,11 +23,15 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import org.nullgroup.lados.R
 import org.nullgroup.lados.compose.common.DefaultCenterTopAppBar
 import org.nullgroup.lados.compose.common.TwoColsItem
 import org.nullgroup.lados.compose.profile.SwipeToDeleteContainer
@@ -50,7 +54,7 @@ fun AddressList(
         topBar = {
             DefaultCenterTopAppBar(
                 onBackClick = { navController?.navigateUp() },
-                content = "Address"
+                content = stringResource(id = R.string.address_title),
             )
         }
     ) { innerPadding ->
@@ -68,7 +72,16 @@ fun AddressList(
                         .weight(1f),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = "No address found")
+                    Text(
+                        text = stringResource(R.string.no_address_found_message),
+                        textAlign = TextAlign.Center,
+                        style = LadosTheme.typography.bodyLarge.copy(
+                            color = LadosTheme.colorScheme.onSurface,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 32.sp,
+                            lineHeight = 40.sp
+                        )
+                    )
                 }
             } else {
                 LazyColumn(
@@ -97,6 +110,7 @@ fun AddressList(
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis,
                                         fontSize = 16.sp,
+                                        color = LadosTheme.colorScheme.onBackground,
                                     )
                                 },
                                 trailingAction = {
@@ -112,8 +126,9 @@ fun AddressList(
                                             navController?.navigate("${Screen.Customer.Address.EditAddress.route}/${address.id}")
                                         }) {
                                         Text(
-                                            text = "Edit",
+                                            text = stringResource(R.string.edit_button),
                                             color = LadosTheme.colorScheme.onPrimaryContainer,
+                                            fontWeight = FontWeight.SemiBold,
                                         )
                                     }
                                 }
@@ -133,7 +148,9 @@ fun AddressList(
                     disabledContainerColor = LadosTheme.colorScheme.outline,
                 ),
             ) {
-                Text(text = "Add Address", style = LadosTheme.typography.bodyLarge)
+                Text(text = stringResource(R.string.address_add_button), style = LadosTheme.typography.bodyLarge.copy(
+                    fontWeight = FontWeight.SemiBold,
+                ))
             }
         }
     }

@@ -174,7 +174,7 @@ fun ThemeModeCards(
             ThemeCard(
                 isDarkMode = isDarkMode,
                 modifier = Modifier.weight(1f),
-                text = "Light mode",
+                text = stringResource(R.string.setting_light_mode),
                 onColorSelected = {
                     onColorSelected()
                 }
@@ -186,7 +186,7 @@ fun ThemeModeCards(
             ThemeCard(
                 isDarkMode = !isDarkMode,
                 modifier = Modifier.weight(1f),
-                text = "Dark mode",
+                text = stringResource(R.string.setting_dark_mode),
                 onColorSelected = {
                     onColorSelected()
                 }
@@ -216,7 +216,8 @@ fun ThemeCard(
         colors = CardDefaults.cardColors(
             containerColor = Color.Transparent
         ),
-        onClick = onColorSelected
+        onClick = onColorSelected,
+        enabled = isDarkMode
     ) {
         Box(
             modifier = Modifier
