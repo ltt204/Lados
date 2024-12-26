@@ -32,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -125,11 +126,12 @@ fun OrderScreen(
                             )
                             Spacer(modifier = Modifier.height(LadosTheme.size.medium))
                             Text(
-                                text = "No orders yet",
+                                text = stringResource(R.string.no_orders_message),
                                 style = LadosTheme.typography.titleLarge.copy(
                                     fontWeight = FontWeight.SemiBold,
                                     fontSize = 24.sp
                                 ),
+                                textAlign = TextAlign.Center,
                                 color = LadosTheme.colorScheme.primary
                             )
                         }
