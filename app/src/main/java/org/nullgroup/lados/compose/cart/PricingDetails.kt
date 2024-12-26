@@ -9,8 +9,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import org.nullgroup.lados.R
 import org.nullgroup.lados.ui.theme.LadosTheme
 
 @Composable
@@ -20,25 +22,35 @@ fun PricingDetails(
     orderDiscount: String? = null,
     total: String,
 ) {
-    Column(modifier = Modifier
-        .fillMaxWidth()
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
 //        .background(LadosTheme.colorScheme.surfaceContainerLow)
     ) {
         // Subtotal
-        PricingRow(label = "Subtotal", value = subtotal)
+        PricingRow(
+            label = stringResource(R.string.cart_subtotal),
+            subtotal
+        )
         Spacer(modifier = Modifier.height(8.dp))
 
         // Discount
-        PricingRow(label = "Discount", value = productDiscount)
+        PricingRow(
+            label = stringResource(R.string.cart_discount),
+            productDiscount
+        )
         Spacer(modifier = Modifier.height(8.dp))
 
-        if (orderDiscount != null && orderDiscount.isNotEmpty()) {
-            PricingRow(label = "Order Discount", value = orderDiscount)
+        if (!orderDiscount.isNullOrEmpty()) {
+            PricingRow(
+                label = stringResource(R.string.cart_order_discount),
+                orderDiscount
+            )
             Spacer(modifier = Modifier.height(8.dp))
         }
 
         // Total
-        PricingRow(label = "Total", value = total, isBold = true)
+        PricingRow(label = stringResource(R.string.cart_total), value = total, isBold = true)
     }
 }
 
