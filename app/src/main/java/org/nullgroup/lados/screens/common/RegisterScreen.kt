@@ -24,12 +24,14 @@ import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import org.nullgroup.lados.R
 import org.nullgroup.lados.compose.SignIn.ButtonSubmit
 import org.nullgroup.lados.compose.SignIn.CustomTextField
 import org.nullgroup.lados.compose.SignIn.Headline
@@ -67,7 +69,8 @@ fun RegisterScreen(
             }
 
             is ResourceState.Success -> {
-                Toast.makeText(context, "You create account successful", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context,
+                    context.getString(R.string.auth_create_account_successful), Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -81,7 +84,7 @@ fun RegisterScreen(
         is RegisterScreenStepState.Notification -> {
             val email = (registerStepState as RegisterScreenStepState.Notification).email
             NotifySendEmailScreen(
-                text = "Please check $email to verify your account.",
+                text = stringResource(R.string.auth_verify_account, email),
                 onClick = {
                     registerViewModel.handleEvent(
                         RegisterScreenEvent.HandleBackLogin(
@@ -133,12 +136,12 @@ fun RegisterInputScreen(navController: NavController, modifier: Modifier = Modif
 
         Spacer(modifier = Modifier.height(70.dp))
 
-        Headline(text = "Create Account")
+        Headline(text = stringResource(R.string.auth_create_account_header))
 
         Spacer(modifier = Modifier.height(16.dp))
 
         CustomTextField(
-            label = "First Name",
+            label = stringResource(R.string.auth_first_name),
             text = firstName,
             onValueChange = {
                 firstName = it
@@ -174,7 +177,7 @@ fun RegisterInputScreen(navController: NavController, modifier: Modifier = Modif
         if (firstNameError) {
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "First Name is required",
+                text = stringResource(R.string.auth_first_name_require),
                 color = LadosTheme.colorScheme.error,
             )
         }
@@ -182,7 +185,7 @@ fun RegisterInputScreen(navController: NavController, modifier: Modifier = Modif
         Spacer(modifier = Modifier.height(16.dp))
 
         CustomTextField(
-            label = "Last Name",
+            label = stringResource(R.string.auth_last_name),
             text = lastName,
             onValueChange = {
                 lastName = it
@@ -218,7 +221,7 @@ fun RegisterInputScreen(navController: NavController, modifier: Modifier = Modif
         if (lastNameError) {
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Last Name is required",
+                text = stringResource(R.string.auth_last_name_required),
                 color = LadosTheme.colorScheme.error,
             )
         }
@@ -226,7 +229,7 @@ fun RegisterInputScreen(navController: NavController, modifier: Modifier = Modif
         Spacer(modifier = Modifier.height(16.dp))
 
         CustomTextField(
-            label = "Email Address",
+            label = stringResource(id = R.string.auth_email_address),
             text = email,
             onValueChange = {
                 email = it
@@ -263,7 +266,7 @@ fun RegisterInputScreen(navController: NavController, modifier: Modifier = Modif
         if (emailError) {
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Email invalid",
+                text = stringResource(id = R.string.auth_invalid_email),
                 color = LadosTheme.colorScheme.error,
             )
         }
@@ -271,7 +274,7 @@ fun RegisterInputScreen(navController: NavController, modifier: Modifier = Modif
         Spacer(modifier = Modifier.height(16.dp))
 
         CustomTextField(
-            label = "Password",
+            label = stringResource(R.string.auth_password),
             text = password,
             onValueChange = {
                 password = it
@@ -313,12 +316,12 @@ fun RegisterInputScreen(navController: NavController, modifier: Modifier = Modif
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Text(
-                    text = "Password must be at least 8 characters long",
+                    text = stringResource(R.string.auth_password_length_requirement),
                     color = LadosTheme.colorScheme.error,
                 )
                 Spacer(modifier = Modifier.height(5.dp))
                 Text(
-                    text = "Password must contain at least one uppercase letter, lowercase letter, number and special character",
+                    text = stringResource(R.string.auth_password_form_requirement),
                     color = LadosTheme.colorScheme.error,
                 )
             }
@@ -327,7 +330,7 @@ fun RegisterInputScreen(navController: NavController, modifier: Modifier = Modif
         Spacer(modifier = Modifier.height(16.dp))
 
         CustomTextField(
-            label = "Phone number",
+            label = stringResource(R.string.auth_phone_number),
             text = phone,
             onValueChange = {
                 phone = it
@@ -364,7 +367,7 @@ fun RegisterInputScreen(navController: NavController, modifier: Modifier = Modif
         if (phoneError) {
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Phone must be number",
+                text = stringResource(R.string.auth_phone_requirement),
                 color = LadosTheme.colorScheme.error,
             )
         }
@@ -372,7 +375,7 @@ fun RegisterInputScreen(navController: NavController, modifier: Modifier = Modif
         Spacer(modifier = Modifier.height(32.dp))
 
         ButtonSubmit(
-            text = "Register",
+            text = stringResource(R.string.auth_register),
             onClick = {
                 if (!registerViewModel.validateEmail(email)) emailError = true
                 if (!registerViewModel.validatePassword(password)) passwordError = true
@@ -404,10 +407,10 @@ fun RegisterInputScreen(navController: NavController, modifier: Modifier = Modif
             horizontalArrangement = Arrangement.Center
         ) {
             TextNormal(
-                text = "Forgot password? "
+                text = stringResource(R.string.auth_forgot_password)
             )
             TextClickable(
-                text = "Reset",
+                text = stringResource(R.string.auth_reset),
                 onClick = {
                     navController.navigate("forgot_password")
                 },

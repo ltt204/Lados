@@ -9,7 +9,6 @@ enum class OrderStatus {
     SHIPPED,
     DELIVERED,
     CANCELLED,
-
     // Optional feature: Customer can cancel the order
     RETURNED,
     // Optional feature: Customer can return the products after delivery

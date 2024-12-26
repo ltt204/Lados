@@ -12,6 +12,7 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.navigation.NavController
 import com.google.firebase.Timestamp
+import org.nullgroup.lados.R
 import org.nullgroup.lados.data.models.Category
 import org.nullgroup.lados.data.models.Color
 import org.nullgroup.lados.data.models.Product
@@ -120,6 +121,17 @@ fun OrderStatus.getActionForButtonOfOrderProduct(): Pair<String?, ((NavControlle
         else -> {
             null to { _, _, _ -> /*TODO*/ }
         }
+    }
+}
+
+fun OrderStatus.getByLocale(context: Context): String {
+    return when (this) {
+        OrderStatus.CREATED -> context.getString(R.string.order_status_created)
+        OrderStatus.CONFIRMED -> context.getString(R.string.order_status_confirmed)
+        OrderStatus.SHIPPED -> context.getString(R.string.order_status_shipped)
+        OrderStatus.DELIVERED -> context.getString(R.string.order_status_delivered)
+        OrderStatus.CANCELLED -> context.getString(R.string.order_status_cancelled)
+        OrderStatus.RETURNED -> context.getString(R.string.order_status_returned)
     }
 }
 

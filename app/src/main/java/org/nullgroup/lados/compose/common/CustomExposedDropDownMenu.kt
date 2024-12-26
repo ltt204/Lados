@@ -33,8 +33,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import org.nullgroup.lados.R
 import org.nullgroup.lados.viewmodels.customer.MenuItemsUIState
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
@@ -76,7 +78,8 @@ fun CustomExposedDropDownMenu(
             isReadonly = true
         )
         ExposedDropdownMenu(
-            modifier = Modifier.widthIn(min = windowWidth.dp)
+            modifier = Modifier
+                .widthIn(min = windowWidth.dp)
                 .height(menuHeight.dp),
             scrollState = scrollState,
             expanded = isExpanded,
@@ -85,7 +88,7 @@ fun CustomExposedDropDownMenu(
             when (itemsUiState) {
                 is MenuItemsUIState.Default -> {
                     DropdownMenuItem(
-                        text = { Text(text = "No items", color = Color.Black) },
+                        text = { Text(text = stringResource(R.string.dropdown_no_items), color = Color.Black) },
                         onClick = { /* No action */ },
                     )
                 }

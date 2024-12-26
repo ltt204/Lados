@@ -20,10 +20,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import org.nullgroup.lados.R
 import org.nullgroup.lados.compose.SignIn.ButtonSubmit
 import org.nullgroup.lados.compose.SignIn.CustomTextField
 import org.nullgroup.lados.compose.SignIn.Headline
@@ -60,7 +62,7 @@ fun ForgotPasswordScreen(
         is ResourceState.Success -> {
             NotifySendEmailScreen(
                 modifier = modifier,
-                text = "We Sent you an Email to reset your password.",
+                text = stringResource(R.string.auth_reset_notify),
                 onClick = {
                     forgotPasswordViewModel.handleEvent(
                         ForgotPasswordScreenEvent.HandleReturnToLogin(
@@ -87,7 +89,7 @@ fun ForgotPasswordInputScreen(modifier: Modifier = Modifier) {
         Spacer(modifier = Modifier.height(70.dp))
 
         Headline(
-            text = "Forgot password",
+            text = stringResource(id = R.string.auth_forgot_password_header),
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -116,7 +118,7 @@ fun ForgotPasswordInputScreen(modifier: Modifier = Modifier) {
         if (isError) {
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Email invalid",
+                text = stringResource(id = R.string.auth_invalid_email),
                 color = LadosTheme.colorScheme.error,
             )
         }
@@ -124,7 +126,7 @@ fun ForgotPasswordInputScreen(modifier: Modifier = Modifier) {
         Spacer(modifier = Modifier.height(32.dp))
 
         ButtonSubmit(
-            text = "Continue",
+            text = stringResource(R.string.auth_continue),
             onClick = {
                 if (!forgotPasswordViewModel.isValidateEmail(email)) {
                     isError = true
