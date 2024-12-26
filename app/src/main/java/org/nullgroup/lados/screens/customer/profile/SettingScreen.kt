@@ -38,14 +38,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import org.nullgroup.lados.R
 import org.nullgroup.lados.compose.common.CustomExposedDropDownMenu
 import org.nullgroup.lados.compose.common.DefaultCenterTopAppBar
 import org.nullgroup.lados.compose.profile.ConfirmDialog
+import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.utilities.SupportedRegion
 import org.nullgroup.lados.utilities.capitalizeWords
 import org.nullgroup.lados.utilities.updateLocale
+import org.nullgroup.lados.viewmodels.HomeViewModel
 import org.nullgroup.lados.viewmodels.common.SettingViewModel
 import org.nullgroup.lados.viewmodels.customer.MenuItemsUIState
 
@@ -55,9 +58,12 @@ fun SettingScreen(
     modifier: Modifier = Modifier,
     onBack: () -> Unit,
     paddingValues: PaddingValues = PaddingValues(0.dp),
+    navController: NavController,
     themeSwitched: () -> Unit,
     settingViewModel: SettingViewModel = hiltViewModel(),
 ) {
+    val homeViewModel: HomeViewModel = hiltViewModel()
+
     var isRegionChanged by remember {
         mutableStateOf(false)
     }
@@ -142,6 +148,8 @@ fun SettingScreen(
                 isRegionChanged = isRegionChanged.not()
                 settingViewModel.saveLocale(region)
                 updateLocale(context, region)
+                navController.clearBackStack(Screen.Customer.Home.route)
+                navController.navigate(Screen.Customer.Home.route)
                 (context as? Activity)?.recreate()
             },
             primaryButtonText = stringResource(R.string.dialog_agree),
