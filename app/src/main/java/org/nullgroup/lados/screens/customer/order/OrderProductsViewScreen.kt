@@ -50,6 +50,7 @@ import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.utilities.OrderStatus
 import org.nullgroup.lados.utilities.getActionForButtonOfOrderProduct
 import org.nullgroup.lados.utilities.getStatusByName
+import org.nullgroup.lados.utilities.toCurrency
 import org.nullgroup.lados.viewmodels.customer.OrderProductsState
 import org.nullgroup.lados.viewmodels.customer.OrderProductsViewModel
 
@@ -204,13 +205,13 @@ fun OrderProductItem(
                             val amount = orderProduct.amount
                             val isSale = variant.salePrice != null
                             Text(
-                                text = "$${variant.originalPrice * amount}",
+                                text = (variant.originalPrice * amount).toCurrency(),
                                 textDecoration = if (isSale) TextDecoration.LineThrough else null,
                                 style = LadosTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                             )
                             if (isSale) {
                                 Text(
-                                    text = "$${variant.salePrice!! * amount}",
+                                    text = (variant.salePrice!! * amount).toCurrency(),
                                     style = LadosTheme.typography.titleMedium.copy(
                                         fontWeight = FontWeight.SemiBold,
                                         color = LadosTheme.colorScheme.error,
@@ -250,98 +251,6 @@ fun OrderProductItem(
             }
         )
     }
-}
-
-@Preview
-@Composable
-fun OrderProductsViewScreenPreview() {
-//    // Sample test data
-//    val testOrder = Order(
-//        orderId = "order123",
-//        customerId = "customer@test.com",
-//        orderStatusLog = mapOf(
-//            OrderStatus.CREATED.name to System.currentTimeMillis() - 500000,
-//            OrderStatus.CONFIRMED.name to System.currentTimeMillis() - 400000,
-//            OrderStatus.SHIPPED.name to System.currentTimeMillis() - 300000,
-//            OrderStatus.DELIVERED.name to System.currentTimeMillis() - 200000
-//        ),
-//        orderProducts = listOf(
-//            OrderProduct(
-//                id = "orderProduct1",
-//                productId = "product1",
-//                variantId = "variant1",
-//                amount = 2,
-//                totalPrice = 59.98
-//            ),
-//            OrderProduct(
-//                id = "orderProduct2",
-//                productId = "product2",
-//                variantId = "variant2",
-//                amount = 1,
-//                totalPrice = 29.99
-//            ),
-//            OrderProduct(
-//                id = "orderProduct3",
-//                productId = "product3",
-//                variantId = "variant3",
-//                amount = 3,
-//                totalPrice = 89.97
-//            )
-//        ),
-//        orderTotal = 179.94,
-//        deliveryAddress = "123 Test Street, Test City",
-//        customerPhone = "1234567890"
-//    )
-//    val orderProducts = remember {
-//        mutableStateOf<OrderProductsState>(
-//            OrderProductsState.Success(
-//                mutableListOf(
-//                    Pair(
-//                        Product(
-//                            id = "product1",
-//                            name = "Test Product 1",
-//                            variants = listOf(
-//                                ProductVariant(
-//                                    id = "variant1",
-//                                    size = Size(1, "Skibidi"),
-//                                    color = Color(1, "Red", "#FF0000"),
-//                                    originalPrice = 29.99,
-//                                    salePrice = 19.99,
-//                                    images = listOf(
-//                                        Image(
-//                                            id = "image1",
-//                                            link = "https://via.placeholder.com/150"
-//                                        )
-//                                    )
-//                                )
-//                            )
-//                        ) to ProductVariant(
-//                            id = "variant1",
-//                            size = Size(1, "Small"),
-//                            color = Color(1, "Red", "#FF0000"),
-//                            originalPrice = 29.99,
-//                            salePrice = 19.99,
-//                            images = listOf(
-//                                Image(
-//                                    id = "image1",
-//                                    link = "https://jimmyluxury.in/products/fabric-lucas-double-clothe-cream-full-sleeve-shirt"
-//                                )
-//                            )
-//                        )
-//                    ),
-//                )
-//            )
-//        )
-//    }
-//
-//    val currentOrder = remember {
-//        mutableStateOf(testOrder)
-//    }
-//
-//    OrderProductsView(
-//        orderProducts = orderProducts,
-//        currentOrder = currentOrder,
-//    )
 }
 
 @Preview

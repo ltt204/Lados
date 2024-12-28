@@ -38,7 +38,6 @@
     <string name="profile_setting">Cài đặt</string>
     <string name="profile_setting_regions">Khu vực</string>
     <string name="profile_setting_color_scheme">Chế độ hiển thị</string>
-    <string name="product_price">%1$s ₫</string>
     <string name="dialog_title_region_change">Đổi khu vực thành %1$s</string>
     <string name="dialog_message_region_change">Ứng dụng sẽ cần khởi động lại. Bạn có muốn xác nhận không?</string>
     <string name="dialog_agree">Đồng ý</string>

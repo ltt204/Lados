@@ -40,7 +40,6 @@
     <string name="profile_setting">Setting</string>
     <string name="profile_setting_regions">Regions</string>
     <string name="profile_setting_color_scheme">Color Scheme</string>
-    <string name="product_price">%1$s</string>
     <string name="dialog_title_region_change">Changes region to %1$s</string>
     <string name="dialog_message_region_change">Application need to be reload. Are you accept this?</string>
     <string name="dialog_agree">Agree</string>

@@ -183,7 +183,6 @@ fun CheckoutScreen(
 
     val defaultImageUrl = "https://placehold.co/600x400"
     val defaultTitle = "Unknown Product"
-    val defaultValue = "???"
 
     if (isCheckoutCompleted) {
         CheckoutCompleteScreen(
@@ -249,13 +248,12 @@ fun CheckoutScreen(
             if (checkoutDetail.value == null) {
                 return@Scaffold
             }
-            val context = LocalContext.current
             val (subtotal, productDiscount, orderDiscount, total) = checkoutDetail.value!!
             CheckoutBottomBar(
-                subtotal = subtotal.toCurrency(context),
-                productDiscount = productDiscount.toCurrency(context),
-                orderDiscount = orderDiscount.toCurrency(context),
-                total = total.toCurrency(context),
+                subtotal = subtotal.toCurrency(),
+                productDiscount = productDiscount.toCurrency(),
+                orderDiscount = orderDiscount.toCurrency(),
+                total = total.toCurrency(),
                 onCheckout = onCheckout,
                 checkoutEnabled = isAllowedInteracting && selectedAddress.value != null,
                 modifier = Modifier.padding(horizontal = 20.dp)
@@ -309,16 +307,8 @@ fun CheckoutScreen(
                                 imageUrl = productVariant?.images?.firstOrNull()?.link
                                     ?: defaultImageUrl,
                                 title = product?.name ?: defaultTitle,
-                                originalPrice = stringResource(
-                                    id = R.string.product_price,
-                                    productVariant?.originalPrice!!
-                                ),
-                                salePrice = productVariant.salePrice?.let {
-                                    stringResource(
-                                        id = R.string.product_price,
-                                        it
-                                    )
-                                },
+                                originalPrice = productVariant?.originalPrice!!.toCurrency(),
+                                salePrice = productVariant.salePrice?.toCurrency(),
                                 size = productVariant.size.sizeName,
                                 color = productVariant.color.colorName,
                                 quantity = cartItem.amount,

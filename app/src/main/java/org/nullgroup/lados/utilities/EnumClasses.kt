@@ -22,7 +22,7 @@ enum class UserRole {
     ADMIN
 }
 
-enum class SupportedRegion(val locale: Locale) {
-    US(locale = Locale("en", "United States")),
-    VIETNAM(locale = Locale("vi", "Vietnam"))
+enum class SupportedRegion(val locale: Locale, val regionName: String) {
+    US(locale = Locale("en", "US"), regionName = "United States"),
+    VIETNAM(locale = Locale("vi", "VN"), regionName = "Vietnam")
 }

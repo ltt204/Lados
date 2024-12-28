@@ -69,7 +69,7 @@ fun SettingScreen(
     }
 
     val itemsUiState = MenuItemsUIState.Success(
-        data = SupportedRegion.entries.map { it.locale.country.capitalizeWords() },
+        data = SupportedRegion.entries.map { it.regionName.capitalizeWords() },
     )
     val context = LocalContext.current
     val currentRegion = settingViewModel.locale.collectAsState().value

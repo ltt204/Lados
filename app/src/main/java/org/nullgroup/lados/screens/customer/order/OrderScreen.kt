@@ -46,6 +46,7 @@ import org.nullgroup.lados.data.models.Order
 import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.utilities.OrderStatus
+import org.nullgroup.lados.utilities.toCurrency
 import org.nullgroup.lados.viewmodels.customer.OrderState
 import org.nullgroup.lados.viewmodels.customer.OrderViewModel
 
@@ -209,7 +210,7 @@ fun OrderCard(
                 )
                 Spacer(modifier = Modifier.height(LadosTheme.size.small))
                 Text(
-                    text = "$${order.orderTotal}",
+                    text = order.orderTotal.toCurrency(),
                     style = LadosTheme.typography.bodyMedium.copy(
                         fontSize = 14.sp
                     ),

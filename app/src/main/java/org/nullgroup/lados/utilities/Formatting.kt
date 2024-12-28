@@ -1,13 +1,11 @@
 package org.nullgroup.lados.utilities
 
-import android.content.Context
-import org.nullgroup.lados.R
+import java.text.NumberFormat
 import java.util.Locale
 
-fun Number?.toCurrency(context: Context): String {
+fun Number?.toCurrency(locale: Locale = Locale.getDefault()): String {
     if (this == null) {
-        return context.getString(R.string.product_price, "0.00")
+        return NumberFormat.getCurrencyInstance(locale).format(0)
     }
-    val formatted = String.format(Locale.US, "%.2f", this)
-    return context.getString(R.string.product_price, formatted)
+    return NumberFormat.getCurrencyInstance(locale).format(this)
 }

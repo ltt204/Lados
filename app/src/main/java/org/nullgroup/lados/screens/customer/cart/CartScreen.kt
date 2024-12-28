@@ -39,7 +39,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -338,13 +337,12 @@ fun CartScreen(
         },
         bottomBar = {
             if (isAnyItemsExisted.value) {
-                val context = LocalContext.current
                 val (subtotal, productDiscount, orderDiscount, total) = checkoutDetail()
                 CartBottomBar(
-                    subtotal = subtotal.toCurrency(context),
-                    productDiscount = productDiscount.toCurrency(context),
-                    orderDiscount = orderDiscount.toCurrency(context),
-                    total = total.toCurrency(context),
+                    subtotal = subtotal.toCurrency(),
+                    productDiscount = productDiscount.toCurrency(),
+                    orderDiscount = orderDiscount.toCurrency(),
+                    total = total.toCurrency(),
                     isEnabled = isAnyValidItemSelected.value,
                     onCheckout = onCheckingOut,
                     checkoutEnabled = isAllowedInteracting,
@@ -428,17 +426,8 @@ fun CartScreen(
                                 imageUrl = productVariant?.images?.firstOrNull()?.link
                                     ?: defaultImageUrl,
                                 title = product?.name ?: defaultTitle,
-                                originalPrice = stringResource(
-                                    id = R.string.product_price,
-                                    productVariant?.originalPrice
-                                        ?: defaultValue
-                                ),
-                                salePrice = productVariant?.salePrice?.let {
-                                    stringResource(
-                                        id = R.string.product_price,
-                                        it
-                                    )
-                                },
+                                originalPrice = productVariant?.originalPrice.toCurrency(),
+                                salePrice = productVariant?.salePrice?.toCurrency(),
                                 size = productVariant?.size?.sizeName ?: defaultValue,
                                 color = productVariant?.color?.colorName ?: defaultValue,
                                 clickEnabled = isAllowedInteracting,
@@ -516,7 +505,9 @@ fun CartBottomBar(
             onClick = { onCheckout() },
             enabled = isEnabled && checkoutEnabled,
             colors = buttonColors,
-            modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = 56.dp)
         ) {
             Text(stringResource(R.string.cart_checkout))
         }

@@ -44,14 +44,12 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -86,6 +84,7 @@ import org.nullgroup.lados.data.models.Product
 import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.ui.theme.Primary
+import org.nullgroup.lados.utilities.toCurrency
 import org.nullgroup.lados.viewmodels.CategoryUiState
 import org.nullgroup.lados.viewmodels.HomeViewModel
 import org.nullgroup.lados.viewmodels.ProductUiState
@@ -388,10 +387,7 @@ fun ProductItem(
             ) {
                 val isSale = product.variants.first().salePrice != null
                 Text(
-                    text = stringResource(
-                        id = R.string.product_price,
-                        product.variants.first().originalPrice
-                    ),
+                    text = product.variants.first().originalPrice.toCurrency(),
                     style = TextStyle(
                         fontSize = 16.sp,
                         color = LadosTheme.colorScheme.onSurface.copy(
@@ -402,10 +398,7 @@ fun ProductItem(
                 )
                 if (isSale) {
                     Text(
-                        text = stringResource(
-                            id = R.string.product_price,
-                            product.variants.first().salePrice!!
-                        ),
+                        text = product.variants.first().salePrice!!.toCurrency(),
                         style = TextStyle(
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,

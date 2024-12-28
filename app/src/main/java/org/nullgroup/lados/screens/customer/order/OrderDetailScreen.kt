@@ -45,6 +45,7 @@ import org.nullgroup.lados.utilities.OrderStatus
 import org.nullgroup.lados.utilities.capitalizeWords
 import org.nullgroup.lados.utilities.getByLocale
 import org.nullgroup.lados.utilities.getFirstFourOrderStatuses
+import org.nullgroup.lados.utilities.toCurrency
 import org.nullgroup.lados.utilities.toDateTimeString
 import org.nullgroup.lados.viewmodels.customer.OrderDetailState
 import org.nullgroup.lados.viewmodels.customer.OrderDetailViewModel
@@ -230,7 +231,7 @@ fun OrderItemsArea(
                         ),
                     )
                     Text(
-                        text = "$${order.orderTotal}",
+                        text = order.orderTotal.toCurrency(),
                         style = LadosTheme.typography.bodyMedium.copy(
                             fontSize = 14.sp
                         ),
