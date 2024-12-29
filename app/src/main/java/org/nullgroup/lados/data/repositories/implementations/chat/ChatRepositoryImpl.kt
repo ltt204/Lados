@@ -130,15 +130,29 @@ class ChatRepositoryImpl(
 
     override suspend fun sendMessage(message: Message, chatId: String): Result<Unit> =
         withContext(Dispatchers.IO) {
+            Log.d("ChatRepository:sendMessage", "context: ${message.content} ${message.senderId}")
             suspendCoroutine { continuation ->
+                Log.d(
+                    "ChatRepository:sendMessage",
+                    "suspend: ${message.content} ${message.senderId}"
+                )
                 database.reference.child("chats")
                     .child(chatId)
                     .child("messages")
+                    .child(message.id)
                     .setValue(message.toMap())
                     .addOnSuccessListener {
+                        Log.d(
+                            "ChatRepository:sendMessage",
+                            "success ${message.content} ${message.senderId}"
+                        )
                         continuation.resume(Result.success(Unit))
                     }
                     .addOnFailureListener { e ->
+                        Log.d(
+                            "ChatRepository:sendMessage",
+                            "fail ${message.content} ${message.senderId}"
+                        )
                         continuation.resume(Result.failure(e))
                     }
             }
@@ -149,10 +163,14 @@ class ChatRepositoryImpl(
             .child(chatId)
             .child("messages")
             .orderByChild("timestamp")
+        Log.d("ChatRepository:observeMessages", "chatId: $chatId")
 
         val listener = messagesRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val messageList = snapshot.children.mapNotNull {
+                    val test = it.child("type").getValue(String::class.java)
+                    Log.d("ChatRepository:observeMessages", test ?: "unk")
+
                     it.getValue(Message::class.java)
                 }
                 trySend(messageList)

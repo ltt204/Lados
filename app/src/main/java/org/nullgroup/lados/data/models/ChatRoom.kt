@@ -1,5 +1,8 @@
 package org.nullgroup.lados.data.models
 
+import androidx.annotation.Keep
+
+@Keep
 data class ChatRoom(
     val id: String = "",
     val customerId: String = "",

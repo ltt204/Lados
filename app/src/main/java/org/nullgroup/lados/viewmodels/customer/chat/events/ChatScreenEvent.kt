@@ -14,6 +14,4 @@ sealed class ChatScreenEvent {
     data class SendProduct(
         val productId: String,
     ) : ChatScreenEvent()
-
-    data object ObserveMessages : ChatScreenEvent()
 }

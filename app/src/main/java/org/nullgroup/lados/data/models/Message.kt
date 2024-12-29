@@ -1,5 +1,8 @@
 package org.nullgroup.lados.data.models
 
+import androidx.annotation.Keep
+
+@Keep
 data class Message(
     val id: String = "",
     val senderId: String = "",
@@ -17,7 +20,7 @@ data class Message(
             "timestamp" to timestamp,
             "imageUrl" to imageUrl,
             "productId" to productId,
-            "type" to type,
+            "type" to type.name,
         )
     }
 }

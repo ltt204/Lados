@@ -1,12 +1,12 @@
 package org.nullgroup.lados.screens.customer.chat
 
-import android.graphics.Paint.Align
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,7 +24,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -36,11 +35,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
+import org.nullgroup.lados.compose.signin.CustomTextField
 import org.nullgroup.lados.data.models.Message
 import org.nullgroup.lados.data.models.MessageType
+import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.viewmodels.customer.chat.ChatViewModel
 import org.nullgroup.lados.viewmodels.customer.chat.events.ChatScreenEvent
@@ -52,6 +56,8 @@ import java.util.Locale
 @Composable
 fun ChatScreen(
     modifier: Modifier = Modifier,
+    navController: NavController = rememberNavController(),
+    paddingValues: PaddingValues = PaddingValues(0.dp),
 ) {
     val viewModel = hiltViewModel<ChatViewModel>()
     val messages by viewModel.messages.collectAsState()
@@ -68,11 +74,11 @@ fun ChatScreen(
         }
     }
 
-    LaunchedEffect(true) {
-        viewModel.handleEvent(ChatScreenEvent.ObserveMessages)
-    }
-
-    Box(modifier = modifier.fillMaxSize()) {
+    Box(
+        modifier = modifier
+            .padding(bottom = paddingValues.calculateBottomPadding())
+            .fillMaxSize()
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -85,7 +91,13 @@ fun ChatScreen(
                 reverseLayout = true,
             ) {
                 items(messages.reversed()) { message ->
-                    // message item
+                    MessageItem(
+                        message = message,
+                        isFromCurrentUser = message.senderId == viewModel.getCurrentUserId(),
+                        onProductClick = { productId ->
+                            navController.navigate("${Screen.Customer.ProductDetailScreen.route}/$productId")
+                        }
+                    )
                 }
             }
 
@@ -102,15 +114,23 @@ fun ChatScreen(
                     Icon(
                         imageVector = Icons.Default.Image,
                         contentDescription = "Send image",
+                        tint = LadosTheme.colorScheme.primary,
                     )
                 }
 
-                TextField(
-                    value = messageText,
+//                TextField(
+//                    value = messageText,
+//                    onValueChange = { messageText = it },
+//                    modifier = Modifier.weight(1f),
+//                    placeholder = { Text("Type a message...") },
+//                    textStyle = LadosTheme.typography.titleMedium,
+//                )
+
+                CustomTextField(
+                    text = messageText,
                     onValueChange = { messageText = it },
                     modifier = Modifier.weight(1f),
-                    placeholder = { Text("Type a message...") },
-                    enabled = uiState !is ChatUiState.Loading
+                    label = "Type a message...",
                 )
 
                 IconButton(
@@ -124,7 +144,8 @@ fun ChatScreen(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Send,
-                        contentDescription = "Send message"
+                        contentDescription = "Send message",
+                        tint = LadosTheme.colorScheme.primary,
                     )
                 }
             }
@@ -151,8 +172,8 @@ fun MessageItem(
             .padding(vertical = LadosTheme.size.small / 2),
         horizontalAlignment = if (isFromCurrentUser) Alignment.End else Alignment.Start,
     ) {
-        when (message.type) {
-            MessageType.TEXT -> {
+        when (message.type.name) {
+            MessageType.TEXT.name -> {
                 Surface(
                     color = if (isFromCurrentUser)
                         LadosTheme.colorScheme.primaryContainer
@@ -170,7 +191,7 @@ fun MessageItem(
                 }
             }
 
-            MessageType.IMAGE -> {
+            MessageType.IMAGE.name -> {
                 Surface(
                     shape = LadosTheme.shape.medium,
                     tonalElevation = 2.dp,
@@ -186,7 +207,7 @@ fun MessageItem(
                 }
             }
 
-            MessageType.PRODUCT -> {
+            MessageType.PRODUCT.name -> {
                 Surface(
                     modifier = Modifier
                         .clickable {
@@ -238,4 +259,20 @@ fun MessageItem(
             ),
         )
     }
+}
+
+@Preview
+@Composable
+fun MessageItemPreview() {
+    MessageItem(Message(
+        id = "1",
+        senderId = "1",
+        content = "Ban co khoe khong",
+        timestamp = System.currentTimeMillis(),
+        type = MessageType.TEXT,
+        imageUrl = null,
+        productId = null,
+    ),
+        isFromCurrentUser = true,
+        onProductClick = {})
 }

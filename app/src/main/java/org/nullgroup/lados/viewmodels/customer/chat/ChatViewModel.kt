@@ -1,8 +1,10 @@
 package org.nullgroup.lados.viewmodels.customer.chat
 
 import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.stateIn
@@ -14,6 +16,7 @@ import org.nullgroup.lados.viewmodels.customer.chat.events.ChatScreenEvent
 import org.nullgroup.lados.viewmodels.customer.chat.states.ChatUiState
 import javax.inject.Inject
 
+@HiltViewModel
 class ChatViewModel @Inject constructor(
     private val repository: ChatRepository,
 ) : ViewModel() {
@@ -30,6 +33,7 @@ class ChatViewModel @Inject constructor(
             repository.getCurrentUserId() ?: ""
         ) { chatId ->
             this.chatId = chatId
+            observeMessages(chatId)
         }
     }
 
@@ -37,24 +41,22 @@ class ChatViewModel @Inject constructor(
     fun handleEvent(event: ChatScreenEvent) {
         when (event) {
             is ChatScreenEvent.SendImage -> {
-                sendImageMessage(event.uri, this.chatId)
+                sendImageMessage(event.uri)
             }
 
             is ChatScreenEvent.SendProduct -> {
-                sendProductMessage(event.productId, this.chatId)
+                sendProductMessage(event.productId)
             }
 
             is ChatScreenEvent.SendText -> {
-                sendTextMessage(event.content, this.chatId)
-            }
-
-            is ChatScreenEvent.ObserveMessages -> {
-                observeMessages(this.chatId)
+                sendTextMessage(event.content)
             }
         }
     }
 
-    private fun sendTextMessage(content: String, chatId: String) {
+    fun getCurrentUserId(): String = repository.getCurrentUserId() ?: ""
+
+    private fun sendTextMessage(content: String) {
         val messageId = repository.generateMessageId(chatId) ?: return
         val currentUserId = repository.getCurrentUserId() ?: return
 
@@ -66,21 +68,24 @@ class ChatViewModel @Inject constructor(
         )
 
         viewModelScope.launch {
-            uiState.value = ChatUiState.Loading
             try {
                 repository.sendMessage(message, chatId)
                     .onFailure { e ->
                         uiState.value = ChatUiState.Error(e.message)
                     }
+                    .onSuccess {
+                        Log.d(
+                            "ChatViewModel:sendTextMessage",
+                            "${message.content} ${message.senderId}"
+                        )
+                    }
             } catch (e: Exception) {
                 uiState.value = ChatUiState.Error(e.message)
-            } finally {
-                uiState.value = ChatUiState.Idle
             }
         }
     }
 
-    private fun sendImageMessage(uri: Uri, chatId: String) {
+    private fun sendImageMessage(uri: Uri) {
         val messageId = repository.generateMessageId(chatId) ?: return
         val currentUserId = repository.getCurrentUserId() ?: return
 
@@ -100,6 +105,12 @@ class ChatViewModel @Inject constructor(
                             .onFailure { e ->
                                 uiState.value = ChatUiState.Error(e.message)
                             }
+                            .onSuccess {
+                                Log.d(
+                                    "ChatViewModel:sendImageMessage",
+                                    "${message.content} ${message.senderId}"
+                                )
+                            }
                     }
                     .onFailure { e ->
                         uiState.value = ChatUiState.Error(e.message)
@@ -112,7 +123,7 @@ class ChatViewModel @Inject constructor(
         }
     }
 
-    private fun sendProductMessage(productId: String, chatId: String) {
+    private fun sendProductMessage(productId: String) {
         val messageId = repository.generateMessageId(chatId) ?: return
         val currentUserId = repository.getCurrentUserId() ?: return
 
@@ -124,7 +135,6 @@ class ChatViewModel @Inject constructor(
         )
 
         viewModelScope.launch {
-            uiState.value = ChatUiState.Loading
             try {
                 repository.sendMessage(message, chatId)
                     .onFailure { e ->
@@ -132,8 +142,6 @@ class ChatViewModel @Inject constructor(
                     }
             } catch (e: Exception) {
                 uiState.value = ChatUiState.Error(e.message)
-            } finally {
-                uiState.value = ChatUiState.Idle
             }
         }
     }
