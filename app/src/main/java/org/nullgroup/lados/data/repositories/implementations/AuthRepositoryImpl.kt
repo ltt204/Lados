@@ -5,7 +5,6 @@ import android.util.Base64
 import android.util.Log
 import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
-import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
@@ -14,7 +13,6 @@ import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.local.Persistence
 import kotlinx.coroutines.tasks.await
 import org.json.JSONObject
 import org.nullgroup.lados.data.models.AuthTokens
@@ -24,8 +22,6 @@ import org.nullgroup.lados.data.repositories.interfaces.AuthRepository
 import org.nullgroup.lados.data.repositories.interfaces.SharedPreferencesRepository
 import org.nullgroup.lados.data.repositories.interfaces.UserRepository
 import org.nullgroup.lados.viewmodels.common.states.ResourceState
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 class AuthRepositoryImpl(
     private val firestore: FirebaseFirestore,
@@ -48,12 +44,12 @@ class AuthRepositoryImpl(
         }
     }
 
-    private fun mapToUser(firebaseUser: FirebaseUser, provider: String): User {
+    private fun mapToUser(firebaseUser: FirebaseUser, provider: String, role: String?): User {
         return User(
             id = firebaseUser.uid,
             name = firebaseUser.displayName ?: "",
             email = firebaseUser.email ?: "",
-            role = UserRole.CUSTOMER.name,
+            role = role ?: UserRole.CUSTOMER.name,
             phoneNumber = firebaseUser.phoneNumber ?: "",
             avatarUri = firebaseUser.photoUrl?.toString() ?: "",
             provider = provider,
@@ -76,7 +72,7 @@ class AuthRepositoryImpl(
             val authResult = firebaseAuth.signInWithCredential(firebaseCredential).await()
 
             if (authResult != null) {
-                val user = mapToUser(authResult.user!!, "google.com")
+                val user = mapToUser(authResult.user!!, "google.com", UserRole.CUSTOMER.name)
 
                 val refreshToken = authResult.user!!.getIdToken(false).await().token ?: ""
                 sharedPreferences.saveAuthTokens(
@@ -105,9 +101,10 @@ class AuthRepositoryImpl(
             sharedPreferences.getAuthTokens() ?: return ResourceState.Idle
 
         return try {
-            val user = firebaseAuth.currentUser
+            val user = userRepository.getUserFromFirestore(firebaseAuth.currentUser?.uid ?: "").getOrNull()
+
             if (user != null) {
-                return ResourceState.Success(mapToUser(user, "email"))
+                return ResourceState.Success(user)
             }
 
             if (!isTokenExpired(tokens.idToken)) {
@@ -120,7 +117,8 @@ class AuthRepositoryImpl(
                 val authResult = firebaseAuth.signInWithCredential(credential).await()
 
                 if (authResult?.user != null) {
-                    return ResourceState.Success(mapToUser(authResult.user!!, tokens.provider))
+                    val userAuth = userRepository.getUserFromFirestore(authResult.user?.uid ?: "").getOrNull()
+                    return ResourceState.Success(userAuth)
                 }
             }
 
@@ -136,7 +134,8 @@ class AuthRepositoryImpl(
 
                 if (newIdToken != null) {
                     sharedPreferences.saveAuthTokens(tokens.copy(idToken = newIdToken))
-                    ResourceState.Success(mapToUser(authResult.user!!, tokens.provider))
+                    val userAuth = userRepository.getUserFromFirestore(authResult.user?.uid ?: "").getOrNull()
+                    ResourceState.Success(userAuth)
                 } else {
                     ResourceState.Error("Failed to get new token")
                 }
@@ -219,13 +218,15 @@ class AuthRepositoryImpl(
                 return ResourceState.Error("Failed to create user")
             }
 
-            val user = mapToUser(result.user!!, "password")
+            val user = mapToUser(result.user!!, "password", UserRole.CUSTOMER.name)
 
-            userRepository.saveUserToFirestore(user.copy(
-                name = fullName,
-                email = email,
-                phoneNumber = phone,
-            ))
+            userRepository.saveUserToFirestore(
+                user.copy(
+                    name = fullName,
+                    email = email,
+                    phoneNumber = phone,
+                )
+            )
 
             firebaseAuth.currentUser?.sendEmailVerification()?.await()
 
