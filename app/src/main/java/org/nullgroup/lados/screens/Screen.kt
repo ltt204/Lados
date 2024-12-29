@@ -180,12 +180,10 @@ sealed class Screen(
         icon: ImageVector
     ) : Screen(name, route, icon) {
         data object ChatScreen : Staff("Chat", "staff_chat", Icons.Default.MailOutline)
-        data object Reports : Staff("Reports", "staff_reports", Icons.Default.AccountCircle)
-        data object TeamAnalytics :
-            Staff("Team Analytics", "staff_team_analytics", Icons.Default.AccountCircle)
+        data object OrderManagement : Staff("Order Management", "staff_order_management", Icons.Default.AccountCircle)
 
         companion object {
-            fun getAllScreens() = listOf(ChatScreen, Reports, TeamAnalytics)
+            fun getAllScreens() = listOf(ChatScreen, OrderManagement)
         }
     }
 
@@ -197,17 +195,19 @@ sealed class Screen(
         route: String,
         icon: ImageVector
     ) : Screen(name, route, icon) {
-        data object AdminPanel : Admin("Panel", "admin_panel", Icons.Default.AccountCircle)
         data object UserManagement :
             Admin("User Management", "user_management", Icons.Default.AccountCircle)
 
-        data object SystemSettings :
-            Admin("System Settings", "system_settings", Icons.Default.AccountCircle)
+        data object ProductManagement :
+            Admin("Product Management", "product_management", Icons.Default.AccountCircle)
+
+        data object PromotionManagement :
+            Admin("Promotion Management", "promotion_management", Icons.Default.AccountCircle)
 
         data object Analytics : Admin("Analytics", "analytics", Icons.Default.AccountCircle)
 
         companion object {
-            fun getAllScreens() = listOf(AdminPanel, UserManagement, SystemSettings, Analytics)
+            fun getAllScreens() = listOf(Analytics, UserManagement, ProductManagement, PromotionManagement)
         }
     }
 
