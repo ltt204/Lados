@@ -37,6 +37,7 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.Done
 import androidx.compose.material.icons.outlined.ShoppingCart
+import androidx.compose.material.icons.outlined.ShoppingCartCheckout
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -82,6 +83,7 @@ import org.nullgroup.lados.compose.common.LoadOnProgress
 import org.nullgroup.lados.data.models.Category
 import org.nullgroup.lados.data.models.Product
 import org.nullgroup.lados.screens.Screen
+import org.nullgroup.lados.screens.customer.product.PriceSlider
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.ui.theme.Primary
 import org.nullgroup.lados.utilities.toCurrency
@@ -142,7 +144,7 @@ fun SearchBar(
             singleLine = true,
             placeholder = {
                 Text(
-                    stringResource(R.string.search_place_holder),
+                    "Search",
                     style = LadosTheme.typography.bodyLarge.copy(
                         color = LadosTheme.colorScheme.onBackground
                     )
@@ -445,6 +447,7 @@ fun ProductItem(
     }
 }
 
+
 @Composable
 fun ProductRow(
     modifier: Modifier = Modifier,
@@ -465,6 +468,24 @@ fun ProductRow(
         }
     }
 }
+
+fun Product.hasNoSalePrice(): Boolean {
+    return variants.none { it.salePrice != null}
+}
+
+fun Product.isProductOnSale(): Triple<Boolean, Double?, Double?> {
+    val saleVariant = variants.find { it.salePrice != null}
+    return if (saleVariant != null) {
+        Triple(true, saleVariant.salePrice, saleVariant.originalPrice)
+    } else {
+        Triple(false, null, null)
+    }
+}
+
+fun Product.sumOfSaleAmount(): Int {
+    return variants.sumOf { it.saleAmount }
+}
+
 
 @Composable
 fun DrawProductScreenContent(
@@ -532,6 +553,26 @@ fun DrawProductScreenContent(
 
                 item {
                     TitleTextRow(
+                        contentLeft = "On Sale",
+                        contentRight = "See all",
+                        onClick = {
+                            sharedViewModel.updateTypeScreen("On Sale")
+                            navController.navigate(
+                                Screen.Customer.DisplayProductInCategory.route
+                            )
+                        }
+                    )
+                }
+                item {
+                    ProductRow(
+                        onProductClick = onProductClick,
+                        products = (productUiState.value as ProductUiState.Success).products.filter{ !it.hasNoSalePrice() }
+                            .take(5)
+                    )
+                }
+
+                item {
+                    TitleTextRow(
                         contentLeft = stringResource(R.string.home_top_selling),
                         contentRight = stringResource(R.string.home_see_all),
                         onClick = {
@@ -546,7 +587,7 @@ fun DrawProductScreenContent(
                 item {
                     ProductRow(
                         onProductClick = onProductClick,
-                        products = (productUiState.value as ProductUiState.Success).products.filter { it.engagements.size >= 2 }
+                        products = (productUiState.value as ProductUiState.Success).products.sortedByDescending { it.sumOfSaleAmount() }
                             .take(5)
                     )
                 }
@@ -570,6 +611,25 @@ fun DrawProductScreenContent(
                             .take(1)
                     )
                 }
+
+                item {
+                    TitleTextRow(
+                        contentLeft = "All products",
+                        contentRight = "See all",
+                        onClick = {
+                            sharedViewModel.updateTypeScreen("All Products")
+                            navController.navigate(
+                                Screen.Customer.DisplayProductInCategory.route
+                            )
+                        }
+                    )
+                }
+                item {
+                    ProductRow(
+                        onProductClick = onProductClick,
+                        products = (productUiState.value as ProductUiState.Success).products.take(5)
+                    )
+                }
             }
         }
     }
@@ -584,6 +644,7 @@ fun BottomSheetContent(
     paddingValues: PaddingValues,
     onCloseClick: () -> Unit,
     onClearClick: (String) -> Unit = {},
+    onSliderChanged: (ClosedFloatingPointRange<Float>) -> Unit = {}
 ) {
     var selectedButtonIndex by remember { mutableStateOf<Int?>(null) }
     Box(
@@ -596,10 +657,10 @@ fun BottomSheetContent(
                 start = 8.dp,
                 end = 8.dp,
                 top = 8.dp,
-                bottom = paddingValues.calculateBottomPadding() + 8.dp
             )
     ) {
         Column(
+            modifier = Modifier.fillMaxHeight(),
             verticalArrangement = Arrangement.spacedBy(8.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -608,18 +669,26 @@ fun BottomSheetContent(
                     .fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
-
-                ) {
+            ) {
                 TextButton(
                     onClick = {
                         if (title == "Sort by" && selectedButtonIndex!! >= 2) {
                             selectedButtonIndex = null
                             onClearClick("Sort by")
                         } else
-                            if (title != "Sort by" && selectedButtonIndex!! < 2) {
+                            if (title == "Price" && selectedButtonIndex!! < 2) {
                                 selectedButtonIndex = null
                                 onClearClick("Price")
-                            }
+                            } else if (title == "Category") {
+                                selectedButtonIndex = null
+                                onClearClick("Category")
+                            } else
+                                if (title == "Rating") {
+                                    selectedButtonIndex = null
+                                    onClearClick("Rating")
+                                } else if (title == "Pricing Range") {
+                                    onClearClick("Pricing Range")
+                                }
                         onCloseClick()
                     }
                 ) {
@@ -645,57 +714,71 @@ fun BottomSheetContent(
                 }
             }
             Spacer(modifier = Modifier.height(8.dp))
-            options.forEachIndexed { index, option ->
-                Button(
-                    onClick = {
-                        selectedButtonIndex = index
-                        if (title == "Sort by")
-                            selectedButtonIndex = selectedButtonIndex!! + 2
-                        //onCloseClick()
-                        onSelectionChanged(option)
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth(0.95f)
-                        .height(56.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        if ((title != "Sort by" && selectedButtonIndex == index) ||
-                            (title == "Sort by" && selectedButtonIndex == index + 2)
-                        )
-                            LadosTheme.colorScheme.primary else
-                            LadosTheme.colorScheme.surfaceContainerHighest
-                    )
-                ) {
-                    Row(
+            if (title == "Pricing Range") {
+                val minPrice = 0f
+                val maxPrice = 200f
+                var currentPriceRange by remember { mutableStateOf(minPrice..maxPrice) }
+                PriceSlider(
+                    minPrice = minPrice,
+                    maxPrice = maxPrice,
+                    currentPriceRange = currentPriceRange,
+                    onPriceRangeChanged = { newRange ->
+                        currentPriceRange = newRange
+                        onSliderChanged(newRange)
+                    }
+                )
+            } else
+                options.forEachIndexed { index, option ->
+                    Button(
+                        onClick = {
+                            selectedButtonIndex = index
+                            if (title == "Sort by")
+                                selectedButtonIndex = selectedButtonIndex!! + 2
+                            //onCloseClick()
+                            onSelectionChanged(option)
+                        },
                         modifier = Modifier
-                            .fillMaxWidth(0.95f),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = option,
-                            fontWeight = FontWeight.Bold,
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = if ((title != "Sort by" && selectedButtonIndex == index) ||
+                            .fillMaxWidth(0.95f)
+                            .height(56.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            if ((title != "Sort by" && selectedButtonIndex == index) ||
                                 (title == "Sort by" && selectedButtonIndex == index + 2)
                             )
-                                Color.White else
-                                LadosTheme.colorScheme.onBackground
+                                LadosTheme.colorScheme.primary else
+                                LadosTheme.colorScheme.surfaceContainerHighest
                         )
-                        if ((title != "Sort by" && selectedButtonIndex == index) ||
-                            (title == "Sort by" && selectedButtonIndex == index + 2)
-                        )
-                            Icon(
-                                Icons.Outlined.Done,
-                                contentDescription = null,
-                                tint = if ((title != "Sort by" && selectedButtonIndex == index) ||
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth(0.95f),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = option,
+                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = if ((title != "Sort by" && selectedButtonIndex == index) ||
                                     (title == "Sort by" && selectedButtonIndex == index + 2)
                                 )
-                                    LadosTheme.colorScheme.primary else
-                                    LadosTheme.colorScheme.surfaceContainerHighest
+                                    Color.White else
+                                    LadosTheme.colorScheme.onBackground
                             )
+                            if ((title != "Sort by" && selectedButtonIndex == index) ||
+                                (title == "Sort by" && selectedButtonIndex == index + 2)
+                            )
+                                Icon(
+                                    Icons.Outlined.Done,
+                                    contentDescription = null,
+                                    tint = if ((title != "Sort by" && selectedButtonIndex == index) ||
+                                        (title == "Sort by" && selectedButtonIndex == index + 2)
+                                    )
+                                        LadosTheme.colorScheme.primary else
+                                        LadosTheme.colorScheme.surfaceContainerHighest
+                                )
+                        }
                     }
                 }
-            }
         }
     }
 }

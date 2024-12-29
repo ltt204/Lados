@@ -68,7 +68,8 @@ fun DrawError_FindNotMatch(
             TextStyle(
                 fontSize = 24.sp,
                 fontWeight = FontWeight.SemiBold,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                color = LadosTheme.colorScheme.onBackground,
             )
         )
         Spacer(modifier = Modifier.height(16.dp))
@@ -78,10 +79,10 @@ fun DrawError_FindNotMatch(
                     Screen.Customer.Home.route
                 ) },
             // note: modify color
-            colors = ButtonDefaults.buttonColors(LadosTheme.colorScheme.primary)
+            colors = ButtonDefaults.buttonColors(LadosTheme.colorScheme.primaryContainer)
         ) {
 
-            Text(text = "Explore Categories")
+            Text(text = "Explore Categories", color = LadosTheme.colorScheme.onPrimaryContainer)
 
 
         }
