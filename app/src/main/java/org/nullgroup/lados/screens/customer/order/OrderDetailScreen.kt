@@ -42,13 +42,12 @@ import org.nullgroup.lados.data.models.Order
 import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.utilities.OrderStatus
-import org.nullgroup.lados.utilities.capitalizeWords
 import org.nullgroup.lados.utilities.getByLocale
 import org.nullgroup.lados.utilities.getFirstFourOrderStatuses
 import org.nullgroup.lados.utilities.toCurrency
 import org.nullgroup.lados.utilities.toDateTimeString
-import org.nullgroup.lados.viewmodels.customer.OrderDetailState
-import org.nullgroup.lados.viewmodels.customer.OrderDetailViewModel
+import org.nullgroup.lados.viewmodels.customer.order.OrderDetailState
+import org.nullgroup.lados.viewmodels.customer.order.OrderDetailViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

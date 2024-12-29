@@ -1,4 +1,4 @@
-package org.nullgroup.lados.viewmodels.customer
+package org.nullgroup.lados.viewmodels.customer.product
 
 import android.util.Log
 import androidx.lifecycle.SavedStateHandle
@@ -17,11 +17,9 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.nullgroup.lados.data.models.Product
 import org.nullgroup.lados.data.models.ProductVariant
-import org.nullgroup.lados.data.models.User
 import org.nullgroup.lados.data.models.UserEngagement
 import org.nullgroup.lados.data.repositories.interfaces.ProductRepository
 import org.nullgroup.lados.data.repositories.interfaces.ReviewProductRepository
-import org.nullgroup.lados.data.repositories.interfaces.UserRepository
 import org.nullgroup.lados.screens.Screen
 import javax.inject.Inject
 

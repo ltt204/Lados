@@ -1,4 +1,4 @@
-package org.nullgroup.lados.viewmodels.customer
+package org.nullgroup.lados.viewmodels.customer.profile.address
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

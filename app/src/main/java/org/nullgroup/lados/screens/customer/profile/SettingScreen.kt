@@ -48,9 +48,9 @@ import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.utilities.SupportedRegion
 import org.nullgroup.lados.utilities.capitalizeWords
 import org.nullgroup.lados.utilities.updateLocale
-import org.nullgroup.lados.viewmodels.HomeViewModel
+import org.nullgroup.lados.viewmodels.customer.home.HomeViewModel
 import org.nullgroup.lados.viewmodels.common.SettingViewModel
-import org.nullgroup.lados.viewmodels.customer.MenuItemsUIState
+import org.nullgroup.lados.viewmodels.customer.profile.address.MenuItemsUIState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

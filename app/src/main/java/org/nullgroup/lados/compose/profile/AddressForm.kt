@@ -27,7 +27,7 @@ import org.nullgroup.lados.R
 import org.nullgroup.lados.compose.SignIn.CustomTextField
 import org.nullgroup.lados.compose.common.CustomExposedDropDownMenu
 import org.nullgroup.lados.data.models.Address
-import org.nullgroup.lados.viewmodels.customer.MenuItemsUIState
+import org.nullgroup.lados.viewmodels.customer.profile.address.MenuItemsUIState
 
 @Composable
 fun AddressForm(

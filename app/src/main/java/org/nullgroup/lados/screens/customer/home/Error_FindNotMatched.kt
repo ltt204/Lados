@@ -1,4 +1,4 @@
-package org.nullgroup.lados.screens.customer
+package org.nullgroup.lados.screens.customer.home
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background

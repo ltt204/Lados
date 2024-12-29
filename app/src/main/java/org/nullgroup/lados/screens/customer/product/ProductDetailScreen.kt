@@ -73,7 +73,7 @@ import org.nullgroup.lados.data.models.UserEngagement
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.utilities.formatToRelativeTime
 import org.nullgroup.lados.utilities.toCurrency
-import org.nullgroup.lados.viewmodels.customer.ProductDetailScreenViewModel
+import org.nullgroup.lados.viewmodels.customer.product.ProductDetailScreenViewModel
 import java.util.Locale
 
 data class ProductDetailUiState(

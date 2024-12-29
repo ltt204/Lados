@@ -1,4 +1,4 @@
-package org.nullgroup.lados.viewmodels.customer
+package org.nullgroup.lados.viewmodels.customer.home
 
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel

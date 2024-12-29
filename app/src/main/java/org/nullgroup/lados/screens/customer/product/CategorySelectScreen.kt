@@ -44,8 +44,8 @@ import org.nullgroup.lados.R
 import org.nullgroup.lados.data.models.Category
 import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.ui.theme.LadosTheme
-import org.nullgroup.lados.viewmodels.CategoryUiState
-import org.nullgroup.lados.viewmodels.HomeViewModel
+import org.nullgroup.lados.viewmodels.customer.home.CategoryUiState
+import org.nullgroup.lados.viewmodels.customer.home.HomeViewModel
 import org.nullgroup.lados.viewmodels.SharedViewModel
 
 @Composable

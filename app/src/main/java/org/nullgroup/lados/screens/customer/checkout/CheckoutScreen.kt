@@ -48,7 +48,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.buildAnnotatedString
@@ -72,9 +71,9 @@ import org.nullgroup.lados.data.models.Address
 import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.utilities.toCurrency
-import org.nullgroup.lados.viewmodels.customer.CheckoutError
-import org.nullgroup.lados.viewmodels.customer.CheckoutViewModel
-import org.nullgroup.lados.viewmodels.customer.InsufficientOrderProductInfo
+import org.nullgroup.lados.viewmodels.customer.checkout.CheckoutError
+import org.nullgroup.lados.viewmodels.customer.checkout.CheckoutViewModel
+import org.nullgroup.lados.viewmodels.customer.checkout.InsufficientOrderProductInfo
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable

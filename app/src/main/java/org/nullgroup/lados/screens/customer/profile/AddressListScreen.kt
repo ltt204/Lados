@@ -37,7 +37,7 @@ import org.nullgroup.lados.compose.common.TwoColsItem
 import org.nullgroup.lados.compose.profile.SwipeToDeleteContainer
 import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.ui.theme.LadosTheme
-import org.nullgroup.lados.viewmodels.customer.AddressListViewModel
+import org.nullgroup.lados.viewmodels.customer.profile.address.AddressListViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

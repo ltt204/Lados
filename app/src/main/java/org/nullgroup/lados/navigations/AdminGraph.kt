@@ -7,7 +7,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import org.nullgroup.lados.screens.Screen
-import org.nullgroup.lados.screens.customer.HomeScreen
 
 
 @Composable

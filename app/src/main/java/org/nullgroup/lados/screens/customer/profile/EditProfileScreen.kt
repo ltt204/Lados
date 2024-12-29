@@ -56,9 +56,9 @@ import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.ui.theme.Typography
 import org.nullgroup.lados.utilities.toByteArray
 import org.nullgroup.lados.utilities.toDrawable
-import org.nullgroup.lados.viewmodels.customer.EditProfileViewModel
-import org.nullgroup.lados.viewmodels.customer.ProfilePictureUiState
-import org.nullgroup.lados.viewmodels.customer.UserUiState
+import org.nullgroup.lados.viewmodels.customer.profile.EditProfileViewModel
+import org.nullgroup.lados.viewmodels.customer.profile.ProfilePictureUiState
+import org.nullgroup.lados.viewmodels.customer.profile.UserUiState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

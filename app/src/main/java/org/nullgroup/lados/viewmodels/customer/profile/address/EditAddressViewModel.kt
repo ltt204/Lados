@@ -1,4 +1,4 @@
-package org.nullgroup.lados.viewmodels.customer
+package org.nullgroup.lados.viewmodels.customer.profile.address
 
 import android.util.Log
 import androidx.compose.runtime.getValue

@@ -1,4 +1,4 @@
-package org.nullgroup.lados.viewmodels.customer
+package org.nullgroup.lados.viewmodels.customer.checkout
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf

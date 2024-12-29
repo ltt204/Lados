@@ -48,9 +48,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -59,18 +57,13 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.google.firebase.Timestamp
 import org.nullgroup.lados.R
-import org.nullgroup.lados.data.models.Image
-import org.nullgroup.lados.data.models.Product
 import org.nullgroup.lados.data.models.ProductVariant
-import org.nullgroup.lados.data.models.Size
 import org.nullgroup.lados.data.models.UserEngagement
 import org.nullgroup.lados.screens.Screen
-import org.nullgroup.lados.screens.customer.order.OrderItemsArea
 import org.nullgroup.lados.ui.theme.LadosTheme
-import org.nullgroup.lados.utilities.getCurrentUTCFormattedTime
-import org.nullgroup.lados.viewmodels.customer.ProfileViewModel
-import org.nullgroup.lados.viewmodels.customer.ReviewProductViewModel
-import org.nullgroup.lados.viewmodels.customer.ReviewProductsState
+import org.nullgroup.lados.viewmodels.customer.profile.ProfileViewModel
+import org.nullgroup.lados.viewmodels.customer.product.ReviewProductViewModel
+import org.nullgroup.lados.viewmodels.customer.product.ReviewProductsState
 
 
 @RequiresApi(Build.VERSION_CODES.O)

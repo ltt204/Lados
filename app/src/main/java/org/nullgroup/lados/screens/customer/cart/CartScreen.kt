@@ -60,7 +60,7 @@ import org.nullgroup.lados.data.models.CartItem
 import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.utilities.toCurrency
-import org.nullgroup.lados.viewmodels.customer.CartViewModel
+import org.nullgroup.lados.viewmodels.customer.cart.CartViewModel
 
 enum class ItemState {
     SELECTED,

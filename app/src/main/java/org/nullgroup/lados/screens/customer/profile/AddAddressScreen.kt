@@ -35,8 +35,8 @@ import org.nullgroup.lados.compose.profile.AddressForm
 import org.nullgroup.lados.compose.profile.ConfirmDialog
 import org.nullgroup.lados.compose.common.DefaultCenterTopAppBar
 import org.nullgroup.lados.ui.theme.LadosTheme
-import org.nullgroup.lados.viewmodels.customer.AddAddressViewModel
-import org.nullgroup.lados.viewmodels.customer.SavingResult
+import org.nullgroup.lados.viewmodels.customer.profile.address.AddAddressViewModel
+import org.nullgroup.lados.viewmodels.customer.profile.address.SavingResult
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

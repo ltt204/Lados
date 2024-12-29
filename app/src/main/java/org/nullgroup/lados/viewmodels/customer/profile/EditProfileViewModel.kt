@@ -1,4 +1,4 @@
-package org.nullgroup.lados.viewmodels.customer
+package org.nullgroup.lados.viewmodels.customer.profile
 
 import android.util.Log
 import androidx.compose.runtime.MutableState
@@ -12,7 +12,7 @@ import org.nullgroup.lados.data.models.User
 import org.nullgroup.lados.data.models.UserProfilePicture
 import org.nullgroup.lados.data.repositories.interfaces.ImageRepository
 import org.nullgroup.lados.data.repositories.interfaces.UserRepository
-import org.nullgroup.lados.viewmodels.customer.ProfilePictureUiState.Loading
+import org.nullgroup.lados.viewmodels.customer.profile.ProfilePictureUiState.Loading
 import javax.inject.Inject
 
 @HiltViewModel

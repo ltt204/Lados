@@ -1,4 +1,4 @@
-package org.nullgroup.lados.viewmodels.customer
+package org.nullgroup.lados.viewmodels.customer.cart
 
 import android.util.Log
 import androidx.lifecycle.ViewModel

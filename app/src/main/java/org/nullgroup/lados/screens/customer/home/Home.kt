@@ -1,4 +1,4 @@
-package org.nullgroup.lados.screens.customer
+package org.nullgroup.lados.screens.customer.home
 
 //noinspection UsingMaterialAndMaterial3Libraries
 //noinspection UsingMaterialAndMaterial3Libraries
@@ -85,9 +85,9 @@ import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.ui.theme.Primary
 import org.nullgroup.lados.utilities.toCurrency
-import org.nullgroup.lados.viewmodels.CategoryUiState
-import org.nullgroup.lados.viewmodels.HomeViewModel
-import org.nullgroup.lados.viewmodels.ProductUiState
+import org.nullgroup.lados.viewmodels.customer.home.CategoryUiState
+import org.nullgroup.lados.viewmodels.customer.home.HomeViewModel
+import org.nullgroup.lados.viewmodels.customer.home.ProductUiState
 import org.nullgroup.lados.viewmodels.SharedViewModel
 import java.text.DecimalFormat
 
