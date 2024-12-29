@@ -1,6 +1,7 @@
 package org.nullgroup.lados.viewmodels.customer.home
 
 import android.util.Log
+import androidx.annotation.FloatRange
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -11,6 +12,9 @@ import org.nullgroup.lados.data.models.Category
 import org.nullgroup.lados.data.models.Product
 import org.nullgroup.lados.data.repositories.interfaces.category.CategoryRepository
 import org.nullgroup.lados.data.repositories.interfaces.product.ProductRepository
+import org.nullgroup.lados.screens.customer.home.hasNoSalePrice
+import org.nullgroup.lados.screens.customer.home.isProductOnSale
+import org.nullgroup.lados.screens.customer.product.getAverageRating
 import javax.inject.Inject
 
 @HiltViewModel
@@ -66,16 +70,53 @@ class HomeViewModel @Inject constructor(
         val currentState = _productUiState.value
         if (currentState is ProductUiState.Success) {
             _productUiState.value = ProductUiState.Success(
-                products = currentState.products.sortedBy { it.variants[0].salePrice }
+                products = currentState.products.sortedBy { if (it.hasNoSalePrice()) it.variants[0].originalPrice else it.isProductOnSale().second }
             )
         }
+    }
+
+    fun filterProductsByRating(low: Float, high: Float){
+        val currentState = _productUiState.value
+        if (currentState is ProductUiState.Success) {
+            //Log.d("Product compare", "filterProductsByRating: ${currentState.products.none { (it.getAverageRating() < low) || (it.getAverageRating() > high) }}")
+            _productUiState.value = ProductUiState.Success(
+                products = currentState.products.filter { !(it.getAverageRating() < low) && !(it.getAverageRating() > high) }
+            )
+        }
+    }
+
+    fun filterProductsByPrice(@FloatRange(from = 0.0) minPrice: Float, @FloatRange(from = 0.0) maxPrice: Float){
+        val currentState = _productUiState.value
+        if (currentState is ProductUiState.Success) {
+            _productUiState.value = ProductUiState.Success(
+                products = currentState.products.filter { if (it.hasNoSalePrice()) {it.variants[0].originalPrice in minPrice..maxPrice} else {
+                    it.isProductOnSale().second!! in minPrice..maxPrice} }
+            )
+        }
+    }
+
+    fun filterProductsByCategory(category: Category) {
+        val currentState = _productUiState.value
+        if (currentState is ProductUiState.Success) {
+            _productUiState.value = ProductUiState.Success(
+                products = currentState.products.filter { it.categoryId == category.categoryId }
+            )
+        }
+    }
+
+    fun findCategoryByName(name: String): Category? {
+        val currentState = _categoryUiState.value
+        if (currentState is CategoryUiState.Success) {
+            return currentState.categories.find { it.categoryName == name }
+        }
+        return null
     }
 
     fun sortProductsByPriceHighToLow() {
         val currentState = _productUiState.value
         if (currentState is ProductUiState.Success) {
             _productUiState.value = ProductUiState.Success(
-                products = currentState.products.sortedByDescending { it.variants[0].salePrice }
+                products = currentState.products.sortedByDescending { if (it.hasNoSalePrice()) it.variants[0].originalPrice else it.isProductOnSale().second }
             )
         }
     }
@@ -93,7 +134,7 @@ class HomeViewModel @Inject constructor(
         val currentState = _productUiState.value
         if (currentState is ProductUiState.Success) {
             _productUiState.value = ProductUiState.Success(
-                products = currentState.products.filter { it.variants[0].salePrice!! < 50.0f }
+                products = currentState.products.filter { !it.hasNoSalePrice() }
             )
         }
     }

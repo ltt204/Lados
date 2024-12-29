@@ -2,6 +2,7 @@ package org.nullgroup.lados.screens.customer.product
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -31,6 +32,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -60,10 +62,12 @@ import org.nullgroup.lados.screens.customer.home.BottomSheetContent
 import org.nullgroup.lados.screens.customer.home.DrawError_FindNotMatch
 import org.nullgroup.lados.screens.customer.home.ProductItem
 import org.nullgroup.lados.screens.customer.home.SearchBar
+import org.nullgroup.lados.screens.customer.home.hasNoSalePrice
+import org.nullgroup.lados.screens.customer.home.sumOfSaleAmount
 import org.nullgroup.lados.ui.theme.LadosTheme
+import org.nullgroup.lados.viewmodels.SharedViewModel
 import org.nullgroup.lados.viewmodels.customer.home.HomeViewModel
 import org.nullgroup.lados.viewmodels.customer.home.ProductUiState
-import org.nullgroup.lados.viewmodels.SharedViewModel
 
 
 @Composable
@@ -145,17 +149,18 @@ fun DrawProductInCategoryScreenContent(
     sharedViewModel: SharedViewModel = SharedViewModel(),
     onButtonClick: (String) -> Unit ={},
     onNormalButtonClick: (String) -> Unit={},
-    isSelected: List<Boolean> = listOf(false,false,false),
+    isSelected: List<Boolean> = listOf(false,false,false,false,false),
     inCategory: Boolean = false,
     inNewest: Boolean=false,
     inTopSelling: Boolean=false,
     inSearch: Boolean=false,
+    inOnSale: Boolean=false,
+    inAllProducts: Boolean=false,
 ) {
     if (inSearch && products.none { it.name.contains(sharedViewModel.searchQuery ?: "") }) {
         DrawError_FindNotMatch(
             modifier = modifier
-                .padding(horizontal = 8.dp)
-                .padding(top = paddingValues.calculateTopPadding()),
+                .padding(horizontal = 8.dp),
             navController = navController,
             paddingValues = paddingValues
         )
@@ -171,9 +176,19 @@ fun DrawProductInCategoryScreenContent(
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 modifier = modifier
             ) {
-                items(3) { index ->
+                items(6) { index ->
                     when (index) {
-                        0 -> FilterButton(
+                        0 -> if (inAllProducts) FilterButton(
+                            text = "Category",
+                            icon = Icons.Outlined.KeyboardArrowDown,
+                            contentDescription = "Category Filter",
+                            type = "Category",
+                            onButtonClick = onButtonClick,
+                            isNormal = false,
+                            isSelected = isSelected[3],
+                        )
+
+                        1 -> if (!inOnSale) FilterButton(
                             text = "On Sale",
                             contentDescription = "On Sale Filter",
                             type = "Deals",
@@ -181,7 +196,7 @@ fun DrawProductInCategoryScreenContent(
                             isSelected = isSelected[0],
                         )
 
-                        1 -> FilterButton(
+                        2 -> FilterButton(
                             text = "Price",
                             icon = Icons.Outlined.KeyboardArrowDown,
                             contentDescription = "Price Sort",
@@ -191,7 +206,7 @@ fun DrawProductInCategoryScreenContent(
                             isSelected = isSelected[1]
                         )
 
-                        2 -> FilterButton(
+                        3 -> FilterButton(
                             text = "Sort by",
                             icon = Icons.Outlined.KeyboardArrowDown,
                             contentDescription = "Sort by",
@@ -199,6 +214,25 @@ fun DrawProductInCategoryScreenContent(
                             onButtonClick = onButtonClick,
                             isNormal = false,
                             isSelected = isSelected[2]
+                        )
+
+                        4 -> FilterButton(
+                            text = "Rating",
+                            icon = Icons.Outlined.KeyboardArrowDown,
+                            contentDescription = "Rating Filter",
+                            type = "Rating",
+                            onButtonClick = onButtonClick,
+                            isNormal = false,
+                            isSelected = isSelected[4],
+                        )
+
+                        5-> FilterButton(
+                            text="Pricing Range",
+                            icon = Icons.Outlined.KeyboardArrowDown,
+                            type = "Pricing Range",
+                            onButtonClick = onButtonClick,
+                            isNormal = false,
+                            isSelected = isSelected[5],
                         )
                     }
                 }
@@ -211,33 +245,83 @@ fun DrawProductInCategoryScreenContent(
             }
             ProductsGrid(
                 navController = navController,
-
                 products = if (inTopSelling)
-                    products.filter { it.engagements.size >= 2 }.take(10)
+                    products.sortedBy { it.sumOfSaleAmount() }
                 else if (inNewest)
                     products.sortedByDescending { it.createdAt }
                 else if (inCategory)
                     products.filter { it.categoryId == sharedViewModel.sharedData?.categoryId }
                 else if (inSearch)
                     products.filter { it.name.contains(sharedViewModel.searchQuery ?: "") }
-                else products
+                else if (inOnSale)
+                    products.filter { !it.hasNoSalePrice() }
+                else
+                    products
             )
         }
     }
 }
 
 @Composable
+fun PriceSlider(
+    minPrice: Float,
+    maxPrice: Float,
+    currentPriceRange: ClosedFloatingPointRange<Float>,
+    onPriceRangeChanged: (ClosedFloatingPointRange<Float>) -> Unit
+) {
+    var sliderPosition by remember { mutableStateOf(currentPriceRange) }
+
+    Column {
+        RangeSlider(
+            value = sliderPosition,
+            onValueChange = { newRange ->
+                sliderPosition = newRange
+                onPriceRangeChanged(newRange)
+            },
+            valueRange = minPrice..maxPrice,
+            // Add any other desired styling or configuration
+        )
+
+        // Display labels for selected values
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = "${sliderPosition.start.toInt()} ", // Start value label
+                modifier = Modifier.weight(1f),
+                color = LadosTheme.colorScheme.onBackground
+            )
+            Spacer(modifier = Modifier.width(10.dp)) // 10 spaces between labels
+            Text(
+                text = " ${sliderPosition.endInclusive.toInt()}", // End value label
+                modifier = Modifier.weight(1f),
+                color = LadosTheme.colorScheme.onBackground
+            )
+        }
+    }
+}
+
+fun Product.getAverageRating(): Float {
+    Log.d("Product", "getAverageRating: ${engagements.sumOf { it.ratings } * 1.0f / engagements.size}")
+    return engagements.sumOf { it.ratings } * 1.0f / engagements.size
+}
+
+@Composable
 fun ProductInCategoryScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
-    paddingValues: PaddingValues = PaddingValues(0.dp),
+    paddingValues: PaddingValues = PaddingValues(
+        horizontal = 16.dp,
+        vertical = 8.dp
+    ),
     sharedViewModel: SharedViewModel = SharedViewModel(),
     viewModel: HomeViewModel = hiltViewModel(),
     context: Context
 ) {
     val productUiState = viewModel.productUiState.collectAsStateWithLifecycle().value
     var selectedSortOption by remember { mutableStateOf<String?>(null) }
-    var isSelected by remember { mutableStateOf(listOf(false, false, false)) }
+    var isSelected by remember { mutableStateOf(listOf(false, false, false, false, false, false)) }
     val typeScreen = sharedViewModel.typeScreen
 
     val sheetState = rememberModalBottomSheetState(
@@ -256,10 +340,15 @@ fun ProductInCategoryScreen(
             "Recommended",
             "Newest",
         ) else listOf("Recommended"),
-        "Price" to listOf("Lowest - Highest Price", "Highest - Lowest Price")
+        "Price" to listOf("Lowest - Highest Price", "Highest - Lowest Price"),
+        "Category" to listOf("Pant", "Crop-top", "Top"),
+        "Rating" to listOf("1.0 to 2.0", "2.0 to 3.0", "3.0 to 4.0", "4.0 +")
     )
     ModalBottomSheetLayout(
         sheetState = sheetState,
+        modifier = Modifier.padding(
+            bottom = paddingValues.calculateBottomPadding()
+        ),
         sheetBackgroundColor = LadosTheme.colorScheme.background,
         sheetContentColor = LadosTheme.colorScheme.onBackground,
         sheetShape = RoundedCornerShape(
@@ -270,7 +359,7 @@ fun ProductInCategoryScreen(
     ) {
         Scaffold(
             modifier = modifier
-                .padding(bottom = paddingValues.calculateBottomPadding())
+               // .padding(top = paddingValues.calculateTopPadding())
                 .padding(horizontal = 16.dp),
             containerColor = LadosTheme.colorScheme.background,
             topBar = {
@@ -330,29 +419,73 @@ fun ProductInCategoryScreen(
                 }
 
                 is ProductUiState.Success -> {
-                        DrawProductInCategoryScreenContent(
-                            modifier = modifier,
-                            paddingValues = it,
-                            navController = navController,
-                            products = productUiState.products,
-                            sharedViewModel = sharedViewModel,
-                            inCategory = typeScreen == "In Category",
-                            inTopSelling = typeScreen == "Top Selling",
-                            inNewest = typeScreen == "Newest",
-                            inSearch = typeScreen == "In Search",
-                            onNormalButtonClick = { _ ->
-                                val oldStatus: List<Boolean> = isSelected
-                                if (selectedSortOption == "On Sale") {
-                                    selectedSortOption = null
-                                    viewModel.resetProducts()
-                                    isSelected = listOf(false, oldStatus[1], oldStatus[2])
-                                } else {
-                                    selectedSortOption = "On Sale"
-                                    viewModel.filterSaleProducts()
-                                    isSelected = listOf(true, oldStatus[1], false)
+                    DrawProductInCategoryScreenContent(
+                        modifier = modifier,
+                        paddingValues = it,
+                        navController = navController,
+                        products = productUiState.products,
+                        sharedViewModel = sharedViewModel,
+                        inCategory = typeScreen == "In Category",
+                        inTopSelling = typeScreen == "Top Selling",
+                        inNewest = typeScreen == "Newest",
+                        inSearch = typeScreen == "In Search",
+                        inOnSale = typeScreen == "On Sale",
+                        inAllProducts = typeScreen == "All Products",
+                        onNormalButtonClick = { _ ->
+                            val oldStatus: List<Boolean> = isSelected
+                            if (selectedSortOption == "On Sale") {
+                                selectedSortOption = null
+                                viewModel.resetProducts()
+                                isSelected = listOf(false, oldStatus[1], oldStatus[2], oldStatus[3], oldStatus[4] )
+                            } else {
+                                selectedSortOption = "On Sale"
+                                viewModel.filterSaleProducts()
+                                isSelected = listOf(true, oldStatus[1], false, oldStatus[3], oldStatus[4])
+                            }
+                        },
+                        onButtonClick = { content ->
+                            Log.d("FilterButton", "onButtonClick: $content")
+                            if (content=="Pricing Range") {
+                                sheetContent = {
+                                    BottomSheetContent(
+                                        title = content,
+                                        paddingValues = paddingValues,
+                                        onClearClick = {
+                                            isSelected = listOf(
+                                                selectedSortOption == "On Sale",
+                                                isSelected[1],
+                                                isSelected[2],
+                                                isSelected[3],
+                                                isSelected[4],
+                                                false
+                                            )
+                                        },
+                                        onSliderChanged = { sliderRange ->
+                                            viewModel.resetProducts()
+                                            viewModel.filterProductsByPrice(
+                                                sliderRange.start,
+                                                sliderRange.endInclusive
+                                            )
+                                            isSelected = listOf(
+                                                selectedSortOption == "On Sale",
+                                                true,
+                                                false,
+                                                isSelected[3],
+                                                isSelected[4],
+                                                true
+                                            )
+                                        },
+                                        onCloseClick = {
+                                            scope.launch {
+                                                sheetState.hide()
+                                            }
+                                        },
+                                        options = emptyList(),
+                                    )
                                 }
-                            },
-                            onButtonClick = { content ->
+                                scope.launch { sheetState.show() }
+                            }
+                            else {
                                 val option = optionsMap[content] ?: emptyList()
                                 if (option.isNotEmpty()) {
                                     sheetContent = {
@@ -361,32 +494,70 @@ fun ProductInCategoryScreen(
                                             options = option,
                                             paddingValues = paddingValues,
                                             onClearClick = { clearOption ->
+                                                when (clearOption) {
+                                                    "Sort by" -> {
+                                                        val oldStatus = isSelected[1]
+                                                        isSelected = listOf(
+                                                            selectedSortOption == "On Sale",
+                                                            oldStatus,
+                                                            false,
+                                                            isSelected[3],
+                                                            isSelected[4],
+                                                            isSelected[5]
+                                                        )
+                                                    }
 
-                                                if (clearOption == "Sort by") {
-                                                    val oldStatus = isSelected[1]
-                                                    isSelected = listOf(
-                                                        selectedSortOption == "On Sale",
-                                                        oldStatus,
-                                                        false,
-                                                    )
-                                                } else if (clearOption == "Price") {
-                                                    val oldStatus = isSelected[2]
-                                                    isSelected = listOf(
-                                                        selectedSortOption == "On Sale",
-                                                        false,
-                                                        oldStatus
-                                                    )
+                                                    "Price" -> {
+                                                        val oldStatus = isSelected[2]
+                                                        isSelected = listOf(
+                                                            selectedSortOption == "On Sale",
+                                                            false,
+                                                            oldStatus,
+                                                            isSelected[3],
+                                                            isSelected[4],
+                                                            isSelected[5]
+                                                        )
+                                                    }
+
+                                                    "Category" -> {
+                                                        isSelected = listOf(
+                                                            selectedSortOption == "On Sale",
+                                                            isSelected[1],
+                                                            isSelected[2],
+                                                            false,
+                                                            isSelected[4],
+                                                            isSelected[5]
+                                                        )
+                                                    }
+
+                                                    "Rating" -> {
+                                                        isSelected = listOf(
+                                                            selectedSortOption == "On Sale",
+                                                            isSelected[1],
+                                                            isSelected[2],
+                                                            isSelected[3],
+                                                            false,
+                                                            isSelected[5]
+                                                        )
+                                                    }
                                                 }
                                                 viewModel.resetProducts()
                                             },
                                             onSelectionChanged = { selectedOption ->
+                                                Log.d(
+                                                    "FilterButton",
+                                                    "onSelectionChanged: $selectedOption"
+                                                )
                                                 when (selectedOption) {
                                                     "Lowest - Highest Price" -> {
                                                         viewModel.sortProductsByPriceLowToHigh()
                                                         isSelected = listOf(
                                                             selectedSortOption == "On Sale",
                                                             true,
-                                                            false
+                                                            false,
+                                                            isSelected[3],
+                                                            isSelected[4],
+                                                            isSelected[5]
                                                         )
                                                     }
 
@@ -395,13 +566,23 @@ fun ProductInCategoryScreen(
                                                         isSelected = listOf(
                                                             selectedSortOption == "On Sale",
                                                             true,
-                                                            false
+                                                            false,
+                                                            isSelected[3],
+                                                            isSelected[4],
+                                                            isSelected[5]
                                                         )
                                                     }
 
                                                     "Recommended" -> {
                                                         viewModel.resetProducts()
-                                                        isSelected = listOf(false, false, true)
+                                                        isSelected = listOf(
+                                                            false,
+                                                            false,
+                                                            true,
+                                                            isSelected[3],
+                                                            isSelected[4],
+                                                            isSelected[5]
+                                                        )
                                                     }
 
                                                     "Newest" -> {
@@ -409,7 +590,128 @@ fun ProductInCategoryScreen(
                                                         isSelected = listOf(
                                                             selectedSortOption == "On Sale",
                                                             false,
-                                                            true
+                                                            true,
+                                                            isSelected[3],
+                                                            isSelected[4],
+                                                            isSelected[5]
+                                                        )
+                                                    }
+
+                                                    "Pant" -> {
+                                                        viewModel.resetProducts()
+                                                        viewModel.findCategoryByName("Pant")
+                                                            ?.let { it1 ->
+                                                                viewModel.filterProductsByCategory(
+                                                                    it1
+                                                                )
+                                                            }
+                                                        isSelected = listOf(
+                                                            selectedSortOption == "On Sale",
+                                                            false,
+                                                            false,
+                                                            true,
+                                                            isSelected[4],
+                                                            isSelected[5]
+                                                        )
+                                                    }
+
+                                                    "Crop-top" -> {
+                                                        viewModel.resetProducts()
+                                                        viewModel.findCategoryByName("Crop-top")
+                                                            ?.let { it1 ->
+                                                                viewModel.filterProductsByCategory(
+                                                                    it1
+                                                                )
+                                                            }
+                                                        isSelected = listOf(
+                                                            selectedSortOption == "On Sale",
+                                                            false,
+                                                            false,
+                                                            true,
+                                                            isSelected[4],
+                                                            isSelected[5]
+                                                        )
+                                                    }
+
+                                                    "Top" -> {
+                                                        viewModel.resetProducts()
+                                                        viewModel.findCategoryByName("Top")
+                                                            ?.let { it1 ->
+                                                                viewModel.filterProductsByCategory(
+                                                                    it1
+                                                                )
+                                                            }
+                                                        isSelected = listOf(
+                                                            selectedSortOption == "On Sale",
+                                                            false,
+                                                            false,
+                                                            true,
+                                                            isSelected[4],
+                                                            isSelected[5]
+                                                        )
+                                                    }
+
+                                                    "1.0 to 2.0" -> {
+                                                        viewModel.resetProducts()
+                                                        viewModel.filterProductsByRating(
+                                                            1.0f,
+                                                            2.0f
+                                                        )
+                                                        isSelected = listOf(
+                                                            selectedSortOption == "On Sale",
+                                                            false,
+                                                            false,
+                                                            false,
+                                                            true,
+                                                            isSelected[5]
+                                                        )
+                                                    }
+
+                                                    "2.0 to 3.0" -> {
+                                                        viewModel.resetProducts()
+                                                        viewModel.filterProductsByRating(
+                                                            2.0f,
+                                                            3.0f
+                                                        )
+                                                        isSelected = listOf(
+                                                            selectedSortOption == "On Sale",
+                                                            false,
+                                                            false,
+                                                            false,
+                                                            true,
+                                                            isSelected[5]
+                                                        )
+                                                    }
+
+                                                    "3.0 to 4.0" -> {
+                                                        viewModel.resetProducts()
+                                                        viewModel.filterProductsByRating(
+                                                            3.0f,
+                                                            4.0f
+                                                        )
+                                                        isSelected = listOf(
+                                                            selectedSortOption == "On Sale",
+                                                            false,
+                                                            false,
+                                                            false,
+                                                            true,
+                                                            isSelected[5]
+                                                        )
+                                                    }
+
+                                                    "4.0 +" -> {
+                                                        viewModel.resetProducts()
+                                                        viewModel.filterProductsByRating(
+                                                            4.0f,
+                                                            5.0f
+                                                        )
+                                                        isSelected = listOf(
+                                                            selectedSortOption == "On Sale",
+                                                            false,
+                                                            false,
+                                                            false,
+                                                            true,
+                                                            isSelected[5]
                                                         )
                                                     }
                                                 }
@@ -424,9 +726,10 @@ fun ProductInCategoryScreen(
                                 } else {
 
                                 }
-                            },
-                            isSelected = isSelected,
-                        )
+                            }
+                        },
+                        isSelected = isSelected,
+                    )
 
                 }
             }

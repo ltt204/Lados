@@ -20,6 +20,7 @@ data class ProductVariant(
     val color: Color = Color(),
     val quantityInStock: Int = 0,
     val originalPrice: Double = 0.0,
+    val saleAmount: Int = 0,
     val salePrice: Double? = null,
     var images: List<Image> = emptyList()
 )
