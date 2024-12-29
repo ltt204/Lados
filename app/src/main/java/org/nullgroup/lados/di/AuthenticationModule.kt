@@ -15,10 +15,10 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import org.nullgroup.lados.R
-import org.nullgroup.lados.data.repositories.implementations.AuthRepositoryImpl
-import org.nullgroup.lados.data.repositories.interfaces.AuthRepository
-import org.nullgroup.lados.data.repositories.interfaces.SharedPreferencesRepository
-import org.nullgroup.lados.data.repositories.interfaces.UserRepository
+import org.nullgroup.lados.data.repositories.implementations.auth.AuthRepositoryImpl
+import org.nullgroup.lados.data.repositories.interfaces.auth.AuthRepository
+import org.nullgroup.lados.data.repositories.interfaces.common.SharedPreferencesRepository
+import org.nullgroup.lados.data.repositories.interfaces.user.UserRepository
 import javax.inject.Singleton
 
 @Module

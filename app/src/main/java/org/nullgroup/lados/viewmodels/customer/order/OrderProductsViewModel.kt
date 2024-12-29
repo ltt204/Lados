@@ -15,8 +15,8 @@ import org.nullgroup.lados.data.models.Order
 import org.nullgroup.lados.data.models.OrderProduct
 import org.nullgroup.lados.data.models.Product
 import org.nullgroup.lados.data.models.ProductVariant
-import org.nullgroup.lados.data.repositories.interfaces.OrderRepository
-import org.nullgroup.lados.data.repositories.interfaces.ProductRepository
+import org.nullgroup.lados.data.repositories.interfaces.order.OrderRepository
+import org.nullgroup.lados.data.repositories.interfaces.product.ProductRepository
 import org.nullgroup.lados.screens.Screen
 import javax.inject.Inject
 

@@ -7,7 +7,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import org.nullgroup.lados.data.repositories.UserPreferencesRepository
+import org.nullgroup.lados.data.repositories.interfaces.common.UserPreferencesRepository
 import org.nullgroup.lados.utilities.SupportedRegion
 import java.util.Locale
 import javax.inject.Inject

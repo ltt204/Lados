@@ -9,8 +9,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.nullgroup.lados.data.models.Category
 import org.nullgroup.lados.data.models.Product
-import org.nullgroup.lados.data.repositories.interfaces.CategoryRepository
-import org.nullgroup.lados.data.repositories.interfaces.ProductRepository
+import org.nullgroup.lados.data.repositories.interfaces.category.CategoryRepository
+import org.nullgroup.lados.data.repositories.interfaces.product.ProductRepository
 import javax.inject.Inject
 
 @HiltViewModel

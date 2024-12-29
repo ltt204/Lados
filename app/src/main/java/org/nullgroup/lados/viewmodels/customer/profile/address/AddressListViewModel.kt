@@ -6,7 +6,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import org.nullgroup.lados.data.repositories.interfaces.IUserAddressRepository
+import org.nullgroup.lados.data.repositories.interfaces.user.IUserAddressRepository
 import javax.inject.Inject
 
 @HiltViewModel

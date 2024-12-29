@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.nullgroup.lados.data.models.Order
-import org.nullgroup.lados.data.repositories.interfaces.OrderRepository
+import org.nullgroup.lados.data.repositories.interfaces.order.OrderRepository
 import org.nullgroup.lados.utilities.OrderStatus
 import javax.inject.Inject
 

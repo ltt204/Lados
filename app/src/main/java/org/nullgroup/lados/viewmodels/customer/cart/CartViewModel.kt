@@ -22,8 +22,8 @@ import org.nullgroup.lados.data.models.CheckingOutItem
 import org.nullgroup.lados.data.models.CheckoutInfo
 import org.nullgroup.lados.data.models.Product
 import org.nullgroup.lados.data.models.ProductVariant
-import org.nullgroup.lados.data.repositories.interfaces.CartItemRepository
-import org.nullgroup.lados.data.repositories.interfaces.ProductRepository
+import org.nullgroup.lados.data.repositories.interfaces.cart.CartItemRepository
+import org.nullgroup.lados.data.repositories.interfaces.product.ProductRepository
 import javax.inject.Inject
 
 @HiltViewModel

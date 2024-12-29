@@ -14,9 +14,9 @@ import org.nullgroup.lados.data.models.Address
 import org.nullgroup.lados.data.models.District
 import org.nullgroup.lados.data.models.Province
 import org.nullgroup.lados.data.models.Ward
-import org.nullgroup.lados.data.repositories.interfaces.IUserAddressRepository
-import org.nullgroup.lados.data.repositories.interfaces.UserRepository
-import org.nullgroup.lados.data.repositories.interfaces.VietnamProvinceService
+import org.nullgroup.lados.data.repositories.interfaces.user.IUserAddressRepository
+import org.nullgroup.lados.data.repositories.interfaces.user.UserRepository
+import org.nullgroup.lados.data.repositories.interfaces.common.VietnamProvinceService
 import javax.inject.Inject
 
 @HiltViewModel

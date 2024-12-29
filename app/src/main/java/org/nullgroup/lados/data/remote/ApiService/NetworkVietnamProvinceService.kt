@@ -4,9 +4,10 @@ import android.util.Log
 import org.nullgroup.lados.data.models.District
 import org.nullgroup.lados.data.models.Province
 import org.nullgroup.lados.data.models.Ward
-import org.nullgroup.lados.data.repositories.interfaces.VietnamProvinceService
+import org.nullgroup.lados.data.repositories.interfaces.common.VietnamProvinceService
 
-class NetworkVietnamProvinceService(private val apiService: VietnamProvinceApiInterface) : VietnamProvinceService {
+class NetworkVietnamProvinceService(private val apiService: VietnamProvinceApiInterface) :
+    VietnamProvinceService {
 
     override suspend fun getProvinces(): List<Province> {
         val response = apiService.getProvinces()

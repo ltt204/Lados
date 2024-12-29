@@ -11,29 +11,29 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ActivityContext
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import org.nullgroup.lados.data.repositories.implementations.CartItemRepositoryImplement
-import org.nullgroup.lados.data.repositories.implementations.CategoryRepositoryImplement
-import org.nullgroup.lados.data.repositories.implementations.OrderRepositoryImplement
-import org.nullgroup.lados.data.repositories.implementations.ProductRepositoryImplement
-import org.nullgroup.lados.data.repositories.implementations.SharedPreferencesImpl
-import org.nullgroup.lados.data.repositories.implementations.ImageRepositoryImplement
-import org.nullgroup.lados.data.repositories.implementations.ReviewProductRepositoryImplement
-import org.nullgroup.lados.data.repositories.implementations.UserAddressRepositoryImplement
-import org.nullgroup.lados.data.repositories.implementations.UserRepositoryImplement
-import org.nullgroup.lados.data.repositories.implementations.WishlistItemRepositoryImplement
-import org.nullgroup.lados.data.repositories.interfaces.CartItemRepository
-import org.nullgroup.lados.data.repositories.interfaces.SharedPreferencesRepository
+import org.nullgroup.lados.data.repositories.implementations.cart.CartItemRepositoryImplement
+import org.nullgroup.lados.data.repositories.implementations.category.CategoryRepositoryImplement
+import org.nullgroup.lados.data.repositories.implementations.order.OrderRepositoryImplement
+import org.nullgroup.lados.data.repositories.implementations.product.ProductRepositoryImplement
+import org.nullgroup.lados.data.repositories.implementations.common.SharedPreferencesImpl
+import org.nullgroup.lados.data.repositories.implementations.common.ImageRepositoryImplement
+import org.nullgroup.lados.data.repositories.implementations.product.ReviewProductRepositoryImplement
+import org.nullgroup.lados.data.repositories.implementations.user.UserAddressRepositoryImplement
+import org.nullgroup.lados.data.repositories.implementations.user.UserRepositoryImplement
+import org.nullgroup.lados.data.repositories.implementations.wishlist.WishlistItemRepositoryImplement
+import org.nullgroup.lados.data.repositories.interfaces.cart.CartItemRepository
+import org.nullgroup.lados.data.repositories.interfaces.common.SharedPreferencesRepository
 
-import org.nullgroup.lados.data.repositories.interfaces.CategoryRepository
+import org.nullgroup.lados.data.repositories.interfaces.category.CategoryRepository
 
-import org.nullgroup.lados.data.repositories.interfaces.IUserAddressRepository
+import org.nullgroup.lados.data.repositories.interfaces.user.IUserAddressRepository
 
-import org.nullgroup.lados.data.repositories.interfaces.ImageRepository
-import org.nullgroup.lados.data.repositories.interfaces.OrderRepository
-import org.nullgroup.lados.data.repositories.interfaces.ProductRepository
-import org.nullgroup.lados.data.repositories.interfaces.ReviewProductRepository
-import org.nullgroup.lados.data.repositories.interfaces.UserRepository
-import org.nullgroup.lados.data.repositories.interfaces.WishlistItemRepository
+import org.nullgroup.lados.data.repositories.interfaces.common.ImageRepository
+import org.nullgroup.lados.data.repositories.interfaces.order.OrderRepository
+import org.nullgroup.lados.data.repositories.interfaces.product.ProductRepository
+import org.nullgroup.lados.data.repositories.interfaces.product.ReviewProductRepository
+import org.nullgroup.lados.data.repositories.interfaces.user.UserRepository
+import org.nullgroup.lados.data.repositories.interfaces.wishlist.WishlistItemRepository
 import javax.inject.Singleton
 
 @Module

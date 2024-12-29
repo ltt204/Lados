@@ -9,7 +9,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import org.nullgroup.lados.data.repositories.UserPreferencesRepository
+import org.nullgroup.lados.data.repositories.interfaces.common.UserPreferencesRepository
 import javax.inject.Singleton
 
 private const val USER_PREFERENCES = "user_preferences"

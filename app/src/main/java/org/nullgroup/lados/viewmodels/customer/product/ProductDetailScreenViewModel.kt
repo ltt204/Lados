@@ -14,9 +14,9 @@ import org.nullgroup.lados.data.models.Color
 import org.nullgroup.lados.data.models.Product
 import org.nullgroup.lados.data.models.Size
 import org.nullgroup.lados.data.models.User
-import org.nullgroup.lados.data.repositories.interfaces.CartItemRepository
-import org.nullgroup.lados.data.repositories.interfaces.ProductRepository
-import org.nullgroup.lados.data.repositories.interfaces.UserRepository
+import org.nullgroup.lados.data.repositories.interfaces.cart.CartItemRepository
+import org.nullgroup.lados.data.repositories.interfaces.product.ProductRepository
+import org.nullgroup.lados.data.repositories.interfaces.user.UserRepository
 import org.nullgroup.lados.screens.customer.product.ProductDetailUiState
 import javax.inject.Inject
 

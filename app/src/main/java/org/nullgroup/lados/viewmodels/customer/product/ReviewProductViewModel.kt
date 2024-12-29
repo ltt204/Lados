@@ -18,8 +18,8 @@ import kotlinx.coroutines.launch
 import org.nullgroup.lados.data.models.Product
 import org.nullgroup.lados.data.models.ProductVariant
 import org.nullgroup.lados.data.models.UserEngagement
-import org.nullgroup.lados.data.repositories.interfaces.ProductRepository
-import org.nullgroup.lados.data.repositories.interfaces.ReviewProductRepository
+import org.nullgroup.lados.data.repositories.interfaces.product.ProductRepository
+import org.nullgroup.lados.data.repositories.interfaces.product.ReviewProductRepository
 import org.nullgroup.lados.screens.Screen
 import javax.inject.Inject
 

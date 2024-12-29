@@ -19,10 +19,10 @@ import org.nullgroup.lados.data.models.Order
 import org.nullgroup.lados.data.models.OrderProduct
 import org.nullgroup.lados.data.models.Product
 import org.nullgroup.lados.data.models.ProductVariant
-import org.nullgroup.lados.data.repositories.interfaces.CartItemRepository
-import org.nullgroup.lados.data.repositories.interfaces.IUserAddressRepository
-import org.nullgroup.lados.data.repositories.interfaces.OrderRepository
-import org.nullgroup.lados.data.repositories.interfaces.UserRepository
+import org.nullgroup.lados.data.repositories.interfaces.cart.CartItemRepository
+import org.nullgroup.lados.data.repositories.interfaces.user.IUserAddressRepository
+import org.nullgroup.lados.data.repositories.interfaces.order.OrderRepository
+import org.nullgroup.lados.data.repositories.interfaces.user.UserRepository
 import javax.inject.Inject
 
 enum class CheckoutError {

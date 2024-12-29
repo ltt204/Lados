@@ -10,8 +10,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.nullgroup.lados.data.models.User
 import org.nullgroup.lados.data.models.UserProfilePicture
-import org.nullgroup.lados.data.repositories.interfaces.ImageRepository
-import org.nullgroup.lados.data.repositories.interfaces.UserRepository
+import org.nullgroup.lados.data.repositories.interfaces.common.ImageRepository
+import org.nullgroup.lados.data.repositories.interfaces.user.UserRepository
 import org.nullgroup.lados.viewmodels.customer.profile.ProfilePictureUiState.Loading
 import javax.inject.Inject
 

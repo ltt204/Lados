@@ -15,8 +15,8 @@ import org.nullgroup.lados.data.models.Address
 import org.nullgroup.lados.data.models.District
 import org.nullgroup.lados.data.models.Province
 import org.nullgroup.lados.data.models.Ward
-import org.nullgroup.lados.data.repositories.interfaces.IUserAddressRepository
-import org.nullgroup.lados.data.repositories.interfaces.VietnamProvinceService
+import org.nullgroup.lados.data.repositories.interfaces.user.IUserAddressRepository
+import org.nullgroup.lados.data.repositories.interfaces.common.VietnamProvinceService
 import org.nullgroup.lados.screens.Screen
 import javax.inject.Inject
 
