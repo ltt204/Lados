@@ -44,7 +44,6 @@ import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.nullgroup.lados.screens.Screen
-import org.nullgroup.lados.screens.admin.ProductManagement
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.viewmodels.customer.profile.ProfileViewModel
 
@@ -167,6 +166,7 @@ fun AdminGraph(
                 )
             }
         ) { innerPadding ->
+            val padding = innerPadding
             NavHost(navController = navController, startDestination = startDestination.route) {
 
                 composable(route = Screen.Admin.Analytics.route) {
@@ -178,11 +178,11 @@ fun AdminGraph(
                 }
 
                 composable(route = Screen.Admin.ProductManagement.route) {
-                    ProductManagement(
-                        modifier = Modifier,
-                        paddingValues = innerPadding,
-                        navController = navController,
-                    )
+//                    Screen.Admin.ProductManagement(
+//                        modifier = Modifier,
+//                        paddingValues = innerPadding,
+//                        navController = navController,
+//                    )
                 }
 
                 composable(route = Screen.Admin.PromotionManagement.route) {
