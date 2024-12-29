@@ -1,4 +1,4 @@
-package org.nullgroup.lados.compose.SignIn
+package org.nullgroup.lados.compose.signin
 
 import androidx.compose.foundation.clickable
 import androidx.compose.material3.Text
@@ -6,7 +6,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import org.nullgroup.lados.ui.theme.LadosTheme
-import org.nullgroup.lados.viewmodels.common.events.LoginScreenEvent
 
 @Composable
 fun TextClickable(

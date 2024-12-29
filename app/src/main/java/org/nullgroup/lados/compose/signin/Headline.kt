@@ -1,4 +1,4 @@
-package org.nullgroup.lados.compose.SignIn
+package org.nullgroup.lados.compose.signin
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable

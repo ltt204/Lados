@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.nullgroup.lados.R
-import org.nullgroup.lados.compose.SignIn.CustomTextField
+import org.nullgroup.lados.compose.signin.CustomTextField
 import org.nullgroup.lados.compose.common.CustomExposedDropDownMenu
 import org.nullgroup.lados.data.models.Address
 import org.nullgroup.lados.viewmodels.customer.profile.address.MenuItemsUIState

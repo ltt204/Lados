@@ -47,7 +47,7 @@ import androidx.navigation.NavController
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import org.nullgroup.lados.R
-import org.nullgroup.lados.compose.SignIn.CustomTextField
+import org.nullgroup.lados.compose.signin.CustomTextField
 import org.nullgroup.lados.compose.common.LoadOnProgress
 import org.nullgroup.lados.compose.common.DefaultCenterTopAppBar
 import org.nullgroup.lados.compose.profile.ConfirmDialog

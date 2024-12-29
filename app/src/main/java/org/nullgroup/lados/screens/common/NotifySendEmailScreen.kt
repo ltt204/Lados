@@ -24,7 +24,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.nullgroup.lados.R
-import org.nullgroup.lados.compose.SignIn.ButtonSubmit
+import org.nullgroup.lados.compose.signin.ButtonSubmit
 import org.nullgroup.lados.ui.theme.LadosTheme
 
 @Composable

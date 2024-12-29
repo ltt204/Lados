@@ -65,7 +65,7 @@ fun CustomExposedDropDownMenu(
             isExpanded = !isExpanded
             Log.d("AddressExposedDropDownMenu", "isExpanded: $isExpanded")
         }) {
-        org.nullgroup.lados.compose.SignIn.CustomTextField(
+        org.nullgroup.lados.compose.signin.CustomTextField(
             label = placeHolder,
             text = selectedItem,
             onValueChange = { },
