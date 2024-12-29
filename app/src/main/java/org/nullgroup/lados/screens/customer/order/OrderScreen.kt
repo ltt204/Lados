@@ -47,8 +47,8 @@ import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.utilities.OrderStatus
 import org.nullgroup.lados.utilities.toCurrency
-import org.nullgroup.lados.viewmodels.customer.OrderState
-import org.nullgroup.lados.viewmodels.customer.OrderViewModel
+import org.nullgroup.lados.viewmodels.customer.order.OrderState
+import org.nullgroup.lados.viewmodels.customer.order.OrderViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

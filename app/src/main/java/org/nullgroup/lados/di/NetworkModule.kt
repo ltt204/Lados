@@ -8,7 +8,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import org.nullgroup.lados.data.remote.ApiService.VietnamProvinceApiInterface
 import org.nullgroup.lados.data.remote.ApiService.NetworkVietnamProvinceService
-import org.nullgroup.lados.data.repositories.interfaces.VietnamProvinceService
+import org.nullgroup.lados.data.repositories.interfaces.common.VietnamProvinceService
 import org.nullgroup.lados.utilities.VIETNAM_PROVINCE_BASE_URL
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory

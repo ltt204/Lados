@@ -32,11 +32,11 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import org.nullgroup.lados.R
-import org.nullgroup.lados.compose.SignIn.ButtonSubmit
-import org.nullgroup.lados.compose.SignIn.CustomTextField
-import org.nullgroup.lados.compose.SignIn.Headline
-import org.nullgroup.lados.compose.SignIn.TextClickable
-import org.nullgroup.lados.compose.SignIn.TextNormal
+import org.nullgroup.lados.compose.signin.ButtonSubmit
+import org.nullgroup.lados.compose.signin.CustomTextField
+import org.nullgroup.lados.compose.signin.Headline
+import org.nullgroup.lados.compose.signin.TextClickable
+import org.nullgroup.lados.compose.signin.TextNormal
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.viewmodels.common.RegisterScreenViewModel
 import org.nullgroup.lados.viewmodels.common.events.RegisterScreenEvent

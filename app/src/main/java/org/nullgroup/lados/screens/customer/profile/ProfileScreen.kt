@@ -49,7 +49,7 @@ import org.nullgroup.lados.compose.common.TwoColsItem
 import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.ui.theme.Typography
-import org.nullgroup.lados.viewmodels.customer.ProfileViewModel
+import org.nullgroup.lados.viewmodels.customer.profile.ProfileViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

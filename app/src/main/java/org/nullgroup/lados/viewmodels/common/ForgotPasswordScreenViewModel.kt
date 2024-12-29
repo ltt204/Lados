@@ -7,7 +7,7 @@ import androidx.navigation.NavController
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import org.nullgroup.lados.data.repositories.interfaces.AuthRepository
+import org.nullgroup.lados.data.repositories.interfaces.auth.AuthRepository
 import org.nullgroup.lados.viewmodels.common.states.ResourceState
 import org.nullgroup.lados.viewmodels.common.events.ForgotPasswordScreenEvent
 import javax.inject.Inject

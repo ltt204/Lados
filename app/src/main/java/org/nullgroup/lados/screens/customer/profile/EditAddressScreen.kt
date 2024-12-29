@@ -32,8 +32,8 @@ import org.nullgroup.lados.compose.common.LoadOnProgress
 import org.nullgroup.lados.compose.common.DefaultCenterTopAppBar
 import org.nullgroup.lados.compose.profile.AddressForm
 import org.nullgroup.lados.compose.profile.ConfirmDialog
-import org.nullgroup.lados.viewmodels.customer.EditAddressViewModel
-import org.nullgroup.lados.viewmodels.customer.SavingResult
+import org.nullgroup.lados.viewmodels.customer.profile.address.EditAddressViewModel
+import org.nullgroup.lados.viewmodels.customer.profile.address.SavingResult
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

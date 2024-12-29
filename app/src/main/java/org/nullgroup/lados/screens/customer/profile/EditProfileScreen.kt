@@ -47,7 +47,7 @@ import androidx.navigation.NavController
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import org.nullgroup.lados.R
-import org.nullgroup.lados.compose.SignIn.CustomTextField
+import org.nullgroup.lados.compose.signin.CustomTextField
 import org.nullgroup.lados.compose.common.LoadOnProgress
 import org.nullgroup.lados.compose.common.DefaultCenterTopAppBar
 import org.nullgroup.lados.compose.profile.ConfirmDialog
@@ -56,9 +56,9 @@ import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.ui.theme.Typography
 import org.nullgroup.lados.utilities.toByteArray
 import org.nullgroup.lados.utilities.toDrawable
-import org.nullgroup.lados.viewmodels.customer.EditProfileViewModel
-import org.nullgroup.lados.viewmodels.customer.ProfilePictureUiState
-import org.nullgroup.lados.viewmodels.customer.UserUiState
+import org.nullgroup.lados.viewmodels.customer.profile.EditProfileViewModel
+import org.nullgroup.lados.viewmodels.customer.profile.ProfilePictureUiState
+import org.nullgroup.lados.viewmodels.customer.profile.UserUiState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

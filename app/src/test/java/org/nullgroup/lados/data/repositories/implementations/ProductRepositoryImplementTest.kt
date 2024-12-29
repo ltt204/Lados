@@ -2,16 +2,13 @@ package org.nullgroup.lados.data.repositories.implementations
 
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.QuerySnapshot
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.tasks.await
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
 import org.nullgroup.lados.data.models.Color
 import org.nullgroup.lados.data.models.Product
 import org.nullgroup.lados.data.models.ProductVariant
@@ -20,6 +17,7 @@ import org.nullgroup.lados.data.remote.models.ColorRemoteModel
 import org.nullgroup.lados.data.remote.models.ProductRemoteModel
 import org.nullgroup.lados.data.remote.models.ProductVariantRemoteModel
 import org.nullgroup.lados.data.remote.models.SizeRemoteModel
+import org.nullgroup.lados.data.repositories.implementations.product.ProductRepositoryImplement
 import org.nullgroup.lados.utilities.toLocalProduct
 
 @ExperimentalCoroutinesApi

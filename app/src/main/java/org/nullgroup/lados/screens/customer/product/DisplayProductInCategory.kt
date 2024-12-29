@@ -3,7 +3,6 @@ package org.nullgroup.lados.screens.customer.product
 import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -27,7 +26,6 @@ import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
-import androidx.compose.material.icons.outlined.List
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -38,7 +36,6 @@ import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -48,38 +45,29 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.nullgroup.lados.compose.common.LoadOnProgress
 import org.nullgroup.lados.data.local.SearchHistoryManager
 import org.nullgroup.lados.data.models.Product
 import org.nullgroup.lados.screens.Screen
-import org.nullgroup.lados.screens.customer.BottomSheetContent
-import org.nullgroup.lados.screens.customer.DrawError_FindNotMatch
-import org.nullgroup.lados.screens.customer.ProductItem
-import org.nullgroup.lados.screens.customer.SearchBar
-import org.nullgroup.lados.screens.customer.SearchBarRow
-import org.nullgroup.lados.screens.customer.hasNoSalePrice
-import org.nullgroup.lados.screens.customer.sumOfSaleAmount
+import org.nullgroup.lados.screens.customer.home.BottomSheetContent
+import org.nullgroup.lados.screens.customer.home.DrawError_FindNotMatch
+import org.nullgroup.lados.screens.customer.home.ProductItem
+import org.nullgroup.lados.screens.customer.home.SearchBar
+import org.nullgroup.lados.screens.customer.home.hasNoSalePrice
+import org.nullgroup.lados.screens.customer.home.sumOfSaleAmount
 import org.nullgroup.lados.ui.theme.LadosTheme
-import org.nullgroup.lados.ui.theme.OnSurface
-import org.nullgroup.lados.ui.theme.Outline
-import org.nullgroup.lados.ui.theme.Primary
-import org.nullgroup.lados.ui.theme.SurfaceContainerHighest
-import org.nullgroup.lados.viewmodels.HomeViewModel
-import org.nullgroup.lados.viewmodels.ProductUiState
 import org.nullgroup.lados.viewmodels.SharedViewModel
+import org.nullgroup.lados.viewmodels.customer.home.HomeViewModel
+import org.nullgroup.lados.viewmodels.customer.home.ProductUiState
 
 
 @Composable

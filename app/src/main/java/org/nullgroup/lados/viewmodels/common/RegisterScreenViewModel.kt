@@ -8,7 +8,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import org.nullgroup.lados.data.models.User
-import org.nullgroup.lados.data.repositories.interfaces.AuthRepository
+import org.nullgroup.lados.data.repositories.interfaces.auth.AuthRepository
 import org.nullgroup.lados.utilities.EmailValidator
 import org.nullgroup.lados.utilities.NotEmptyValidator
 import org.nullgroup.lados.utilities.PasswordValidator

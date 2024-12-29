@@ -51,8 +51,8 @@ import org.nullgroup.lados.utilities.OrderStatus
 import org.nullgroup.lados.utilities.getActionForButtonOfOrderProduct
 import org.nullgroup.lados.utilities.getStatusByName
 import org.nullgroup.lados.utilities.toCurrency
-import org.nullgroup.lados.viewmodels.customer.OrderProductsState
-import org.nullgroup.lados.viewmodels.customer.OrderProductsViewModel
+import org.nullgroup.lados.viewmodels.customer.order.OrderProductsState
+import org.nullgroup.lados.viewmodels.customer.order.OrderProductsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
