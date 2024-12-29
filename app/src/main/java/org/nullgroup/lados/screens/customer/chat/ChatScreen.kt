@@ -118,14 +118,6 @@ fun ChatScreen(
                     )
                 }
 
-//                TextField(
-//                    value = messageText,
-//                    onValueChange = { messageText = it },
-//                    modifier = Modifier.weight(1f),
-//                    placeholder = { Text("Type a message...") },
-//                    textStyle = LadosTheme.typography.titleMedium,
-//                )
-
                 CustomTextField(
                     text = messageText,
                     onValueChange = { messageText = it },
@@ -172,8 +164,8 @@ fun MessageItem(
             .padding(vertical = LadosTheme.size.small / 2),
         horizontalAlignment = if (isFromCurrentUser) Alignment.End else Alignment.Start,
     ) {
-        when (message.type.name) {
-            MessageType.TEXT.name -> {
+        when (message.type) {
+            MessageType.TEXT -> {
                 Surface(
                     color = if (isFromCurrentUser)
                         LadosTheme.colorScheme.primaryContainer
@@ -191,7 +183,7 @@ fun MessageItem(
                 }
             }
 
-            MessageType.IMAGE.name -> {
+            MessageType.IMAGE -> {
                 Surface(
                     shape = LadosTheme.shape.medium,
                     tonalElevation = 2.dp,
@@ -207,7 +199,7 @@ fun MessageItem(
                 }
             }
 
-            MessageType.PRODUCT.name -> {
+            MessageType.PRODUCT -> {
                 Surface(
                     modifier = Modifier
                         .clickable {
@@ -259,20 +251,4 @@ fun MessageItem(
             ),
         )
     }
-}
-
-@Preview
-@Composable
-fun MessageItemPreview() {
-    MessageItem(Message(
-        id = "1",
-        senderId = "1",
-        content = "Ban co khoe khong",
-        timestamp = System.currentTimeMillis(),
-        type = MessageType.TEXT,
-        imageUrl = null,
-        productId = null,
-    ),
-        isFromCurrentUser = true,
-        onProductClick = {})
 }

@@ -44,7 +44,6 @@ import org.nullgroup.lados.screens.common.RegisterScreen
 import org.nullgroup.lados.screens.customer.chat.ChatScreen
 import org.nullgroup.lados.screens.customer.home.Error_FindNotMatchScreen
 import org.nullgroup.lados.screens.customer.home.FilterScreen
-import org.nullgroup.lados.screens.customer.home.HomeScreen
 import org.nullgroup.lados.screens.customer.home.ProductScreen
 import org.nullgroup.lados.screens.customer.home.SearchScreen
 import org.nullgroup.lados.screens.customer.order.OrderDetailScreen
@@ -177,15 +176,6 @@ fun CustomerGraph(
                                 paddingValues = innerPadding,
                                 sharedViewModel = sharedViewModel,
                                 context = LocalContext.current,
-                                modifier = modifier,
-                            )
-                        }
-
-                        Screen.Customer.HomeScreen.route -> {
-                            HomeScreen(
-                                navController = navController,
-                                paddingValues = innerPadding,
-                                sharedViewModel = sharedViewModel,
                                 modifier = modifier,
                             )
                         }

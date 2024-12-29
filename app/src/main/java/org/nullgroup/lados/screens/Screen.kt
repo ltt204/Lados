@@ -46,7 +46,6 @@ sealed class Screen(
         icon: ImageVector
     ) : Screen(name, route, icon) {
 
-        data object HomeScreen : Customer("Home", "customer_home", Icons.Default.Home)
         data object ChatScreen : Customer("Chat", "customer_chat", Icons.Default.MailOutline)
         data object Profile : Customer("Profile", "customer_profile", Icons.Default.AccountCircle)
         data object Setting : Customer("Setting", "customer_setting", Icons.Default.AccountCircle)
@@ -152,11 +151,10 @@ sealed class Screen(
         companion object {
             fun getAllScreens() =
                 listOf(
-                    HomeScreen,
+                    Home,
                     ChatScreen,
                     Order.OrderList,
                     Profile,
-                    Home,
                     SearchScreen,
                     FilterScreen,
                     CategorySelectScreen,
@@ -166,7 +164,7 @@ sealed class Screen(
                     Order.OrderProductsView
                 )
 
-            fun getBaseScreens() = listOf(HomeScreen, ChatScreen, Order.OrderList, Profile)
+            fun getBaseScreens() = listOf(Home, ChatScreen, Order.OrderList, Profile)
         }
 
     }

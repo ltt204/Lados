@@ -97,8 +97,13 @@ class ChatViewModel @Inject constructor(
                         val message = Message(
                             id = messageId,
                             senderId = currentUserId,
-                            content = imageUrl,
+                            imageUrl = imageUrl,
                             type = MessageType.IMAGE
+                        )
+
+                        Log.d(
+                            "ChatViewModel:sendImageMessage",
+                            "${message.senderId} ${message.imageUrl}"
                         )
 
                         repository.sendMessage(message, chatId)
