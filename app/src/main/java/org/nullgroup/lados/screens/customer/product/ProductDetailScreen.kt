@@ -72,6 +72,7 @@ import org.nullgroup.lados.data.models.Size
 import org.nullgroup.lados.data.models.UserEngagement
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.utilities.formatToRelativeTime
+import org.nullgroup.lados.utilities.toCurrency
 import org.nullgroup.lados.viewmodels.customer.ProductDetailScreenViewModel
 import java.util.Locale
 
@@ -145,10 +146,12 @@ fun ProductDetailScreen(
                 },
                 containerColor = LadosTheme.colorScheme.background,
                 bottomBar = {
+                    val showPrice = uiState.product.variants.first().salePrice
+                        ?: uiState.product.variants.first().originalPrice
                     ProductDetailBottomBar(
                         title = stringResource(R.string.add_to_cart),
                         enabled = uiState.quantityInStock > 0,
-                        price = "$${uiState.product.variants.first().salePrice ?: uiState.product.variants.first().originalPrice}",
+                        price = showPrice.toCurrency(),
                         onClick = onAddToCart
                     )
                 }
@@ -336,7 +339,7 @@ fun ProductInformationSection(
 
             if (isSale) {
                 Text(
-                    text = stringResource(R.string.product_price, salePrice!!),
+                    text = salePrice!!.toCurrency(),
                     fontWeight = FontWeight.Bold,
                     fontSize = 22.sp,
                     color = LadosTheme.colorScheme.primary
@@ -344,7 +347,7 @@ fun ProductInformationSection(
             }
 
             Text(
-                text = stringResource(R.string.product_price, originalPrice),
+                text = originalPrice.toCurrency(),
                 color = if (isSale) LadosTheme.colorScheme.outline else LadosTheme.colorScheme.primary,
                 fontWeight = FontWeight.Medium,
                 textDecoration = if (isSale) TextDecoration.LineThrough else TextDecoration.None,
@@ -705,7 +708,7 @@ fun ProductDetailBottomBar(
                 .padding(vertical = 10.dp, horizontal = 16.dp)
         ) {
             Text(
-                text = stringResource(R.string.product_price, price),
+                text = price,
                 color = Color.White,
                 fontWeight = FontWeight.Bold,
                 fontSize = 18.sp

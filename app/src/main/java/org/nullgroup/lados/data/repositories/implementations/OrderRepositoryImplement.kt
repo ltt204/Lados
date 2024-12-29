@@ -12,6 +12,7 @@ import kotlinx.coroutines.tasks.await
 import org.nullgroup.lados.data.models.Order
 import org.nullgroup.lados.data.models.OrderProduct
 import org.nullgroup.lados.data.models.ProductVariant
+import org.nullgroup.lados.data.remote.models.ProductVariantRemoteModel
 import org.nullgroup.lados.data.repositories.interfaces.OrderRepository
 import org.nullgroup.lados.utilities.OrderStatus
 
@@ -39,7 +40,7 @@ class OrderRepositoryImplement(
                     val variantRef =
                         productRef.collection("variants").document(orderProduct.variantId)
                     val snapshot = transaction.get(variantRef)
-                    val variant = snapshot.toObject(ProductVariant::class.java)
+                    val variant = snapshot.toObject(ProductVariantRemoteModel::class.java)
                     if (variant == null) {
                         // Kind of "redundant", but just in case
                         failReason.add("Product/Variant not found for order item ${orderProduct.productId}")

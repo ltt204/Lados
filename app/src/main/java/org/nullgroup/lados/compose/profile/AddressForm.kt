@@ -18,10 +18,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import org.nullgroup.lados.R
 import org.nullgroup.lados.compose.SignIn.CustomTextField
 import org.nullgroup.lados.compose.common.CustomExposedDropDownMenu
 import org.nullgroup.lados.data.models.Address
@@ -53,7 +55,7 @@ fun AddressForm(
         CustomExposedDropDownMenu(
             modifier = Modifier,
             itemsUiState = provincesUiState,
-            placeHolder = "Province",
+            placeHolder = stringResource(R.string.address_province),
             onItemSelected = { _, index -> scope.launch { onProvinceSelected(index) } },
             currentItem = address.province
         )
@@ -64,7 +66,7 @@ fun AddressForm(
             CustomExposedDropDownMenu(
                 modifier = Modifier.weight(1f),
                 itemsUiState = districtsUiState,
-                placeHolder = "District",
+                placeHolder = stringResource(R.string.address_district),
                 onItemSelected = { _, index -> scope.launch { onDistrictSelected(index) } },
                 currentItem = address.district
             )
@@ -79,13 +81,16 @@ fun AddressForm(
         }
         Spacer(modifier = Modifier.height(16.dp))
         CustomTextField(
-            modifier = Modifier.fillMaxWidth().wrapContentHeight().heightIn(max = 128.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .heightIn(max = 128.dp),
             text = streetDetail,
             onValueChange = {
                 onDetailChanged(it)
                 streetDetail = it
             },
-            label = "Street",
+            label = stringResource(R.string.address_street),
         )
     }
 }

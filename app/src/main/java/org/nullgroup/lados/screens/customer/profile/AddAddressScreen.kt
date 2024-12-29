@@ -25,9 +25,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import org.nullgroup.lados.R
 import org.nullgroup.lados.compose.common.LoadOnProgress
 import org.nullgroup.lados.compose.profile.AddressForm
 import org.nullgroup.lados.compose.profile.ConfirmDialog
@@ -60,12 +62,11 @@ fun AddAddressScreen(
 
     Scaffold(
         modifier = modifier
-            .fillMaxSize()
-            .padding(vertical = paddingValues.calculateTopPadding()),
+            .fillMaxSize(),
         topBar = {
             DefaultCenterTopAppBar(onBackClick = {
                 cancelConfirmation = true
-            }, content = "Address")
+            }, content = stringResource(id = R.string.add_address_title))
         },
         containerColor = Color.Transparent
     ) { innerPadding ->
@@ -115,7 +116,7 @@ fun AddAddressScreen(
                     contentColor = LadosTheme.colorScheme.onPrimary,
                     disabledContainerColor = LadosTheme.colorScheme.outline,
                 ),) {
-                Text(text = "Save")
+                Text(text = stringResource(id = R.string.save_button))
             }
         }
     }

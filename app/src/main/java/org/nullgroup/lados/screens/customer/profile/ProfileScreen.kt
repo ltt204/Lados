@@ -146,7 +146,10 @@ fun ProfileScreen(
                                 fontSize = 16.sp
                             )
                             Text(
-                                modifier = Modifier, text = currentUser.value.phoneNumber.ifEmpty { "No phone number provided!" },
+                                modifier = Modifier, text = currentUser.value.phoneNumber.ifEmpty {
+                                    stringResource(
+                                        R.string.profile_no_phone_number_message
+                                    ) },
                                 softWrap = true,
                                 overflow = TextOverflow.Ellipsis,
                                 maxLines = 1,

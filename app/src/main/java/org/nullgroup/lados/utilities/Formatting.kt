@@ -1,10 +1,11 @@
 package org.nullgroup.lados.utilities
 
+import java.text.NumberFormat
 import java.util.Locale
 
-fun Number?.toUSDCurrency(): String {
+fun Number?.toCurrency(locale: Locale = Locale.getDefault()): String {
     if (this == null) {
-        return "$0.00"
+        return NumberFormat.getCurrencyInstance(locale).format(0)
     }
-    return "$${String.format(Locale.US ,"%,.2f", this)}"
+    return NumberFormat.getCurrencyInstance(locale).format(this)
 }

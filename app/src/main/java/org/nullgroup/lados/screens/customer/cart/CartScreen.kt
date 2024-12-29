@@ -3,8 +3,6 @@ package org.nullgroup.lados.screens.customer.cart
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,11 +11,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.Delete
@@ -61,7 +59,7 @@ import org.nullgroup.lados.compose.cart.PricingDetails
 import org.nullgroup.lados.data.models.CartItem
 import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.ui.theme.LadosTheme
-import org.nullgroup.lados.utilities.toUSDCurrency
+import org.nullgroup.lados.utilities.toCurrency
 import org.nullgroup.lados.viewmodels.customer.CartViewModel
 
 enum class ItemState {
@@ -92,7 +90,7 @@ fun CartScreen(
     val selectedItems = cartViewModel.selectedCartItems.collectAsStateWithLifecycle().value
     val validSelectedItems = cartViewModel.validSelectedItems.collectAsStateWithLifecycle().value
     val isAnyValidItemSelected = remember(validSelectedItems.size) {
-         derivedStateOf { validSelectedItems.isNotEmpty() }
+        derivedStateOf { validSelectedItems.isNotEmpty() }
     }
     val checkoutDetail = cartViewModel.checkoutDetail
     val scope = cartViewModel.viewModelScope
@@ -191,10 +189,12 @@ fun CartScreen(
         currentDialogState.value = DialogInfo(
             titleText = "Checkout Confirmation",
             messageText =
-                """
-                There ${if (invalidCount > 1) "are" else "is"
-                } ${selectedItems.size - validSelectedItems.size
-                } item${if (invalidCount > 1) "s" else ""} in the cart that are currently invalid!
+            """
+                There ${
+                if (invalidCount > 1) "are" else "is"
+            } ${
+                selectedItems.size - validSelectedItems.size
+            } item${if (invalidCount > 1) "s" else ""} in the cart that are currently invalid!
                 
                 ${if (invalidCount > 1) "They" else "It"} will be ignored when checking out!
                 
@@ -273,7 +273,7 @@ fun CartScreen(
                             fontWeight = FontWeight.Bold
                         ),
                         color = LadosTheme.colorScheme.onSurface,
-                        )
+                    )
                 },
                 navigationIcon = {
                     IconButton(
@@ -339,10 +339,10 @@ fun CartScreen(
             if (isAnyItemsExisted.value) {
                 val (subtotal, productDiscount, orderDiscount, total) = checkoutDetail()
                 CartBottomBar(
-                    subtotal = subtotal.toUSDCurrency(),
-                    productDiscount = productDiscount.toUSDCurrency(),
-                    orderDiscount = orderDiscount.toUSDCurrency(),
-                    total = total.toUSDCurrency(),
+                    subtotal = subtotal.toCurrency(),
+                    productDiscount = productDiscount.toCurrency(),
+                    orderDiscount = orderDiscount.toCurrency(),
+                    total = total.toCurrency(),
                     isEnabled = isAnyValidItemSelected.value,
                     onCheckout = onCheckingOut,
                     checkoutEnabled = isAllowedInteracting,
@@ -368,7 +368,7 @@ fun CartScreen(
                             .width(64.dp)
                     )
                 }
-            // } else if (cartItems.value.isEmpty()) { // Not working
+                // } else if (cartItems.value.isEmpty()) { // Not working
             } else if (isAnyItemsExisted.value.not()) {
                 Column(
                     modifier = Modifier
@@ -387,10 +387,12 @@ fun CartScreen(
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
                         text = stringResource(R.string.cart_empty_message),
+                        textAlign = TextAlign.Center,
                         style = LadosTheme.typography.bodyLarge.copy(
                             color = LadosTheme.colorScheme.onSurface,
                             fontWeight = FontWeight.Bold,
-                            fontSize = 32.sp
+                            fontSize = 32.sp,
+                            lineHeight = 40.sp
                         )
                     )
                 }
@@ -419,34 +421,13 @@ fun CartScreen(
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .combinedClickable(
-                                    interactionSource = remember { MutableInteractionSource() },
-                                    indication = null,
-                                    onClick = {
-                                        // Prevent click if interacting with child components
-                                        onItemSelected(cartItem)
-                                    }
-                                )
-                                .background(
-//                                    if (cartItem !in selectedItems) LadosTheme.colorScheme.secondaryContainer
-//                                    else if (productVariant == null) LadosTheme.colorScheme.errorContainer
-//                                    else LadosTheme.colorScheme.primaryContainer,
-                                    when (itemState) {
-                                        ItemState.SELECTED -> LadosTheme.colorScheme.primaryContainer
-                                        ItemState.UNSELECTED -> LadosTheme.colorScheme.secondaryContainer
-                                        ItemState.INVALID -> LadosTheme.colorScheme.errorContainer
-                                    },
-                                    shape = RoundedCornerShape(8.dp)
-                                )
                         ) {
                             CartItemBar(
                                 imageUrl = productVariant?.images?.firstOrNull()?.link
                                     ?: defaultImageUrl,
                                 title = product?.name ?: defaultTitle,
-                                originalPrice = "$" + (productVariant?.originalPrice
-                                    ?: defaultValue).toString(),
-                                salePrice = "$" + (productVariant?.salePrice
-                                    ?: defaultValue).toString(),
+                                originalPrice = productVariant?.originalPrice.toCurrency(),
+                                salePrice = productVariant?.salePrice?.toCurrency(),
                                 size = productVariant?.size?.sizeName ?: defaultValue,
                                 color = productVariant?.color?.colorName ?: defaultValue,
                                 clickEnabled = isAllowedInteracting,
@@ -459,8 +440,9 @@ fun CartScreen(
                                         onItemAmountChanged(cartItem, -1)
                                     }
                                 },
+                                onItemSelected = { onItemSelected(cartItem) },
                                 itemState = itemState,
-                                modifier = Modifier.fillMaxWidth()
+                                modifier = Modifier
                             )
                         }
 
@@ -499,8 +481,7 @@ fun CartBottomBar(
 ) {
     Column(
         modifier = modifier
-            .fillMaxWidth()
-        ,
+            .fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Spacer(modifier = Modifier.height(8.dp))
@@ -524,10 +505,11 @@ fun CartBottomBar(
             onClick = { onCheckout() },
             enabled = isEnabled && checkoutEnabled,
             colors = buttonColors,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = 56.dp)
         ) {
-            Text("Checkout")
+            Text(stringResource(R.string.cart_checkout))
         }
-        Spacer(modifier = Modifier.height(8.dp))
     }
 }

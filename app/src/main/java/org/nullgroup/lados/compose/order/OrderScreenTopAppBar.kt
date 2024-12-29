@@ -13,10 +13,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.nullgroup.lados.utilities.OrderStatus
 import org.nullgroup.lados.utilities.capitalizeWords
+import org.nullgroup.lados.utilities.getByLocale
 
 @Composable
 fun OrderScreenTopAppBar(
@@ -24,7 +26,8 @@ fun OrderScreenTopAppBar(
     selectedTabIndex: Int,
     onTabSelected: (Int) -> Unit
 ) {
-    val tabs = OrderStatus.entries.map { it.name.capitalizeWords() }
+    val localContext = LocalContext.current
+    val tabs = OrderStatus.entries.map { it.getByLocale(localContext) }
     Log.d("OrderScreenTopAppBar", "OrderUiState: $selectedTabIndex")
     LazyRow(
         modifier = modifier.fillMaxWidth(),

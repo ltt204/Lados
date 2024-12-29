@@ -31,6 +31,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -85,13 +86,13 @@ fun EmailScreen(
     ) {
         Spacer(modifier = Modifier.height(70.dp))
 
-        Headline("Sign in")
+        Headline(stringResource(R.string.auth_sign_in))
 
         Column(
             modifier = Modifier.fillMaxWidth()
         ) {
             CustomTextField(
-                label = "Email Address",
+                label = stringResource(R.string.auth_email_address),
                 text = email,
                 onValueChange = {
                     email = it
@@ -117,7 +118,7 @@ fun EmailScreen(
             if (isError) {
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "Email invalid",
+                    text = stringResource(R.string.auth_invalid_email),
                     color = LadosTheme.colorScheme.error,
                 )
             }
@@ -130,7 +131,8 @@ fun EmailScreen(
                     loginScreenViewModel.handleLoginEvent(LoginScreenEvent.HandleEnterEmail(email))
                     isError = false
                 } else {
-                    Toast.makeText(context, "Invalid Email", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context,
+                        context.getString(R.string.auth_invalid_email), Toast.LENGTH_SHORT).show()
                     isError = true
                 }
             },
@@ -143,9 +145,9 @@ fun EmailScreen(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Center,
         ) {
-            TextNormal("Don't have an Account? ")
+            TextNormal(stringResource(R.string.auth_create_account_message))
             TextClickable(
-                text = "Create One",
+                text = stringResource(R.string.auth_create_acc),
                 onClick = {
                     loginScreenViewModel.handleLoginEvent(
                         LoginScreenEvent.HandleSignUp(
@@ -163,7 +165,7 @@ fun EmailScreen(
             verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
             OutlineButton(
-                text = "Continue With Google",
+                text = stringResource(R.string.auth_continue_with_google),
                 icon = R.drawable.ic_google,
                 onClick = {
                     loginScreenViewModel.handleLoginEvent(

@@ -10,7 +10,6 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Surface
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -27,7 +26,6 @@ import org.nullgroup.lados.screens.common.SplashScreen
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.utilities.updateLocale
 import org.nullgroup.lados.viewmodels.common.SettingViewModel
-import java.util.Locale
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -44,10 +42,9 @@ class MainActivity : ComponentActivity() {
         )
         setContent {
             val settingViewModel = hiltViewModel<SettingViewModel>()
-            val locale = settingViewModel.locale.collectAsState()
-            Locale.setDefault(locale.value.locale)
-            updateLocale(this, locale.value.locale)
-            Log.d("MainActivity", "locale: ${locale.value.locale}")
+            val region = settingViewModel.locale.collectAsState()
+            updateLocale(this, region.value.locale)
+            Log.d("MainActivity", "locale: ${region.value.locale}")
             var isDarkTheme = settingViewModel.darkMode.collectAsState()
             LadosTheme(darkTheme = isDarkTheme.value) {
                 Scaffold(

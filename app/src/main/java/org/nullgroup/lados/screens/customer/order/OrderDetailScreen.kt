@@ -26,6 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -42,7 +43,9 @@ import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.utilities.OrderStatus
 import org.nullgroup.lados.utilities.capitalizeWords
+import org.nullgroup.lados.utilities.getByLocale
 import org.nullgroup.lados.utilities.getFirstFourOrderStatuses
+import org.nullgroup.lados.utilities.toCurrency
 import org.nullgroup.lados.utilities.toDateTimeString
 import org.nullgroup.lados.viewmodels.customer.OrderDetailState
 import org.nullgroup.lados.viewmodels.customer.OrderDetailViewModel
@@ -163,6 +166,7 @@ fun OrderStatusItem(
     modifier: Modifier = Modifier,
     status: Pair<OrderStatus, Long?> = Pair(OrderStatus.CREATED, null),
 ) {
+    val context = LocalContext.current
     var tintColor = LadosTheme.colorScheme.primary
     val time: String = if (status.second == null) {
         tintColor = tintColor.copy(0.5f)
@@ -182,7 +186,7 @@ fun OrderStatusItem(
             )
             Spacer(modifier = Modifier.padding(horizontal = 8.dp))
             Text(
-                text = status.first.name.capitalizeWords(),
+                text = status.first.getByLocale(context),
                 color = LadosTheme.colorScheme.onBackground,
                 style = LadosTheme.typography.titleMedium,
             )
@@ -227,7 +231,7 @@ fun OrderItemsArea(
                         ),
                     )
                     Text(
-                        text = "$${order.orderTotal}",
+                        text = order.orderTotal.toCurrency(),
                         style = LadosTheme.typography.bodyMedium.copy(
                             fontSize = 14.sp
                         ),

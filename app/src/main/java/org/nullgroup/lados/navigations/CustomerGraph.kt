@@ -291,6 +291,7 @@ fun CustomerGraph(
                     modifier = modifier,
                     paddingValues = innerPadding,
                     onBack = { navController.navigateUp() },
+                    navController = navController,
                     themeSwitched = themeSwitched
                 )
             }

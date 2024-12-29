@@ -32,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -45,6 +46,7 @@ import org.nullgroup.lados.data.models.Order
 import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.utilities.OrderStatus
+import org.nullgroup.lados.utilities.toCurrency
 import org.nullgroup.lados.viewmodels.customer.OrderState
 import org.nullgroup.lados.viewmodels.customer.OrderViewModel
 
@@ -125,11 +127,12 @@ fun OrderScreen(
                             )
                             Spacer(modifier = Modifier.height(LadosTheme.size.medium))
                             Text(
-                                text = "No orders yet",
+                                text = stringResource(R.string.no_orders_message),
                                 style = LadosTheme.typography.titleLarge.copy(
                                     fontWeight = FontWeight.SemiBold,
                                     fontSize = 24.sp
                                 ),
+                                textAlign = TextAlign.Center,
                                 color = LadosTheme.colorScheme.primary
                             )
                         }
@@ -207,7 +210,7 @@ fun OrderCard(
                 )
                 Spacer(modifier = Modifier.height(LadosTheme.size.small))
                 Text(
-                    text = "$${order.orderTotal}",
+                    text = order.orderTotal.toCurrency(),
                     style = LadosTheme.typography.bodyMedium.copy(
                         fontSize = 14.sp
                     ),
