@@ -94,17 +94,17 @@ fun getCurrentUTCFormattedTime(): String {
     return formatter.format(utcInstant)
 }
 
-fun OrderStatus.getActionForButtonOfOrderProduct(): Pair<String?, ((NavController, String?, String?) -> Unit)> {
+fun OrderStatus.getActionForButtonOfOrderProduct(context: Context): Pair<String?, ((NavController, String?, String?) -> Unit)> {
     return when (this) {
         OrderStatus.CREATED, OrderStatus.SHIPPED -> {
-            "Detail" to { navController, productId, _ ->
+            context.getString(R.string.detail) to { navController, productId, _ ->
                 /*TODO: Do nothing, disable the button or hide it */
                 navController.navigate("${Screen.Customer.ProductDetailScreen.route}/$productId")
             }
         }
 
         OrderStatus.DELIVERED -> {
-            "Leave review" to { navController, productId, variantId ->
+            context.getString(R.string.leave_review) to { navController, productId, variantId ->
                 /*TODO: Navigate to review screen*/
                 navController.navigate("${Screen.Customer.ReviewProductScreen.route}/$productId/$variantId")
             }
@@ -112,12 +112,30 @@ fun OrderStatus.getActionForButtonOfOrderProduct(): Pair<String?, ((NavControlle
 
         // TODO: Consider designing user flow for these cases
         OrderStatus.CANCELLED, OrderStatus.RETURNED -> {
-            "Re-order" to { navController, orderId, _ ->
+            context.getString(R.string.re_order) to { navController, orderId, _ ->
                 /*TODO: Allow user to re-order, which mean they will be navigated to the checkout screen with current list of products of order.*/
 //                it.navigate(Screen.Customer.Checkout.route)
             }
         }
 
+        else -> {
+            null to { _, _, _ -> /*TODO*/ }
+        }
+    }
+}
+
+fun OrderStatus.getActionForButtonOfOrder(context: Context): Pair<String?, ((NavController, String?, String?) -> Unit)> {
+    return when (this) {
+        OrderStatus.CANCELLED -> {
+            context.getString(R.string.cancel_order) to { _, _, _ ->
+                // Navigate to Ask for reason screen
+            }
+        }
+        OrderStatus.RETURNED -> {
+            context.getString(R.string.return_order) to { _, _, _ ->
+                // Navigate to Ask for reason screen
+            }
+        }
         else -> {
             null to { _, _, _ -> /*TODO*/ }
         }

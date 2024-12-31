@@ -1,5 +1,6 @@
 package org.nullgroup.lados.screens.customer.order
 
+import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -24,6 +25,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -38,16 +43,20 @@ import androidx.navigation.NavController
 import org.nullgroup.lados.R
 import org.nullgroup.lados.compose.common.DefaultCenterTopAppBar
 import org.nullgroup.lados.compose.common.TwoColsItem
+import org.nullgroup.lados.compose.profile.ConfirmDialog
 import org.nullgroup.lados.data.models.Order
 import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.utilities.OrderStatus
+import org.nullgroup.lados.utilities.getActionForButtonOfOrder
 import org.nullgroup.lados.utilities.getByLocale
 import org.nullgroup.lados.utilities.getFirstFourOrderStatuses
+import org.nullgroup.lados.utilities.getStatusByName
 import org.nullgroup.lados.utilities.toCurrency
 import org.nullgroup.lados.utilities.toDateTimeString
 import org.nullgroup.lados.viewmodels.customer.order.OrderDetailState
 import org.nullgroup.lados.viewmodels.customer.order.OrderDetailViewModel
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -55,9 +64,16 @@ fun OrderDetailScreen(
     modifier: Modifier = Modifier,
     navController: NavController? = null,
     viewModel: OrderDetailViewModel = hiltViewModel<OrderDetailViewModel>(),
+    context: Context = LocalContext.current,
     paddingValues: PaddingValues = PaddingValues(0.dp),
 ) {
     val uiState = viewModel.orderDetailState.collectAsState()
+    var isConfirmedToCancelOrReturn by remember {
+        mutableStateOf(false)
+    }
+    var actionForBottomButton by remember {
+        mutableStateOf(Pair(null as String?) { _: NavController, _: String?, _: String? -> })
+    }
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -67,6 +83,23 @@ fun OrderDetailScreen(
                 },
                 content = stringResource(id = R.string.order_detail_title)
             )
+        },
+        bottomBar = {
+            actionForBottomButton.first?.let {
+                if (it.isNotEmpty()) {
+                    TextButton(
+                        onClick = {
+                            isConfirmedToCancelOrReturn = true
+                        }
+                    ) {
+                        Text(
+                            text = it,
+                            fontWeight = FontWeight.SemiBold,
+                            color = LadosTheme.colorScheme.primary.copy(alpha = 0.8f)
+                        )
+                    }
+                }
+            }
         },
         containerColor = LadosTheme.colorScheme.background,
     ) { innerPadding ->
@@ -82,6 +115,9 @@ fun OrderDetailScreen(
 
             is OrderDetailState.Success -> {
                 val currentOrder = (uiState.value as OrderDetailState.Success).currentOrder
+                actionForBottomButton =
+                    getStatusByName(currentOrder.orderStatusLog.keys.last())
+                        .getActionForButtonOfOrder(context)
                 Column(
                     modifier = Modifier.padding(
                         start = LadosTheme.size.medium,
@@ -138,6 +174,27 @@ fun OrderDetailScreen(
                 }
             }
         }
+    }
+
+    if (isConfirmedToCancelOrReturn) {
+        ConfirmDialog(
+            title = {
+                Text(text = stringResource(R.string.are_you_sure))
+            },
+            message = {
+                Text(
+                    text = stringResource(R.string.order_cancel_return_message)
+                )
+            },
+            primaryButtonText = stringResource(R.string.dialog_agree),
+            secondaryButtonText = stringResource(R.string.dialog_cancel),
+            onDismissRequest = {
+                isConfirmedToCancelOrReturn = false
+            },
+            confirmButton = {
+                isConfirmedToCancelOrReturn = false
+            }
+        )
     }
 }
 
