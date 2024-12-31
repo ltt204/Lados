@@ -103,7 +103,6 @@
     <string name="re_order">Re-order</string>
     <string name="cancel_order">Cancel</string>
     <string name="return_order">Return</string>
-    <string name="return_order">Return</string>
     <string name="are_you_sure">Are you sure?</string>
     <string name="order_cancel_return_message">Please contact our staffs to %1$s this order.</string>
 </resources>

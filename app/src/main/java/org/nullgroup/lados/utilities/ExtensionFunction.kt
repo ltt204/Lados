@@ -10,6 +10,7 @@ import android.net.Uri
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import com.google.firebase.Timestamp
 import org.nullgroup.lados.R
@@ -126,18 +127,18 @@ fun OrderStatus.getActionForButtonOfOrderProduct(context: Context): Pair<String?
 
 fun OrderStatus.getActionForButtonOfOrder(context: Context): Pair<String?, ((NavController, String?, String?) -> Unit)> {
     return when (this) {
-        OrderStatus.CANCELLED -> {
-            context.getString(R.string.cancel_order) to { _, _, _ ->
+        OrderStatus.RETURNED, OrderStatus.CANCELLED -> {
+            null to { _, _, _ ->
                 // Navigate to Ask for reason screen
             }
         }
-        OrderStatus.RETURNED -> {
+        OrderStatus.DELIVERED -> {
             context.getString(R.string.return_order) to { _, _, _ ->
                 // Navigate to Ask for reason screen
             }
         }
         else -> {
-            null to { _, _, _ -> /*TODO*/ }
+            context.getString(R.string.cancel_order) to { _, _, _ -> /*TODO*/ }
         }
     }
 }

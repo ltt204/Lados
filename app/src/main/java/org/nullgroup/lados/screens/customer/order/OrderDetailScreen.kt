@@ -1,6 +1,7 @@
 package org.nullgroup.lados.screens.customer.order
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -31,10 +32,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -87,15 +90,15 @@ fun OrderDetailScreen(
         bottomBar = {
             actionForBottomButton.first?.let {
                 if (it.isNotEmpty()) {
-                    TextButton(
-                        onClick = {
-                            isConfirmedToCancelOrReturn = true
-                        }
-                    ) {
+                    TextButton(modifier = Modifier.fillMaxWidth().heightIn(min = 64.dp), onClick = {
+                        isConfirmedToCancelOrReturn = true
+                    }) {
                         Text(
+                            textAlign = TextAlign.Center,
                             text = it,
-                            fontWeight = FontWeight.SemiBold,
-                            color = LadosTheme.colorScheme.primary.copy(alpha = 0.8f)
+                            color = Color.Red,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.SemiBold
                         )
                     }
                 }
@@ -118,6 +121,10 @@ fun OrderDetailScreen(
                 actionForBottomButton =
                     getStatusByName(currentOrder.orderStatusLog.keys.last())
                         .getActionForButtonOfOrder(context)
+                Log.d(
+                    "OrderDetailScreen",
+                    "actionForBottomButton.first(): ${actionForBottomButton.first}"
+                )
                 Column(
                     modifier = Modifier.padding(
                         start = LadosTheme.size.medium,
