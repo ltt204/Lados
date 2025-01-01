@@ -552,23 +552,27 @@ fun ProductInCategoryScreen(
                                                 when (selectedOption) {
                                                     context.getString(R.string.lowest_highest_price) -> {
                                                         filterState.price="Price (Low to High)"
+                                                        filterState.sortBy=null
                                                         updateSelected(selectedFilters, filterState)
                                                         viewModel.filterProducts(filterState)
                                                     }
 
                                                     context.getString(R.string.highest_lowest_price) -> {
                                                         filterState.price="Price (High to Low)"
+                                                        filterState.sortBy=null
                                                         updateSelected(selectedFilters, filterState)
                                                         viewModel.filterProducts(filterState)
                                                     }
 
                                                     context.getString(R.string.recommended) -> {
+                                                        filterState.price=null
                                                         filterState.sortBy="Recommended"
                                                         updateSelected(selectedFilters, filterState)
                                                         viewModel.filterProducts(filterState)
                                                     }
 
                                                     context.getString(R.string.newest) -> {
+                                                        filterState.price=null
                                                         filterState.sortBy="Newest"
                                                         updateSelected(selectedFilters, filterState)
                                                         viewModel.filterProducts(filterState)
