@@ -101,4 +101,9 @@
     <string name="on_sale">Giảm giá</string>
     <string name="all_products">Tất cả sản phẩm</string>
     <string name="search">Tìm kiếm</string>
+    <string name="category">Loại</string>
+    <string name="price">Giá</string>
+    <string name="pricing_range">Khoảng giá</string>
+    <string name="sort_by">Sắp xếp</string>
+    <string name="rating">Đánh giá</string>
 </resources>

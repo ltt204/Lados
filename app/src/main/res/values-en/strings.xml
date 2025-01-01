@@ -101,4 +101,9 @@
     <string name="on_sale">On Sale</string>
     <string name="all_products">All products</string>
     <string name="search">Search</string>
+    <string name="category">Category</string>
+    <string name="price">Price</string>
+    <string name="sort_by">Sort by</string>
+    <string name="rating">Rating</string>
+    <string name="pricing_range">Pricing Range</string>
 </resources>

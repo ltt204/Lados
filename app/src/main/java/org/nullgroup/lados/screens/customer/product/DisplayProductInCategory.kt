@@ -183,7 +183,7 @@ fun DrawProductInCategoryScreenContent(
                 items(6) { index ->
                     when (index) {
                         0 -> if (!inCategory) FilterButton(
-                            text = "Category",
+                            text = stringResource(R.string.category),
                             icon = Icons.Outlined.KeyboardArrowDown,
                             contentDescription = "Category Filter",
                             type = "Category",
@@ -193,7 +193,7 @@ fun DrawProductInCategoryScreenContent(
                         )
 
                         1 -> if (!inOnSale) FilterButton(
-                            text = "On Sale",
+                            text = stringResource(R.string.on_sale),
                             contentDescription = "On Sale Filter",
                             type = "Deals",
                             onButtonClick = onNormalButtonClick,
@@ -201,7 +201,7 @@ fun DrawProductInCategoryScreenContent(
                         )
 
                         2 -> FilterButton(
-                            text = "Price",
+                            text = stringResource(R.string.price),
                             icon = Icons.Outlined.KeyboardArrowDown,
                             contentDescription = "Price Sort",
                             type = "Price",
@@ -211,7 +211,7 @@ fun DrawProductInCategoryScreenContent(
                         )
 
                         3 -> FilterButton(
-                            text = "Sort by",
+                            text = stringResource(R.string.sort_by),
                             icon = Icons.Outlined.KeyboardArrowDown,
                             contentDescription = "Sort by",
                             type = "Sort by",
@@ -221,7 +221,7 @@ fun DrawProductInCategoryScreenContent(
                         )
 
                         4 -> FilterButton(
-                            text = "Rating",
+                            text = stringResource(R.string.rating),
                             icon = Icons.Outlined.KeyboardArrowDown,
                             contentDescription = "Rating Filter",
                             type = "Rating",
@@ -231,7 +231,7 @@ fun DrawProductInCategoryScreenContent(
                         )
 
                         5-> FilterButton(
-                            text="Pricing Range",
+                            text= stringResource(R.string.pricing_range),
                             icon = Icons.Outlined.KeyboardArrowDown,
                             type = "Pricing Range",
                             onButtonClick = onButtonClick,
