@@ -98,4 +98,7 @@
     <string name="auth_forgot_password_header">Quên mật khẩu</string>
     <string name="auth_register">Đăng ký</string>
     <string name="auth_phone_number">Số điện thoại</string>
+    <string name="on_sale">Giảm giá</string>
+    <string name="all_products">Tất cả sản phẩm</string>
+    <string name="search">Tìm kiếm</string>
 </resources>

@@ -98,4 +98,7 @@
     <string name="auth_forgot_password_header">Forgot password</string>
     <string name="auth_register">Register</string>
     <string name="auth_phone_number">Phone number</string>
+    <string name="on_sale">On Sale</string>
+    <string name="all_products">All products</string>
+    <string name="search">Search</string>
 </resources>
