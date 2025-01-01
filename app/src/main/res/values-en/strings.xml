@@ -106,4 +106,12 @@
     <string name="sort_by">Sort by</string>
     <string name="rating">Rating</string>
     <string name="pricing_range">Pricing Range</string>
+    <string name="clear">Clear</string>
+    <string name="lowest_highest_price">Lowest - Highest Price</string>
+    <string name="highest_lowest_price">Highest - Lowest Price</string>
+    <string name="recommended">Recommended</string>
+    <string name="newest">Newest</string>
+    <string name="pant">Pant</string>
+    <string name="top">Top</string>
+    <string name="crop_top">Crop-top</string>
 </resources>

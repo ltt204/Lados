@@ -106,4 +106,12 @@
     <string name="pricing_range">Khoảng giá</string>
     <string name="sort_by">Sắp xếp</string>
     <string name="rating">Đánh giá</string>
+    <string name="clear">Xoá</string>
+    <string name="newest">Mới nhất</string>
+    <string name="recommended">Đề xuất</string>
+    <string name="lowest_highest_price">Giá từ thấp đến cao</string>
+    <string name="highest_lowest_price">Giá từ cao đến thấp</string>
+    <string name="pant">Quần</string>
+    <string name="top">Thân trên</string>
+    <string name="crop_top">Crop-top</string>
 </resources>

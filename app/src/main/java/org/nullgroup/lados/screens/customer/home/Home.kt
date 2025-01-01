@@ -76,6 +76,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import android.content.Context
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
@@ -639,12 +640,12 @@ fun DrawProductScreenContent(
     }
 }
 
-private fun getFilterCategoryAndIndex(title: String, index: Int? = null): Pair<FilterCategory, Int?> {
+private fun getFilterCategoryAndIndex(context: Context, title: String, index: Int? = null): Pair<FilterCategory, Int?> {
     return when (title) {
-        "Category" -> FilterCategory.CATEGORIES to index
-        "Sort by" -> FilterCategory.SORT_BY to index
-        "Rating" -> FilterCategory.RATING_RANGE to index
-        "Pricing Range" -> FilterCategory.PRICING_RANGE to null // or appropriate index if needed
+        context.getString(R.string.category) -> FilterCategory.CATEGORIES to index
+        context.getString(R.string.sort_by) -> FilterCategory.SORT_BY to index
+        context.getString(R.string.rating) -> FilterCategory.RATING_RANGE to index
+        context.getString(R.string.pricing_range) -> FilterCategory.PRICING_RANGE to null // or appropriate index if needed
         else -> FilterCategory.PRICE to index
     }
 }
@@ -654,6 +655,7 @@ fun BottomSheetContent(
     modifier: Modifier = Modifier,
     title: String,
     options: List<String>,
+    context: Context,
     onSelectionChanged: (String) -> Unit = {},
     paddingValues: PaddingValues,
     onCloseClick: () -> Unit,
@@ -686,14 +688,15 @@ fun BottomSheetContent(
             ) {
                 TextButton(
                     onClick = {
-                        val (category, _) = getFilterCategoryAndIndex(title)
+                        val (category, _) = getFilterCategoryAndIndex(title=title, context = context)
                         selectedFilters[category] = null
                         onClearClick(title)
                         onCloseClick()
+
                     }
                 ) {
                     Text(
-                        "Clear", style = LadosTheme.typography.titleMedium.copy(
+                        stringResource(R.string.clear), style = LadosTheme.typography.titleMedium.copy(
                             color = LadosTheme.colorScheme.primary,
                         )
                     )
@@ -729,12 +732,12 @@ fun BottomSheetContent(
                 )
             } else
                 options.forEachIndexed { index, option ->
-                    val (category, index) = getFilterCategoryAndIndex(title, index)
+                    val (category, index) = getFilterCategoryAndIndex(title=title, context = context, index = index)
                     val isSelected = selectedFilters[category] == index
                     Button(
 
                         onClick = {
-                            val (category, index) = getFilterCategoryAndIndex(title, index)
+                            val (category, index) = getFilterCategoryAndIndex(title=title, context = context, index = index)
                             selectedFilters[category] = index
 
                             onSelectionChanged(option)

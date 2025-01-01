@@ -186,7 +186,7 @@ fun DrawProductInCategoryScreenContent(
                             text = stringResource(R.string.category),
                             icon = Icons.Outlined.KeyboardArrowDown,
                             contentDescription = "Category Filter",
-                            type = "Category",
+                            type = stringResource(R.string.category),
                             onButtonClick = onButtonClick,
                             isNormal = false,
                             isSelected = isSelected[FilterCategory.CATEGORIES]==true,
@@ -195,7 +195,7 @@ fun DrawProductInCategoryScreenContent(
                         1 -> if (!inOnSale) FilterButton(
                             text = stringResource(R.string.on_sale),
                             contentDescription = "On Sale Filter",
-                            type = "Deals",
+                            type = stringResource(R.string.on_sale),
                             onButtonClick = onNormalButtonClick,
                             isSelected = isSelected[FilterCategory.ON_SALE]==true,
                         )
@@ -204,7 +204,7 @@ fun DrawProductInCategoryScreenContent(
                             text = stringResource(R.string.price),
                             icon = Icons.Outlined.KeyboardArrowDown,
                             contentDescription = "Price Sort",
-                            type = "Price",
+                            type = stringResource(R.string.price),
                             onButtonClick = onButtonClick,
                             isNormal = false,
                             isSelected = isSelected[FilterCategory.PRICE]==true,
@@ -214,7 +214,7 @@ fun DrawProductInCategoryScreenContent(
                             text = stringResource(R.string.sort_by),
                             icon = Icons.Outlined.KeyboardArrowDown,
                             contentDescription = "Sort by",
-                            type = "Sort by",
+                            type = stringResource(R.string.sort_by),
                             onButtonClick = onButtonClick,
                             isNormal = false,
                             isSelected = isSelected[FilterCategory.SORT_BY]==true,
@@ -224,7 +224,7 @@ fun DrawProductInCategoryScreenContent(
                             text = stringResource(R.string.rating),
                             icon = Icons.Outlined.KeyboardArrowDown,
                             contentDescription = "Rating Filter",
-                            type = "Rating",
+                            type = stringResource(R.string.rating),
                             onButtonClick = onButtonClick,
                             isNormal = false,
                             isSelected = isSelected[FilterCategory.RATING_RANGE]==true,
@@ -233,7 +233,7 @@ fun DrawProductInCategoryScreenContent(
                         5-> FilterButton(
                             text= stringResource(R.string.pricing_range),
                             icon = Icons.Outlined.KeyboardArrowDown,
-                            type = "Pricing Range",
+                            type = stringResource(R.string.pricing_range),
                             onButtonClick = onButtonClick,
                             isNormal = false,
                             isSelected = isSelected[FilterCategory.PRICING_RANGE]==true,
@@ -283,22 +283,19 @@ fun PriceSlider(
                 onPriceRangeChanged(newRange)
             },
             valueRange = minPrice..maxPrice,
-            // Add any other desired styling or configuration
         )
-
-        // Display labels for selected values
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = "${sliderPosition.start.toInt()} ", // Start value label
+                text = "${sliderPosition.start.toInt()} ", 
                 modifier = Modifier.weight(1f),
                 color = LadosTheme.colorScheme.onBackground
             )
-            Spacer(modifier = Modifier.width(10.dp)) // 10 spaces between labels
+            Spacer(modifier = Modifier.width(10.dp))
             Text(
-                text = " ${sliderPosition.endInclusive.toInt()}", // End value label
+                text = " ${sliderPosition.endInclusive.toInt()}",
                 modifier = Modifier.weight(1f),
                 color = LadosTheme.colorScheme.onBackground
             )
@@ -376,7 +373,15 @@ fun ProductInCategoryScreen(
         ) else listOf("Recommended"),
         "Price" to listOf("Lowest - Highest Price", "Highest - Lowest Price"),
         "Category" to listOf("Pant", "Crop-top", "Top"),
-        "Rating" to listOf("1.0 to 2.0", "2.0 to 3.0", "3.0 to 4.0", "4.0 +")
+        "Rating" to listOf("1.0 - 2.0", "2.0 - 3.0", "3.0 - 4.0", "4.0 +"),
+
+        "Sắp xếp" to if (typeScreen!="Newest")listOf(
+            "Đề xuất",
+            "Mới nhất",
+        ) else listOf("Đề xuất"),
+        "Giá" to listOf("Giá từ thấp đến cao", "Giá từ cao đến thấp"),
+        "Loại" to listOf("Quần", "Crop-top", "Thân trên"),
+        "Đánh giá" to listOf("1.0 - 2.0", "2.0 - 3.0", "3.0 - 4.0", "4.0 +")
     )
     ModalBottomSheetLayout(
         sheetState = sheetState,
@@ -478,7 +483,7 @@ fun ProductInCategoryScreen(
                         },
                         onButtonClick = { content ->
                             Log.d("FilterButton", "onButtonClick: $content")
-                            if (content=="Pricing Range") {
+                            if (content==context.getString(R.string.pricing_range)) {
                                 sheetContent = {
                                     BottomSheetContent(
                                         title = content,
@@ -491,6 +496,7 @@ fun ProductInCategoryScreen(
                                         onSliderChanged = { sliderRange ->
                                             filterState.pricingRange=sliderRange
                                             updateSelected(selectedFilters, filterState)
+                                            Log.d("BSC", "onSliderChanged: $filterState")
                                             viewModel.filterProducts(filterState)
                                         },
                                         onCloseClick = {
@@ -499,7 +505,8 @@ fun ProductInCategoryScreen(
                                             }
                                         },
                                         options = emptyList(),
-                                        selectedFilters = selectedOptions
+                                        selectedFilters = selectedOptions,
+                                        context = context
                                     )
                                 }
                                 scope.launch { sheetState.show() }
@@ -515,25 +522,25 @@ fun ProductInCategoryScreen(
                                             paddingValues = paddingValues,
                                             onClearClick = { clearOption ->
                                                 when (clearOption) {
-                                                    "Sort by" -> {
+                                                    context.getString(R.string.sort_by) -> {
                                                         filterState.sortBy=null
                                                         updateSelected(selectedFilters, filterState)
                                                         viewModel.filterProducts(filterState)
                                                     }
 
-                                                    "Price" -> {
+                                                    context.getString(R.string.price) -> {
                                                         filterState.price=null
                                                         updateSelected(selectedFilters, filterState)
                                                         viewModel.filterProducts(filterState)
                                                     }
 
-                                                    "Category" -> {
+                                                    context.getString(R.string.category) -> {
                                                         filterState.selectedCategories=null
                                                         updateSelected(selectedFilters, filterState)
                                                         viewModel.filterProducts(filterState)
                                                     }
 
-                                                    "Rating" -> {
+                                                    context.getString(R.string.rating) -> {
                                                         filterState.ratingRange=null
                                                         updateSelected(selectedFilters, filterState)
                                                         viewModel.filterProducts(filterState)
@@ -541,62 +548,63 @@ fun ProductInCategoryScreen(
                                                 }
                                             },
                                             onSelectionChanged = { selectedOption ->
+                                                Log.d("BottomSheetContent", "onSelectionChanged: $selectedOption")
                                                 when (selectedOption) {
-                                                    "Lowest - Highest Price" -> {
+                                                    context.getString(R.string.lowest_highest_price) -> {
                                                         filterState.price="Price (Low to High)"
                                                         updateSelected(selectedFilters, filterState)
                                                         viewModel.filterProducts(filterState)
                                                     }
 
-                                                    "Highest - Lowest Price" -> {
+                                                    context.getString(R.string.highest_lowest_price) -> {
                                                         filterState.price="Price (High to Low)"
                                                         updateSelected(selectedFilters, filterState)
                                                         viewModel.filterProducts(filterState)
                                                     }
 
-                                                    "Recommended" -> {
+                                                    context.getString(R.string.recommended) -> {
                                                         filterState.sortBy="Recommended"
                                                         updateSelected(selectedFilters, filterState)
                                                         viewModel.filterProducts(filterState)
                                                     }
 
-                                                    "Newest" -> {
+                                                    context.getString(R.string.newest) -> {
                                                         filterState.sortBy="Newest"
                                                         updateSelected(selectedFilters, filterState)
                                                         viewModel.filterProducts(filterState)
                                                     }
 
-                                                    "Pant" -> {
-                                                        filterState.selectedCategories="Pant"
+                                                    context.getString(R.string.pant) -> {
+                                                        filterState.selectedCategories=context.getString(R.string.pant)
                                                         updateSelected(selectedFilters, filterState)
                                                         viewModel.filterProducts(filterState)
                                                     }
 
-                                                    "Crop-top" -> {
-                                                        filterState.selectedCategories="Crop-top"
+                                                    context.getString(R.string.crop_top) -> {
+                                                        filterState.selectedCategories=context.getString(R.string.crop_top) 
                                                         updateSelected(selectedFilters, filterState)
                                                         viewModel.filterProducts(filterState)
                                                     }
 
-                                                    "Top" -> {
-                                                        filterState.selectedCategories="Top"
+                                                    context.getString(R.string.top) -> {
+                                                        filterState.selectedCategories=context.getString(R.string.top)  
                                                         updateSelected(selectedFilters, filterState)
                                                         viewModel.filterProducts(filterState)
                                                     }
 
-                                                    "1.0 to 2.0" -> {
+                                                    "1.0 - 2.0" -> {
                                                         filterState.ratingRange=1.0f..2.0f
                                                         updateSelected(selectedFilters, filterState)
                                                         viewModel.filterProducts(filterState)
                                                     }
 
-                                                    "2.0 to 3.0" -> {
+                                                    "2.0 - 3.0" -> {
                                                         filterState.ratingRange=2.0f..3.0f
                                                         updateSelected(selectedFilters, filterState)
                                                         viewModel.filterProducts(filterState)
                                                     }
 
-                                                    "3.0 to 4.0" -> {
+                                                    "3.0 - 4.0" -> {
                                                         filterState.ratingRange=3.0f..4.0f
                                                         updateSelected(selectedFilters, filterState)
                                                         viewModel.filterProducts(filterState)
@@ -607,8 +615,11 @@ fun ProductInCategoryScreen(
                                                         updateSelected(selectedFilters, filterState)
                                                         viewModel.filterProducts(filterState)
                                                     }
+
+                                                    else -> {}
                                                 }
                                             },
+                                            context = context,
                                             onCloseClick = {
                                                 scope.launch {
                                                     sheetState.hide()
