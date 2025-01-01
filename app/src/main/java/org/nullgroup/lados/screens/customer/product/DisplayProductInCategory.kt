@@ -34,6 +34,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -72,6 +73,7 @@ import org.nullgroup.lados.viewmodels.SharedViewModel
 import org.nullgroup.lados.viewmodels.customer.home.CategoryUiState
 import org.nullgroup.lados.viewmodels.customer.home.HomeViewModel
 import org.nullgroup.lados.viewmodels.customer.home.ProductUiState
+import kotlin.math.roundToInt
 
 
 @Composable
@@ -265,19 +267,20 @@ fun DrawProductInCategoryScreenContent(
         }
     }
 }
-
 @Composable
 fun PriceSlider(
     minPrice: Float,
     maxPrice: Float,
     currentPriceRange: ClosedFloatingPointRange<Float>,
-    onPriceRangeChanged: (ClosedFloatingPointRange<Float>) -> Unit
+    onPriceRangeChanged: (ClosedFloatingPointRange<Float>) -> Unit,
+    steps: Int = 25 // Default to 15 steps
 ) {
     var sliderPosition by remember { mutableStateOf(currentPriceRange) }
 
     Column {
         RangeSlider(
             value = sliderPosition,
+            steps=steps,
             onValueChange = { newRange ->
                 sliderPosition = newRange
                 onPriceRangeChanged(newRange)
@@ -486,6 +489,8 @@ fun ProductInCategoryScreen(
                             if (content==context.getString(R.string.pricing_range)) {
                                 sheetContent = {
                                     BottomSheetContent(
+                                        minPrice = viewModel.findMinPrice().toFloat(),
+                                        maxPrice = viewModel.findMaxPrice().toFloat(),
                                         title = content,
                                         paddingValues = paddingValues,
                                         onClearClick = {
@@ -553,6 +558,7 @@ fun ProductInCategoryScreen(
                                                     context.getString(R.string.lowest_highest_price) -> {
                                                         filterState.price="Price (Low to High)"
                                                         filterState.sortBy=null
+                                                        selectedOptions[FilterCategory.SORT_BY]=null
                                                         updateSelected(selectedFilters, filterState)
                                                         viewModel.filterProducts(filterState)
                                                     }
@@ -560,12 +566,14 @@ fun ProductInCategoryScreen(
                                                     context.getString(R.string.highest_lowest_price) -> {
                                                         filterState.price="Price (High to Low)"
                                                         filterState.sortBy=null
+                                                        selectedOptions[FilterCategory.SORT_BY]=null
                                                         updateSelected(selectedFilters, filterState)
                                                         viewModel.filterProducts(filterState)
                                                     }
 
                                                     context.getString(R.string.recommended) -> {
                                                         filterState.price=null
+                                                        selectedOptions[FilterCategory.PRICE]=null
                                                         filterState.sortBy="Recommended"
                                                         updateSelected(selectedFilters, filterState)
                                                         viewModel.filterProducts(filterState)
@@ -573,6 +581,7 @@ fun ProductInCategoryScreen(
 
                                                     context.getString(R.string.newest) -> {
                                                         filterState.price=null
+                                                        selectedOptions[FilterCategory.PRICE]=null
                                                         filterState.sortBy="Newest"
                                                         updateSelected(selectedFilters, filterState)
                                                         viewModel.filterProducts(filterState)

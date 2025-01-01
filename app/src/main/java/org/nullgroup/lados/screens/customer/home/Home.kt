@@ -662,6 +662,8 @@ fun BottomSheetContent(
     onClearClick: (String) -> Unit = {},
     onSliderChanged: (ClosedFloatingPointRange<Float>) -> Unit = {},
     selectedFilters: MutableMap<FilterCategory, Int?> = mutableMapOf(),
+    minPrice: Float = 0f,
+    maxPrice: Float = 500f,
 ) {
     Box(
         modifier = Modifier
@@ -717,9 +719,7 @@ fun BottomSheetContent(
                 }
             }
             Spacer(modifier = Modifier.height(8.dp))
-            if (title == "Pricing Range") {
-                val minPrice = 0f
-                val maxPrice = 200f
+            if (title == stringResource(R.string.pricing_range)) {
                 var currentPriceRange by remember { mutableStateOf(minPrice..maxPrice) }
                 PriceSlider(
                     minPrice = minPrice,

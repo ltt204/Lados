@@ -115,6 +115,22 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    fun findMaxPrice(): Double {
+        val currentState = _productUiState.value
+        if (currentState is ProductUiState.Success) {
+            return currentState.products.maxOf { if (it.hasNoSalePrice()) it.variants[0].originalPrice else it.isProductOnSale().second!! }
+        }
+        return 0.0
+    }
+
+    fun findMinPrice(): Double {
+        val currentState = _productUiState.value
+        if (currentState is ProductUiState.Success) {
+            return currentState.products.minOf { if (it.hasNoSalePrice()) it.variants[0].originalPrice else it.isProductOnSale().second!! }
+        }
+        return 0.0
+    }
+
     fun filterProductsByRating(low: Float, high: Float){
         val currentState = _productUiState.value
         if (currentState is ProductUiState.Success) {
