@@ -13,7 +13,6 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.withContext
-import okhttp3.Dispatcher
 import org.nullgroup.lados.data.models.ChatRoom
 import org.nullgroup.lados.data.models.Message
 import org.nullgroup.lados.data.repositories.interfaces.chat.ChatRepository
@@ -92,7 +91,33 @@ class ChatRepositoryImpl(
                     val chatRooms = snapshot.children.mapNotNull {
                         it.getValue(ChatRoom::class.java)
                     }
-                    trySend(chatRooms)
+                    chatRooms.forEach { room ->
+                        val messagesRef = database.reference.child("chats")
+                            .child(room.id)
+                            .child("messages")
+                            .orderByChild("timestamp")
+
+                        messagesRef.addValueEventListener(object : ValueEventListener {
+                            override fun onDataChange(snapshot: DataSnapshot) {
+                                val messageList = snapshot.children.mapNotNull {
+                                    it.getValue(Message::class.java)
+                                }
+                                if (messageList.isNotEmpty()) {
+                                    Log.d("ChatRepository", "Last message: ${messageList.last()}")
+                                    room.lastMessage = messageList.last().content
+                                    room.lastMessageTime = messageList.last().timestamp
+                                    Log.d("ChatRepository", "Last message: ${room.lastMessage}")
+                                }
+                            }
+
+                            override fun onCancelled(error: DatabaseError) {
+                                close(error.run { toException() })
+                            }
+                        })
+                    }
+                    trySend(chatRooms.filter {
+                        it.customerId != auth.currentUser?.uid
+                    })
                 }
 
                 override fun onCancelled(error: DatabaseError) {
@@ -163,7 +188,7 @@ class ChatRepositoryImpl(
             .child(chatId)
             .child("messages")
             .orderByChild("timestamp")
-        Log.d("ChatRepository:observeMessages", "chatId: $chatId")
+        Log.d("ChatRepository", "chatId:observeMessages $chatId")
 
         val listener = messagesRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -190,4 +215,21 @@ class ChatRepositoryImpl(
         database.reference.child("chats").child(chatId).child("messages").push().key
 
     override fun getCurrentUserId(): String? = auth.currentUser?.uid
+    override suspend fun updateLastMessage(chatRoomId: String, message: String): Result<Boolean> {
+        return withContext(Dispatchers.IO) {
+            suspendCoroutine { continuation ->
+                val charRoomRef = database.reference.child("chat_rooms")
+                    .child(chatRoomId)
+                try {
+                    charRoomRef.child("lastMessageTime").setValue(System.currentTimeMillis())
+                    charRoomRef.child("lastMessage")
+                        .setValue(message)
+
+                    continuation.resume(Result.success(true))
+                } catch (e: Exception) {
+                    continuation.resume(Result.failure(e))
+                }
+            }
+        }
+    }
 }

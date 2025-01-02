@@ -6,8 +6,8 @@ import androidx.annotation.Keep
 data class ChatRoom(
     val id: String = "",
     val customerId: String = "",
-    val lastMessage: String = "",
-    val lastMessageTime: Long = System.currentTimeMillis(),
+    var lastMessage: String = "",
+    var lastMessageTime: Long = System.currentTimeMillis(),
     val unreadCount: Int = 0,
 ) {
     fun toMap(): Map<String, Any?> {

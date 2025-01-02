@@ -6,19 +6,23 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.nullgroup.lados.data.models.Message
 import org.nullgroup.lados.data.models.MessageType
 import org.nullgroup.lados.data.repositories.interfaces.chat.ChatRepository
+import org.nullgroup.lados.data.repositories.interfaces.user.UserRepository
 import org.nullgroup.lados.viewmodels.customer.chat.events.ChatScreenEvent
+import org.nullgroup.lados.viewmodels.customer.chat.states.ChatRoomUiState
 import org.nullgroup.lados.viewmodels.customer.chat.states.ChatUiState
 import javax.inject.Inject
 
 @HiltViewModel
 class ChatViewModel @Inject constructor(
     private val repository: ChatRepository,
+    private val userRepository: UserRepository
 ) : ViewModel() {
     var messages = MutableStateFlow<List<Message>>(emptyList())
         private set
@@ -36,7 +40,6 @@ class ChatViewModel @Inject constructor(
             observeMessages(chatId)
         }
     }
-
 
     fun handleEvent(event: ChatScreenEvent) {
         when (event) {
@@ -78,6 +81,8 @@ class ChatViewModel @Inject constructor(
                             "ChatViewModel:sendTextMessage",
                             "${message.content} ${message.senderId}"
                         )
+                        val currentUser = userRepository.getCurrentUser()
+                        repository.updateLastMessage(chatId, content)
                     }
             } catch (e: Exception) {
                 uiState.value = ChatUiState.Error(e.message)
@@ -116,6 +121,8 @@ class ChatViewModel @Inject constructor(
                                     "${message.content} ${message.senderId}"
                                 )
                             }
+                        val currentUser = userRepository.getCurrentUser()
+                        repository.updateLastMessage(chatId, "${currentUser.name} sent an image")
                     }
                     .onFailure { e ->
                         uiState.value = ChatUiState.Error(e.message)
