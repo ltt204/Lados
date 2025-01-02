@@ -14,4 +14,6 @@ interface UserRepository {
     suspend fun updateUser(user: User): Result<Boolean>
     suspend fun getCurrentUser(): User
     suspend fun updateUserRole(email: String, role: String): Result<Boolean>
+    suspend fun getUserName(id: String): Result<String>
+    suspend fun getUserAvatar(id: String): Result<String>
 }
