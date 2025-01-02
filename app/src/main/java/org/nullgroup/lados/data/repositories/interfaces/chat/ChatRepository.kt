@@ -15,4 +15,5 @@ interface ChatRepository {
     fun observeMessages(chatId: String): Flow<List<Message>>
     fun generateMessageId(chatId: String): String?
     fun getCurrentUserId(): String?
+    suspend fun updateLastMessage(chatRoomId: String, message: String): Result<Boolean>
 }
