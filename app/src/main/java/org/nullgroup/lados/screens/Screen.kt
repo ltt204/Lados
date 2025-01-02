@@ -178,6 +178,10 @@ sealed class Screen(
         icon: ImageVector
     ) : Screen(name, route, icon) {
         data object ChatScreen : Staff("Chat", "staff_chat", Icons.Default.MailOutline)
+        data object ChatWithCustomerScreen : Staff("Chat", "staff_chat", Icons.Default.MailOutline) {
+            const val CHAT_ID_ARG = "chatId_id"
+            const val ROUTE_WITH_ARG = "staff_chat/{$CHAT_ID_ARG}"
+        }
         data object OrderManagement : Staff("Order Management", "staff_order_management", Icons.Default.AccountCircle)
 
         companion object {

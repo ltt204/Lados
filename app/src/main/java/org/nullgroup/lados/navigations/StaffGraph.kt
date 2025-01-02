@@ -1,6 +1,9 @@
 package org.nullgroup.lados.navigations
 
 import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -37,12 +40,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.nullgroup.lados.screens.Screen
+import org.nullgroup.lados.screens.staff.ChatScreen
+import org.nullgroup.lados.screens.staff.ChatWithCustomerScreen
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.viewmodels.customer.profile.ProfileViewModel
 
@@ -63,7 +70,9 @@ fun StaffGraph(
     var currentDestination by remember {
         mutableStateOf(startDestination)
     }
-
+    var isVisibility by remember {
+        mutableStateOf(true)
+    }
     ModalNavigationDrawer(
         modifier = modifier,
         drawerState = drawerState,
@@ -115,27 +124,31 @@ fun StaffGraph(
         Scaffold(
             containerColor = LadosTheme.colorScheme.background,
             topBar = {
-                CenterAlignedTopAppBar(
-                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                        containerColor = LadosTheme.colorScheme.background
-                    ),
-                    title = { Text(text = currentDestination.name!!) },
-                    navigationIcon = {
-                        IconButton(onClick = {
-                            Log.d("AdminTopAppBar", "onDrawerClick")
-                            scope.launch {
-                                Log.d(TAG, "AdminGraph: onDrawerClick: ${drawerState.isClosed}")
-                                if (drawerState.isClosed) drawerState.open() else drawerState.close()
+                AnimatedVisibility(
+                    visible = isVisibility,
+                ) {
+                    CenterAlignedTopAppBar(
+                        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                            containerColor = LadosTheme.colorScheme.background
+                        ),
+                        title = { Text(text = currentDestination.name!!) },
+                        navigationIcon = {
+                            IconButton(onClick = {
+                                Log.d("AdminTopAppBar", "onDrawerClick")
+                                scope.launch {
+                                    Log.d(TAG, "AdminGraph: onDrawerClick: ${drawerState.isClosed}")
+                                    if (drawerState.isClosed) drawerState.open() else drawerState.close()
+                                }
+                            }) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Default.List,
+                                    contentDescription = "Back button"
+                                )
                             }
-                        }) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Default.List,
-                                contentDescription = "Back button"
-                            )
-                        }
-                    },
-                    scrollBehavior = scrollBehavior
-                )
+                        },
+                        scrollBehavior = scrollBehavior
+                    )
+                }
             }
         ) { innerPadding ->
             NavHost(
@@ -146,7 +159,12 @@ fun StaffGraph(
                     composable(screen.route) {
                         when (screen.route) {
                             Screen.Staff.ChatScreen.route -> {
-                                // ChatScreen()
+                                isVisibility = true
+                                ChatScreen(
+                                    modifier = Modifier,
+                                    navController = navController,
+                                    paddingValues = innerPadding
+                                )
                             }
 
                             Screen.Staff.OrderManagement.route -> {
@@ -154,6 +172,20 @@ fun StaffGraph(
                             }
                         }
                     }
+                }
+
+                composable(
+                    route = Screen.Staff.ChatWithCustomerScreen.ROUTE_WITH_ARG,
+                    arguments = listOf(navArgument(Screen.Staff.ChatWithCustomerScreen.CHAT_ID_ARG) {
+                        type = NavType.StringType
+                    })
+                ) {
+                    isVisibility = false
+                    ChatWithCustomerScreen(
+                        modifier = Modifier,
+                        navController = navController,
+                        paddingValues = innerPadding,
+                    )
                 }
             }
         }

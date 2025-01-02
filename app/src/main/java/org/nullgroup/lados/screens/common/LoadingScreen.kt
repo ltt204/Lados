@@ -15,7 +15,7 @@ import org.nullgroup.lados.ui.theme.LadosTheme
 
 @Preview(showBackground = true)
 @Composable
-fun LoadingScreen(modifier: Modifier = Modifier) {
+fun LoadingScreen(modifier: Modifier = Modifier, circularSize: Int = 50) {
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -28,7 +28,7 @@ fun LoadingScreen(modifier: Modifier = Modifier) {
     ) {
         Dialog(onDismissRequest = {}) {
             CircularProgressIndicator(
-                modifier = Modifier.size(50.dp),
+                modifier = Modifier.size(circularSize.dp),
                 color = LadosTheme.colorScheme.onBackground
             )
         }
