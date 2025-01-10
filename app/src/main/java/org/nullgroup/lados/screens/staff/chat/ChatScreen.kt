@@ -1,20 +1,26 @@
-package org.nullgroup.lados.screens.staff
+package org.nullgroup.lados.screens.staff.chat
 
 import android.util.Log
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -26,9 +32,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -39,22 +46,21 @@ import androidx.navigation.NavController
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import org.nullgroup.lados.R
-import org.nullgroup.lados.compose.common.AutoCompleteSearchBar
 import org.nullgroup.lados.compose.common.LoadOnProgress
 import org.nullgroup.lados.compose.common.TwoColsItem
+import org.nullgroup.lados.compose.signin.CustomTextField
 import org.nullgroup.lados.data.models.ChatRoom
 import org.nullgroup.lados.data.models.User
 import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.screens.common.LoadingScreen
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.utilities.getMessageHistoryTimeDisplayment
-import org.nullgroup.lados.viewmodels.customer.chat.ChatViewModel
 import org.nullgroup.lados.viewmodels.staff.StaffChatScreenUiState
 import org.nullgroup.lados.viewmodels.staff.StaffChatViewModel
-import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Locale
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen(
     modifier: Modifier = Modifier,
@@ -72,17 +78,28 @@ fun ChatScreen(
             .padding(horizontal = 16.dp),
         containerColor = LadosTheme.colorScheme.background,
         topBar = {
-            //Search bar
-            AutoCompleteSearchBar(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight(),
-                label = "Search by user name",
-                options = userNames,
-                onOptionSelected = { value, index ->
-
-                }
-            )
+            Box(modifier = Modifier.clickable {
+                navController?.navigate(Screen.Staff.SearchScreen.route)
+            }) {
+                CustomTextField(
+                    modifier = Modifier
+                        .height(48.dp)
+                        .fillMaxWidth(),
+                    enabled = false,
+                    shape = RoundedCornerShape(24.dp),
+                    text = "",
+                    leadingIcon = {
+                        Icon(
+                            painter = painterResource(id = R.drawable.searchnormal1),
+                            contentDescription = "Dropdown"
+                        )
+                    },
+                    onValueChange = {
+                    },
+                    label = "Search",
+                    singleLine = true,
+                )
+            }
         }
     ) { innerPadding ->
         when (chatScreenUiState) {
@@ -99,7 +116,10 @@ fun ChatScreen(
                             chatRoom = chatRoom,
                             user = user,
                             onChatRoomItemClick = {
-                                Log.d("ChatScreen", "ChatRoom: \"${Screen.Staff.ChatWithCustomerScreen.route}/${chatRoom.id}\"")
+                                Log.d(
+                                    "ChatScreen",
+                                    "ChatRoom: \"${Screen.Staff.ChatWithCustomerScreen.route}/${chatRoom.id}\""
+                                )
                                 navController?.navigate("${Screen.Staff.ChatWithCustomerScreen.route}/${chatRoom.id}")
                             }
                         )

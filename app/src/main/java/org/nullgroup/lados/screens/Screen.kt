@@ -180,9 +180,10 @@ sealed class Screen(
             const val ROUTE_WITH_ARG = "staff_chat/{$CHAT_ROOM_ID_ARG}"
         }
         data object OrderManagement : Staff("Order Management", "staff_order_management", Icons.Default.AccountCircle)
+        data object SearchScreen : Staff("Search", "staff_search", Icons.Default.MailOutline)
 
         companion object {
-            fun getAllScreens() = listOf(ChatScreen, OrderManagement)
+            fun getAllScreens() = listOf(ChatScreen, OrderManagement, SearchScreen)
         }
     }
 
