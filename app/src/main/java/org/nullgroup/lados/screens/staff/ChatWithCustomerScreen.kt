@@ -1,6 +1,8 @@
 package org.nullgroup.lados.screens.staff
 
-import android.widget.Toast
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -51,6 +53,8 @@ import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.screens.customer.chat.MessageItem
 import org.nullgroup.lados.screens.customer.profile.LoadingContent
 import org.nullgroup.lados.ui.theme.LadosTheme
+import org.nullgroup.lados.viewmodels.customer.chat.ChatViewModel
+import org.nullgroup.lados.viewmodels.customer.chat.events.ChatScreenEvent
 import org.nullgroup.lados.viewmodels.customer.chat.states.ChatUiState
 import org.nullgroup.lados.viewmodels.staff.MessageUiState
 import org.nullgroup.lados.viewmodels.staff.StaffChatWithCustomerViewModel
@@ -61,21 +65,21 @@ fun ChatWithCustomerScreen(
     modifier: Modifier = Modifier,
     navController: NavController = rememberNavController(),
     paddingValues: PaddingValues = PaddingValues(0.dp),
-    viewModel: StaffChatWithCustomerViewModel = hiltViewModel()
+    chatViewModel: ChatViewModel = hiltViewModel(),
+    staffChatViewModel: StaffChatWithCustomerViewModel = hiltViewModel()
 ) {
-    val uiState by viewModel.messageUiState.collectAsState()
+    val uiState by staffChatViewModel.msgUiState.collectAsState()
     var messageText by remember {
         mutableStateOf("")
     }
 
-    // TODO: this is for sending picture
-//    val launcher = rememberLauncherForActivityResult(
-//        contract = ActivityResultContracts.GetContent()
-//    ) { uri ->
-//        uri?.let {
-//            viewModel.handleEvent(ChatScreenEvent.SendImage(it))
-//        }
-//    }
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        uri?.let {
+            chatViewModel.handleEvent(ChatScreenEvent.SendImage(it))
+        }
+    }
     when (uiState) {
         is MessageUiState.Error -> {
             (uiState as ChatUiState.Error).message?.let {
@@ -126,13 +130,13 @@ fun ChatWithCustomerScreen(
                                     },
                                     model = ImageRequest
                                         .Builder(context = LocalContext.current)
-                                        .data(viewModel.chatWith.second)
+                                        .data(staffChatViewModel.chatWith.second)
                                         .crossfade(true)
                                         .build(),
                                     contentDescription = "Profile Picture"
                                 )
                                 Text(
-                                    text = viewModel.chatWith.first,
+                                    text = staffChatViewModel.chatWith.first,
                                     style = LadosTheme.typography.titleLarge.copy(
                                         fontSize = 18.sp,
                                         fontWeight = FontWeight.SemiBold
@@ -167,9 +171,10 @@ fun ChatWithCustomerScreen(
                         reverseLayout = true,
                     ) {
                         items(items = messages.reversed(), key = { it.id }) { message ->
+                            Log.d("ChatWithCustomerScreen", "Sender: ${message.senderId} \n current: ${staffChatViewModel.currentStaff.id}")
                             MessageItem(
                                 message = message,
-                                isFromCurrentUser = message.senderId == viewModel.currentUser.id,
+                                isFromCurrentUser = message.senderId == staffChatViewModel.currentStaff.id,
                                 onProductClick = { productId ->
                                     navController.navigate("${Screen.Customer.ProductDetailScreen.route}/$productId")
                                 }
@@ -185,13 +190,7 @@ fun ChatWithCustomerScreen(
                     ) {
                         IconButton(
                             onClick = {
-//                        launcher.launch("image/*")
-                                Toast.makeText(
-                                    navController.context,
-                                    "Not implemented",
-                                    Toast.LENGTH_SHORT
-                                )
-                                    .show()
+                                launcher.launch("image/*")
                             },
                             enabled = uiState !is MessageUiState.Loading
                         ) {
@@ -211,16 +210,10 @@ fun ChatWithCustomerScreen(
 
                         IconButton(
                             onClick = {
-//                        if (messageText.isNotEmpty()) {
-//                            viewModel.handleEvent(ChatScreenEvent.SendText(messageText))
-//                            messageText = ""
-//                        }
-                                Toast.makeText(
-                                    navController.context,
-                                    "Not implemented",
-                                    Toast.LENGTH_SHORT
-                                )
-                                    .show()
+                                if (messageText.isNotEmpty()) {
+                                    chatViewModel.handleEvent(ChatScreenEvent.SendText(messageText))
+                                    messageText = ""
+                                }
                             },
                             enabled = uiState !is MessageUiState.Loading && messageText.isNotEmpty()
                         ) {

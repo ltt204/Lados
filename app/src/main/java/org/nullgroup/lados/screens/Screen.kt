@@ -6,10 +6,7 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MailOutline
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.material3.Icon
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.painterResource
-import org.nullgroup.lados.R
 import org.nullgroup.lados.utilities.UserRole
 
 sealed class Screen(
@@ -179,8 +176,8 @@ sealed class Screen(
     ) : Screen(name, route, icon) {
         data object ChatScreen : Staff("Chat", "staff_chat", Icons.Default.MailOutline)
         data object ChatWithCustomerScreen : Staff("Chat", "staff_chat", Icons.Default.MailOutline) {
-            const val CHAT_ID_ARG = "chatId_id"
-            const val ROUTE_WITH_ARG = "staff_chat/{$CHAT_ID_ARG}"
+            const val CHAT_ROOM_ID_ARG = "chatId_id"
+            const val ROUTE_WITH_ARG = "staff_chat/{$CHAT_ROOM_ID_ARG}"
         }
         data object OrderManagement : Staff("Order Management", "staff_order_management", Icons.Default.AccountCircle)
 

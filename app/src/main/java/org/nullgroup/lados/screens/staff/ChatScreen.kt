@@ -60,7 +60,6 @@ fun ChatScreen(
     modifier: Modifier = Modifier,
     navController: NavController? = null,
     paddingValues: PaddingValues = PaddingValues(0.dp),
-    chatViewModel: ChatViewModel = hiltViewModel(),
     staffChatViewModel: StaffChatViewModel = hiltViewModel(),
 ) {
     val chatScreenUiState by staffChatViewModel.uiState.collectAsStateWithLifecycle()
@@ -169,6 +168,7 @@ fun ChatRoomItem(
                             fontWeight = FontWeight.SemiBold,
                         )
                     )
+                    Log.d("ChatRoomItem", "ChatRoom: $chatRoom")
                     Text(
                         modifier = Modifier.widthIn(max = 172.dp),
                         text = chatRoom.lastMessage,

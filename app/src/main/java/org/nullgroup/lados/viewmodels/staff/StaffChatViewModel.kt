@@ -44,12 +44,17 @@ class StaffChatViewModel @Inject constructor(
                     val messages = chatRooms
                         .sortedByDescending { it.lastMessageTime }
                         .mapNotNull { chatRoom ->
+                            // Hotfix
+                            val chatRoomCopy = chatRoom.copy()
+                            Log.d("StaffChatViewModel", "ChatRoom before map: $chatRoomCopy")
                             userRepository.getUserFromFirestore(chatRoom.customerId).getOrNull()?.let { user ->
-                                user to chatRoom
+                                Log.d("StaffChatViewModel", "User: $user\nChatRoom: $chatRoomCopy")
+                                user to chatRoomCopy
                             }
                         }
                         .toMap()
                     _uiState.value = StaffChatScreenUiState.Success(messages)
+                    Log.d("StaffChatViewModel", "Messages: $messages")
                 }
         }
     }

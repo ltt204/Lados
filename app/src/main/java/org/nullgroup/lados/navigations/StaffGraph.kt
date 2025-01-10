@@ -2,8 +2,6 @@ package org.nullgroup.lados.navigations
 
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -176,7 +174,7 @@ fun StaffGraph(
 
                 composable(
                     route = Screen.Staff.ChatWithCustomerScreen.ROUTE_WITH_ARG,
-                    arguments = listOf(navArgument(Screen.Staff.ChatWithCustomerScreen.CHAT_ID_ARG) {
+                    arguments = listOf(navArgument(Screen.Staff.ChatWithCustomerScreen.CHAT_ROOM_ID_ARG) {
                         type = NavType.StringType
                     })
                 ) {
