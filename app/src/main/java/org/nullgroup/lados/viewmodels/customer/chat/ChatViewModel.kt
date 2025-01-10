@@ -2,6 +2,7 @@ package org.nullgroup.lados.viewmodels.customer.chat
 
 import android.net.Uri
 import android.util.Log
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -14,6 +15,8 @@ import org.nullgroup.lados.data.models.Message
 import org.nullgroup.lados.data.models.MessageType
 import org.nullgroup.lados.data.repositories.interfaces.chat.ChatRepository
 import org.nullgroup.lados.data.repositories.interfaces.user.UserRepository
+import org.nullgroup.lados.screens.Screen.Staff.ChatWithCustomerScreen.CHAT_ROOM_ID_ARG
+import org.nullgroup.lados.utilities.capitalizeWords
 import org.nullgroup.lados.viewmodels.customer.chat.events.ChatScreenEvent
 import org.nullgroup.lados.viewmodels.customer.chat.states.ChatRoomUiState
 import org.nullgroup.lados.viewmodels.customer.chat.states.ChatUiState
@@ -22,8 +25,11 @@ import javax.inject.Inject
 @HiltViewModel
 class ChatViewModel @Inject constructor(
     private val repository: ChatRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
+    private val chatRoomId = savedStateHandle.get<String>(CHAT_ROOM_ID_ARG)
+
     var messages = MutableStateFlow<List<Message>>(emptyList())
         private set
 
@@ -33,25 +39,34 @@ class ChatViewModel @Inject constructor(
     private var chatId: String = ""
 
     init {
-        repository.createOrGetChatRoom(
-            repository.getCurrentUserId() ?: ""
-        ) { chatId ->
-            this.chatId = chatId
+        if (!chatRoomId.isNullOrEmpty()) {
+            Log.d("ChatViewModel:init", "ChatRoomId: $chatRoomId")
+            chatId = chatRoomId
             observeMessages(chatId)
+        } else {
+            repository.createOrGetChatRoom(
+                repository.getCurrentUserId() ?: ""
+            ) { chatId ->
+                this.chatId = chatId
+                observeMessages(chatId)
+            }
         }
     }
 
     fun handleEvent(event: ChatScreenEvent) {
         when (event) {
             is ChatScreenEvent.SendImage -> {
+                Log.d("ChatViewModel:handleEvent", "SendImage")
                 sendImageMessage(event.uri)
             }
 
             is ChatScreenEvent.SendProduct -> {
+                Log.d("ChatViewModel:handleEvent", "SendProduct")
                 sendProductMessage(event.productId)
             }
 
             is ChatScreenEvent.SendText -> {
+                Log.d("ChatViewModel:handleEvent", "SendText")
                 sendTextMessage(event.content)
             }
         }
@@ -69,7 +84,6 @@ class ChatViewModel @Inject constructor(
             content = content,
             type = MessageType.TEXT
         )
-
         viewModelScope.launch {
             try {
                 repository.sendMessage(message, chatId)
@@ -118,11 +132,11 @@ class ChatViewModel @Inject constructor(
                             .onSuccess {
                                 Log.d(
                                     "ChatViewModel:sendImageMessage",
-                                    "${message.content} ${message.senderId}"
+                                    "Sender: ${message.senderId} \n Content ${message.content}"
                                 )
                             }
                         val currentUser = userRepository.getCurrentUser()
-                        repository.updateLastMessage(chatId, "${currentUser.name} sent an image")
+                        repository.updateLastMessage(chatId, "${currentUser.name.capitalizeWords()} sent an image")
                     }
                     .onFailure { e ->
                         uiState.value = ChatUiState.Error(e.message)
