@@ -1,5 +1,6 @@
 package org.nullgroup.lados.viewmodels.customer.chat.events
 
+import android.content.Context
 import android.net.Uri
 
 sealed class ChatScreenEvent {
@@ -9,6 +10,7 @@ sealed class ChatScreenEvent {
 
     data class SendImage(
         val uri: Uri,
+        val context: Context,
     ) : ChatScreenEvent()
 
     data class SendProduct(
