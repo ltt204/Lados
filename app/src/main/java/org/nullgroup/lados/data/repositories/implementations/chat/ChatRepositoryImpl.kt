@@ -232,4 +232,48 @@ class ChatRepositoryImpl(
             }
         }
     }
+
+    override suspend fun getChatRoomByUserId(userId: String): Result<ChatRoom> {
+        return withContext(Dispatchers.IO) {
+            suspendCoroutine {
+                database.reference.child("chat_rooms")
+                    .orderByChild("customerId")
+                    .equalTo(userId)
+                    .get()
+                    .addOnSuccessListener { snapshot ->
+                        val chatRoom =
+                            snapshot.children.firstOrNull()?.getValue(ChatRoom::class.java)
+                        if (chatRoom != null) {
+                            it.resume(Result.success(chatRoom))
+                        } else {
+                            it.resume(Result.failure(Exception("Chat room not found")))
+                        }
+                    }
+                    .addOnFailureListener { e ->
+                        it.resume(Result.failure(e))
+                    }
+            }
+        }
+    }
+
+    override suspend fun getChatRoomById(chatRoomId: String): Result<ChatRoom> {
+        return withContext(Dispatchers.IO) {
+            suspendCoroutine {
+                database.reference.child("chat_rooms")
+                    .child(chatRoomId)
+                    .get()
+                    .addOnSuccessListener { snapshot ->
+                        val chatRoom = snapshot.getValue(ChatRoom::class.java)
+                        if (chatRoom != null) {
+                            it.resume(Result.success(chatRoom))
+                        } else {
+                            it.resume(Result.failure(Exception("Chat room not found")))
+                        }
+                    }
+                    .addOnFailureListener { e ->
+                        it.resume(Result.failure(e))
+                    }
+            }
+        }
+    }
 }

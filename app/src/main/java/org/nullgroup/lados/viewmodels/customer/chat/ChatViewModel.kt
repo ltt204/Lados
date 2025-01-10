@@ -93,9 +93,8 @@ class ChatViewModel @Inject constructor(
                     .onSuccess {
                         Log.d(
                             "ChatViewModel:sendTextMessage",
-                            "${message.content} ${message.senderId}"
+                            "Sender: ${message.senderId} \n Content ${message.content}"
                         )
-                        val currentUser = userRepository.getCurrentUser()
                         repository.updateLastMessage(chatId, content)
                     }
             } catch (e: Exception) {
