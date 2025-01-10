@@ -30,9 +30,11 @@ fun CustomTextField(
     isReadonly: Boolean = false,
     label: String = "",
     singleLine: Boolean = false,
+    enabled: Boolean = true
 ) {
     OutlinedTextField(
         value = text,
+        enabled = enabled,
         onValueChange = onValueChange,
         readOnly = isReadonly,
         shape = shape,
