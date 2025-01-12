@@ -11,7 +11,6 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.storage.FirebaseStorage
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -135,7 +134,12 @@ class ChatRepositoryImpl(
         }
     }
 
-    override suspend fun uploadImage(uri: Uri, chatId: String, messageId: String, context: Context): Result<String> =
+    override suspend fun uploadImage(
+        uri: Uri,
+        chatId: String,
+        messageId: String,
+        context: Context
+    ): Result<String> =
         withContext(Dispatchers.IO) {
             suspendCoroutine { continuation ->
                 val imageRef = storage.reference.child("chat_images/$chatId/$messageId.jpg")
@@ -286,6 +290,26 @@ class ChatRepositoryImpl(
                     .addOnFailureListener { e ->
                         it.resume(Result.failure(e))
                     }
+            }
+        }
+    }
+
+    override suspend fun removeChatRoom(chatRoomId: String): Result<Boolean> {
+        return withContext(Dispatchers.IO) {
+            suspendCoroutine { continuation ->
+                val chatRoomRef = database.reference.child("chat_rooms").child(chatRoomId)
+                val messagesRef =
+                    database.reference.child("chats").child(chatRoomId)
+
+                chatRoomRef.removeValue().addOnSuccessListener {
+                    messagesRef.removeValue().addOnSuccessListener {
+                        continuation.resume(Result.success(true))
+                    }.addOnFailureListener { e ->
+                        continuation.resume(Result.failure(e))
+                    }
+                }.addOnFailureListener { e ->
+                    continuation.resume(Result.failure(e))
+                }
             }
         }
     }

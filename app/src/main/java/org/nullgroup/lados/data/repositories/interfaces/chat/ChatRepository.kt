@@ -19,4 +19,5 @@ interface ChatRepository {
     suspend fun updateLastMessage(chatRoomId: String, message: String): Result<Boolean>
     suspend fun getChatRoomByUserId(userId: String): Result<ChatRoom>
     suspend fun getChatRoomById(chatRoomId: String): Result<ChatRoom>
+    suspend fun removeChatRoom(chatRoomId: String): Result<Boolean>
 }
