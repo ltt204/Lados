@@ -1,5 +1,8 @@
 package org.nullgroup.lados.data.repositories.implementations.chat
 
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
@@ -8,6 +11,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.storage.FirebaseStorage
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -16,6 +20,7 @@ import kotlinx.coroutines.withContext
 import org.nullgroup.lados.data.models.ChatRoom
 import org.nullgroup.lados.data.models.Message
 import org.nullgroup.lados.data.repositories.interfaces.chat.ChatRepository
+import java.io.ByteArrayOutputStream
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -130,11 +135,19 @@ class ChatRepositoryImpl(
         }
     }
 
-    override suspend fun uploadImage(uri: Uri, chatId: String, messageId: String): Result<String> =
+    override suspend fun uploadImage(uri: Uri, chatId: String, messageId: String, context: Context): Result<String> =
         withContext(Dispatchers.IO) {
             suspendCoroutine { continuation ->
                 val imageRef = storage.reference.child("chat_images/$chatId/$messageId.jpg")
-                val uploadTask = imageRef.putFile(uri)
+
+                val inputStream = context.contentResolver.openInputStream(uri)
+                val originalBitmap = BitmapFactory.decodeStream(inputStream)
+
+                val baos = ByteArrayOutputStream()
+                originalBitmap.compress(Bitmap.CompressFormat.JPEG, 50, baos)
+                val data = baos.toByteArray()
+
+                val uploadTask = imageRef.putBytes(data)
 
                 uploadTask.continueWithTask { task ->
                     if (!task.isSuccessful) {

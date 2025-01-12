@@ -1,5 +1,6 @@
 package org.nullgroup.lados.viewmodels.customer.chat
 
+import android.content.Context
 import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.SavedStateHandle
@@ -57,7 +58,7 @@ class ChatViewModel @Inject constructor(
         when (event) {
             is ChatScreenEvent.SendImage -> {
                 Log.d("ChatViewModel:handleEvent", "SendImage")
-                sendImageMessage(event.uri)
+                sendImageMessage(event.uri, event.context)
             }
 
             is ChatScreenEvent.SendProduct -> {
@@ -103,14 +104,14 @@ class ChatViewModel @Inject constructor(
         }
     }
 
-    private fun sendImageMessage(uri: Uri) {
+    private fun sendImageMessage(uri: Uri, context: Context) {
         val messageId = repository.generateMessageId(chatId) ?: return
         val currentUserId = repository.getCurrentUserId() ?: return
 
         viewModelScope.launch {
             uiState.value = ChatUiState.Loading
             try {
-                repository.uploadImage(uri, chatId, messageId)
+                repository.uploadImage(uri, chatId, messageId, context)
                     .onSuccess { imageUrl ->
                         val message = Message(
                             id = messageId,

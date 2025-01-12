@@ -73,11 +73,12 @@ fun ChatWithCustomerScreen(
         mutableStateOf("")
     }
 
+    val context = LocalContext.current
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri ->
         uri?.let {
-            chatViewModel.handleEvent(ChatScreenEvent.SendImage(it))
+            chatViewModel.handleEvent(ChatScreenEvent.SendImage(it, context))
         }
     }
     when (uiState) {
