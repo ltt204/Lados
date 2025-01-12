@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -51,6 +50,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
@@ -144,6 +144,7 @@ fun ChatScreen(
                             chatRoom = chatRoom,
                             user = user,
                             onChatRoomItemClick = {
+                                staffChatViewModel.markMessagesAsRead(chatRoom.id)
                                 navController?.navigate("${Screen.Staff.ChatWithCustomerScreen.route}/${chatRoom.id}")
                             },
                             onLongClick = {
@@ -240,6 +241,8 @@ fun ChatRoomItem(
     onChatRoomItemClick: (ChatRoom) -> Unit = {},
     onLongClick: () -> Unit = {},
 ) {
+    val unreadChatRoom = chatRoom.unreadCount > 0
+    Log.d("ChatRoomItem", "ChatRoom: $chatRoom")
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -306,16 +309,35 @@ fun ChatRoomItem(
                 Text(
                     modifier = Modifier.widthIn(max = 172.dp),
                     text = chatRoom.lastMessage,
-                    style = LadosTheme.typography.bodySmall,
+                    style = LadosTheme.typography.bodySmall.copy(
+                        fontWeight = if (unreadChatRoom) FontWeight.SemiBold else FontWeight.Normal,
+                        fontSize = 14.sp
+                    ),
                     maxLines = 1,
                     softWrap = true,
                     overflow = TextOverflow.Ellipsis
                 )
             }
-            Text(
-                text = chatRoom.lastMessageTime.getMessageHistoryTimeDisplayment(),
-                style = LadosTheme.typography.bodySmall
-            )
+            Column(
+                modifier = Modifier.fillMaxHeight(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.SpaceEvenly
+            ) {
+                if (unreadChatRoom) {
+                    Box(
+                        modifier = Modifier
+                            .size(8.dp)
+                            .clip(CircleShape)
+                            .background(LadosTheme.colorScheme.primary)
+                    )
+                }
+                Text(
+                    text = chatRoom.lastMessageTime.getMessageHistoryTimeDisplayment(),
+                    style = LadosTheme.typography.bodySmall.copy(
+                        fontWeight = if (unreadChatRoom) FontWeight.SemiBold else FontWeight.Normal,
+                    )
+                )
+            }
         }
     }
 }
@@ -333,6 +355,7 @@ fun ChatRoomItemPreview() {
                         customerId = "1",
                         lastMessage = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
                         lastMessageTime = System.currentTimeMillis(),
+                        unreadCount = 2
                     ),
                     user = User(
                         name = "John Doe",

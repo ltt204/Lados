@@ -47,6 +47,12 @@ class StaffChatViewModel @Inject constructor(
         }
     }
 
+    fun markMessagesAsRead(chatRoomId: String) {
+        viewModelScope.launch {
+            chatRepository.markMessagesAsRead(chatRoomId)
+        }
+    }
+
     private fun fetchMessages() {
         viewModelScope.launch {
             chatRepository.getChatRoomsForStaff()
