@@ -52,6 +52,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -75,6 +77,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
@@ -91,6 +98,8 @@ import org.nullgroup.lados.viewmodels.customer.home.CategoryUiState
 import org.nullgroup.lados.viewmodels.customer.home.HomeViewModel
 import org.nullgroup.lados.viewmodels.customer.home.ProductUiState
 import org.nullgroup.lados.viewmodels.SharedViewModel
+import org.nullgroup.lados.viewmodels.customer.wishlist.WishlistUiState
+import org.nullgroup.lados.viewmodels.customer.wishlist.WishlistViewModel
 import java.text.DecimalFormat
 
 @Composable
@@ -321,9 +330,10 @@ fun ProductItem(
     modifier: Modifier = Modifier,
     product: Product,
     onClick: (String) -> Unit,
+    isClicked: Boolean? = null,
     onFavicon: (String) -> Unit = {}
 ) {
-    var isClicked by remember { mutableStateOf(false) }
+//    var isClicked by remember { mutableStateOf(false) }
 
     Column(modifier = modifier
         .wrapContentHeight()
@@ -345,20 +355,25 @@ fun ProductItem(
             )
             Image(
                 painter = painterResource(
-                    if (!isClicked) R.drawable.love
+                    if (isClicked == null) R.drawable.love
+                    else if (!isClicked) R.drawable.love
                     else R.drawable.heart
+                ),
+                colorFilter = ColorFilter.tint(
+                    LadosTheme.colorScheme.onTertiary,
                 ),
                 contentDescription = "Image",
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .padding(8.dp)
                     .background(
-                        Color.Gray.copy(alpha = 0.8f),
+                        // Color.Gray.copy(alpha = 0.8f),
+                        LadosTheme.colorScheme.tertiary,
                         CircleShape
                     )
                     .padding(4.dp)
                     .clickable {
-                        isClicked = !isClicked
+//                        isClicked = !isClicked
                         onFavicon(product.id)
                     }
             )
@@ -454,6 +469,8 @@ fun ProductRow(
     onProductClick: (String) -> Unit,
     viewModel: HomeViewModel = hiltViewModel(),
     products: List<Product> = emptyList(),
+    isIconToggled: (String) -> Boolean? = { null },
+    onToggleIcon: (String) -> Unit = {}
 ) {
     LazyRow(
         modifier = modifier.heightIn(min = 280.dp),
@@ -463,7 +480,9 @@ fun ProductRow(
         { item ->
             ProductItem(
                 product = item,
-                onClick = onProductClick
+                onClick = onProductClick,
+                isClicked = isIconToggled(item.id),
+                onFavicon = onToggleIcon,
             )
         }
     }
@@ -495,8 +514,42 @@ fun DrawProductScreenContent(
     sharedViewModel: SharedViewModel,
     onProductClick: (String) -> Unit,
     viewModel: HomeViewModel,
+    wishlistViewModel: WishlistViewModel
 ) {
     val productUiState = viewModel.productUiState.collectAsStateWithLifecycle()
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_STOP) {
+                wishlistViewModel.commitChangesToDatabase()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
+    val wishlistUiState = wishlistViewModel.wishlistUiState.collectAsStateWithLifecycle()
+    val productIdsInWishList = (wishlistUiState.value as? WishlistUiState.Success)
+        ?.items
+        ?.map { it.productId }
+        ?: emptyList()
+    val isProductInWishList: (String) -> Boolean? = {
+        if (productUiState.value !is ProductUiState.Success)
+            null
+        else
+            productIdsInWishList.contains(it)
+    }
+    val switchWishListState = fun(productId: String) {
+        if (productUiState.value !is ProductUiState.Success) {
+            return
+        }
+        wishlistViewModel.switchWishListState.invoke(productId)
+    }
+
     when (productUiState.value) {
         is ProductUiState.Loading -> {
             LoadOnProgress(
@@ -567,7 +620,9 @@ fun DrawProductScreenContent(
                     ProductRow(
                         onProductClick = onProductClick,
                         products = (productUiState.value as ProductUiState.Success).products.filter{ !it.hasNoSalePrice() }
-                            .take(5)
+                            .take(5),
+                        isIconToggled = isProductInWishList,
+                        onToggleIcon = switchWishListState,
                     )
                 }
 
@@ -588,7 +643,9 @@ fun DrawProductScreenContent(
                     ProductRow(
                         onProductClick = onProductClick,
                         products = (productUiState.value as ProductUiState.Success).products.sortedByDescending { it.sumOfSaleAmount() }
-                            .take(5)
+                            .take(5),
+                        isIconToggled = isProductInWishList,
+                        onToggleIcon = switchWishListState,
                     )
                 }
 
@@ -608,7 +665,9 @@ fun DrawProductScreenContent(
                     ProductRow(
                         onProductClick = onProductClick,
                         products = (productUiState.value as ProductUiState.Success).products.sortedByDescending { it.createdAt }
-                            .take(1)
+                            .take(1),
+                        isIconToggled = isProductInWishList,
+                        onToggleIcon = switchWishListState,
                     )
                 }
 
@@ -627,7 +686,9 @@ fun DrawProductScreenContent(
                 item {
                     ProductRow(
                         onProductClick = onProductClick,
-                        products = (productUiState.value as ProductUiState.Success).products.take(5)
+                        products = (productUiState.value as ProductUiState.Success).products.take(5),
+                        isIconToggled = isProductInWishList,
+                        onToggleIcon = switchWishListState,
                     )
                 }
             }
@@ -792,6 +853,7 @@ fun ProductScreen(
     paddingValues: PaddingValues = PaddingValues(0.dp),
     sharedViewModel: SharedViewModel = SharedViewModel(),
     viewModel: HomeViewModel = hiltViewModel(),
+    wishlistViewModel: WishlistViewModel = hiltViewModel()
 ) {
     Scaffold(
         modifier = modifier
@@ -837,7 +899,8 @@ fun ProductScreen(
             onProductClick = { id ->
                 navController.navigate(Screen.Customer.ProductDetailScreen.route + "/$id")
             },
-            viewModel = viewModel
+            viewModel = viewModel,
+            wishlistViewModel = wishlistViewModel
         )
     }
 }
