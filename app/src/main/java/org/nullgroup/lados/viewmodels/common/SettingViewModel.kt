@@ -7,23 +7,25 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import org.nullgroup.lados.data.repositories.interfaces.common.UserPreferencesRepository
+import org.nullgroup.lados.data.repositories.implementations.common.LocaleUserPreferencesRepository
+import org.nullgroup.lados.data.repositories.implementations.common.ThemeUserPreferencesRepository
 import org.nullgroup.lados.utilities.SupportedRegion
 import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
 class SettingViewModel @Inject constructor(
-    private val userPreferencesRepository: UserPreferencesRepository
+    private val themeUserPreferencesRepository: ThemeUserPreferencesRepository,
+    private val localeUserPreferencesRepository: LocaleUserPreferencesRepository
 ) : ViewModel() {
-    val darkMode = userPreferencesRepository.isDarkMode
+    val darkMode = themeUserPreferencesRepository.isDarkMode
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
             initialValue = false
         )
 
-    val locale = userPreferencesRepository.locale
+    val locale = localeUserPreferencesRepository.locale
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
@@ -32,18 +34,17 @@ class SettingViewModel @Inject constructor(
 
     fun modifyTheme() {
         viewModelScope.launch {
-            userPreferencesRepository.modifyTheme(darkMode.value.not())
+            themeUserPreferencesRepository.modify(darkMode.value.not())
         }
     }
 
     fun saveLocale(locale: Locale) {
         viewModelScope.launch {
             Log.d("SettingViewModel", "saveLocale: $locale")
-            userPreferencesRepository.saveLocale(locale)
+            localeUserPreferencesRepository.modify(
+                SupportedRegion.entries.firstOrNull { it.locale == locale }
+                    ?: SupportedRegion.VIETNAM
+            )
         }
-    }
-
-    suspend fun reset() {
-        userPreferencesRepository.reset()
     }
 }

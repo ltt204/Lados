@@ -62,8 +62,6 @@ fun SettingScreen(
     themeSwitched: () -> Unit,
     settingViewModel: SettingViewModel = hiltViewModel(),
 ) {
-    val homeViewModel: HomeViewModel = hiltViewModel()
-
     var isRegionChanged by remember {
         mutableStateOf(false)
     }
@@ -109,7 +107,7 @@ fun SettingScreen(
                     isRegionChanged = isRegionChanged.not()
                     region = locale
                 },
-                currentItem = currentRegion.locale.country.capitalizeWords(),
+                currentItem = currentRegion.regionName.capitalizeWords(),
             )
 
             Spacer(modifier = Modifier.padding(bottom = LadosTheme.size.medium))
