@@ -9,7 +9,9 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import org.nullgroup.lados.data.repositories.interfaces.common.UserPreferencesRepository
+import org.nullgroup.lados.data.repositories.implementations.common.LocaleUserPreferencesRepository
+import org.nullgroup.lados.data.repositories.implementations.common.RecentUserSearchPreferencesRepository
+import org.nullgroup.lados.data.repositories.implementations.common.ThemeUserPreferencesRepository
 import javax.inject.Singleton
 
 private const val USER_PREFERENCES = "user_preferences"
@@ -28,6 +30,16 @@ object PreferencesDataStoreModule {
 
     @Singleton
     @Provides
-    fun provideUserPreferencesRepository(dataStore: DataStore<Preferences>) =
-        UserPreferencesRepository(dataStore)
+    fun provideThemeUserPreferencesRepository(dataStore: DataStore<Preferences>) =
+        ThemeUserPreferencesRepository(dataStore)
+
+    @Singleton
+    @Provides
+    fun provideLocaleUserPreferencesRepository(dataStore: DataStore<Preferences>) =
+        LocaleUserPreferencesRepository(dataStore)
+
+    @Singleton
+    @Provides
+    fun provideRecentUserSearchPreferencesRepository(dataStore: DataStore<Preferences>) =
+        RecentUserSearchPreferencesRepository(dataStore)
 }

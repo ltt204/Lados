@@ -38,6 +38,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import org.nullgroup.lados.R
@@ -47,8 +48,8 @@ import org.nullgroup.lados.compose.staff.chat.SearchRecentGrid
 import org.nullgroup.lados.compose.staff.chat.SearchResultList
 import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.ui.theme.LadosTheme
-import org.nullgroup.lados.viewmodels.SearchChatState
-import org.nullgroup.lados.viewmodels.SearchChatViewModel
+import org.nullgroup.lados.viewmodels.staff.SearchChatState
+import org.nullgroup.lados.viewmodels.staff.SearchChatViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,6 +60,7 @@ fun SearchScreen(
     searchChatViewModel: SearchChatViewModel = hiltViewModel()
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
+    val recentSearches = searchChatViewModel.recentSearches.collectAsState()
     val searchChatState = searchChatViewModel.searchChatState.collectAsState()
     var searchValue by remember {
         mutableStateOf("")
@@ -83,6 +85,9 @@ fun SearchScreen(
                         modifier = modifier
                             .focusRequester(focusRequester)
                             .height(48.dp),
+                        textStyle = LadosTheme.typography.titleMedium.copy(
+                            fontSize = 14.sp
+                        ),
                         shape = RoundedCornerShape(24.dp),
                         singleLine = true,
                         text = searchValue,
@@ -92,7 +97,7 @@ fun SearchScreen(
                         },
                         label = "Search",
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                        keyboardActions =  KeyboardActions(
+                        keyboardActions = KeyboardActions(
                             onSearch = {
                                 focusManager.clearFocus()
                                 keyboardController?.hide()
@@ -129,16 +134,8 @@ fun SearchScreen(
             thickness = 1.dp
         )
 
-        /**TODO: There are three situations
-         *  1. Search value is empty -> Show recent searches
-         *  2. Search value is not empty -> Show search result
-         *  3. User click on search button with not completed search value or click on a suggestions
-         *      -> Navigate to search result screen
-         *  Need to re-handle the conditions for better handling this three situations
-         */
         if (searchValue.isNotEmpty()) {
             Log.d("SearchScreen", "Search value: $searchValue")
-            // Show suggestions
             Column(
                 modifier = Modifier
                     .padding(top = innerPadding.calculateTopPadding())
@@ -171,6 +168,7 @@ fun SearchScreen(
                             modifier = Modifier,
                             listResult = (searchChatState.value as SearchChatState.Success).data
                         ) { user ->
+                            searchChatViewModel.saveRecentSearch(user.id)
                             searchValue = user.name
                             searchChatViewModel.getRoomChatByUserId(user.id) {
                                 navController?.navigate("${Screen.Staff.ChatWithCustomerScreen.route}/${it}")
@@ -180,23 +178,34 @@ fun SearchScreen(
                 }
             }
         } else {
-            Log.d("SearchScreen", "Search value is empty")
-            // Show recent searches
             Column(
                 modifier = Modifier
                     .padding(top = innerPadding.calculateTopPadding())
+                    .padding(horizontal = 16.dp)
                     .fillMaxSize()
             ) {
                 Text(
-                    modifier = Modifier.padding(16.dp),
+                    modifier = Modifier.padding(vertical = 16.dp),
                     text = "Recent Searches",
                     style = LadosTheme.typography.titleMedium.copy(
                         color = LadosTheme.colorScheme.onBackground.copy(alpha = 0.6f)
                     )
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-                SearchRecentGrid(recentlySearches = emptyList()) { user ->
-                    //TODO: Get chat room id from searchScreenViewModel and navigate to chat screen
+                if (recentSearches.value.isEmpty()) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "No recent searches")
+                    }
+                } else {
+                    SearchRecentGrid(recentlySearches = recentSearches.value.reversed()) { user ->
+                        searchChatViewModel.getRoomChatByUserId(user.id) {
+                            searchChatViewModel.saveRecentSearch(user.id)
+                            navController?.navigate("${Screen.Staff.ChatWithCustomerScreen.route}/${it}")
+                        }
+                    }
                 }
             }
         }
