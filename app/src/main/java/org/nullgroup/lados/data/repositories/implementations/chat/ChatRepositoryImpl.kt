@@ -234,14 +234,19 @@ class ChatRepositoryImpl(
     override fun getCurrentUserId(): String? = auth.currentUser?.uid
     override suspend fun updateLastMessage(chatRoomId: String, message: String): Result<Boolean> {
         return withContext(Dispatchers.IO) {
+            Log.d("ChatRepository", "Updating last message")
             suspendCoroutine { continuation ->
-                val charRoomRef = database.reference.child("chat_rooms")
+                val chatRoomRef = database.reference.child("chat_rooms")
                     .child(chatRoomId)
                 try {
-                    charRoomRef.child("lastMessageTime").setValue(System.currentTimeMillis())
-                    charRoomRef.child("lastMessage")
+                    chatRoomRef.child("lastMessageTime").setValue(System.currentTimeMillis())
+                    chatRoomRef.child("lastMessage")
                         .setValue(message)
-
+                    chatRoomRef.child("unreadMessages").get().addOnSuccessListener {
+                        val unreadMessages = it.value as? Long ?: 0
+                        Log.d("ChatRepository", "Unread messages: $unreadMessages")
+                        chatRoomRef.child("unreadCount").setValue(unreadMessages + 1)
+                    }
                     continuation.resume(Result.success(true))
                 } catch (e: Exception) {
                     continuation.resume(Result.failure(e))
@@ -310,6 +315,21 @@ class ChatRepositoryImpl(
                 }.addOnFailureListener { e ->
                     continuation.resume(Result.failure(e))
                 }
+            }
+        }
+    }
+
+    override suspend fun markMessagesAsRead(chatRoomId: String): Result<Boolean> {
+        return withContext(Dispatchers.IO) {
+            suspendCoroutine { continuation ->
+                val chatRoomRef = database.reference.child("chat_rooms").child(chatRoomId)
+                chatRoomRef.child("unreadCount").setValue(0)
+                    .addOnSuccessListener {
+                        continuation.resume(Result.success(true))
+                    }
+                    .addOnFailureListener { e ->
+                        continuation.resume(Result.failure(e))
+                    }
             }
         }
     }
