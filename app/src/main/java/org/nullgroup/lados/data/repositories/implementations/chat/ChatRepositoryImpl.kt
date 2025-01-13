@@ -232,7 +232,7 @@ class ChatRepositoryImpl(
         database.reference.child("chats").child(chatId).child("messages").push().key
 
     override fun getCurrentUserId(): String? = auth.currentUser?.uid
-    override suspend fun updateLastMessage(chatRoomId: String, message: String): Result<Boolean> {
+    override suspend fun updateLastMessage(sendBy: String, chatRoomId: String, message: String): Result<Boolean> {
         return withContext(Dispatchers.IO) {
             Log.d("ChatRepository", "Updating last message")
             suspendCoroutine { continuation ->
@@ -242,7 +242,9 @@ class ChatRepositoryImpl(
                     chatRoomRef.child("lastMessageTime").setValue(System.currentTimeMillis())
                     chatRoomRef.child("lastMessage")
                         .setValue(message)
-                    chatRoomRef.child("unreadMessages").get().addOnSuccessListener {
+                    chatRoomRef.child("lastMessageSendBy")
+                        .setValue(sendBy)
+                    chatRoomRef.child("unreadCount").get().addOnSuccessListener {
                         val unreadMessages = it.value as? Long ?: 0
                         Log.d("ChatRepository", "Unread messages: $unreadMessages")
                         chatRoomRef.child("unreadCount").setValue(unreadMessages + 1)

@@ -96,7 +96,7 @@ class ChatViewModel @Inject constructor(
                             "ChatViewModel:sendTextMessage",
                             "Sender: ${message.senderId} \n Content ${message.content}"
                         )
-                        repository.updateLastMessage(chatId, content)
+                        repository.updateLastMessage(currentUserId, chatId, content)
                     }
             } catch (e: Exception) {
                 uiState.value = ChatUiState.Error(e.message)
@@ -136,7 +136,7 @@ class ChatViewModel @Inject constructor(
                                 )
                             }
                         val currentUser = userRepository.getCurrentUser()
-                        repository.updateLastMessage(chatId, "${currentUser.name.capitalizeWords()} sent an image")
+                        repository.updateLastMessage(currentUserId, chatId, "${currentUser.name.capitalizeWords()} sent an image")
                     }
                     .onFailure { e ->
                         uiState.value = ChatUiState.Error(e.message)
