@@ -54,9 +54,10 @@ class SingleItemWishlistViewModel @Inject constructor(
         viewModelScope.launch {
             wishlistRepository.checkIfItemIsInWishlist(customerId, productId).collect {
                 _uiState.value = SingleItemWishlistUiState.Success(it)
-                if (_isInWishListWhenLoaded == null) {
-                    _isInWishListWhenLoaded = it
-                }
+//                if (_isInWishListWhenLoaded == null) {
+//                    _isInWishListWhenLoaded = it
+//                }
+                _isInWishListWhenLoaded = it
             }
         }
     }

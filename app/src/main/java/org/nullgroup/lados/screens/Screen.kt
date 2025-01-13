@@ -101,6 +101,7 @@ sealed class Screen(
 
         data object CartScreen : Customer("Cart", "customer_cart", Icons.Default.ShoppingCart)
         data object CheckOutScreen: Customer("Check Out", "customer_check_out", Icons.Filled.MailOutline)
+        data object WishlistScreen: Customer("Wishlist", "customer_wishlist", Icons.Filled.MailOutline)
 
         sealed class Address(
             name: String,

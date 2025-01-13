@@ -98,4 +98,7 @@
     <string name="auth_forgot_password_header">Quên mật khẩu</string>
     <string name="auth_register">Đăng ký</string>
     <string name="auth_phone_number">Số điện thoại</string>
+    <string name="wishlist_empty">Danh sách yêu thích của bạn trống</string>
+    <string name="wishlist_empty_description">Danh sách yêu thích trống</string>
+    <string name="wishlist_back_description">Trở về</string>
 </resources>

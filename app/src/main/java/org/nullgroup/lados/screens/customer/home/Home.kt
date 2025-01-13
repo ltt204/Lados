@@ -37,7 +37,6 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.Done
 import androidx.compose.material.icons.outlined.ShoppingCart
-import androidx.compose.material.icons.outlined.ShoppingCartCheckout
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -53,7 +52,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -77,10 +75,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
@@ -94,10 +90,10 @@ import org.nullgroup.lados.screens.customer.product.PriceSlider
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.ui.theme.Primary
 import org.nullgroup.lados.utilities.toCurrency
+import org.nullgroup.lados.viewmodels.SharedViewModel
 import org.nullgroup.lados.viewmodels.customer.home.CategoryUiState
 import org.nullgroup.lados.viewmodels.customer.home.HomeViewModel
 import org.nullgroup.lados.viewmodels.customer.home.ProductUiState
-import org.nullgroup.lados.viewmodels.SharedViewModel
 import org.nullgroup.lados.viewmodels.customer.wishlist.WishlistUiState
 import org.nullgroup.lados.viewmodels.customer.wishlist.WishlistViewModel
 import java.text.DecimalFormat
@@ -353,30 +349,31 @@ fun ProductItem(
                     .height(220.dp),
                 contentScale = ContentScale.Crop,
             )
-            Image(
-                painter = painterResource(
-                    if (isClicked == null) R.drawable.love
-                    else if (!isClicked) R.drawable.love
-                    else R.drawable.heart
-                ),
-                colorFilter = ColorFilter.tint(
-                    LadosTheme.colorScheme.onTertiary,
-                ),
-                contentDescription = "Image",
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(8.dp)
-                    .background(
-                        // Color.Gray.copy(alpha = 0.8f),
-                        LadosTheme.colorScheme.tertiary,
-                        CircleShape
-                    )
-                    .padding(4.dp)
-                    .clickable {
+            if (isClicked != null) {
+                Image(
+                    painter = painterResource(
+                        if (!isClicked) R.drawable.love
+                        else R.drawable.heart
+                    ),
+                    colorFilter = ColorFilter.tint(
+                        LadosTheme.colorScheme.primary,
+                    ),
+                    contentDescription = "Image",
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(8.dp)
+                        .background(
+                            // Color.Gray.copy(alpha = 0.8f),
+                            LadosTheme.colorScheme.surfaceContainerHighest,
+                            CircleShape
+                        )
+                        .padding(4.dp)
+                        .clickable {
 //                        isClicked = !isClicked
-                        onFavicon(product.id)
-                    }
-            )
+                            onFavicon(product.id)
+                        }
+                )
+            }
         }
         Spacer(Modifier.height(4.dp))
         Column(
@@ -425,38 +422,40 @@ fun ProductItem(
                     )
                 }
             }
-            Row(
-                modifier = Modifier.weight(0.5f),
-                horizontalArrangement = Arrangement.End,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            if (product.engagements.isNotEmpty()) {
                 Row(
+                    modifier = Modifier.weight(0.5f),
+                    horizontalArrangement = Arrangement.End,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        imageVector = Icons.Filled.Star,
-                        contentDescription = "Rating",
-                        tint = LadosTheme.colorScheme.yellow,
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Spacer(modifier = Modifier.width(2.dp))
-                    val decimalFormat = DecimalFormat("#.##")
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Star,
+                            contentDescription = "Rating",
+                            tint = LadosTheme.colorScheme.yellow,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(2.dp))
+                        val decimalFormat = DecimalFormat("#.##")
+                        Text(
+                            text = decimalFormat.format(product.engagements.sumOf { it.ratings } * 1.0f / product.engagements.size),
+                            style = TextStyle(
+                                fontSize = 16.sp,
+                                color = LadosTheme.colorScheme.onBackground,
+                            )
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = decimalFormat.format(product.engagements.sumOf { it.ratings } * 1.0f / product.engagements.size),
+                        text = "(${product.engagements.size})",
                         style = TextStyle(
                             fontSize = 16.sp,
                             color = LadosTheme.colorScheme.onBackground,
                         )
                     )
                 }
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(
-                    text = "(${product.engagements.size})",
-                    style = TextStyle(
-                        fontSize = 16.sp,
-                        color = LadosTheme.colorScheme.onBackground,
-                    )
-                )
             }
         }
     }

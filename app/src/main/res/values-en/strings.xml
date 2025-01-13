@@ -98,4 +98,7 @@
     <string name="auth_forgot_password_header">Forgot password</string>
     <string name="auth_register">Register</string>
     <string name="auth_phone_number">Phone number</string>
+    <string name="wishlist_empty">Your wishlist is empty</string>
+    <string name="wishlist_empty_description">Empty wishlist</string>
+    <string name="wishlist_back_description">Back</string>
 </resources>

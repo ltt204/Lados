@@ -24,9 +24,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.nullgroup.lados.data.models.Product
 import org.nullgroup.lados.data.models.WishlistItem
+import org.nullgroup.lados.data.repositories.interfaces.product.ProductRepository
 import org.nullgroup.lados.data.repositories.interfaces.wishlist.WishlistItemRepository
 import javax.inject.Inject
 
@@ -34,18 +38,22 @@ import javax.inject.Inject
 class WishlistViewModel @Inject constructor(
     firebaseAuth: FirebaseAuth,
     private val wishlistRepository: WishlistItemRepository,
+    private val productRepository: ProductRepository,
     @ApplicationContext private val appContext: Context, // Not really used
 ) : ViewModel() {
     private val _wishlistUiState = MutableStateFlow<WishlistUiState>(WishlistUiState.Loading)
     val wishlistUiState: StateFlow<WishlistUiState> = _wishlistUiState.asStateFlow()
 
-    private val _loadedWishlistItems: MutableList<WishlistItem> = mutableListOf()
+    private val _loadedWishlistItems = MutableStateFlow<MutableList<WishlistItem>>(mutableListOf())
     private val _addingWishlistItems: MutableList<WishlistItem> = mutableListOf()
     private val _removingWishlistItems: MutableList<WishlistItem> = mutableListOf()
 
+    private val _productInformation = MutableStateFlow<Map<String, Product>?>(null)
+    val productInformation = _productInformation.asStateFlow()
+
     private fun updateCurrentItemsFlow () {
         _wishlistUiState.value = WishlistUiState.Success(
-            _loadedWishlistItems.plus(_addingWishlistItems).minus(_removingWishlistItems)
+            _loadedWishlistItems.value.plus(_addingWishlistItems).minus(_removingWishlistItems)
         )
     }
 
@@ -66,14 +74,39 @@ class WishlistViewModel @Inject constructor(
                     _wishlistUiState.value = WishlistUiState.Error(it.message ?: "An error occurred")
                 }
                 .collect { items ->
-                    _loadedWishlistItems.clear()
-                    _loadedWishlistItems.addAll(items)
+                    _loadedWishlistItems.value = items.toMutableList()
                     _addingWishlistItems.removeIf { item -> items.any { it.productId == item.productId } }
                     _removingWishlistItems.removeIf { item -> items.none { it.productId == item.productId } }
                     _wishlistUiState.value = WishlistUiState.Success(
-                        _loadedWishlistItems.plus(_addingWishlistItems).minus(_removingWishlistItems)
+                        items.plus(_addingWishlistItems).minus(_removingWishlistItems)
                     )
                 }
+        }
+    }
+
+    fun fetchProductInfo() {
+        viewModelScope.launch {
+            _loadedWishlistItems.collect { items ->
+                val newItemIds = items
+                    .filter { _productInformation.value?.containsKey(it.productId) != true }
+                    .map { it.productId }
+                if (newItemIds.isEmpty()) {
+                    return@collect
+                }
+
+                newItemIds.forEach { productId ->
+                    viewModelScope.launch(Dispatchers.IO) {
+                        productRepository.getProductByIdFlow(productId)
+                            .firstOrNull()
+                            ?.let { product ->
+                                val newInfo = mapOf(productId to product)
+                                _productInformation.update { it?.plus(newInfo) ?: newInfo }
+                            }
+                    }
+                }
+
+            }
+
         }
     }
 
@@ -112,7 +145,7 @@ class WishlistViewModel @Inject constructor(
 
         } else {
             // If the item is already in the adding list, do nothing
-            if (_loadedWishlistItems.any { it.productId == productId }) {
+            if (_loadedWishlistItems.value.any { it.productId == productId }) {
                 return
             }
 
@@ -130,7 +163,7 @@ class WishlistViewModel @Inject constructor(
         if (addingItemRef != null) {
             _addingWishlistItems.remove(addingItemRef)
         } else {
-            val removingItem = _loadedWishlistItems.find { it.productId == productId }
+            val removingItem = _loadedWishlistItems.value.find { it.productId == productId }
                 ?: return // If the item is not in the wishlist (loaded list), do nothing
 
             // There exists an item in the wishlist (loaded list) with the same productId
