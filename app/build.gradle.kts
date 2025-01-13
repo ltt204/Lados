@@ -53,6 +53,7 @@ dependencies {
     implementation(libs.firebase.database)
     implementation(libs.firebase.firestore)
     implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.database.ktx)
 
     implementation(libs.androidx.ui)
     implementation(libs.androidx.core.ktx)
@@ -86,6 +87,7 @@ dependencies {
     // Coil for image loading
     implementation(libs.coil)
     implementation(libs.coil.compose)
+    implementation(libs.coil.kt.coil.compose)
 
     // Image Slider
     implementation(libs.coil.compose)

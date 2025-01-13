@@ -27,6 +27,7 @@ import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
@@ -261,4 +262,24 @@ fun CategoryRemoteModel.toLocalCategory(): Category {
             ),
         parentCategoryId = this.parentCategoryId
     )
+}
+
+fun Long.getMessageHistoryTimeDisplayment(): String {
+    val dateTime = Date(this)
+    val currentDateTime = Date()
+
+    val sameDay = dateTime.date == currentDateTime.date
+    val sameWeek = Calendar.getInstance().apply { time = dateTime }
+        .get(Calendar.WEEK_OF_YEAR) == Calendar.getInstance().apply { time = currentDateTime }
+        .get(Calendar.WEEK_OF_YEAR)
+    val sameYear = Calendar.getInstance().apply { time = dateTime }
+        .get(Calendar.YEAR) == Calendar.getInstance().apply { time = currentDateTime }
+        .get(Calendar.YEAR)
+
+    return when {
+        sameDay -> SimpleDateFormat("HH:mm", Locale.getDefault()).format(dateTime)
+        sameWeek -> SimpleDateFormat("EEE", Locale.getDefault()).format(dateTime)
+        sameYear -> SimpleDateFormat("MMM dd", Locale.getDefault()).format(dateTime)
+        else -> SimpleDateFormat("MMM yyyy", Locale.getDefault()).format(dateTime)
+    }
 }

@@ -3,6 +3,7 @@ package org.nullgroup.lados.di
 import android.app.Activity
 import android.content.Context
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import dagger.Module
@@ -13,6 +14,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import org.nullgroup.lados.data.repositories.implementations.cart.CartItemRepositoryImplement
 import org.nullgroup.lados.data.repositories.implementations.category.CategoryRepositoryImplement
+import org.nullgroup.lados.data.repositories.implementations.chat.ChatRepositoryImpl
 import org.nullgroup.lados.data.repositories.implementations.order.OrderRepositoryImplement
 import org.nullgroup.lados.data.repositories.implementations.product.ProductRepositoryImplement
 import org.nullgroup.lados.data.repositories.implementations.common.SharedPreferencesImpl
@@ -25,6 +27,7 @@ import org.nullgroup.lados.data.repositories.interfaces.cart.CartItemRepository
 import org.nullgroup.lados.data.repositories.interfaces.common.SharedPreferencesRepository
 
 import org.nullgroup.lados.data.repositories.interfaces.category.CategoryRepository
+import org.nullgroup.lados.data.repositories.interfaces.chat.ChatRepository
 
 import org.nullgroup.lados.data.repositories.interfaces.user.IUserAddressRepository
 
@@ -128,5 +131,15 @@ object DataModule {
     @Provides
     fun provideWishlistRepository(firestore: FirebaseFirestore): WishlistItemRepository {
         return WishlistItemRepositoryImplement(firestore)
+    }
+
+    @Singleton
+    @Provides
+    fun provideChatRepository(
+        database: FirebaseDatabase,
+        auth: FirebaseAuth,
+        storage: FirebaseStorage,
+    ): ChatRepository {
+        return ChatRepositoryImpl(database, auth, storage)
     }
 }

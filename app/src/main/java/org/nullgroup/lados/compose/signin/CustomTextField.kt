@@ -1,5 +1,7 @@
 package org.nullgroup.lados.compose.signin
 
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.OutlinedTextField
@@ -10,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.unit.dp
 import org.nullgroup.lados.ui.theme.LadosTheme
 
 @Composable
@@ -26,6 +29,7 @@ fun CustomTextField(
     isError: Boolean = false,
     isReadonly: Boolean = false,
     label: String = "",
+    singleLine: Boolean = false,
 ) {
     OutlinedTextField(
         value = text,
@@ -41,7 +45,7 @@ fun CustomTextField(
         },
         textStyle = LadosTheme.typography.titleMedium,
         modifier = modifier,
-        singleLine = true,
+        singleLine = singleLine,
         leadingIcon = leadingIcon,
         trailingIcon = trailingIcon,
         keyboardOptions = keyboardOptions,
