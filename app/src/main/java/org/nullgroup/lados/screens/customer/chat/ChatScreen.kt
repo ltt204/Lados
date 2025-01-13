@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Send
@@ -172,7 +173,7 @@ fun MessageItem(
                     color = if (isFromCurrentUser)
                         LadosTheme.colorScheme.primaryContainer
                     else LadosTheme.colorScheme.surfaceContainer,
-                    shape = LadosTheme.shape.medium,
+                    shape = RoundedCornerShape(24.dp),
                     tonalElevation = 2.dp,
                 ) {
                     Text(
@@ -251,6 +252,22 @@ fun MessageItem(
                 horizontal = 4.dp,
                 vertical = 2.dp
             ),
+        )
+    }
+}
+
+@Preview
+@Composable
+fun MessageItemPreview() {
+    LadosTheme {
+        MessageItem(
+            message = Message(
+                senderId = "1",
+                content = "Hello",
+                type = MessageType.TEXT,
+            ),
+            isFromCurrentUser = false,
+            onProductClick = {},
         )
     }
 }

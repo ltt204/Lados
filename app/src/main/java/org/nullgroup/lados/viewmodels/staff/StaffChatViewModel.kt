@@ -32,7 +32,12 @@ class StaffChatViewModel @Inject constructor(
     private var _deleteChatRoomUiState = MutableStateFlow<DeleteChatRoomUiState>(DeleteChatRoomUiState.Loading)
     val deleteChatRoomUiState = _deleteChatRoomUiState.asStateFlow()
 
+    lateinit var currentUser: User
+
     init {
+        viewModelScope.launch {
+            currentUser = userRepository.getCurrentUser()
+        }
         fetchMessages()
     }
 

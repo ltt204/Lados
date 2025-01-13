@@ -140,9 +140,12 @@ fun ChatScreen(
                     items(screenUiState.data.keys.toList(), { it.id }) { user ->
                         val chatRoom = screenUiState.data[user]!!
                         Log.d("ChatScreen", "ChatRoom: $chatRoom")
+                        Log.d("ChatScreen", "Current User: ${staffChatViewModel.currentUser.id}")
+                        Log.d("ChatScreen", "Last message sent by: ${chatRoom.lastMessageSendBy}")
                         ChatRoomItem(
                             chatRoom = chatRoom,
                             user = user,
+                            isCurrentUser = staffChatViewModel.currentUser.id == chatRoom.lastMessageSendBy,
                             onChatRoomItemClick = {
                                 staffChatViewModel.markMessagesAsRead(chatRoom.id)
                                 navController?.navigate("${Screen.Staff.ChatWithCustomerScreen.route}/${chatRoom.id}")
@@ -238,6 +241,7 @@ fun ChatScreen(
 fun ChatRoomItem(
     chatRoom: ChatRoom,
     user: User,
+    isCurrentUser: Boolean = false,
     onChatRoomItemClick: (ChatRoom) -> Unit = {},
     onLongClick: () -> Unit = {},
 ) {
@@ -298,7 +302,7 @@ fun ChatRoomItem(
                 modifier = Modifier
                     .padding(start = 8.dp)
                     .weight(1f),
-                verticalArrangement = Arrangement.Center
+                verticalArrangement = Arrangement.SpaceEvenly
             ) {
                 Text(
                     text = user.name, style = LadosTheme.typography.bodyLarge.copy(
@@ -306,11 +310,12 @@ fun ChatRoomItem(
                     )
                 )
                 Log.d("ChatRoomItem", "ChatRoom: $chatRoom")
+                Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     modifier = Modifier.widthIn(max = 172.dp),
-                    text = chatRoom.lastMessage,
+                    text = if (isCurrentUser) "You: ${chatRoom.lastMessage}" else chatRoom.lastMessage,
                     style = LadosTheme.typography.bodySmall.copy(
-                        fontWeight = if (unreadChatRoom) FontWeight.SemiBold else FontWeight.Normal,
+                        fontWeight = if (unreadChatRoom && !isCurrentUser) FontWeight.SemiBold else FontWeight.Normal,
                         fontSize = 14.sp
                     ),
                     maxLines = 1,
@@ -323,7 +328,7 @@ fun ChatRoomItem(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceEvenly
             ) {
-                if (unreadChatRoom) {
+                if (unreadChatRoom && !isCurrentUser) {
                     Box(
                         modifier = Modifier
                             .size(8.dp)
@@ -334,7 +339,7 @@ fun ChatRoomItem(
                 Text(
                     text = chatRoom.lastMessageTime.getMessageHistoryTimeDisplayment(),
                     style = LadosTheme.typography.bodySmall.copy(
-                        fontWeight = if (unreadChatRoom) FontWeight.SemiBold else FontWeight.Normal,
+                        fontWeight = if (unreadChatRoom && !isCurrentUser) FontWeight.SemiBold else FontWeight.Normal,
                     )
                 )
             }
