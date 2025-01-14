@@ -28,5 +28,31 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!--
+         See: https://developer.android.com/develop/background-work/background-tasks/persistent/configuration/custom-configuration
+
+         Required by: https://developer.android.com/training/dependency-injection/hilt-jetpack
+         Required changes by: https://developer.android.com/jetpack/androidx/releases/work#2.6.0-alpha01
+         -->
+
+        <!--
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            android:exported="false"
+            tools:node="merge">
+            <meta-data
+                android:name="androidx.work.impl.WorkManagerInitializer"
+                android:value="androidx.startup"
+                tools:node="remove" />
+        </provider>
+        -->
+
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            tools:node="remove">
+        </provider>
     </application>
 </manifest>

@@ -100,4 +100,7 @@
     <string name="auth_invalid_email">Invalid Email</string>
     <string name="auth_register">Register</string>
     <string name="auth_phone_number">Phone number</string>
+    <string name="wishlist_empty">wishlist_empty</string>
+    <string name="wishlist_empty_description">Empty wishlist</string>
+    <string name="wishlist_back_description">Back</string>
 </resources>

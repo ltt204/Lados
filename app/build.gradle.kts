@@ -148,6 +148,11 @@ dependencies {
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services.auth)
     implementation(libs.androidx.security.crypto)
+
+    // For async works when viewmodel is destroyed
+    implementation(libs.androidx.work.runtime.ktx)
+    // DI for WorkManager
+    implementation(libs.androidx.hilt.work)
 }
 
 kapt {

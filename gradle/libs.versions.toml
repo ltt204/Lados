@@ -20,6 +20,7 @@ hiltAndroidCompilerVersion = "2.49"
 hiltAndroidTesting = "2.52"
 hiltCompiler = "1.2.0"
 hiltNavigationCompose = "1.2.0"
+hiltWork = "1.2.0"
 javaJwt = "3.18.2"
 javaJwtVersion = "4.4.0"
 junitJupiterApi = "5.8.1"
@@ -59,6 +60,7 @@ roomCommon = "2.6.1"
 composeMaterial3 = "1.0.0-alpha29"
 googleid = "1.1.1"
 securityCrypto = "1.1.0-alpha06"
+workRuntimeKtx = "2.9.1"
 
 [libraries]
 androidx-compose-material3-material3 = { module = "androidx.compose.material3:material3" }
@@ -69,8 +71,10 @@ androidx-credentials-play-services-auth = { module = "androidx.credentials:crede
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 androidx-hilt-compiler = { module = "androidx.hilt:hilt-compiler", version.ref = "hiltCompiler" }
 androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
+androidx-hilt-work = { module = "androidx.hilt:hilt-work", version.ref = "hiltWork" }
 androidx-material = { module = "androidx.compose.material:material", version.ref = "material" }
 androidx-security-crypto = { module = "androidx.security:security-crypto", version.ref = "securityCrypto" }
+androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntimeKtx" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
 converter-gson = { module = "com.squareup.retrofit:converter-gson", version.ref = "converterGson" }
 coil = { module = "io.coil-kt:coil", version.ref = "coil" }
