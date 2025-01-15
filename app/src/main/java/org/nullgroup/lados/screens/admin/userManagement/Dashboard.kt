@@ -27,6 +27,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Divider
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
@@ -39,14 +40,19 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -131,7 +137,7 @@ fun SearchBar(
 
 
 @Composable
-fun UserManagementScreen(
+fun UserManagementScreenContent(
     modifier: Modifier = Modifier,
     navController: NavController,
     paddingValues: PaddingValues,
@@ -310,6 +316,189 @@ fun FlyoutMenu(
     }
 }
 
+
+@Composable
+fun BottomSheetContent(
+
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxHeight(0.5f)
+            // note: modify
+            .background(LadosTheme.colorScheme.background)
+            .clip(RoundedCornerShape(16.dp))
+            .padding(
+                start = 8.dp,
+                end = 8.dp,
+                top = 8.dp,
+            )
+    ) {
+        Column {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                TextButton(
+                    onClick = {},
+                    content = {
+                        Text(
+                            "Clear"
+                        )
+                    }
+                )
+
+                Text(
+                    text = "Filter",
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.padding(16.dp)
+                )
+
+                IconButton(
+                    onClick = {},
+                    content = {
+                        Icon(
+                            imageVector = Icons.Filled.Close,
+                            contentDescription = null
+                        )
+                    }
+                )
+            }
+            Text(
+                "Role"
+            )
+            Row(
+                modifier=Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ){
+                Button(
+                    onClick={},
+                    content={
+                        Text(
+                            "Admin",
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                )
+
+                Button(
+                    onClick={},
+                    content={
+                        Text(
+                            "Staff",
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                )
+
+                Button(
+                    onClick={},
+                    content={
+                        Text(
+                            "Customer",
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                )
+
+            }
+
+            Text(
+                "Status"
+            )
+            Row(
+                modifier=Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                Button(
+                    onClick = {},
+                    content = {
+                        Text(
+                            "Active",
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                )
+
+                Button(
+                    onClick = {},
+                    content = {
+                        Text(
+                            "Unactive",
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                )
+            }
+
+            Text(
+                "Username"
+            )
+            Row(
+                modifier=Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                Button(
+                    onClick = {},
+                    content = {
+                        Text(
+                            "User Name to A - Z",
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                )
+
+                Button(
+                    onClick = {},
+                    content = {
+                        Text(
+                            "User Name to Z - A",
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                )
+            }
+
+            Text(
+                "Email"
+            )
+            Row(
+                modifier=Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                Button(
+                    onClick = {},
+                    content = {
+                        Text(
+                            "Email to A - Z",
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                )
+
+                Button(
+                    onClick = {},
+                    content = {
+                        Text(
+                            "Email to Z - A",
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                )
+            }
+
+
+        }
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun BottomSheetPreview() {
+    BottomSheetContent()
+}
+
+
 @Composable
 fun MoreVertMenu(
 menuItems: List<String>,
@@ -382,14 +571,27 @@ fun UserRow(user: org.nullgroup.lados.data.models.User) {
     }
 }
 
-/*
-@Preview(showBackground = true, showSystemUi = true)
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ReviewProductInCategoryScreen() {
-    LadosTheme {
-        UserManagementScreen(navController = NavController(LocalContext.current))
+fun UserManagementScreen(
+    modifier: Modifier = Modifier,
+    navController: NavController,
+    paddingValues: PaddingValues = PaddingValues(0.dp),
+    //sharedViewModel: SharedViewModel = SharedViewModel(),
+    //viewModel: HomeViewModel = hiltViewModel(),
+) {
+    Scaffold(
+        modifier = modifier
+            .padding(bottom = paddingValues.calculateBottomPadding())
+            .padding(horizontal = 16.dp),
+        containerColor = LadosTheme.colorScheme.background,
+
+    ) { it ->
+        UserManagementScreenContent(
+            modifier = modifier,
+            paddingValues = it,
+            navController = navController,
+        )
     }
 }
-*/
-
-
