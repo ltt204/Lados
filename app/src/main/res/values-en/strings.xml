@@ -106,5 +106,8 @@
     <string name="are_you_sure">Are you sure?</string>
     <string name="order_cancel_return_message">Please contact our staffs to %1$s this order.</string>
     <string name="delivery_detail">Delivery Details</string>
+    <string name="wishlist_empty">Your wishlist is empty</string>
+    <string name="wishlist_empty_description">Empty wishlist</string>
+    <string name="wishlist_back_description">Back</string>
 </resources>
 
