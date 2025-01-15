@@ -53,6 +53,7 @@ dependencies {
     implementation(libs.firebase.database)
     implementation(libs.firebase.firestore)
     implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.database.ktx)
 
     implementation(libs.androidx.ui)
     implementation(libs.androidx.core.ktx)
@@ -75,6 +76,7 @@ dependencies {
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.googleid)
+    implementation(libs.androidx.hilt.common)
     kapt(libs.hilt.android.compiler.v2511)
     ksp(libs.androidx.hilt.compiler)
 
@@ -86,6 +88,7 @@ dependencies {
     // Coil for image loading
     implementation(libs.coil)
     implementation(libs.coil.compose)
+    implementation(libs.coil.kt.coil.compose)
 
     // Image Slider
     implementation(libs.coil.compose)

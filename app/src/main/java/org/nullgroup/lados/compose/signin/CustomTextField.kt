@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.VisualTransformation
 import org.nullgroup.lados.ui.theme.LadosTheme
 
@@ -26,9 +27,13 @@ fun CustomTextField(
     isError: Boolean = false,
     isReadonly: Boolean = false,
     label: String = "",
+    singleLine: Boolean = false,
+    enabled: Boolean = true,
+    textStyle: TextStyle = LadosTheme.typography.titleMedium,
 ) {
     OutlinedTextField(
         value = text,
+        enabled = enabled,
         onValueChange = onValueChange,
         readOnly = isReadonly,
         shape = shape,
@@ -39,9 +44,9 @@ fun CustomTextField(
                 style = LadosTheme.typography.bodyMedium
             )
         },
-        textStyle = LadosTheme.typography.titleMedium,
+        textStyle = textStyle,
         modifier = modifier,
-        singleLine = true,
+        singleLine = singleLine,
         leadingIcon = leadingIcon,
         trailingIcon = trailingIcon,
         keyboardOptions = keyboardOptions,

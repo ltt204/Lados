@@ -6,7 +6,6 @@ import androidx.hilt.work.HiltWorker
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.work.CoroutineWorker
-import androidx.work.OneTimeWorkRequest
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.OutOfQuotaPolicy
 import androidx.work.WorkManager
@@ -32,10 +31,11 @@ class SingleItemWishlistViewModel @Inject constructor(
     firebaseAuth: FirebaseAuth,
     private val wishlistRepository: WishlistItemRepository,
     @ApplicationContext private val appContext: Context
-): ViewModel() {
+) : ViewModel() {
     private val customerId = firebaseAuth.currentUser?.uid
 
-    private val _uiState = MutableStateFlow<SingleItemWishlistUiState>(SingleItemWishlistUiState.Loading)
+    private val _uiState =
+        MutableStateFlow<SingleItemWishlistUiState>(SingleItemWishlistUiState.Loading)
     val uiState = _uiState.asStateFlow()
 
     private var _isInWishListWhenLoaded: Boolean? = null
@@ -69,7 +69,8 @@ class SingleItemWishlistViewModel @Inject constructor(
 
         _uiState.update {
             SingleItemWishlistUiState.Success(
-                !(_uiState.value as SingleItemWishlistUiState.Success).isInWishList)
+                !(_uiState.value as SingleItemWishlistUiState.Success).isInWishList
+            )
         }
         _lastUpdateTimestamp = Timestamp.now()
     }
@@ -113,7 +114,7 @@ class SingleItemWishlistUpdateWork @AssistedInject constructor(
     @Assisted context: Context,
     @Assisted workerParams: WorkerParameters,
     private val wishlistRepository: WishlistItemRepository,
-): CoroutineWorker(context, workerParams) {
+) : CoroutineWorker(context, workerParams) {
     companion object {
         const val CUSTOMER_ID_KEY = "customerId"
         const val PRODUCT_ID_KEY = "productId"
@@ -122,18 +123,26 @@ class SingleItemWishlistUpdateWork @AssistedInject constructor(
     }
 
     override suspend fun doWork() = coroutineScope {
-        val customerId = inputData.getString(CUSTOMER_ID_KEY) ?: return@coroutineScope Result.failure()
-        val productId = inputData.getString(PRODUCT_ID_KEY) ?: return@coroutineScope Result.failure()
+        val customerId =
+            inputData.getString(CUSTOMER_ID_KEY) ?: return@coroutineScope Result.failure()
+        val productId =
+            inputData.getString(PRODUCT_ID_KEY) ?: return@coroutineScope Result.failure()
         val isInWishList = inputData.getBoolean(IS_IN_WISHLIST_KEY, false)
         val timestamp = Timestamp(inputData.getLong(TIMESTAMP_KEY, 0), 0)
 
         if (isInWishList) {
-            wishlistRepository.addItemsToWishlist(customerId, listOf(WishlistItem(productId = productId, addedAt = timestamp)))
+            wishlistRepository.addItemsToWishlist(
+                customerId,
+                listOf(WishlistItem(productId = productId, addedAt = timestamp))
+            )
         } else {
             wishlistRepository.removeProductFromWishlist(customerId, productId)
         }
 
-        Log.d("SingleItemWishlistUpdateWork", "Updated wishlist for $customerId for product $productId")
+        Log.d(
+            "SingleItemWishlistUpdateWork",
+            "Updated wishlist for $customerId for product $productId"
+        )
 
         Result.success()
     }
