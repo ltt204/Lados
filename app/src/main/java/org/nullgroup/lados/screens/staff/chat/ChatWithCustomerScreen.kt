@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -21,8 +22,8 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Image
-import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -195,6 +196,7 @@ fun ChatWithCustomerScreen(
                             }
                             MessageItem(
                                 message = message,
+                                userAvatar = staffChatViewModel.chatWith.second,
                                 isFromCurrentUser = message.senderId == staffChatViewModel.currentStaff.id,
                                 onProductClick = { productId ->
                                     navController.navigate("${Screen.Customer.ProductDetailScreen.route}/$productId")
@@ -213,7 +215,6 @@ fun ChatWithCustomerScreen(
                             onClick = {
                                 launcher.launch("image/*")
                             },
-                            enabled = uiState !is MessageUiState.Loading
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Image,
@@ -223,7 +224,9 @@ fun ChatWithCustomerScreen(
                         }
 
                         CustomTextField(
-                            modifier = Modifier.height(48.dp).weight(1f),
+                            modifier = Modifier
+                                .height(48.dp)
+                                .weight(1f),
                             text = messageText,
                             onValueChange = { messageText = it },
                             label = "Type a message...",
@@ -237,10 +240,10 @@ fun ChatWithCustomerScreen(
                                     messageText = ""
                                 }
                             },
-                            enabled = uiState !is MessageUiState.Loading && messageText.isNotEmpty()
+                            enabled = messageText.isNotEmpty()
                         ) {
                             Icon(
-                                imageVector = Icons.Default.Send,
+                                imageVector = Icons.AutoMirrored.Filled.Send,
                                 contentDescription = "Send message",
                                 tint = LadosTheme.colorScheme.primary,
                             )

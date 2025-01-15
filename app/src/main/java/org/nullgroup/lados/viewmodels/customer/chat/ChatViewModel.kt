@@ -179,7 +179,7 @@ class ChatViewModel @Inject constructor(
                     uiState.value = ChatUiState.Error(e.message)
                 }
                 .collect { messageList ->
-                    messages.value = messageList
+                    messages.value = messageList.sortedBy { it.timestamp }
                 }
         }
     }

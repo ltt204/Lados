@@ -804,13 +804,24 @@ fun ProductScreen(
                     containerColor = LadosTheme.colorScheme.background
                 ),
                 title = {
-                    Text(
-                        text = "Lados",
-                        style = LadosTheme.typography.headlineSmall.copy(
-                            color = LadosTheme.colorScheme.onBackground,
-                            fontWeight = FontWeight.SemiBold,
-                        ),
-                    )
+                    Row (
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Image(
+                            modifier = Modifier.size(32.dp),
+                            painter = painterResource(id = R.drawable.lados_app_icon),
+                            contentDescription = "App logo",
+                            colorFilter = ColorFilter.tint(LadosTheme.colorScheme.onBackground),
+                        )
+                        Text(
+                            text = "Lados",
+                            style = LadosTheme.typography.headlineSmall.copy(
+                                color = LadosTheme.colorScheme.onBackground,
+                                fontWeight = FontWeight.SemiBold,
+                            ),
+                        )
+                    }
                 },
                 actions = {
                     IconButton(
