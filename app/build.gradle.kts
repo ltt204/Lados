@@ -150,6 +150,10 @@ dependencies {
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services.auth)
     implementation(libs.androidx.security.crypto)
+
+    // For pager
+    implementation(libs.accompanist.pager)
+    implementation(libs.androidx.foundation)
 }
 
 kapt {

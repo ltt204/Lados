@@ -1,8 +1,10 @@
 package org.nullgroup.lados.screens.staff
 
+import android.os.Build
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -59,6 +61,7 @@ import org.nullgroup.lados.viewmodels.customer.chat.states.ChatUiState
 import org.nullgroup.lados.viewmodels.staff.MessageUiState
 import org.nullgroup.lados.viewmodels.staff.StaffChatWithCustomerViewModel
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatWithCustomerScreen(
@@ -140,7 +143,7 @@ fun ChatWithCustomerScreen(
                                     text = staffChatViewModel.chatWith.first,
                                     style = LadosTheme.typography.titleLarge.copy(
                                         fontSize = 18.sp,
-                                        fontWeight = FontWeight.SemiBold
+                                        fontWeight = FontWeight.SemiBold,
                                     ),
                                     color = LadosTheme.colorScheme.onBackground,
                                 )
@@ -150,7 +153,8 @@ fun ChatWithCustomerScreen(
                                 Icon(
                                     modifier = Modifier.size(24.dp),
                                     painter = painterResource(id = R.drawable.arrowleft2),
-                                    contentDescription = null
+                                    contentDescription = null,
+                                    tint = LadosTheme.colorScheme.onBackground,
                                 )
                             }
                         }

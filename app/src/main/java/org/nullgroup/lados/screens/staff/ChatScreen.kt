@@ -99,7 +99,10 @@ fun ChatScreen(
                             chatRoom = chatRoom,
                             user = user,
                             onChatRoomItemClick = {
-                                Log.d("ChatScreen", "ChatRoom: \"${Screen.Staff.ChatWithCustomerScreen.route}/${chatRoom.id}\"")
+                                Log.d(
+                                    "ChatScreen",
+                                    "ChatRoom: \"${Screen.Staff.ChatWithCustomerScreen.route}/${chatRoom.id}\""
+                                )
                                 navController?.navigate("${Screen.Staff.ChatWithCustomerScreen.route}/${chatRoom.id}")
                             }
                         )
@@ -166,13 +169,17 @@ fun ChatRoomItem(
                     Text(
                         text = user.name, style = LadosTheme.typography.bodyLarge.copy(
                             fontWeight = FontWeight.SemiBold,
+                            color = LadosTheme.colorScheme.onBackground,
                         )
                     )
                     Log.d("ChatRoomItem", "ChatRoom: $chatRoom")
                     Text(
                         modifier = Modifier.widthIn(max = 172.dp),
                         text = chatRoom.lastMessage,
-                        style = LadosTheme.typography.bodySmall,
+                        style = LadosTheme.typography.bodySmall
+                            .copy(
+                                color = LadosTheme.colorScheme.onBackground,
+                            ),
                         maxLines = 1,
                         softWrap = true,
                         overflow = TextOverflow.Ellipsis
@@ -180,7 +187,9 @@ fun ChatRoomItem(
                 }
                 Text(
                     text = chatRoom.lastMessageTime.getMessageHistoryTimeDisplayment(),
-                    style = LadosTheme.typography.bodySmall
+                    style = LadosTheme.typography.bodySmall.copy(
+                        color = LadosTheme.colorScheme.onBackground,
+                    )
                 )
             }
         },

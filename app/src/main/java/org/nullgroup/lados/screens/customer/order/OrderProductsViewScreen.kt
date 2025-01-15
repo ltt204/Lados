@@ -67,7 +67,6 @@ fun OrderProductsViewScreen(
     val orderProducts = orderProductsViewModel.orderProducts.collectAsState()
     Log.d("OrderProductsViewScreen", "OrderProductsViewScreen: $orderProducts")
     Scaffold(
-        modifier = modifier,
         topBar = {
             DefaultCenterTopAppBar(
                 onBackClick = {
@@ -76,7 +75,7 @@ fun OrderProductsViewScreen(
                 content = stringResource(id = R.string.order_products_title)
             )
         },
-        backgroundColor = LadosTheme.colorScheme.background
+        backgroundColor = LadosTheme.colorScheme.background,
     ) { innerPadding ->
         when (productVariants.value) {
             is OrderProductsState.Loading -> {
@@ -120,7 +119,7 @@ fun OrderProductsView(
     orderProducts: List<OrderProduct> = emptyList(),
     orderStatus: OrderStatus,
     navController: NavController? = null,
-    context: Context = LocalContext.current
+    context: Context = LocalContext.current,
 ) {
     val buttonAction = orderStatus.getActionForButtonOfOrderProduct(context)
 

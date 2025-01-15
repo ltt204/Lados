@@ -78,7 +78,6 @@ fun OrderDetailScreen(
         mutableStateOf(Pair(null as String?) { _: NavController, _: String?, _: String? -> })
     }
     Scaffold(
-        modifier = modifier,
         topBar = {
             DefaultCenterTopAppBar(
                 onBackClick = {
@@ -90,7 +89,9 @@ fun OrderDetailScreen(
         bottomBar = {
             actionForBottomButton.first?.let {
                 if (it.isNotEmpty()) {
-                    TextButton(modifier = Modifier.fillMaxWidth().heightIn(min = 64.dp), onClick = {
+                    TextButton(modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 64.dp), onClick = {
                         isConfirmedToCancelOrReturn = true
                     }) {
                         Text(
@@ -287,7 +288,10 @@ fun OrderItemsArea(
                     verticalArrangement = Arrangement.SpaceEvenly
                 ) {
                     Text(
-                        text = stringResource(R.string.order_items_header, order.orderProducts.size),
+                        text = stringResource(
+                            R.string.order_items_header,
+                            order.orderProducts.size
+                        ),
                         style = LadosTheme.typography.bodyLarge.copy(
                             fontWeight = FontWeight.SemiBold,
                             fontSize = 18.sp

@@ -2,6 +2,7 @@ package org.nullgroup.lados.navigations
 
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -14,10 +15,10 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -49,6 +50,8 @@ import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.screens.customer.product.ProductDetailScreen
 import org.nullgroup.lados.screens.staff.ChatScreen
 import org.nullgroup.lados.screens.staff.ChatWithCustomerScreen
+import org.nullgroup.lados.screens.staff.OrderDetailScreen
+import org.nullgroup.lados.screens.staff.OrderListScreen
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.viewmodels.customer.profile.ProfileViewModel
 
@@ -64,7 +67,7 @@ fun StaffGraph(
     drawerState: DrawerState = rememberDrawerState(DrawerValue.Closed),
     scrollBehavior: TopAppBarScrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(),
     scope: CoroutineScope = rememberCoroutineScope(),
-    viewModel: ProfileViewModel = hiltViewModel()
+    viewModel: ProfileViewModel = hiltViewModel(),
 ) {
     var currentDestination by remember {
         mutableStateOf(startDestination)
@@ -73,19 +76,29 @@ fun StaffGraph(
         mutableStateOf(true)
     }
     ModalNavigationDrawer(
-        modifier = modifier,
         drawerState = drawerState,
         drawerContent = {
-            ModalDrawerSheet {
+            ModalDrawerSheet(
+                drawerContainerColor = LadosTheme.colorScheme.surfaceContainer,
+            ) {
                 Column {
                     Text(
                         "Staff panel",
-                        style = MaterialTheme.typography.headlineSmall,
+                        style = LadosTheme.typography.headlineSmall,
+                        color = LadosTheme.colorScheme.onBackground,
                         modifier = Modifier.padding(16.dp)
                     )
-                    HorizontalDivider()
+                    HorizontalDivider(Modifier.padding(bottom = LadosTheme.size.medium))
                     NavigationDrawerItem(
-                        label = { Text(text = Screen.Staff.ChatScreen.name!!) },
+                        modifier = Modifier.padding(horizontal = LadosTheme.size.medium),
+                        label = {
+                            Text(
+                                text = Screen.Staff.ChatScreen.name!!,
+                                color = if (currentDestination.route == Screen.Staff.ChatScreen.route)
+                                    LadosTheme.colorScheme.onPrimary else LadosTheme.colorScheme.onBackground,
+                                modifier = Modifier.padding(start = LadosTheme.size.medium),
+                            )
+                        },
                         selected = currentDestination.route == Screen.Staff.ChatScreen.route,
                         onClick = {
                             scope.launch {
@@ -93,10 +106,21 @@ fun StaffGraph(
                             }
                             currentDestination = Screen.Staff.ChatScreen
                             navController.navigate(Screen.Staff.ChatScreen.route)
-                        }
+                        },
+                        colors = NavigationDrawerItemDefaults.colors(
+                            selectedContainerColor = LadosTheme.colorScheme.primary,
+                        ),
                     )
                     NavigationDrawerItem(
-                        label = { Text(text = Screen.Staff.OrderManagement.name!!) },
+                        modifier = Modifier.padding(horizontal = LadosTheme.size.medium),
+                        label = {
+                            Text(
+                                text = Screen.Staff.OrderManagement.name!!,
+                                color = if (currentDestination.route == Screen.Staff.OrderManagement.route)
+                                    LadosTheme.colorScheme.onPrimary else LadosTheme.colorScheme.onBackground,
+                                modifier = Modifier.padding(start = LadosTheme.size.medium),
+                            )
+                        },
                         selected = currentDestination.route == Screen.Staff.OrderManagement.route,
                         onClick = {
                             scope.launch {
@@ -104,7 +128,10 @@ fun StaffGraph(
                             }
                             currentDestination = Screen.Staff.OrderManagement
                             navController.navigate(Screen.Staff.OrderManagement.route)
-                        }
+                        },
+                        colors = NavigationDrawerItemDefaults.colors(
+                            selectedContainerColor = LadosTheme.colorScheme.primary,
+                        ),
                     )
                 }
                 TextButton(
@@ -130,7 +157,12 @@ fun StaffGraph(
                         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                             containerColor = LadosTheme.colorScheme.background
                         ),
-                        title = { Text(text = currentDestination.name!!) },
+                        title = {
+                            Text(
+                                text = currentDestination.name!!,
+                                color = LadosTheme.colorScheme.onBackground
+                            )
+                        },
                         navigationIcon = {
                             IconButton(onClick = {
                                 Log.d("AdminTopAppBar", "onDrawerClick")
@@ -141,7 +173,8 @@ fun StaffGraph(
                             }) {
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Default.List,
-                                    contentDescription = "Back button"
+                                    contentDescription = "Back button",
+                                    tint = LadosTheme.colorScheme.onBackground,
                                 )
                             }
                         },
@@ -167,7 +200,12 @@ fun StaffGraph(
                             }
 
                             Screen.Staff.OrderManagement.route -> {
-                                // Reports()
+                                isVisibility = true
+                                OrderListScreen(
+                                    navController = navController,
+                                    paddingValues = innerPadding,
+                                    modifier = modifier,
+                                )
                             }
                         }
                     }
@@ -200,6 +238,20 @@ fun StaffGraph(
                             ?: ""
                     ProductDetailScreen(
                         productId = productId,
+                        navController = navController,
+                    )
+                }
+
+                composable(
+                    Screen.Customer.Order.OrderDetail.ROUTE_WITH_ARG,
+                    arguments = listOf(
+                        navArgument(Screen.Customer.Order.OrderDetail.ID_ARG) {
+                            type = NavType.StringType
+                        })
+                ) {
+                    isVisibility = false
+                    OrderDetailScreen(
+                        modifier = modifier,
                         navController = navController,
                     )
                 }
