@@ -10,7 +10,6 @@ import android.net.Uri
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
-import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import com.google.firebase.Timestamp
 import org.nullgroup.lados.R

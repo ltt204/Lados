@@ -1,7 +1,9 @@
 package org.nullgroup.lados.screens.customer.chat
 
+import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -25,7 +27,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -36,23 +37,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
+import com.google.firebase.Timestamp
 import org.nullgroup.lados.compose.signin.CustomTextField
 import org.nullgroup.lados.data.models.Message
 import org.nullgroup.lados.data.models.MessageType
 import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.ui.theme.LadosTheme
+import org.nullgroup.lados.utilities.formatToRelativeTime
 import org.nullgroup.lados.viewmodels.customer.chat.ChatViewModel
 import org.nullgroup.lados.viewmodels.customer.chat.events.ChatScreenEvent
 import org.nullgroup.lados.viewmodels.customer.chat.states.ChatUiState
-import java.text.SimpleDateFormat
 import java.util.Date
-import java.util.Locale
 
 @Composable
 fun ChatScreen(
@@ -98,8 +98,9 @@ fun ChatScreen(
                         isFromCurrentUser = message.senderId == viewModel.getCurrentUserId(),
                         onProductClick = { productId ->
                             navController.navigate("${Screen.Customer.ProductDetailScreen.route}/$productId")
-                        }
-                    )
+                        },
+
+                        )
                 }
             }
 
@@ -153,6 +154,7 @@ fun ChatScreen(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun MessageItem(
     message: Message,
@@ -160,6 +162,7 @@ fun MessageItem(
     onProductClick: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -243,8 +246,7 @@ fun MessageItem(
         }
 
         Text(
-            text = SimpleDateFormat("HH:mm", Locale.getDefault())
-                .format(Date(message.timestamp)),
+            text = formatToRelativeTime(Timestamp(Date(message.timestamp))),
             style = LadosTheme.typography.bodySmall,
             color = LadosTheme.colorScheme.onSurface.copy(alpha = 0.6f),
             modifier = Modifier.padding(

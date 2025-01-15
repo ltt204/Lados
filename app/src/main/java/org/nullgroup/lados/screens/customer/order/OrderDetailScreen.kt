@@ -164,7 +164,7 @@ fun OrderDetailScreen(
                     Spacer(modifier = Modifier.padding(LadosTheme.size.large))
                     Column {
                         Text(
-                            text = "Delivery Details",
+                            text = stringResource(R.string.delivery_detail),
                             style = LadosTheme.typography.titleLarge.copy(
                                 fontWeight = FontWeight.SemiBold,
                             ),
@@ -287,7 +287,7 @@ fun OrderItemsArea(
                     verticalArrangement = Arrangement.SpaceEvenly
                 ) {
                     Text(
-                        text = "${order.orderProducts.size} items",
+                        text = stringResource(R.string.order_items_header, order.orderProducts.size),
                         style = LadosTheme.typography.bodyLarge.copy(
                             fontWeight = FontWeight.SemiBold,
                             fontSize = 18.sp

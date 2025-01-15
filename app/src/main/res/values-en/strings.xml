@@ -105,4 +105,6 @@
     <string name="return_order">Return</string>
     <string name="are_you_sure">Are you sure?</string>
     <string name="order_cancel_return_message">Please contact our staffs to %1$s this order.</string>
+    <string name="delivery_detail">Delivery Details</string>
 </resources>
+
