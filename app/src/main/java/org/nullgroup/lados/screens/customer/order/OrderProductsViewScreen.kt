@@ -1,5 +1,6 @@
 package org.nullgroup.lados.screens.customer.order
 
+import android.content.Context
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -119,10 +120,14 @@ fun OrderProductsView(
     orderProducts: List<OrderProduct> = emptyList(),
     orderStatus: OrderStatus,
     navController: NavController? = null,
+    context: Context = LocalContext.current
 ) {
-    val buttonAction = orderStatus.getActionForButtonOfOrderProduct()
+    val buttonAction = orderStatus.getActionForButtonOfOrderProduct(context)
 
-    LazyColumn(modifier = modifier, verticalArrangement = Arrangement.spacedBy(LadosTheme.size.medium)) {
+    LazyColumn(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(LadosTheme.size.medium)
+    ) {
         items(items = productVariants, key = { it.first.id }) { (product, variant) ->
             val orderProduct = orderProducts.find { it.productId == product.id }
             OrderProductItem(

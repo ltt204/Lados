@@ -23,9 +23,13 @@ import org.nullgroup.lados.data.remote.models.ProductRemoteModel
 import org.nullgroup.lados.screens.Screen
 import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
+import java.time.Duration
 import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
@@ -94,17 +98,17 @@ fun getCurrentUTCFormattedTime(): String {
     return formatter.format(utcInstant)
 }
 
-fun OrderStatus.getActionForButtonOfOrderProduct(): Pair<String?, ((NavController, String?, String?) -> Unit)> {
+fun OrderStatus.getActionForButtonOfOrderProduct(context: Context): Pair<String?, ((NavController, String?, String?) -> Unit)> {
     return when (this) {
         OrderStatus.CREATED, OrderStatus.SHIPPED -> {
-            "Detail" to { navController, productId, _ ->
+            context.getString(R.string.detail) to { navController, productId, _ ->
                 /*TODO: Do nothing, disable the button or hide it */
                 navController.navigate("${Screen.Customer.ProductDetailScreen.route}/$productId")
             }
         }
 
         OrderStatus.DELIVERED -> {
-            "Leave review" to { navController, productId, variantId ->
+            context.getString(R.string.leave_review) to { navController, productId, variantId ->
                 /*TODO: Navigate to review screen*/
                 navController.navigate("${Screen.Customer.ReviewProductScreen.route}/$productId/$variantId")
             }
@@ -112,7 +116,7 @@ fun OrderStatus.getActionForButtonOfOrderProduct(): Pair<String?, ((NavControlle
 
         // TODO: Consider designing user flow for these cases
         OrderStatus.CANCELLED, OrderStatus.RETURNED -> {
-            "Re-order" to { navController, orderId, _ ->
+            context.getString(R.string.re_order) to { navController, orderId, _ ->
                 /*TODO: Allow user to re-order, which mean they will be navigated to the checkout screen with current list of products of order.*/
 //                it.navigate(Screen.Customer.Checkout.route)
             }
@@ -120,6 +124,24 @@ fun OrderStatus.getActionForButtonOfOrderProduct(): Pair<String?, ((NavControlle
 
         else -> {
             null to { _, _, _ -> /*TODO*/ }
+        }
+    }
+}
+
+fun OrderStatus.getActionForButtonOfOrder(context: Context): Pair<String?, ((NavController, String?, String?) -> Unit)> {
+    return when (this) {
+        OrderStatus.RETURNED, OrderStatus.CANCELLED -> {
+            null to { _, _, _ ->
+                // Navigate to Ask for reason screen
+            }
+        }
+        OrderStatus.DELIVERED -> {
+            context.getString(R.string.return_order) to { _, _, _ ->
+                // Navigate to Ask for reason screen
+            }
+        }
+        else -> {
+            context.getString(R.string.cancel_order) to { _, _, _ -> /*TODO*/ }
         }
     }
 }
@@ -242,4 +264,68 @@ fun CategoryRemoteModel.toLocalCategory(): Category {
             ),
         parentCategoryId = this.parentCategoryId
     )
+}
+
+fun Long.getMessageHistoryTimeDisplayment(): String {
+    val dateTime = Date(this)
+    val currentDateTime = Date()
+
+    val justNow = (currentDateTime.time - dateTime.time) / 60000 < 1
+    val sameDay = dateTime.date == currentDateTime.date
+    val sameWeek = Calendar.getInstance().apply { time = dateTime }
+        .get(Calendar.WEEK_OF_YEAR) == Calendar.getInstance().apply { time = currentDateTime }
+        .get(Calendar.WEEK_OF_YEAR)
+    val sameYear = Calendar.getInstance().apply { time = dateTime }
+        .get(Calendar.YEAR) == Calendar.getInstance().apply { time = currentDateTime }
+        .get(Calendar.YEAR)
+
+    return when {
+        justNow -> "Just now"
+        sameDay -> SimpleDateFormat("HH:mm", Locale.getDefault()).format(dateTime)
+        sameWeek -> SimpleDateFormat("EEE", Locale.getDefault()).format(dateTime)
+        sameYear -> SimpleDateFormat("MMM dd", Locale.getDefault()).format(dateTime)
+        else -> SimpleDateFormat("MMM yyyy", Locale.getDefault()).format(dateTime)
+    }
+}
+
+fun Long.getMinuteInTimestamp(): Int {
+    val dateTime = Date(this)
+    val calendar = Calendar.getInstance().apply { time = dateTime }
+
+    return calendar.get(Calendar.MINUTE)
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+fun Long.getMessageTimeGapBetweenTwoMessagesDisplayment(previousMessageTime: Long): String {
+    val zoneId = ZoneId.systemDefault()
+    val previousDateTime = Instant.ofEpochMilli(previousMessageTime).atZone(zoneId).toLocalDateTime()
+    val currentDateTime = Instant.ofEpochMilli(this).atZone(zoneId).toLocalDateTime()
+
+    val duration = Duration.between(previousDateTime, currentDateTime)
+
+    if (previousDateTime.toLocalDate() == currentDateTime.toLocalDate()) {
+        if (duration.toMinutes() > 10) {
+            val formatter = DateTimeFormatter.ofPattern("HH:mm")
+            return formatter.format(currentDateTime)
+        } else {
+            return ""
+        }
+    }
+
+    if (previousDateTime.until(currentDateTime, ChronoUnit.DAYS) == 1L) {
+        return "Yesterday"
+    }
+
+    if (previousDateTime.until(currentDateTime, ChronoUnit.DAYS) < 7L) {
+        val formatter = DateTimeFormatter.ofPattern("E, HH:mm")
+        return formatter.format(currentDateTime)
+    }
+
+    if (previousDateTime.year == currentDateTime.year) {
+        val formatter = DateTimeFormatter.ofPattern("MMM dd")
+        return formatter.format(currentDateTime)
+    }
+
+    val formatter = DateTimeFormatter.ofPattern("MMM yyyy")
+    return formatter.format(currentDateTime)
 }

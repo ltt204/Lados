@@ -30,6 +30,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.Message
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -70,9 +71,12 @@ import org.nullgroup.lados.data.models.Image
 import org.nullgroup.lados.data.models.Product
 import org.nullgroup.lados.data.models.Size
 import org.nullgroup.lados.data.models.UserEngagement
+import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.utilities.formatToRelativeTime
 import org.nullgroup.lados.utilities.toCurrency
+import org.nullgroup.lados.viewmodels.customer.chat.ChatViewModel
+import org.nullgroup.lados.viewmodels.customer.chat.events.ChatScreenEvent
 import org.nullgroup.lados.viewmodels.customer.product.ProductDetailScreenViewModel
 import org.nullgroup.lados.viewmodels.customer.wishlist.SingleItemWishlistUiState
 import org.nullgroup.lados.viewmodels.customer.wishlist.SingleItemWishlistViewModel
@@ -87,7 +91,7 @@ data class ProductDetailUiState(
     val quantity: Int = 1,
     val quantityInStock: Int = 0,
     val isLoading: Boolean = true,
-    val error: String? = null
+    val error: String? = null,
 )
 
 
@@ -95,9 +99,10 @@ data class ProductDetailUiState(
 @Composable
 fun ProductDetailScreen(
     productViewModel: ProductDetailScreenViewModel = hiltViewModel(),
+    chatViewModel: ChatViewModel = hiltViewModel(),
     wishlistViewModel: SingleItemWishlistViewModel = hiltViewModel(),
     productId: String,
-    navController: NavController
+    navController: NavController,
 ) {
 
     val scrollState = rememberScrollState()
@@ -154,8 +159,12 @@ fun ProductDetailScreen(
                 topBar = {
                     ProductDetailTopBar(
                         isFavorite = isFavorite,
-                        onToggleFavorite = onToggleFavorite,
-                        onNavigateBack = { navController.navigateUp() }
+                        onToggleFavorite = { onToggleFavorite() },
+                        onNavigateBack = { navController.navigateUp() },
+                        onChat = {
+                            chatViewModel.handleEvent(ChatScreenEvent.SendProduct(productId))
+                            navController.navigate(Screen.Customer.ChatScreen.route)
+                        }
                     )
                 },
                 containerColor = LadosTheme.colorScheme.background,
@@ -253,7 +262,8 @@ fun ProductDetailScreen(
 fun ProductDetailTopBar(
     isFavorite: Boolean? = null,
     onToggleFavorite: () -> Unit = {},
-    onNavigateBack: () -> Unit = {}
+    onNavigateBack: () -> Unit = {},
+    onChat: () -> Unit = {},
 ) {
 //    var isFavorite by remember { mutableStateOf(false) }
     Row(
@@ -274,6 +284,19 @@ fun ProductDetailTopBar(
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
                 contentDescription = "Back",
                 tint = LadosTheme.colorScheme.onBackground
+            )
+        }
+
+        IconButton(
+            onClick = { onChat() },
+            modifier = Modifier
+                .clip(CircleShape)
+                .background(LadosTheme.colorScheme.surfaceContainerHighest)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Message,
+                contentDescription = "Chat with Staff",
+                tint = LadosTheme.colorScheme.onBackground,
             )
         }
 
@@ -301,7 +324,7 @@ fun ProductInformationSection(
     originalPrice: Double,
     salePrice: Double?,
     productImages: List<Image> = emptyList(),
-    quantityInStock: Int = 0
+    quantityInStock: Int = 0,
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -392,7 +415,7 @@ fun ProductDetailsSection(
     description: String = "",
     onSizeClick: () -> Unit,
     onColorClick: () -> Unit,
-    onUpdateQuantity: (Int) -> Unit
+    onUpdateQuantity: (Int) -> Unit,
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -440,7 +463,7 @@ fun SelectableDetailRow(
     title: String,
     currentSelection: String,
     onClick: () -> Unit = {},
-    additionalContent: @Composable (() -> Unit)? = null
+    additionalContent: @Composable (() -> Unit)? = null,
 ) {
     Row(
         modifier = Modifier
@@ -484,7 +507,7 @@ fun SelectableDetailRow(
 @Composable
 fun QuantitySelector(
     modifier: Modifier = Modifier,
-    onUpdateQuantity: (Int) -> Unit = {}
+    onUpdateQuantity: (Int) -> Unit = {},
 ) {
     var quantity by remember { mutableIntStateOf(1) }
 
@@ -551,7 +574,7 @@ fun ProductReviewSection(
     engagements: List<UserEngagement>,
     averageRating: Double,
     numOfReviews: Int,
-    productViewModel: ProductDetailScreenViewModel = hiltViewModel()
+    productViewModel: ProductDetailScreenViewModel = hiltViewModel(),
 ) {
 
     LaunchedEffect(engagements) {
@@ -628,7 +651,7 @@ fun ReviewCard(
     maxRatings: Int = 5,
     ratings: Int = 5,
     reviews: String = "",
-    createAt: String = ""
+    createAt: String = "",
 ) {
 
     Box(
@@ -704,7 +727,7 @@ fun ProductDetailBottomBar(
     title: String = "",
     price: String = "",
     enabled: Boolean = true,
-    onClick: () -> Unit = {}
+    onClick: () -> Unit = {},
 ) {
     Button(
         onClick = onClick,
@@ -748,7 +771,7 @@ fun <T> SelectionList(
     itemContent: @Composable (T) -> String,
     itemColor: @Composable (T) -> Color,
     initialSelection: Int = -1,
-    onItemSelected: (T) -> Unit = {}
+    onItemSelected: (T) -> Unit = {},
 ) {
     var selectedIndex by remember { mutableIntStateOf(initialSelection) }
 
@@ -775,7 +798,7 @@ fun SelectableItem(
     label: String,
     color: Color = Color.Transparent,
     isSelected: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     val backgroundColor =
         if (isSelected) LadosTheme.colorScheme.primary else LadosTheme.colorScheme.surfaceContainerHighest
@@ -826,7 +849,7 @@ fun SelectionBottomSheet(
     title: String,
     showBottomSheet: Boolean,
     onDismiss: () -> Unit,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     if (showBottomSheet) {
         ModalBottomSheet(

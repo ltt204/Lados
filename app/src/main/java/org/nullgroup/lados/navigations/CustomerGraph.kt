@@ -14,7 +14,6 @@ import androidx.compose.material.BottomNavigation
 //noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -42,9 +41,9 @@ import org.nullgroup.lados.screens.customer.checkout.CheckoutScreen
 import org.nullgroup.lados.screens.common.ForgotPasswordScreen
 import org.nullgroup.lados.screens.common.LoginScreen
 import org.nullgroup.lados.screens.common.RegisterScreen
+import org.nullgroup.lados.screens.customer.chat.ChatScreen
 import org.nullgroup.lados.screens.customer.home.Error_FindNotMatchScreen
 import org.nullgroup.lados.screens.customer.home.FilterScreen
-import org.nullgroup.lados.screens.customer.home.HomeScreen
 import org.nullgroup.lados.screens.customer.home.ProductScreen
 import org.nullgroup.lados.screens.customer.home.SearchScreen
 import org.nullgroup.lados.screens.customer.order.OrderDetailScreen
@@ -64,13 +63,13 @@ import org.nullgroup.lados.screens.customer.wishlist.WishlistScreen
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.viewmodels.SharedViewModel
 
-    @Composable
+@Composable
 fun CustomerGraph(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
     sharedViewModel: SharedViewModel = hiltViewModel(),
     startDestination: String = Screen.Customer.Home.route,
-    themeSwitched: () -> Unit = {}
+    themeSwitched: () -> Unit = {},
 ) {
 
     var isVisibility by remember { mutableStateOf(true) }
@@ -128,7 +127,7 @@ fun CustomerGraph(
                                         )
                                     }
                                 },
-                                selectedContentColor = MaterialTheme.colorScheme.primary,
+                                selectedContentColor = LadosTheme.colorScheme.primary,
                                 alwaysShowLabel = false,
                                 selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true,
                                 onClick = {
@@ -182,15 +181,6 @@ fun CustomerGraph(
                             )
                         }
 
-                        Screen.Customer.HomeScreen.route -> {
-                            HomeScreen(
-                                navController = navController,
-                                paddingValues = innerPadding,
-                                sharedViewModel = sharedViewModel,
-                                modifier = modifier,
-                            )
-                        }
-
                         Screen.Customer.FilterScreen.route -> {
                             FilterScreen(
                                 navController = navController,
@@ -220,7 +210,11 @@ fun CustomerGraph(
                         }
 
                         Screen.Customer.ChatScreen.route -> {
-                            // ChatScreen()
+                            ChatScreen(
+                                modifier = modifier,
+                                navController = navController,
+                                paddingValues = innerPadding,
+                            )
                         }
 
                         Screen.Customer.Profile.route -> {

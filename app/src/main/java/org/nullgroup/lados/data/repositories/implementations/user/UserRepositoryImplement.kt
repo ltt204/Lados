@@ -106,6 +106,26 @@ class UserRepositoryImplement(
         }
     }
 
+    override suspend fun getUserName(id: String): Result<String> {
+        return try {
+            val user =
+                firestore.collection("users").document(id).get().await().toObject(User::class.java)
+            Result.success(user?.name ?: "User not found")
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun getUserAvatar(id: String): Result<String> {
+        return try {
+            val user =
+                firestore.collection("users").document(id).get().await().toObject(User::class.java)
+            Result.success(user?.avatarUri ?: "")
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
 
     override suspend fun getCurrentUser(): User {
         val firebaseUser = firebaseAuth.currentUser
@@ -124,6 +144,20 @@ class UserRepositoryImplement(
                 firestore.collection("users").document(id).get().await()
                     .toObject(User::class.java)
             Result.success(user!!)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun getUsersByName(name: String): Result<List<User>> {
+        return try {
+            val users = firestore.collection("users").get().await()
+            val filterByName = users
+                .toObjects(User::class.java).filter {
+                    it.name.contains(name, ignoreCase = true)
+                }
+            Log.d("UserRepository", "get users by name: $filterByName")
+            Result.success(filterByName)
         } catch (e: Exception) {
             Result.failure(e)
         }
