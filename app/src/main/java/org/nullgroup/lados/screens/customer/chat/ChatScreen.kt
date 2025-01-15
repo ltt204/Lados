@@ -2,14 +2,11 @@ package org.nullgroup.lados.screens.customer.chat
 
 import android.os.Build
 import android.util.Log
-import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -57,7 +54,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
@@ -65,17 +61,17 @@ import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
+import com.google.firebase.Timestamp
 import org.nullgroup.lados.R
 import org.nullgroup.lados.compose.common.LoadOnProgress
-import com.google.firebase.Timestamp
 import org.nullgroup.lados.compose.signin.CustomTextField
 import org.nullgroup.lados.data.models.Message
 import org.nullgroup.lados.data.models.MessageType
 import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.ui.theme.LadosTheme
+import org.nullgroup.lados.utilities.formatToRelativeTime
 import org.nullgroup.lados.utilities.getMessageTimeGapBetweenTwoMessagesDisplayment
 import org.nullgroup.lados.utilities.toDateTimeString
-import org.nullgroup.lados.utilities.formatToRelativeTime
 import org.nullgroup.lados.viewmodels.customer.chat.ChatViewModel
 import org.nullgroup.lados.viewmodels.customer.chat.events.ChatScreenEvent
 import org.nullgroup.lados.viewmodels.customer.chat.states.ChatUiState
