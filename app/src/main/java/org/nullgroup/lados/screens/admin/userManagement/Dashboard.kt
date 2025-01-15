@@ -1,5 +1,6 @@
 package org.nullgroup.lados.screens.admin.userManagement
 
+import android.content.Context
 import android.widget.RemoteViews.RemoteView
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -26,6 +27,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Divider
+import androidx.compose.material.ModalBottomSheetLayout
+import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FilterList
@@ -53,10 +56,13 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -73,7 +79,9 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import kotlinx.coroutines.launch
 import org.nullgroup.lados.compose.common.LoadOnProgress
+import org.nullgroup.lados.data.local.SearchHistoryManager
 import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.ui.theme.Primary
@@ -316,10 +324,34 @@ fun FlyoutMenu(
     }
 }
 
+data class FilterState(
+    var selectedRole: String?=null,
+    var selectedStatus: Boolean = false,
+    var userNameSort: String? = null,
+    var emailSort: String?=null,
+)
+
+enum class FilterUser {
+    ROLE,
+    STATUS,
+    USERNAMESORT,
+    EMAILSORT
+}
+
+fun updateSelected(selectedFilters: MutableMap<FilterUser, Boolean>, filterState: FilterState) {
+    selectedFilters[FilterUser.ROLE] = filterState.selectedRole != null
+    selectedFilters[FilterUser.STATUS] = filterState.selectedStatus
+    selectedFilters[FilterUser.USERNAMESORT] = filterState.userNameSort != null
+    selectedFilters[FilterUser.EMAILSORT] = filterState.emailSort != null
+}
+
+
 
 @Composable
 fun BottomSheetContent(
-
+    onCloseClick: () -> Unit = {},
+    onClearClick: () -> Unit = {},
+    onSelectionChange: (String) -> Unit = {}
 ) {
     Box(
         modifier = Modifier
@@ -340,7 +372,10 @@ fun BottomSheetContent(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 TextButton(
-                    onClick = {},
+                    onClick = {
+                        onClearClick()
+                        onCloseClick()
+                    },
                     content = {
                         Text(
                             "Clear"
@@ -355,7 +390,9 @@ fun BottomSheetContent(
                 )
 
                 IconButton(
-                    onClick = {},
+                    onClick = {
+                        onCloseClick()
+                    },
                     content = {
                         Icon(
                             imageVector = Icons.Filled.Close,
@@ -578,20 +615,179 @@ fun UserManagementScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
     paddingValues: PaddingValues = PaddingValues(0.dp),
+    context: Context
     //sharedViewModel: SharedViewModel = SharedViewModel(),
     //viewModel: HomeViewModel = hiltViewModel(),
 ) {
-    Scaffold(
-        modifier = modifier
-            .padding(bottom = paddingValues.calculateBottomPadding())
-            .padding(horizontal = 16.dp),
-        containerColor = LadosTheme.colorScheme.background,
+    val filterState by remember { mutableStateOf(FilterState()) }
+    val selectedFilters = remember { mutableStateMapOf<FilterUser, Boolean>() }
+    updateSelected(selectedFilters, filterState)
 
-    ) { it ->
-        UserManagementScreenContent(
-            modifier = modifier,
-            paddingValues = it,
-            navController = navController,
-        )
+    val selectedOptions = remember { mutableStateMapOf<FilterUser, Int?>() }
+
+    val sheetState = rememberModalBottomSheetState(
+        initialValue = ModalBottomSheetValue.Hidden
+    )
+
+    val searchHistoryManager = remember { SearchHistoryManager(context) }
+
+    val scope = rememberCoroutineScope()
+    val sheetContent by remember {
+        mutableStateOf<@Composable () -> Unit>({})
+    }
+
+    ModalBottomSheetLayout(
+        sheetState = sheetState,
+        modifier = Modifier.padding(
+            bottom = paddingValues.calculateBottomPadding()
+        ),
+        sheetBackgroundColor = LadosTheme.colorScheme.background,
+        sheetContentColor = LadosTheme.colorScheme.onBackground,
+        sheetShape = RoundedCornerShape(
+            topStart = 30.dp,
+            topEnd = 30.dp
+        ),
+        sheetContent = { BottomSheetContent() }
+    ) {
+        Scaffold(
+            modifier = modifier
+                .padding(bottom = paddingValues.calculateBottomPadding())
+                .padding(horizontal = 16.dp),
+            containerColor = LadosTheme.colorScheme.background,
+
+            ) { innerPadding ->
+            val viewModel: UserManagementViewModel= hiltViewModel()
+            val usersUiState = viewModel.usersUIState.collectAsStateWithLifecycle()
+            when (usersUiState.value) {
+                is UsersUiState.Loading -> {
+                    LoadOnProgress(
+                        modifier = modifier,
+                        content = { CircularProgressIndicator() }
+                    )
+                }
+
+                is UsersUiState.Error -> {
+                    Text(
+                        text = "Failed to load data",
+                        style = LadosTheme.typography.headlineSmall.copy(
+                            color = LadosTheme.colorScheme.error,
+                        )
+                    )
+                }
+
+                is UsersUiState.Success -> {
+                    val users = (usersUiState.value as UsersUiState.Success).users
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(top = innerPadding.calculateTopPadding())
+                            .padding(horizontal = 8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+
+                        Box(
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "Manage your team members and their account permissions here.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.Gray,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            SearchBar(
+                                onSearch = { /* Handle Search */ }
+
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Button(
+                                onClick = {
+                                    scope.launch { sheetState.show() }
+                                },
+                                shape = RoundedCornerShape(4.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = LadosTheme.colorScheme.primary,
+                                    contentColor = LadosTheme.colorScheme.onPrimary
+                                )
+                            ) {
+                                Icon(
+                                    Icons.Default.FilterList,
+                                    contentDescription = null,
+                                    tint = LadosTheme.colorScheme.onPrimary
+                                )
+                                Text("Filters")
+                            }
+                        }
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth().background(
+                                color = LadosTheme.colorScheme.primary,
+                                shape = RoundedCornerShape(8.dp)
+                            )
+                                .padding(vertical = 16.dp),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Row {
+                                Text(
+                                    text = "All users: ",
+                                    style = LadosTheme.typography.titleMedium,
+                                    color = LadosTheme.colorScheme.onPrimary,
+                                )
+                                Spacer(Modifier.width(2.dp))
+                                Text(
+                                    text = users.size.toString(),
+                                    style = LadosTheme.typography.titleMedium,
+                                    color = LadosTheme.colorScheme.onPrimary.copy(alpha = 0.5f)
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        // User List
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .fillMaxHeight(),
+                            contentPadding = PaddingValues(8.dp)
+                        ) {
+                            items(users) { user ->
+                                UserRow(user)
+                                Divider()
+                            }
+                        }
+
+                        /*
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Page 1 of 6",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = LadosTheme.colorScheme.onBackground,
+                            )
+                            Button(
+                                onClick = {}
+                            ) {
+                                Text(
+                                    text = "Next",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = LadosTheme.colorScheme.onPrimary,
+                                )
+                            }
+                        }
+
+                         */
+                    }
+                }
+            }
+        }
     }
 }
