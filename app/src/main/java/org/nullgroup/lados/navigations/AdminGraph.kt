@@ -44,6 +44,7 @@ import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.nullgroup.lados.screens.Screen
+import org.nullgroup.lados.screens.admin.userManagement.UserManagementScreen
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.viewmodels.customer.profile.ProfileViewModel
 
@@ -175,6 +176,11 @@ fun AdminGraph(
 
                 composable(route = Screen.Admin.UserManagement.route) {
                     // UserManagement()
+                    UserManagementScreen(
+                        modifier = Modifier,
+                        paddingValues = innerPadding,
+                        navController = navController,
+                    )
                 }
 
                 composable(route = Screen.Admin.ProductManagement.route) {
