@@ -1,20 +1,25 @@
-package org.nullgroup.lados.screens.staff
+package org.nullgroup.lados.screens.staff.chat
 
+import android.os.Build
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Send
@@ -53,12 +58,14 @@ import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.screens.customer.chat.MessageItem
 import org.nullgroup.lados.screens.customer.profile.LoadingContent
 import org.nullgroup.lados.ui.theme.LadosTheme
+import org.nullgroup.lados.utilities.getMessageTimeGapBetweenTwoMessagesDisplayment
 import org.nullgroup.lados.viewmodels.customer.chat.ChatViewModel
 import org.nullgroup.lados.viewmodels.customer.chat.events.ChatScreenEvent
 import org.nullgroup.lados.viewmodels.customer.chat.states.ChatUiState
 import org.nullgroup.lados.viewmodels.staff.MessageUiState
 import org.nullgroup.lados.viewmodels.staff.StaffChatWithCustomerViewModel
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatWithCustomerScreen(
@@ -164,15 +171,28 @@ fun ChatWithCustomerScreen(
                         .fillMaxSize()
                 ) {
 
-                    val messages = (uiState as MessageUiState.Success).messages
+                    val messages = (uiState as MessageUiState.Success).messages.reversed()
                     LazyColumn(
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxWidth(),
                         reverseLayout = true,
                     ) {
-                        items(items = messages.reversed(), key = { it.id }) { message ->
-                            Log.d("ChatWithCustomerScreen", "Sender: ${message.senderId} \n current: ${staffChatViewModel.currentStaff.id}")
+                        itemsIndexed(items = messages) { index, message ->
+                            val previousMessage = if (index == 0) message else messages[index - 1]
+                            Box(
+                                modifier = Modifier.fillMaxWidth(),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                Text(
+                                    text = message.timestamp.getMessageTimeGapBetweenTwoMessagesDisplayment(
+                                        previousMessage.timestamp
+                                    ),
+                                    modifier = Modifier.padding(top = 8.dp),
+                                    style = LadosTheme.typography.bodySmall,
+                                    color = LadosTheme.colorScheme.onBackground,
+                                )
+                            }
                             MessageItem(
                                 message = message,
                                 isFromCurrentUser = message.senderId == staffChatViewModel.currentStaff.id,
@@ -203,10 +223,11 @@ fun ChatWithCustomerScreen(
                         }
 
                         CustomTextField(
+                            modifier = Modifier.height(48.dp).weight(1f),
                             text = messageText,
                             onValueChange = { messageText = it },
-                            modifier = Modifier.weight(1f),
                             label = "Type a message...",
+                            shape = RoundedCornerShape(24.dp)
                         )
 
                         IconButton(

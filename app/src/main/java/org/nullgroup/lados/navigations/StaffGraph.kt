@@ -47,8 +47,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.screens.customer.product.ProductDetailScreen
-import org.nullgroup.lados.screens.staff.ChatScreen
-import org.nullgroup.lados.screens.staff.ChatWithCustomerScreen
+import org.nullgroup.lados.screens.staff.chat.ChatScreen
+import org.nullgroup.lados.screens.staff.chat.ChatWithCustomerScreen
+import org.nullgroup.lados.screens.staff.chat.SearchScreen
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.viewmodels.customer.profile.ProfileViewModel
 
@@ -171,6 +172,17 @@ fun StaffGraph(
                             }
                         }
                     }
+                }
+
+                composable(
+                    route = Screen.Staff.SearchScreen.route
+                ) {
+                    isVisibility = false
+                    SearchScreen(
+                        modifier = Modifier,
+                        navController = navController,
+                        paddingValues = innerPadding,
+                    )
                 }
 
                 composable(
