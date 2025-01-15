@@ -205,28 +205,31 @@ fun UserManagementScreen(
                 }
 
                 Row(
-                    modifier = Modifier.fillMaxWidth().background(color = LadosTheme.colorScheme.primary, shape = RoundedCornerShape(16.dp)).padding(8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth().background(color = LadosTheme.colorScheme.primary, shape = RoundedCornerShape(8.dp))
+                        .padding(vertical = 16.dp),
+                    horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = "All users: ",
-                        style = LadosTheme.typography.titleMedium,
-                        color = LadosTheme.colorScheme.onPrimary,
-                    )
-                    Text(
-                        text = users.size.toString(),
-                        style = LadosTheme.typography.titleMedium,
-                        color = LadosTheme.colorScheme.onPrimary.copy(alpha = 0.5f)
-                    )
+                    Row {
+                        Text(
+                            text = "All users: ",
+                            style = LadosTheme.typography.titleMedium,
+                            color = LadosTheme.colorScheme.onPrimary,
+                        )
+                        Spacer(Modifier.width(2.dp))
+                        Text(
+                            text = users.size.toString(),
+                            style = LadosTheme.typography.titleMedium,
+                            color = LadosTheme.colorScheme.onPrimary.copy(alpha = 0.5f)
+                        )
+                    }
                 }
-
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(8.dp))
                 // User List
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .fillMaxHeight(0.8f),
+                        .fillMaxHeight(),
                     contentPadding = PaddingValues(8.dp)
                 ) {
                     items(users) { user ->
@@ -283,6 +286,10 @@ fun FlyoutMenu(
     ) {
         menuItems.forEach { item ->
             DropdownMenuItem(
+                modifier = Modifier.background(
+                    color=LadosTheme.colorScheme.primaryContainer,
+                    shape=RoundedCornerShape(8.dp)
+                ).padding(8.dp),
                 leadingIcon = {
                     Icon(
                         imageVector = when (item) {
@@ -298,7 +305,6 @@ fun FlyoutMenu(
                     onMenuItemClick(item)
                     onDismiss()
                 },
-                modifier = Modifier.padding(8.dp)
             )
         }
     }
@@ -324,7 +330,6 @@ onMenuItemClick: (String) -> Unit = {}
 @Composable
 fun UserRow(user: org.nullgroup.lados.data.models.User) {
     val menuItems = listOf("View profile", "Edit details", "Delete user")
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -352,10 +357,10 @@ fun UserRow(user: org.nullgroup.lados.data.models.User) {
                 maxLines = 1
             )
         }
-
+        Spacer(Modifier.width(2.dp))
         Row(
             horizontalArrangement = Arrangement.Center,
-            modifier = Modifier.width(70.dp)
+            modifier = Modifier.width(78.dp)
         ) {
             Text(
                 text = user.role,
