@@ -9,12 +9,15 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.nullgroup.lados.data.models.Message
 import org.nullgroup.lados.data.models.MessageType
+import org.nullgroup.lados.data.models.Product
 import org.nullgroup.lados.data.repositories.interfaces.chat.ChatRepository
+import org.nullgroup.lados.data.repositories.interfaces.product.ProductRepository
 import org.nullgroup.lados.data.repositories.interfaces.user.UserRepository
 import org.nullgroup.lados.screens.Screen.Staff.ChatWithCustomerScreen.CHAT_ROOM_ID_ARG
 import org.nullgroup.lados.utilities.capitalizeWords
@@ -27,6 +30,7 @@ import javax.inject.Inject
 class ChatViewModel @Inject constructor(
     private val repository: ChatRepository,
     private val userRepository: UserRepository,
+    private val productRepository: ProductRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     private val chatRoomId = savedStateHandle.get<String>(CHAT_ROOM_ID_ARG)

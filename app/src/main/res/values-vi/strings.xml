@@ -12,7 +12,7 @@
     <string name="order_products_title">Danh sách sản phẩm</string>
     <string name="order_items_header">%1$s món</string>
     <string name="delivery_address">Địa chỉ giao hàng:</string>
-    <string name="customer_phone">Số điện thoại</string>
+    <string name="customer_phone">"Số điện thoại: "</string>
     <string name="view_all">Tất cả</string>
     <string name="time_not_updated">Chưa cập nhật</string>
     <string name="order_items">Đơn của bạn</string>
@@ -98,4 +98,12 @@
     <string name="auth_forgot_password_header">Quên mật khẩu</string>
     <string name="auth_register">Đăng ký</string>
     <string name="auth_phone_number">Số điện thoại</string>
+    <string name="detail">Chi tiết</string>
+    <string name="leave_review">Đánh giá</string>
+    <string name="re_order">Đặt lại</string>
+    <string name="cancel_order">Hủy đơn</string>
+    <string name="return_order">Hoàn trả</string>
+    <string name="are_you_sure">Bạn có chắc không?</string>
+    <string name="order_cancel_return_message">Hãy liên hệ với nhân viên cửa hàng để được hỗ trợ.</string>
+    <string name="delivery_detail">Chi tiết giao hàng</string>
 </resources>

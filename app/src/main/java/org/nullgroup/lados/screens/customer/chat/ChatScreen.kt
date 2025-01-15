@@ -2,12 +2,14 @@ package org.nullgroup.lados.screens.customer.chat
 
 import android.os.Build
 import android.util.Log
+import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -65,6 +67,7 @@ import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import org.nullgroup.lados.R
 import org.nullgroup.lados.compose.common.LoadOnProgress
+import com.google.firebase.Timestamp
 import org.nullgroup.lados.compose.signin.CustomTextField
 import org.nullgroup.lados.data.models.Message
 import org.nullgroup.lados.data.models.MessageType
@@ -72,12 +75,11 @@ import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.utilities.getMessageTimeGapBetweenTwoMessagesDisplayment
 import org.nullgroup.lados.utilities.toDateTimeString
+import org.nullgroup.lados.utilities.formatToRelativeTime
 import org.nullgroup.lados.viewmodels.customer.chat.ChatViewModel
 import org.nullgroup.lados.viewmodels.customer.chat.events.ChatScreenEvent
 import org.nullgroup.lados.viewmodels.customer.chat.states.ChatUiState
-import java.text.SimpleDateFormat
 import java.util.Date
-import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @RequiresApi(Build.VERSION_CODES.O)
@@ -275,6 +277,7 @@ fun ChatScreen(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun MessageItem(
     modifier: Modifier = Modifier,
@@ -283,6 +286,7 @@ fun MessageItem(
     isFromCurrentUser: Boolean,
     onProductClick: (String) -> Unit,
 ) {
+
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -421,8 +425,7 @@ fun MessageItem(
         }
 
         Text(
-            text = SimpleDateFormat("HH:mm", Locale.getDefault())
-                .format(Date(message.timestamp)),
+            text = formatToRelativeTime(Timestamp(Date(message.timestamp))),
             style = LadosTheme.typography.bodySmall,
             color = LadosTheme.colorScheme.onSurface.copy(alpha = 0.6f),
             modifier = Modifier.padding(
@@ -433,6 +436,7 @@ fun MessageItem(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Preview
 @Composable
 fun MessageItemPreview() {

@@ -46,6 +46,7 @@ import androidx.navigation.navArgument
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.nullgroup.lados.screens.Screen
+import org.nullgroup.lados.screens.customer.product.ProductDetailScreen
 import org.nullgroup.lados.screens.staff.chat.ChatScreen
 import org.nullgroup.lados.screens.staff.chat.ChatWithCustomerScreen
 import org.nullgroup.lados.screens.staff.chat.SearchScreen
@@ -195,6 +196,23 @@ fun StaffGraph(
                         modifier = Modifier,
                         navController = navController,
                         paddingValues = innerPadding,
+                    )
+                }
+
+                composable(
+                    route = Screen.Customer.ProductDetailScreen.ROUTE_WITH_ARG,
+                    arguments = listOf(
+                        navArgument(Screen.Customer.ProductDetailScreen.ID_ARG) {
+                            type = NavType.StringType
+                        })
+                ) { backStackEntry ->
+                    isVisibility = false
+                    val productId =
+                        backStackEntry.arguments?.getString(Screen.Customer.ProductDetailScreen.ID_ARG)
+                            ?: ""
+                    ProductDetailScreen(
+                        productId = productId,
+                        navController = navController,
                     )
                 }
             }

@@ -98,4 +98,13 @@
     <string name="auth_forgot_password_header">Forgot password</string>
     <string name="auth_register">Register</string>
     <string name="auth_phone_number">Phone number</string>
+    <string name="detail">Detail</string>
+    <string name="leave_review">Leave review</string>
+    <string name="re_order">Re-order</string>
+    <string name="cancel_order">Cancel</string>
+    <string name="return_order">Return</string>
+    <string name="are_you_sure">Are you sure?</string>
+    <string name="order_cancel_return_message">Please contact our staffs to %1$s this order.</string>
+    <string name="delivery_detail">Delivery Details</string>
 </resources>
+
