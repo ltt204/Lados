@@ -76,6 +76,7 @@ dependencies {
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.googleid)
+    implementation(libs.androidx.hilt.common)
     kapt(libs.hilt.android.compiler.v2511)
     ksp(libs.androidx.hilt.compiler)
 

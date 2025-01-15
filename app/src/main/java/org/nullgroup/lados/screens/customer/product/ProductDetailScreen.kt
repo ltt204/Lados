@@ -159,7 +159,7 @@ fun ProductDetailScreen(
                 topBar = {
                     ProductDetailTopBar(
                         isFavorite = isFavorite,
-                        onToggleFavorite = onToggleFavorite,
+                        onToggleFavorite = { onToggleFavorite() },
                         onNavigateBack = { navController.navigateUp() },
                         onChat = {
                             chatViewModel.handleEvent(ChatScreenEvent.SendProduct(productId))
