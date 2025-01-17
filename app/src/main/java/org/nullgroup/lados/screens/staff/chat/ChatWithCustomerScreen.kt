@@ -1,4 +1,4 @@
-package org.nullgroup.lados.screens.staff
+package org.nullgroup.lados.screens.staff.chat
 
 import android.os.Build
 import android.util.Log
