@@ -38,4 +38,7 @@
     <string name="profile_setting_color_scheme">Color Scheme</string>
     <string name="order_items">Order Items</string>
     <string name="order_items_header">%1$s items</string>
+    <string name="wishlist_empty">Your wishlist is empty</string>
+    <string name="wishlist_empty_description">Empty wishlist</string>
+    <string name="wishlist_back_description">Back</string>
 </resources>

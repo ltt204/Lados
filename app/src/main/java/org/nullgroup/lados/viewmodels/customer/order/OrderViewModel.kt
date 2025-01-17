@@ -49,8 +49,10 @@ class OrderViewModel @Inject constructor(
     }
 
     fun filterOrderByStatus(status: OrderStatus) {
+        Log.d("OrderViewModel", "OrderStatus: $status")
         viewModelScope.launch {
             val filteredOrders = orders.value.filter {
+                Log.d("OrderViewModel", "order last status: ${it.orderStatusLog.entries.last().key}")
                 it.orderStatusLog.entries.last().key == status.name
             }
             _orderState.update { OrderState.Success(filteredOrders) }

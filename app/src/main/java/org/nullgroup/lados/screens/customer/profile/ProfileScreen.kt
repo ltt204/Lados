@@ -226,6 +226,7 @@ fun ProfileScreen(
                             )
                         }, onClick = {
 //                            navController?.navigate(Screen.Customer.CartScreen.route)
+                            navController?.navigate(Screen.Customer.WishlistScreen.route)
                         })
                     TwoColsItem(
                         modifier = Modifier.height(56.dp),

@@ -6,10 +6,7 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MailOutline
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.material3.Icon
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.painterResource
-import org.nullgroup.lados.R
 import org.nullgroup.lados.utilities.UserRole
 
 sealed class Screen(
@@ -46,7 +43,6 @@ sealed class Screen(
         icon: ImageVector
     ) : Screen(name, route, icon) {
 
-        data object HomeScreen : Customer("Home", "customer_home", Icons.Default.Home)
         data object ChatScreen : Customer("Chat", "customer_chat", Icons.Default.MailOutline)
         data object Profile : Customer("Profile", "customer_profile", Icons.Default.AccountCircle)
         data object Setting : Customer("Setting", "customer_setting", Icons.Default.AccountCircle)
@@ -101,6 +97,7 @@ sealed class Screen(
 
         data object CartScreen : Customer("Cart", "customer_cart", Icons.Default.ShoppingCart)
         data object CheckOutScreen: Customer("Check Out", "customer_check_out", Icons.Filled.MailOutline)
+        data object WishlistScreen: Customer("Wishlist", "customer_wishlist", Icons.Filled.MailOutline)
 
         sealed class Address(
             name: String,
@@ -152,11 +149,10 @@ sealed class Screen(
         companion object {
             fun getAllScreens() =
                 listOf(
-                    HomeScreen,
+                    Home,
                     ChatScreen,
                     Order.OrderList,
                     Profile,
-                    Home,
                     SearchScreen,
                     FilterScreen,
                     CategorySelectScreen,
@@ -166,7 +162,7 @@ sealed class Screen(
                     Order.OrderProductsView
                 )
 
-            fun getBaseScreens() = listOf(HomeScreen, ChatScreen, Order.OrderList, Profile)
+            fun getBaseScreens() = listOf(Home, ChatScreen, Order.OrderList, Profile)
         }
 
     }
@@ -180,10 +176,15 @@ sealed class Screen(
         icon: ImageVector
     ) : Screen(name, route, icon) {
         data object ChatScreen : Staff("Chat", "staff_chat", Icons.Default.MailOutline)
+        data object ChatWithCustomerScreen : Staff("Chat", "staff_chat", Icons.Default.MailOutline) {
+            const val CHAT_ROOM_ID_ARG = "chatId_id"
+            const val ROUTE_WITH_ARG = "staff_chat/{$CHAT_ROOM_ID_ARG}"
+        }
         data object OrderManagement : Staff("Order Management", "staff_order_management", Icons.Default.AccountCircle)
+        data object SearchScreen : Staff("Search", "staff_search", Icons.Default.MailOutline)
 
         companion object {
-            fun getAllScreens() = listOf(ChatScreen, OrderManagement)
+            fun getAllScreens() = listOf(ChatScreen, OrderManagement, SearchScreen)
         }
     }
 
