@@ -170,7 +170,7 @@ fun OrderList(
     onLoadMore: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var listState = rememberLazyListState()
+    val listState = rememberLazyListState()
 
     LaunchedEffect(listState) {
         snapshotFlow {
@@ -232,7 +232,7 @@ fun OrderListItem(
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Text(
-                    text = "Order #${order.orderId.take(8)}",
+                    text = "#${order.orderId}",
                     style = LadosTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.Bold,
                     )
