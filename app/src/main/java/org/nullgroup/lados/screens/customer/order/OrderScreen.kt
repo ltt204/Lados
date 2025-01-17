@@ -209,6 +209,7 @@ fun OrderCard(
                         fontSize = 18.sp
                     ),
                 )
+
                 Spacer(modifier = Modifier.height(LadosTheme.size.small))
                 Text(
                     text = order.orderTotal.toCurrency(),

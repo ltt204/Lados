@@ -1,4 +1,4 @@
-package org.nullgroup.lados.screens.staff
+package org.nullgroup.lados.screens.staff.ordermanagement
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -49,7 +49,6 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import org.nullgroup.lados.data.models.Order
 import org.nullgroup.lados.screens.Screen
-import org.nullgroup.lados.screens.Screen.Customer.Order.OrderDetail.ID_ARG
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.utilities.OrderStatus
 import org.nullgroup.lados.utilities.toCurrency

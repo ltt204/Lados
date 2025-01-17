@@ -1,4 +1,4 @@
-package org.nullgroup.lados.screens.staff
+package org.nullgroup.lados.screens.staff.chat
 
 import android.util.Log
 import androidx.compose.foundation.layout.Column
@@ -28,7 +28,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -38,7 +37,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
-import org.nullgroup.lados.R
 import org.nullgroup.lados.compose.common.AutoCompleteSearchBar
 import org.nullgroup.lados.compose.common.LoadOnProgress
 import org.nullgroup.lados.compose.common.TwoColsItem
@@ -48,10 +46,8 @@ import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.screens.common.LoadingScreen
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.utilities.getMessageHistoryTimeDisplayment
-import org.nullgroup.lados.viewmodels.customer.chat.ChatViewModel
 import org.nullgroup.lados.viewmodels.staff.StaffChatScreenUiState
 import org.nullgroup.lados.viewmodels.staff.StaffChatViewModel
-import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Locale
 
