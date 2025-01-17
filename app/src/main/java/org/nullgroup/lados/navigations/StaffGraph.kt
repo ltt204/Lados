@@ -2,7 +2,6 @@ package org.nullgroup.lados.navigations
 
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -49,11 +48,11 @@ import kotlinx.coroutines.launch
 import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.screens.customer.order.OrderProductsViewScreen
 import org.nullgroup.lados.screens.customer.product.ProductDetailScreen
-import org.nullgroup.lados.screens.staff.ChatScreen
-import org.nullgroup.lados.screens.staff.ChatWithCustomerScreen
-import org.nullgroup.lados.screens.staff.OrderDetailScreen
-import org.nullgroup.lados.screens.staff.OrderListScreen
-import org.nullgroup.lados.screens.staff.OrderProductsScreen
+import org.nullgroup.lados.screens.staff.chat.ChatScreen
+import org.nullgroup.lados.screens.staff.chat.ChatWithCustomerScreen
+import org.nullgroup.lados.screens.staff.ordermanagement.OrderDetailScreen
+import org.nullgroup.lados.screens.staff.ordermanagement.OrderListScreen
+import org.nullgroup.lados.screens.staff.ordermanagement.OrderProductsScreen
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.viewmodels.customer.profile.ProfileViewModel
 

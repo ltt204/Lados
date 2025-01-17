@@ -1,8 +1,12 @@
 package org.nullgroup.lados.screens.customer.order
 
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -17,11 +21,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.CopyAll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -44,12 +51,13 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import org.nullgroup.lados.R
-import org.nullgroup.lados.compose.common.DefaultCenterTopAppBar
+import org.nullgroup.lados.compose.common.CustomCenterTopAppBar
 import org.nullgroup.lados.compose.common.TwoColsItem
 import org.nullgroup.lados.compose.profile.ConfirmDialog
 import org.nullgroup.lados.data.models.Order
 import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.ui.theme.LadosTheme
+import org.nullgroup.lados.ui.theme.Typography
 import org.nullgroup.lados.utilities.OrderStatus
 import org.nullgroup.lados.utilities.getActionForButtonOfOrder
 import org.nullgroup.lados.utilities.getByLocale
@@ -59,7 +67,6 @@ import org.nullgroup.lados.utilities.toCurrency
 import org.nullgroup.lados.utilities.toDateTimeString
 import org.nullgroup.lados.viewmodels.customer.order.OrderDetailState
 import org.nullgroup.lados.viewmodels.customer.order.OrderDetailViewModel
-import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -77,13 +84,23 @@ fun OrderDetailScreen(
     var actionForBottomButton by remember {
         mutableStateOf(Pair(null as String?) { _: NavController, _: String?, _: String? -> })
     }
+
+    val clipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
     Scaffold(
         topBar = {
-            DefaultCenterTopAppBar(
+            CustomCenterTopAppBar(
                 onBackClick = {
                     navController?.navigateUp()
                 },
-                content = stringResource(id = R.string.order_detail_title)
+                content = {
+                    Text(
+                        text = stringResource(R.string.order_title),
+                        style = Typography.titleLarge.copy(
+                            color = LadosTheme.colorScheme.onBackground,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    )
+                }
             )
         },
         bottomBar = {
@@ -133,6 +150,38 @@ fun OrderDetailScreen(
                         top = innerPadding.calculateTopPadding()
                     )
                 ) {
+                    Row(
+                        modifier = Modifier
+                            .wrapContentHeight(),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            text = stringResource(
+                                id = R.string.order_title_with_id,
+                                viewModel.orderId.take(8)
+                            ),
+                            style = Typography.bodyLarge
+                                .copy(
+                                    color = LadosTheme.colorScheme.onBackground
+                                ),
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                        IconButton(onClick = {
+                            val text = viewModel.orderId.take(8)
+                            val clipData = ClipData.newPlainText("text", text)
+                            clipboardManager.setPrimaryClip(clipData)
+                            Toast.makeText(
+                                context,
+                                context.getString(R.string.order_id_is_copied_message),
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }) {
+                            Icon(
+                                imageVector = Icons.Default.CopyAll,
+                                contentDescription = "Copy order id"
+                            )
+                        }
+                    }
                     OrderStatusArea(
                         modifier = Modifier
                             .fillMaxWidth()

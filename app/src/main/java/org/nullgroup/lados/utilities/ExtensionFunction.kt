@@ -130,24 +130,16 @@ fun OrderStatus.getActionForButtonOfOrderProduct(context: Context): Pair<String?
 
 fun OrderStatus.getActionForButtonOfOrder(context: Context): Pair<String?, ((NavController, String?, String?) -> Unit)> {
     return when (this) {
-        OrderStatus.CREATED -> {
-            "Confirm" to { _, _, _ ->
-
-            }
-        }
-
         OrderStatus.RETURNED, OrderStatus.CANCELLED -> {
             null to { _, _, _ ->
                 // Navigate to Ask for reason screen
             }
         }
-
         OrderStatus.DELIVERED -> {
             context.getString(R.string.return_order) to { _, _, _ ->
                 // Navigate to Ask for reason screen
             }
         }
-
         else -> {
             context.getString(R.string.cancel_order) to { _, _, _ -> /*TODO*/ }
         }
@@ -237,7 +229,11 @@ fun getStatusByName(name: String): OrderStatus {
     return OrderStatus.valueOf(name.uppercase())
 }
 
-fun updateOrderStatusByAction(viewModel: OrderDetailViewModel, orderId: String, buttonAction: String) {
+fun updateOrderStatusByAction(
+    viewModel: OrderDetailViewModel,
+    orderId: String,
+    buttonAction: String
+) {
     when (buttonAction) {
         "Cancel" -> {
             viewModel.handleEvent(
