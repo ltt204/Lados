@@ -6,16 +6,20 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -26,6 +30,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -40,6 +46,13 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import org.nullgroup.lados.R
+import org.nullgroup.lados.compose.cart.ConfirmDialog
+import org.nullgroup.lados.compose.cart.DialogInfo
+import org.nullgroup.lados.compose.coupon.CouponItem
+import org.nullgroup.lados.compose.signin.CustomTextField
+import org.nullgroup.lados.data.models.CustomerCoupon
+import org.nullgroup.lados.data.models.currentHostTimeZoneInString
+import org.nullgroup.lados.data.models.toLocalDateTime
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.viewmodels.customer.coupon.CouponUiState
 import org.nullgroup.lados.viewmodels.customer.coupon.CouponViewModel
@@ -56,8 +69,64 @@ fun CouponScreen(
     val couponUiState = couponViewModel.couponUiState.collectAsStateWithLifecycle()
     val currentCoupons = (couponUiState.value as? CouponUiState.Success)?.data ?: emptyList()
 
+    val currentDialogState = remember { mutableStateOf<DialogInfo?>(null) }
+    val currentTimeZone = currentHostTimeZoneInString()
+
     val onNavigateBack = {
         navController.popBackStack()
+    }
+
+    val emptyCodeErrorTitle = stringResource(R.string.coupon_redeem_empty_title)
+    val emptyCodeErrorMessage = stringResource(R.string.coupon_redeem_empty_message)
+    val successRedemptionTitle = stringResource(R.string.coupon_redeem_success_title)
+    val successRedemptionMessage = stringResource(R.string.coupon_redeem_success_message)
+    val failedRedemptionTitle = stringResource(R.string.coupon_redeem_failed_title)
+
+    val internalErrorRedemption = stringResource(R.string.coupon_redeem_failed_internal_error)
+    val unavailableCouponRedemption = stringResource(R.string.coupon_redeem_failed_unavailable_coupon)
+    val exceedMaximumRedemption = stringResource(R.string.coupon_redeem_failed_exceed_maximum_redemption)
+    val expiredCouponRedemption = stringResource(R.string.coupon_redeem_failed_expired_coupon)
+    val alreadyRedeemedCodeRedemption = stringResource(R.string.coupon_redeem_failed_already_redeemed_code)
+
+    val failedRedemptionMessage = { error: CustomerCoupon.Companion.CouponRedemptionError ->
+        when (error) {
+            CustomerCoupon.Companion.CouponRedemptionError.INTERNAL_ERROR -> internalErrorRedemption
+            CustomerCoupon.Companion.CouponRedemptionError.UNAVAILABLE_COUPON -> unavailableCouponRedemption
+            CustomerCoupon.Companion.CouponRedemptionError.EXCEED_MAXIMUM_REDEMPTION -> exceedMaximumRedemption
+            CustomerCoupon.Companion.CouponRedemptionError.EXPIRED_COUPON -> expiredCouponRedemption
+            CustomerCoupon.Companion.CouponRedemptionError.ALREADY_REDEEMED_CODE -> alreadyRedeemedCodeRedemption
+        }
+    }
+
+    val onRedeemClicked = fun(code: String) {
+        val processedCode = code.trim().uppercase()
+        if (processedCode.isEmpty()) {
+            currentDialogState.value = DialogInfo(
+                titleText = emptyCodeErrorTitle,
+                messageText = emptyCodeErrorMessage,
+                onConfirm = { currentDialogState.value = null }
+            )
+            return
+        }
+
+        couponViewModel.redeemCoupon(
+            code = code,
+            onRedeemSuccess = {
+                currentDialogState.value = DialogInfo(
+                    titleText = successRedemptionTitle,
+                    messageText = successRedemptionMessage,
+                    onConfirm = { currentDialogState.value = null }
+                )
+            },
+            onRedeemFailed = {
+                currentDialogState.value = DialogInfo(
+                    titleText = failedRedemptionTitle,
+                    messageText = failedRedemptionMessage(it),
+                    onConfirm = { currentDialogState.value = null }
+                )
+            }
+
+        )
     }
 
     val iconButtonColors = IconButtonColors(
@@ -82,7 +151,7 @@ fun CouponScreen(
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        stringResource(R.string.profile_wishlist),
+                        stringResource(R.string.profile_coupons),
                         textAlign = TextAlign.Center,
                         style = LadosTheme.typography.titleLarge.copy(
                             color = LadosTheme.colorScheme.onSurface,
@@ -98,7 +167,7 @@ fun CouponScreen(
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Default.KeyboardArrowLeft,
-                            contentDescription = stringResource(R.string.wishlist_back_description),
+                            contentDescription = stringResource(R.string.coupon_back_description),
                             tint = iconTintColor,
                         )
                     }
@@ -107,6 +176,7 @@ fun CouponScreen(
             )
         },
     ) { innerScaffoldPadding ->
+        ConfirmDialog(currentDialogState.value)
 
         when (couponUiState.value) {
             is CouponUiState.Loading -> {
@@ -133,53 +203,64 @@ fun CouponScreen(
                         .padding(horizontal = 20.dp)
                         .fillMaxSize()
                         .background(LadosTheme.colorScheme.background),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.love),
-                        colorFilter = ColorFilter.tint(LadosTheme.colorScheme.onSurface),
-                        contentDescription = stringResource(R.string.wishlist_empty_description),
+                    CouponRedeemArea(onRedeemClicked = onRedeemClicked)
+
+                    Column(
                         modifier = Modifier
-                            .scale(2.0f)
-                            .width(120.dp),
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        text = stringResource(R.string.wishlist_empty),
-                        textAlign = TextAlign.Center,
-                        style = LadosTheme.typography.bodyLarge.copy(
-                            color = LadosTheme.colorScheme.onSurface,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 32.sp,
-                            lineHeight = 40.sp
+                            .fillMaxSize()
+                            .background(LadosTheme.colorScheme.background),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.love),
+                            colorFilter = ColorFilter.tint(LadosTheme.colorScheme.onSurface),
+                            contentDescription = stringResource(R.string.coupon_empty_description),
+                            modifier = Modifier
+                                .scale(2.0f)
+                                .width(120.dp),
                         )
-                    )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = stringResource(R.string.coupon_empty),
+                            textAlign = TextAlign.Center,
+                            style = LadosTheme.typography.bodyLarge.copy(
+                                color = LadosTheme.colorScheme.onSurface,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 32.sp,
+                                lineHeight = 40.sp
+                            )
+                        )
+                    }
                 }
             }
 
             is CouponUiState.Success -> {
-                LazyVerticalGrid(
-                    columns = GridCells.Adaptive(140.dp),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                Column(
                     modifier = Modifier
                         .padding(innerScaffoldPadding)
                         .padding(horizontal = 20.dp)
                         .fillMaxSize()
+                        .background(LadosTheme.colorScheme.background),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    itemsIndexed(currentCoupons) { _, coupon ->
-                        Box(
-                            modifier = Modifier
-                                .background(LadosTheme.colorScheme.surfaceContainerLow)
-                                .padding(16.dp)
-                        ) {
-                            Text(
-                                text = coupon.code,
-                                style = LadosTheme.typography.bodyMedium.copy(
-                                    color = LadosTheme.colorScheme.onSurface,
-                                    fontWeight = FontWeight.Bold
-                                )
+                    CouponRedeemArea(onRedeemClicked = onRedeemClicked)
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                    ) {
+                        itemsIndexed(items = currentCoupons) { _, coupon ->
+                            CouponItem(
+                                couponCode = coupon.code,
+                                discountPercentage = coupon.discountPercentage,
+                                minimumOrderAmount = if (coupon.minimumOrderAmount <= 0.0) null else coupon.minimumOrderAmount,
+                                maximumDiscount = coupon.maximumDiscount,
+                                expiredAt = coupon.expiredAt.toLocalDateTime(currentTimeZone),
                             )
                         }
                     }
@@ -191,4 +272,42 @@ fun CouponScreen(
             }
         }
     }
+}
+
+@Composable
+fun CouponRedeemArea(
+    modifier: Modifier = Modifier,
+    onRedeemClicked: (String) -> Unit,
+) {
+    val redeemingCode = remember { mutableStateOf("") }
+
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        CustomTextField(
+            text = redeemingCode.value,
+            onValueChange = { redeemingCode.value = it },
+            modifier = Modifier.weight(1f),
+            label = stringResource(R.string.coupon_redeem_area_hint),
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Button(
+            modifier = Modifier.wrapContentHeight(),
+            onClick = { onRedeemClicked(redeemingCode.value) },
+            colors = ButtonColors(
+                containerColor = LadosTheme.colorScheme.primaryContainer,
+                contentColor = LadosTheme.colorScheme.onPrimaryContainer,
+                disabledContainerColor = LadosTheme.colorScheme.primaryContainer.copy(alpha = 0.38f),
+                disabledContentColor = LadosTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.38f),
+            )
+        ) {
+            Text(
+                text = stringResource(R.string.coupon_redeem_area_button)
+            )
+        }
+    }
+
 }

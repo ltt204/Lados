@@ -1,5 +1,6 @@
 package org.nullgroup.lados.viewmodels.customer.coupon
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
@@ -51,7 +52,47 @@ class CouponViewModel @Inject constructor(
                         _couponUiState.value = CouponUiState.Success(coupons)
                     }
                 } else {
-                    _couponUiState.value = CouponUiState.Error(result.exceptionOrNull()?.message ?: "Unknown error")
+                    _couponUiState.value =
+                        CouponUiState.Error(result.exceptionOrNull()?.message ?: "Unknown error")
+                }
+            }
+        }
+    }
+
+    fun redeemCoupon(
+        code: String,
+        onRedeemSuccess: () -> Unit = {},
+        onRedeemFailed: (CustomerCoupon.Companion.CouponRedemptionError) -> Unit = {}
+    ) {
+        if (customerId == null) {
+            Log.e("CouponViewModel", "redeemCoupon failed: customerId is null")
+            onRedeemFailed(CustomerCoupon.Companion.CouponRedemptionError.INTERNAL_ERROR)
+            return
+        }
+
+        viewModelScope.launch {
+            couponRepository.redeemCoupon(customerId, code).let { result ->
+                if (result.isFailure) {
+                    Log.e(
+                        "CouponViewModel",
+                        "redeemCoupon failed: ${result.exceptionOrNull()?.message}"
+                    )
+                    onRedeemFailed(CustomerCoupon.Companion.CouponRedemptionError.INTERNAL_ERROR)
+                    return@launch
+                }
+
+                val redemptionResult = result.getOrNull()!!
+                when (redemptionResult) {
+                    is CustomerCoupon.Companion.CouponRedemptionResult.Error -> {
+                        onRedeemFailed(redemptionResult.error)
+                    }
+                    is CustomerCoupon.Companion.CouponRedemptionResult.Success -> {
+                        val newCoupon = redemptionResult.coupon
+                        _couponUiState.value = CouponUiState.Success(
+                            ((_couponUiState.value as? CouponUiState.Success)?.data ?: emptyList()) + newCoupon
+                        )
+                        onRedeemSuccess()
+                    }
                 }
             }
         }

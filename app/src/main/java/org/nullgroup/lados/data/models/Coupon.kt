@@ -19,6 +19,11 @@ fun LocalDateTime.toTimestamp(zoneId: String): Timestamp {
     return Timestamp(zonedDateTime.toInstant().epochSecond, 0)
 }
 
+fun Timestamp.toLocalDateTime(zoneId: String): LocalDateTime {
+    val zonedDateTime = ZonedDateTime.ofInstant(this.toDate().toInstant(), ZoneId.of(zoneId))
+    return zonedDateTime.toLocalDateTime()
+}
+
 fun timestampFromNow(seconds: Long = 0): Timestamp {
     val currentDate = System.currentTimeMillis()
     val futureDate = currentDate + seconds * 1000
@@ -34,6 +39,7 @@ fun Duration.toLongFromSeconds(): Long {
 }
 
 /**
+ * @param code Should be trimmed and in uppercase
  * @param startDate The start date of the coupon, inclusive
  * @param endDate (REQUIRED) The end date of the coupon, exclusive
  * @param usageDuration
@@ -59,6 +65,15 @@ data class ServerCoupon(
         // or until it is removed from the database)
 
 ) {
+    init {
+//        require(code.isNotBlank()) { "Code must not be blank" }
+//        require(discountPercentage in 0..100) { "Discount percentage must be between 0 and 100" }
+//        require(minimumOrderAmount >= 0) { "Minimum order amount must be greater than or equal to 0" }
+//        require(startDate.seconds < endDate.seconds) { "Start date must be before end date" }
+//        require(usageDuration == null || usageDuration > 0) { "Usage duration must be greater than 0" }
+//        require(maximumRedemption == null || maximumRedemption >= 0) { "Maximum redemption must be greater than or equal to 0" }
+    }
+
     companion object {
         /**
          * The default date difference in seconds between the start and end date
@@ -78,6 +93,7 @@ data class ServerCoupon(
 
 /**
  * Once redeemed, any changes to the server coupon will not affect the customer coupon
+ * unless the corresponding server coupon is removed from the database.
  */
 data class CustomerCoupon(
     @DocumentId val id: String = "",
@@ -87,7 +103,9 @@ data class CustomerCoupon(
     val minimumOrderAmount: Double = 0.0,
     val effectiveAt: Timestamp = timestampFromNow(),
     val expiredAt: Timestamp = timestampFromNow(DEFAULT_DATE_DIFF_IN_SECOND),
-    val isUsed: Boolean = false,
+    val hasBeenUsed: Boolean = false,
+        // Can't be named "isUsed" as Kotlin treats it as a boolean getter when serializing,
+        // which creates a field named "used" in the database instead of "isUsed"
 ) {
     companion object {
         /**
@@ -107,6 +125,8 @@ data class CustomerCoupon(
             UNAVAILABLE_COUPON, // The code is not matched with any available coupons
             EXCEED_MAXIMUM_REDEMPTION, // The coupon has been redeemed more than the maximum redemption
             EXPIRED_COUPON, // The coupon is redeemed after the end date
+            ALREADY_REDEEMED_CODE, // The code has been redeemed
+            INTERNAL_ERROR, // An internal error occurred while redeeming the coupon
         }
 
         sealed class CouponRedemptionResult {
@@ -153,7 +173,7 @@ data class CustomerCoupon(
             if (serverCoupon == null) {
                 return CouponRedemptionResult.Error(CouponRedemptionError.UNAVAILABLE_COUPON)
             }
-            val currentDate = System.currentTimeMillis()
+            val currentTimeMillis = System.currentTimeMillis()
 
             // autoFetching coupons are not checked for maximum redemption
             if (!serverCoupon.autoFetching) {
@@ -161,7 +181,7 @@ data class CustomerCoupon(
                     return CouponRedemptionResult.Error(CouponRedemptionError.EXCEED_MAXIMUM_REDEMPTION)
                 }
             }
-            if (currentDate >= serverCoupon.endDate.seconds * 1000) {
+            if (currentTimeMillis >= serverCoupon.endDate.seconds * 1000) {
                 return CouponRedemptionResult.Error(CouponRedemptionError.EXPIRED_COUPON)
             }
             return CouponRedemptionResult.Success(from(serverCoupon))
@@ -169,7 +189,7 @@ data class CustomerCoupon(
     }
 
     fun checkAndCalculateForDiscount(totalAmount: Double): CouponUsageResult {
-        if (isUsed) {
+        if (this@CustomerCoupon.hasBeenUsed) {
             return CouponUsageResult.Error(CouponUsageError.COUPON_ALREADY_USED)
         }
         val currentDate = System.currentTimeMillis()
@@ -194,6 +214,9 @@ data class CustomerCoupon(
         }
     }
 
+    /**
+     * [eligibleForCleanup] should be called before [eligibleForUsage]
+     */
     internal fun eligibleForCleanup(serverCoupon: ServerCoupon?): Boolean {
         if (serverCoupon == null) {
             return true
@@ -205,6 +228,6 @@ data class CustomerCoupon(
 
     internal fun eligibleForUsage(): Boolean {
         val currentDate = System.currentTimeMillis()
-        return !isUsed && currentDate < expiredAt.seconds * 1000
+        return !this@CustomerCoupon.hasBeenUsed && currentDate < expiredAt.seconds * 1000
     }
 }

@@ -142,5 +142,24 @@
     <string name="product_explore_categories">Explore Categories</string>
     <string name="shop_by_categories">Shop by Categories</string>
     <string name="profile_coupons">Coupons</string>
+    <string name="coupon_minimum_order_amount_desc">on order over %1$s</string>
+    <string name="coupon_maximum_discount_desc">up to %1$s</string>
+    <string name="coupon_discount_percentage_desc">%1$s%% off</string>
+    <string name="coupon_expire_at_desc">Expires at %1$s</string>
+    <string name="coupon_back_description">Back</string>
+    <string name="coupon_empty_description">No coupons in your disposal</string>
+    <string name="coupon_empty">No coupons in your disposal for now</string>
+    <string name="coupon_redeem_area_hint">Enter code</string>
+    <string name="coupon_redeem_area_button">Apply</string>
+    <string name="coupon_redeem_empty_title">Redemption Error</string>
+    <string name="coupon_redeem_empty_message">Please enter an non-empty and not-all-space code</string>
+    <string name="coupon_redeem_success_title">Redemption Successfully</string>
+    <string name="coupon_redeem_success_message">Your coupon has been redeemed!</string>
+    <string name="coupon_redeem_failed_title">Redemption Error</string>
+    <string name="coupon_redeem_failed_internal_error">Something went wrong while redeeming!</string>
+    <string name="coupon_redeem_failed_unavailable_coupon">The code you redeemed is not currently available (Have you misspelt the code?)</string>
+    <string name="coupon_redeem_failed_exceed_maximum_redemption">Sorry! The maximum redemption for this code has reached!</string>
+    <string name="coupon_redeem_failed_expired_coupon">Sorry! It seems that the code you entered has expired!</string>
+    <string name="coupon_redeem_failed_already_redeemed_code">Sorry! The code you entered has already redeemed!</string>
 </resources>
 
