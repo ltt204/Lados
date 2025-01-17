@@ -199,6 +199,9 @@ sealed class Screen(
         data object UserManagement :
             Admin("User Management", "user_management", Icons.Default.AccountCircle)
 
+        data object UserDetailScreen :
+            Admin("User Detail Screen", "user_detail_screen", Icons.Default.AccountCircle)
+
         data object ProductManagement :
             Admin("Product Management", "product_management", Icons.Default.AccountCircle)
 
@@ -208,7 +211,7 @@ sealed class Screen(
         data object Analytics : Admin("Analytics", "analytics", Icons.Default.AccountCircle)
 
         companion object {
-            fun getAllScreens() = listOf(Analytics, UserManagement, ProductManagement, PromotionManagement)
+            fun getAllScreens() = listOf(Analytics, UserManagement, ProductManagement, PromotionManagement, UserDetailScreen)
         }
     }
 

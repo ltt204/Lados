@@ -97,9 +97,18 @@ class UserRepositoryImplement(
         }
     }
 
-    override suspend fun updateUserRole(email: String, role: String): Result<Boolean> {
+    override suspend fun updateUserRole(id: String, role: String): Result<Boolean> {
         return try {
-            firestore.collection("users").document(email).update("role", role).await()
+            firestore.collection("users").document(id).update("role", role).await()
+            Result.success(true)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun updateUserStatus(id: String, status: Boolean): Result<Boolean> {
+        return try {
+            firestore.collection("users").document(id).update("isActive", status).await()
             Result.success(true)
         } catch (e: Exception) {
             Result.failure(e)

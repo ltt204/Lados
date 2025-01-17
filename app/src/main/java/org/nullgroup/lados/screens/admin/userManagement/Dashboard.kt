@@ -1,7 +1,10 @@
 package org.nullgroup.lados.screens.admin.userManagement
 
+import android.annotation.SuppressLint
 import android.content.Context
+import android.util.Log
 import android.widget.RemoteViews.RemoteView
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -35,6 +38,7 @@ import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.DoNotTouch
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.Button
@@ -68,6 +72,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
@@ -78,13 +83,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import kotlinx.coroutines.launch
 import org.nullgroup.lados.compose.common.LoadOnProgress
 import org.nullgroup.lados.data.local.SearchHistoryManager
 import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.ui.theme.Primary
+import org.nullgroup.lados.viewmodels.SharedViewModel
 import org.nullgroup.lados.viewmodels.admin.UserManagementViewModel
 import org.nullgroup.lados.viewmodels.admin.UsersUiState
 import org.nullgroup.lados.viewmodels.customer.home.ProductUiState
@@ -144,6 +152,7 @@ fun SearchBar(
 }
 
 
+/*
 @Composable
 fun UserManagementScreenContent(
     modifier: Modifier = Modifier,
@@ -279,6 +288,7 @@ fun UserManagementScreenContent(
         }
     }
 }
+*/
 
 @Composable
 fun MoreVertIconButton(onClick: () -> Unit) {
@@ -309,7 +319,7 @@ fun FlyoutMenu(
                         imageVector = when (item) {
                             "View profile" -> Icons.Outlined.Person
                             "Edit details" -> Icons.Outlined.Edit
-                            else -> Icons.Outlined.Delete
+                            else -> Icons.Outlined.DoNotTouch
                         },
                         contentDescription = null
                     )
@@ -326,32 +336,37 @@ fun FlyoutMenu(
 
 data class FilterState(
     var selectedRole: String?=null,
-    var selectedStatus: Boolean = false,
+    var selectedStatus: Boolean? = null,
     var userNameSort: String? = null,
     var emailSort: String?=null,
+    var searchText: String? = null
 )
 
 enum class FilterUser {
     ROLE,
     STATUS,
     USERNAMESORT,
-    EMAILSORT
+    EMAILSORT,
+    SEARCH
 }
 
+/*
 fun updateSelected(selectedFilters: MutableMap<FilterUser, Boolean>, filterState: FilterState) {
     selectedFilters[FilterUser.ROLE] = filterState.selectedRole != null
     selectedFilters[FilterUser.STATUS] = filterState.selectedStatus
     selectedFilters[FilterUser.USERNAMESORT] = filterState.userNameSort != null
     selectedFilters[FilterUser.EMAILSORT] = filterState.emailSort != null
 }
-
-
+ */
 
 @Composable
 fun BottomSheetContent(
     onCloseClick: () -> Unit = {},
     onClearClick: () -> Unit = {},
-    onSelectionChange: (String) -> Unit = {}
+    onSelectionChange: (String) -> Unit = {},
+    filterState: FilterState,
+    onButtonClick: (String) -> Unit ={},
+    isSelected: MutableMap<FilterUser, String?>,
 ) {
     Box(
         modifier = Modifier
@@ -408,32 +423,55 @@ fun BottomSheetContent(
                 modifier=Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ){
-                Button(
-                    onClick={},
+                    Button(
+                    onClick={
+                        isSelected[FilterUser.ROLE] = "Admin"
+                        onSelectionChange("Admin")
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (isSelected[FilterUser.ROLE]=="Admin") LadosTheme.colorScheme.primary else LadosTheme.colorScheme.primaryContainer,
+                        contentColor = if (isSelected[FilterUser.ROLE]=="Admin") LadosTheme.colorScheme.onPrimary else LadosTheme.colorScheme.onPrimaryContainer
+                    ),
                     content={
                         Text(
                             "Admin",
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
                         )
                     }
                 )
 
                 Button(
-                    onClick={},
+                    onClick={
+                        isSelected[FilterUser.ROLE]="Staff"
+                        onSelectionChange("Staff")
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (isSelected[FilterUser.ROLE] == "Staff") LadosTheme.colorScheme.primary else LadosTheme.colorScheme.primaryContainer,
+                        contentColor = if (isSelected[FilterUser.ROLE] == "Staff") LadosTheme.colorScheme.onPrimary else LadosTheme.colorScheme.onPrimaryContainer
+                    ),
                     content={
                         Text(
                             "Staff",
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            color = if (filterState.selectedRole == "Staff") LadosTheme.colorScheme.onPrimary
+                            else LadosTheme.colorScheme.onPrimaryContainer
                         )
                     }
                 )
 
                 Button(
-                    onClick={},
+                    onClick={
+                        isSelected[FilterUser.ROLE]="Customer"
+                        onSelectionChange("Customer")
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (isSelected[FilterUser.ROLE]=="Customer") LadosTheme.colorScheme.primary else LadosTheme.colorScheme.primaryContainer,
+                        contentColor = if (isSelected[FilterUser.ROLE]=="Customer") LadosTheme.colorScheme.onPrimary else LadosTheme.colorScheme.onPrimaryContainer
+                    ),
                     content={
                         Text(
                             "Customer",
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
                         )
                     }
                 )
@@ -448,21 +486,36 @@ fun BottomSheetContent(
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 Button(
-                    onClick = {},
+                    onClick = {
+                        isSelected[FilterUser.STATUS] = "Active"
+                        onSelectionChange("Active")
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (isSelected[FilterUser.STATUS]=="Active") LadosTheme.colorScheme.primary else LadosTheme.colorScheme.primaryContainer,
+                        contentColor = if (isSelected[FilterUser.STATUS]=="Active") LadosTheme.colorScheme.onPrimary else LadosTheme.colorScheme.onPrimaryContainer
+                    ),
                     content = {
                         Text(
                             "Active",
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
                         )
                     }
                 )
 
                 Button(
-                    onClick = {},
+                    onClick = {
+                        isSelected[FilterUser.STATUS] = "UnActive"
+                        onSelectionChange("UnActive")
+                    },
+
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (isSelected[FilterUser.STATUS]=="UnActive") LadosTheme.colorScheme.primary else LadosTheme.colorScheme.primaryContainer,
+                        contentColor = if (isSelected[FilterUser.STATUS]=="UnActive") LadosTheme.colorScheme.onPrimary else LadosTheme.colorScheme.onPrimaryContainer
+                    ),
                     content = {
                         Text(
-                            "Unactive",
-                            fontWeight = FontWeight.Bold
+                            "UnActive",
+                            fontWeight = FontWeight.Bold,
                         )
                     }
                 )
@@ -476,21 +529,38 @@ fun BottomSheetContent(
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 Button(
-                    onClick = {},
+                    onClick = {
+                        isSelected[FilterUser.USERNAMESORT] = "User Name to A - Z"
+                        isSelected[FilterUser.EMAILSORT]=null
+                        onSelectionChange("User Name to A - Z")
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (isSelected[FilterUser.USERNAMESORT]=="User Name to A - Z") LadosTheme.colorScheme.primary else LadosTheme.colorScheme.primaryContainer,
+                        contentColor = if (isSelected[FilterUser.USERNAMESORT]=="User Name to A - Z") LadosTheme.colorScheme.onPrimary else LadosTheme.colorScheme.onPrimaryContainer
+                    ),
                     content = {
                         Text(
                             "User Name to A - Z",
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
                         )
                     }
                 )
 
                 Button(
-                    onClick = {},
+                    onClick = {
+                        isSelected[FilterUser.USERNAMESORT] = "User Name to Z - A"
+                        isSelected[FilterUser.EMAILSORT]=null
+                        onSelectionChange("User Name to Z - A")
+                    },
+
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (isSelected[FilterUser.USERNAMESORT]=="User Name to Z - A") LadosTheme.colorScheme.primary else LadosTheme.colorScheme.primaryContainer,
+                        contentColor = if (isSelected[FilterUser.USERNAMESORT]=="User Name to Z - A") LadosTheme.colorScheme.onPrimary else LadosTheme.colorScheme.onPrimaryContainer
+                    ),
                     content = {
                         Text(
                             "User Name to Z - A",
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
                         )
                     }
                 )
@@ -504,37 +574,45 @@ fun BottomSheetContent(
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 Button(
-                    onClick = {},
+                    onClick = {
+                        isSelected[FilterUser.EMAILSORT] = "Email to A - Z"
+                        isSelected[FilterUser.USERNAMESORT]=null
+                        onSelectionChange("Email to A - Z")
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (isSelected[FilterUser.EMAILSORT]=="Email to A - Z") LadosTheme.colorScheme.primary else LadosTheme.colorScheme.primaryContainer,
+                        contentColor = if (isSelected[FilterUser.EMAILSORT]=="Email to A - Z") LadosTheme.colorScheme.onPrimary else LadosTheme.colorScheme.onPrimaryContainer
+                    ),
                     content = {
                         Text(
                             "Email to A - Z",
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
                         )
                     }
                 )
 
                 Button(
-                    onClick = {},
+                    onClick = {
+                        isSelected[FilterUser.EMAILSORT] = "Email to Z - A"
+                        isSelected[FilterUser.USERNAMESORT]=null
+                        onSelectionChange("Email to Z - A")
+                    },
+
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (isSelected[FilterUser.EMAILSORT]=="Email to Z - A") LadosTheme.colorScheme.primary else LadosTheme.colorScheme.primaryContainer,
+                        contentColor = if (isSelected[FilterUser.EMAILSORT]=="Email to Z - A") LadosTheme.colorScheme.onPrimary else LadosTheme.colorScheme.onPrimaryContainer
+                    ),
                     content = {
                         Text(
                             "Email to Z - A",
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
                         )
                     }
                 )
             }
-
-
         }
     }
 }
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun BottomSheetPreview() {
-    BottomSheetContent()
-}
-
 
 @Composable
 fun MoreVertMenu(
@@ -554,12 +632,24 @@ onMenuItemClick: (String) -> Unit = {}
 }
 
 @Composable
-fun UserRow(user: org.nullgroup.lados.data.models.User) {
-    val menuItems = listOf("View profile", "Edit details", "Delete user")
+fun UserRow(
+    user: org.nullgroup.lados.data.models.User,
+    navController: NavController,
+    sharedViewModel: SharedViewModel,
+    userManagementViewModel: UserManagementViewModel,
+    context: Context
+) {
+    val menuItems = listOf("View profile", "Edit details", "Inactive")
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(72.dp),
+            .height(72.dp)
+            .clickable {
+                sharedViewModel.updateSelectedUser(user)
+                sharedViewModel.updateSearchQuery("View profile")
+                navController.navigate(Screen.Admin.UserDetailScreen.route)
+            }
+        ,
         verticalAlignment = Alignment.CenterVertically
     ) {
 
@@ -568,7 +658,13 @@ fun UserRow(user: org.nullgroup.lados.data.models.User) {
                 .size(48.dp)
                 .clip(CircleShape)
                 .background(Color.Gray)
-        )
+        ){
+            AsyncImage(
+                model = user.avatarUri,
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize()
+            )
+        }
         Spacer(modifier = Modifier.width(8.dp))
 
         Column (
@@ -586,13 +682,18 @@ fun UserRow(user: org.nullgroup.lados.data.models.User) {
         Spacer(Modifier.width(2.dp))
         Row(
             horizontalArrangement = Arrangement.Center,
-            modifier = Modifier.width(78.dp)
+            modifier = Modifier.width(90.dp)
         ) {
             Text(
                 text = user.role,
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier
-                    .background(Color.LightGray, shape = RoundedCornerShape(50))
+                    .background(
+                        if (user.isActive)
+                            Color.Green.copy(alpha=0.2f)
+                        else
+                            Color.Red.copy(alpha=0.2f),
+                        shape = RoundedCornerShape(50))
                     .padding(horizontal = 8.dp, vertical = 2.dp)
             )
         }
@@ -601,40 +702,47 @@ fun UserRow(user: org.nullgroup.lados.data.models.User) {
         MoreVertMenu(
             menuItems = menuItems,
             onMenuItemClick = { item ->
-                // Handle menu item click here
-                println("Clicked on $item")
+                if (item=="View profile" || item=="Edit details"){
+                    sharedViewModel.updateSelectedUser(user)
+                    sharedViewModel.updateSearchQuery(item)
+                    Log.d("UserRow", "UserRow: $user")
+                    navController.navigate(Screen.Admin.UserDetailScreen.route)
+                }
+                else
+                    if (userManagementViewModel.updateUserByEmail(user.id, user.role, !user.isActive)){
+                        Toast.makeText(context, "User status updated", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(context, "Failed to update user status", Toast.LENGTH_SHORT).show()
+                    }
             }
         )
     }
+
 }
 
-
 @OptIn(ExperimentalMaterial3Api::class)
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun UserManagementScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
     paddingValues: PaddingValues = PaddingValues(0.dp),
-    context: Context
-    //sharedViewModel: SharedViewModel = SharedViewModel(),
-    //viewModel: HomeViewModel = hiltViewModel(),
+    context: Context,
+    viewModel: UserManagementViewModel = hiltViewModel(),
+    sharedViewModel: SharedViewModel
 ) {
-    val filterState by remember { mutableStateOf(FilterState()) }
-    val selectedFilters = remember { mutableStateMapOf<FilterUser, Boolean>() }
-    updateSelected(selectedFilters, filterState)
+    val usersUiState = viewModel.usersUIState.collectAsStateWithLifecycle().value
 
-    val selectedOptions = remember { mutableStateMapOf<FilterUser, Int?>() }
+    val filterState by remember { mutableStateOf(FilterState()) }
+
+    val selectedOptions = remember { mutableStateMapOf<FilterUser, String?>() }
 
     val sheetState = rememberModalBottomSheetState(
         initialValue = ModalBottomSheetValue.Hidden
     )
 
-    val searchHistoryManager = remember { SearchHistoryManager(context) }
 
     val scope = rememberCoroutineScope()
-    val sheetContent by remember {
-        mutableStateOf<@Composable () -> Unit>({})
-    }
 
     ModalBottomSheetLayout(
         sheetState = sheetState,
@@ -647,18 +755,76 @@ fun UserManagementScreen(
             topStart = 30.dp,
             topEnd = 30.dp
         ),
-        sheetContent = { BottomSheetContent() }
+        sheetContent = { BottomSheetContent(
+            onCloseClick = { scope.launch { sheetState.hide() } },
+            onClearClick = {
+                scope.launch { sheetState.hide() }
+                filterState.userNameSort=null
+                filterState.emailSort=null
+                filterState.selectedRole=null
+                filterState.selectedStatus=null
+                selectedOptions[FilterUser.ROLE]=null
+                selectedOptions[FilterUser.STATUS]=null
+                selectedOptions[FilterUser.USERNAMESORT]=null
+                selectedOptions[FilterUser.EMAILSORT]=null
+                viewModel.filterUsers(filterState)
+            },
+            filterState = filterState,
+            isSelected = selectedOptions,
+            onSelectionChange = { option ->
+                when (option) {
+                    "User Name to A - Z" -> {
+                        filterState.userNameSort = option
+                        filterState.emailSort = null
+                        Log.d("UserManagementScreen", "onSelectionChange: $filterState")
+                        viewModel.filterUsers(filterState)
+
+                    }
+                    "User Name to Z - A" -> {
+                        filterState.userNameSort = option
+                        filterState.emailSort = null
+                        Log.d("UserManagementScreen", "onSelectionChange: $filterState")
+                        viewModel.filterUsers(filterState)
+                    }
+                    "Email to A - Z" -> {
+                        filterState.emailSort = option
+                        filterState.userNameSort = null
+                        viewModel.filterUsers(filterState)
+                    }
+                    "Email to Z - A" -> {
+                        filterState.emailSort = option
+                        filterState.userNameSort = null
+                        viewModel.filterUsers(filterState)
+                    }
+                    "Admin" -> {
+                        filterState.selectedRole = option
+                        viewModel.filterUsers(filterState)
+                    }
+                    "Staff" -> {
+                        filterState.selectedRole = option
+                        viewModel.filterUsers(filterState)
+                    }
+                    "Customer" -> {
+                        filterState.selectedRole = option
+                        viewModel.filterUsers(filterState)
+                    }
+                    "Active" -> {
+                        filterState.selectedStatus = true
+                        viewModel.filterUsers(filterState)
+                    }
+                    "UnActive" -> {
+                        filterState.selectedStatus = false
+                        viewModel.filterUsers(filterState)
+                    }
+            }})},
     ) {
         Scaffold(
             modifier = modifier
-                .padding(bottom = paddingValues.calculateBottomPadding())
-                .padding(horizontal = 16.dp),
+                .padding(bottom = paddingValues.calculateBottomPadding()),
             containerColor = LadosTheme.colorScheme.background,
 
             ) { innerPadding ->
-            val viewModel: UserManagementViewModel= hiltViewModel()
-            val usersUiState = viewModel.usersUIState.collectAsStateWithLifecycle()
-            when (usersUiState.value) {
+            when (usersUiState) {
                 is UsersUiState.Loading -> {
                     LoadOnProgress(
                         modifier = modifier,
@@ -676,11 +842,13 @@ fun UserManagementScreen(
                 }
 
                 is UsersUiState.Success -> {
-                    val users = (usersUiState.value as UsersUiState.Success).users
+                    val users = usersUiState.users
+                    Log.d("UserManagementScreen", "UserManagementScreen: $users")
+
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(top = innerPadding.calculateTopPadding())
+                            .padding(top = paddingValues.calculateTopPadding())
                             .padding(horizontal = 8.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
@@ -702,8 +870,10 @@ fun UserManagementScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             SearchBar(
-                                onSearch = { /* Handle Search */ }
-
+                                onSearch = {
+                                    filterState.searchText = it
+                                    viewModel.filterUsers(filterState)
+                                }
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Button(
@@ -749,7 +919,7 @@ fun UserManagementScreen(
                             }
                         }
                         Spacer(modifier = Modifier.height(8.dp))
-                        // User List
+
                         LazyColumn(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -757,7 +927,7 @@ fun UserManagementScreen(
                             contentPadding = PaddingValues(8.dp)
                         ) {
                             items(users) { user ->
-                                UserRow(user)
+                                UserRow(user, navController, sharedViewModel, viewModel, context)
                                 Divider()
                             }
                         }
@@ -785,6 +955,7 @@ fun UserManagementScreen(
                         }
 
                          */
+
                     }
                 }
             }

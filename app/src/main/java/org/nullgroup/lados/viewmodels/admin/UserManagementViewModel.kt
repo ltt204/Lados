@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.nullgroup.lados.data.models.User
 import org.nullgroup.lados.data.repositories.interfaces.user.UserRepository
+import org.nullgroup.lados.screens.admin.userManagement.FilterState
 import javax.inject.Inject
 
 @HiltViewModel
@@ -18,6 +19,8 @@ class UserManagementViewModel @Inject constructor(
 ) : ViewModel() {
     private val _usersUIState = MutableStateFlow<UsersUiState>(UsersUiState.Loading)
     val usersUIState = _usersUIState.asStateFlow()
+
+    private val _originalUsers = MutableStateFlow<List<User>>(emptyList())
 
     init {
         fetchUsers()
@@ -28,91 +31,133 @@ class UserManagementViewModel @Inject constructor(
             try {
                 val getUsersResult = userRepository.getAllUsersFromFirestore()
                 _usersUIState.value = UsersUiState.Success(getUsersResult.getOrNull() ?: emptyList())
+                _originalUsers.value= getUsersResult.getOrNull() ?: emptyList()
             } catch (e: Exception) {
                 Log.d("HomeViewModel", "fetchUsers: ${e.message}")
                 _usersUIState.value = UsersUiState.Error(e.message ?: "An error occurred")
             }
         }
     }
-    /*
-    fun resetProducts() {
-        _productUiState.value = ProductUiState.Success(_originalProducts.value)
+
+    fun updateUserByEmail(id: String, role: String, isActive: Boolean): Boolean{
+        var check=true
+        Log.d("UserManagementViewModel", "updateUserByEmail: $id, $role, $isActive")
+        viewModelScope.launch {
+            try {
+                val updateRoleResult = userRepository.updateUserRole(id, role)
+                Log.d("UserManagementViewModel", "updateUserByEmail: ${updateRoleResult.isSuccess}")
+                val updateStatusResult = userRepository.updateUserStatus(id, isActive)
+                Log.d("UserManagementViewModel", "updateUserByEmail: ${updateStatusResult.isSuccess} ${updateStatusResult.isSuccess}")
+            } catch (e: Exception) {
+                Log.d("UserManagementViewModel", "UpdateUserByEmail: ${e.message}")
+                check=false
+            }
+        }
+        return check;
     }
 
-    fun sortProductsByPriceLowToHigh() {
-        val currentState = _productUiState.value
-        if (currentState is ProductUiState.Success) {
-            _productUiState.value = ProductUiState.Success(
-                products = currentState.products.sortedBy { if (it.hasNoSalePrice()) it.variants[0].originalPrice else it.isProductOnSale().second }
+    fun searchUsers(query: String) {
+        resetUsers()
+        val currentState = _usersUIState.value
+        if (currentState is UsersUiState.Success) {
+            Log.d("UserManagementViewModel", "searchUsers: $query, ${query.isEmpty()}, ${query.isBlank()}")
+            _usersUIState.value = UsersUiState.Success(
+                users = if (query.isEmpty() || query.isBlank()) currentState.users else currentState.users.filter { it.name.contains(query, ignoreCase = true) }
+            )
+            Log.d("UserManagementViewModel", "searchUsers: ${_usersUIState.value}")
+        }
+    }
+
+    private fun filterUsersByRole(role: String){
+        val currentState = _usersUIState.value
+        if (currentState is UsersUiState.Success) {
+            _usersUIState.value = UsersUiState.Success(
+                users = currentState.users.filter { it.role == role }
             )
         }
     }
 
-    fun filterProductsByRating(low: Float, high: Float){
-        val currentState = _productUiState.value
-        if (currentState is ProductUiState.Success) {
-            //Log.d("Product compare", "filterProductsByRating: ${currentState.products.none { (it.getAverageRating() < low) || (it.getAverageRating() > high) }}")
-            _productUiState.value = ProductUiState.Success(
-                products = currentState.products.filter { !(it.getAverageRating() < low) && !(it.getAverageRating() > high) }
+    private fun sortUsersByNameAscending(){
+        val currentState = _usersUIState.value
+        if (currentState is UsersUiState.Success) {
+            _usersUIState.value = UsersUiState.Success(
+                users = currentState.users.sortedBy { it.name }
             )
         }
     }
 
-    fun filterProductsByPrice(@FloatRange(from = 0.0) minPrice: Float, @FloatRange(from = 0.0) maxPrice: Float){
-        val currentState = _productUiState.value
-        if (currentState is ProductUiState.Success) {
-            _productUiState.value = ProductUiState.Success(
-                products = currentState.products.filter { if (it.hasNoSalePrice()) {it.variants[0].originalPrice in minPrice..maxPrice} else {
-                    it.isProductOnSale().second!! in minPrice..maxPrice} }
+    private fun sortUsersByNameDescending(){
+        val currentState = _usersUIState.value
+        if (currentState is UsersUiState.Success) {
+            _usersUIState.value = UsersUiState.Success(
+                users = currentState.users.sortedByDescending { it.name }
             )
         }
     }
 
-    fun filterProductsByCategory(category: Category) {
-        val currentState = _productUiState.value
-        if (currentState is ProductUiState.Success) {
-            _productUiState.value = ProductUiState.Success(
-                products = currentState.products.filter { it.categoryId == category.categoryId }
+    private fun sortUsersByEmailAscending() {
+        val currentState = _usersUIState.value
+        if (currentState is UsersUiState.Success) {
+            _usersUIState.value = UsersUiState.Success(
+                users = currentState.users.sortedBy { it.email }
             )
         }
     }
 
-    fun findCategoryByName(name: String): Category? {
-        val currentState = _categoryUiState.value
-        if (currentState is CategoryUiState.Success) {
-            return currentState.categories.find { it.categoryName == name }
-        }
-        return null
-    }
-
-    fun sortProductsByPriceHighToLow() {
-        val currentState = _productUiState.value
-        if (currentState is ProductUiState.Success) {
-            _productUiState.value = ProductUiState.Success(
-                products = currentState.products.sortedByDescending { if (it.hasNoSalePrice()) it.variants[0].originalPrice else it.isProductOnSale().second }
+    private fun sortUsersByEmailDescending() {
+        val currentState = _usersUIState.value
+        if (currentState is UsersUiState.Success) {
+            _usersUIState.value = UsersUiState.Success(
+                users = currentState.users.sortedByDescending { it.email }
             )
         }
     }
 
-    fun sortProductsByCreatedAt() {
-        val currentState = _productUiState.value
-        if (currentState is ProductUiState.Success) {
-            _productUiState.value = ProductUiState.Success(
-                products = currentState.products.sortedByDescending { it.createdAt }
+    private fun filterUsersByStatus(status: Boolean) {
+        val currentState = _usersUIState.value
+        if (currentState is UsersUiState.Success) {
+            _usersUIState.value = UsersUiState.Success(
+                users = currentState.users.filter { it.isActive == status }
             )
         }
     }
 
-    fun filterSaleProducts() {
-        val currentState = _productUiState.value
-        if (currentState is ProductUiState.Success) {
-            _productUiState.value = ProductUiState.Success(
-                products = currentState.products.filter { !it.hasNoSalePrice() }
-            )
-        }
+    private fun resetUsers(){
+        _usersUIState.value = UsersUiState.Success(_originalUsers.value)
     }
 
-     */
+    fun filterUsers(filterState: FilterState){
+        resetUsers()
+
+        Log.d("UserManagementViewModel", "filterUsers: $filterState")
+        Log.d("UserManagementViewModel", "filterUsers: ${_usersUIState.value}")
+
+        if (filterState.searchText != null){
+            searchUsers(filterState.searchText!!)
+        }
+
+        if (filterState.selectedRole != null){
+            filterUsersByRole(filterState.selectedRole!!.uppercase())
+        }
+
+        if (filterState.selectedStatus != null){
+            filterUsersByStatus(filterState.selectedStatus!!)
+        }
+
+        if (filterState.userNameSort != null){
+            when (filterState.userNameSort) {
+                "User Name to A - Z" -> sortUsersByNameAscending()
+                "User Name to Z - A" -> sortUsersByNameDescending()
+            }
+        }
+
+        if (filterState.emailSort != null){
+            when (filterState.emailSort) {
+                "Email to A - Z" -> sortUsersByEmailAscending()
+                "Email to Z - A" -> sortUsersByEmailDescending()
+            }
+        }
+    }
 }
 
 sealed class UsersUiState {

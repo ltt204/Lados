@@ -44,8 +44,11 @@ import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.nullgroup.lados.screens.Screen
+import org.nullgroup.lados.screens.admin.userManagement.UserDetailScreen
 import org.nullgroup.lados.screens.admin.userManagement.UserManagementScreen
 import org.nullgroup.lados.ui.theme.LadosTheme
+import org.nullgroup.lados.viewmodels.SharedViewModel
+import org.nullgroup.lados.viewmodels.admin.UserManagementViewModel
 import org.nullgroup.lados.viewmodels.customer.profile.ProfileViewModel
 
 private const val TAG = "AdminGraph"
@@ -56,6 +59,8 @@ fun AdminGraph(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
     globalNavHostController: NavHostController,
+    sharedViewModel: SharedViewModel = hiltViewModel(),
+    userManagementViewModel: UserManagementViewModel = hiltViewModel(),
     startDestination: Screen = Screen.Admin.ProductManagement,
     drawerState: DrawerState = rememberDrawerState(DrawerValue.Closed),
     scrollBehavior: TopAppBarScrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(),
@@ -180,6 +185,19 @@ fun AdminGraph(
                         modifier = Modifier,
                         paddingValues = innerPadding,
                         navController = navController,
+                        context = LocalContext.current,
+                        sharedViewModel = sharedViewModel
+                    )
+                }
+
+                composable(route = Screen.Admin.UserDetailScreen.route) {
+                    UserDetailScreen(
+                        modifier = Modifier,
+                        paddingValues = innerPadding,
+                        navController = navController,
+                        sharedViewModel = sharedViewModel,
+                        userManagementViewModel= userManagementViewModel,
+                        context = LocalContext.current
                     )
                 }
 
