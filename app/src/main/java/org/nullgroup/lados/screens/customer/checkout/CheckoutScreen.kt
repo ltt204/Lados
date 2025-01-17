@@ -181,7 +181,7 @@ fun CheckoutScreen(
     }
 
     val defaultImageUrl = "https://placehold.co/600x400"
-    val defaultTitle = "Unknown Product"
+    val defaultTitle = stringResource(R.string.unknown_product)
 
     if (isCheckoutCompleted) {
         CheckoutCompleteScreen(
@@ -219,7 +219,7 @@ fun CheckoutScreen(
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        "Checkout",
+                        stringResource(R.string.checkout),
                         textAlign = TextAlign.Center,
                         style = LadosTheme.typography.titleLarge.copy(
                             color = LadosTheme.colorScheme.onSurface,
@@ -262,7 +262,7 @@ fun CheckoutScreen(
             Column(
                 modifier = Modifier
                     .padding(innerScaffoldPadding)
-                    .padding(horizontal = 20.dp)
+                    .padding(horizontal = 16.dp)
                     .fillMaxSize()
             ) {
                 AddressSelector(
@@ -448,13 +448,13 @@ private fun AddressSelector(
                     .weight(1f)
             ) {
                 Text(
-                    text = "Shipping Address",
+                    text = stringResource(R.string.shipping_address),
                     color = LadosTheme.colorScheme.onPrimaryContainer,
                     style = LadosTheme.typography.bodySmall
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = selectedAddress?.toString() ?: "Select Address",
+                    text = selectedAddress?.toString() ?: stringResource(R.string.select_address),
                     color = LadosTheme.colorScheme.onPrimaryContainer,
                     style = LadosTheme.typography.bodyMedium.copy(
                         fontWeight = FontWeight.Bold
@@ -533,7 +533,7 @@ private fun PhoneNumberCard(
             modifier = Modifier.padding(16.dp)
         ) {
             Text(
-                text = "Contact Phone Number",
+                text = stringResource(R.string.contact_phone_number),
                 color = LadosTheme.colorScheme.onPrimaryContainer,
                 style = LadosTheme.typography.bodySmall
             )
@@ -604,7 +604,7 @@ private fun ProductItemWithStockComparison(
                 Text(
                     text = buildAnnotatedString {
                         withStyle(normalStyle) {
-                            append("Color - ")
+                            append(stringResource(id = R.string.product_color) + " - ")
                         }
                         withStyle(specialStyle) {
                             append(productInfo.productColor)
@@ -621,7 +621,7 @@ private fun ProductItemWithStockComparison(
                 Text(
                     text = buildAnnotatedString {
                         withStyle(normalStyle) {
-                            append("Ordered - ")
+                            append(stringResource(R.string.ordered))
                         }
                         withStyle(specialStyle) {
                             append(productInfo.orderedAmount.toString())
@@ -633,7 +633,7 @@ private fun ProductItemWithStockComparison(
                 Text(
                     text = buildAnnotatedString {
                         withStyle(normalStyle) {
-                            append("Available - ")
+                            append(stringResource(R.string.available))
                         }
                         withStyle(specialStyle) {
                             append(productInfo.availableStock.toString())
@@ -659,7 +659,7 @@ private fun InsufficientStockDialog(
             modifier = Modifier.padding(8.dp)
         ) {
             Text(
-                text = "The following item(s) have insufficient stock:",
+                text = stringResource(R.string.out_of_stock),
                 style = LadosTheme.typography.bodyMedium
             )
 
@@ -673,7 +673,7 @@ private fun InsufficientStockDialog(
             }
 
             Text(
-                text = "Please adjust the quantity of the item(s) in your cart and try again later.",
+                text = stringResource(R.string.out_of_stock_message),
                 style = LadosTheme.typography.bodyMedium
             )
         }
@@ -682,7 +682,7 @@ private fun InsufficientStockDialog(
 
     ConfirmDialog(
         DialogInfo(
-            titleText = "Order creation failed",
+            titleText = stringResource(R.string.order_creation_failed),
             message = dialogMessage,
             onConfirm = onConfirm,
             confirmText = "Close",
