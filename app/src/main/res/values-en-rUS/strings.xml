@@ -39,5 +39,5 @@
     <string name="order_items">Order Items</string>
     <string name="order_items_header">%1$s items</string>
     <string name="order_cancel_return_message">Please contact store staff for assistance.</string>
-    <string name="order_title_with_id">Order code: #%1$s</string>
+    <string name="order_title_with_id">Order code:</string>
 </resources>

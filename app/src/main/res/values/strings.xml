@@ -9,7 +9,7 @@
     <string name="address_title">Address</string>
     <string name="edit_address_title">Edit Address</string>
     <string name="add_address_title">Add Address</string>
-    <string name="order_title_with_id">Order Code: #%1$s</string>
+    <string name="order_title_with_id">Order Code:</string>
     <string name="order_title">Order</string>
     <string name="order_detail_title">Order detail</string>
     <string name="order_products_title">Order products</string>
