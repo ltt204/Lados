@@ -19,6 +19,7 @@ import org.nullgroup.lados.data.repositories.implementations.order.OrderReposito
 import org.nullgroup.lados.data.repositories.implementations.product.ProductRepositoryImplement
 import org.nullgroup.lados.data.repositories.implementations.common.SharedPreferencesImpl
 import org.nullgroup.lados.data.repositories.implementations.common.ImageRepositoryImplement
+import org.nullgroup.lados.data.repositories.implementations.coupon.CouponRepositoryImplement
 import org.nullgroup.lados.data.repositories.implementations.product.ReviewProductRepositoryImplement
 import org.nullgroup.lados.data.repositories.implementations.user.UserAddressRepositoryImplement
 import org.nullgroup.lados.data.repositories.implementations.user.UserRepositoryImplement
@@ -32,6 +33,7 @@ import org.nullgroup.lados.data.repositories.interfaces.chat.ChatRepository
 import org.nullgroup.lados.data.repositories.interfaces.user.IUserAddressRepository
 
 import org.nullgroup.lados.data.repositories.interfaces.common.ImageRepository
+import org.nullgroup.lados.data.repositories.interfaces.coupon.CouponRepository
 import org.nullgroup.lados.data.repositories.interfaces.order.OrderRepository
 import org.nullgroup.lados.data.repositories.interfaces.product.ProductRepository
 import org.nullgroup.lados.data.repositories.interfaces.product.ReviewProductRepository
@@ -131,6 +133,12 @@ object DataModule {
     @Provides
     fun provideWishlistRepository(firestore: FirebaseFirestore): WishlistItemRepository {
         return WishlistItemRepositoryImplement(firestore)
+    }
+
+    @Singleton
+    @Provides
+    fun provideCouponRepository(firestore: FirebaseFirestore): CouponRepository {
+        return CouponRepositoryImplement(firestore)
     }
 
     @Singleton

@@ -141,5 +141,6 @@
     <string name="no_search_product_result_message">Sorry, we couldn\'t find any matching results for your Search.</string>
     <string name="product_explore_categories">Explore Categories</string>
     <string name="shop_by_categories">Shop by Categories</string>
+    <string name="profile_coupons">Coupons</string>
 </resources>
 

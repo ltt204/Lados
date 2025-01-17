@@ -29,6 +29,8 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
+        // Required for API desugaring
+        isCoreLibraryDesugaringEnabled = true
     }
     kotlinOptions {
         jvmTarget = "1.8"
@@ -156,6 +158,9 @@ dependencies {
     implementation(libs.androidx.work.runtime.ktx)
     // DI for WorkManager
     implementation(libs.androidx.hilt.work)
+
+    // Enable Java 8+ features supposed to be for SDK 26, to be used with MIN SDK 24
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
 }
 
 kapt {
