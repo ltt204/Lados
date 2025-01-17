@@ -94,7 +94,8 @@ import org.nullgroup.lados.viewmodels.admin.UserManagementViewModel
 fun ComboBox(
     options: List<String>,
     defaultIndex: Int = 0,
-    onOptionSelected: (String) -> Unit
+    onOptionSelected: (String) -> Unit,
+    enable: Boolean
 ) {
     var expanded by remember { mutableStateOf(false) }
     var selectedOption by remember { mutableStateOf(options.getOrElse(defaultIndex) { "" }) }
@@ -124,6 +125,7 @@ fun ComboBox(
         ) {
             options.forEach { option ->
                 DropdownMenuItem(
+                    enabled = enable,
                     text = { Text(text = option) },
                     onClick = {
                         selectedOption = option
@@ -281,7 +283,8 @@ fun UserDetailScreen(
                     defaultIndex = if (selectedOption=="Active") 0 else 1,
                     onOptionSelected = { option ->
                         selectedOption = option
-                    }
+                    },
+                    enable = searchType!="View profile"
                 )
             }
         }
@@ -346,7 +349,7 @@ fun UserDetailScreen(
             Spacer(modifier = Modifier.width(16.dp))
             Button(
                 onClick = {
-                    Log.d("UserManagementViewModel", "updateUserByEmail:")
+                    Log.d("UserManagementViewModel", "updateUserByEmail: $selectedOption")
 
 
                     if (userManagementViewModel.updateUserByEmail(selectedUser!!.id, radioSelectedOption.uppercase(), selectedOption=="Active")) {
