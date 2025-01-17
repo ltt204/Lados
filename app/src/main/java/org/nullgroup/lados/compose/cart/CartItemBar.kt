@@ -109,7 +109,7 @@ fun CartItemBar(
             modifier = Modifier
                 .wrapContentHeight()
                 .fillMaxWidth()
-                .padding(8.dp),
+                .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             SubcomposeAsyncImage(
@@ -147,11 +147,11 @@ fun CartItemBar(
                     ) {
                         Column {
                             Text(
-                                text = "Size: $size",
+                                text = stringResource(id = R.string.cart_item_size, size),
                                 style = LadosTheme.typography.bodySmall
                             )
                             Text(
-                                text = "Color: $color",
+                                text = stringResource(id = R.string.cart_item_color, color),
                                 style = LadosTheme.typography.bodySmall
                             )
                         }

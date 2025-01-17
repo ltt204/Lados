@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -64,7 +65,7 @@ fun DrawError_FindNotMatch(
         )
         Spacer(modifier = Modifier.height(16.dp))
         Title(
-            content = "Sorry, we couldn't find any matching results for your Search.", textStyle =
+            content = stringResource(R.string.no_search_product_result_message), textStyle =
             TextStyle(
                 fontSize = 24.sp,
                 fontWeight = FontWeight.SemiBold,
@@ -82,7 +83,7 @@ fun DrawError_FindNotMatch(
             colors = ButtonDefaults.buttonColors(LadosTheme.colorScheme.primaryContainer)
         ) {
 
-            Text(text = "Explore Categories", color = LadosTheme.colorScheme.onPrimaryContainer)
+            Text(text = stringResource(R.string.product_explore_categories), color = LadosTheme.colorScheme.onPrimaryContainer)
 
 
         }

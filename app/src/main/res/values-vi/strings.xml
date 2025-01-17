@@ -60,8 +60,8 @@
     <string name="address_province">Tỉnh thành</string>
     <string name="address_district">Quận/huyện</string>
     <string name="address_street">Số nhà, tên đường</string>
-    <string name="cart_item_size">Kích thước - </string>
-    <string name="cart_item_color">Màu sắc - </string>
+    <string name="cart_item_size">Kích thước - %1$s</string>
+    <string name="cart_item_color">Màu sắc - %1$s</string>
     <string name="cart_checkout">Thanh toán</string>
     <string name="cart_order_discount">Mã giảm giá</string>
     <string name="cart_discount">"Giảm "</string>
@@ -125,4 +125,22 @@
     <string name="wishlist_empty">Danh sách yêu thích của bạn trống</string>
     <string name="wishlist_empty_description">Danh sách yêu thích trống</string>
     <string name="wishlist_back_description">Trở về</string>
+    <string name="unknown_product">Mặt hàng không xác định</string>
+    <string name="checkout">Thanh Toán</string>
+    <string name="shipping_address">Địa chỉ giao hàng</string>
+    <string name="select_address">Chọn địa chỉ</string>
+    <string name="ordered">"Đã đặt - "</string>
+    <string name="available">"Có sẵn - "</string>
+    <string name="out_of_stock">Mặt hàng này không còn đủ số lượng:</string>
+    <string name="out_of_stock_message">Vui lòng điều chỉnh số lượng sản phẩm trong giỏ hàng và thử lại sau.</string>
+    <string name="order_creation_failed">Tạo đơn hàng thất bại</string>
+    <string name="contact_phone_number">Số điện thoại liên lạc</string>
+    <string name="remove_cart_item_message">Bạn có chắc muốn xóa món hàng này ra khỏi giỏ không?</string>
+    <string name="remove_cart_item">Xóa món hàng</string>
+    <string name="search_product_history">Lịch sử</string>
+    <string name="no_search_product_result_message">Rất tiếc, chúng tôi không tìm thấy kết quả nào phù hợp với Tìm kiếm của bạn.</string>
+    <string name="clear_search_product_history">Xóa</string>
+    <string name="product_explore_categories">Khám phá danh mục</string>
+    <string name="shop_by_categories">Mua sắm theo danh mục</string>
+
 </resources>

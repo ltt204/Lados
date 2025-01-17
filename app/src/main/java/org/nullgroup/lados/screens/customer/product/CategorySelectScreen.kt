@@ -30,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -135,7 +136,7 @@ fun DrawCategorySelectScreenContent(
             .padding(top = paddingValues.calculateTopPadding()),
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
-        Title(content = "Shop by Categories")
+        Title(content = stringResource(R.string.shop_by_categories))
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {

@@ -62,8 +62,8 @@
     <string name="address_province">Province</string>
     <string name="address_district">District</string>
     <string name="address_street">Street</string>
-    <string name="cart_item_size">"Size - "</string>
-    <string name="cart_item_color">"Color - "</string>
+    <string name="cart_item_size">"Size - %1$s"</string>
+    <string name="cart_item_color">"Color - %1$s"</string>
     <string name="cart_checkout">Checkout</string>
     <string name="cart_order_discount">Order Discount</string>
     <string name="cart_discount">Discount</string>
@@ -127,4 +127,21 @@
     <string name="wishlist_empty">wishlist_empty</string>
     <string name="wishlist_empty_description">Empty wishlist</string>
     <string name="wishlist_back_description">Back</string>
+    <string name="unknown_product">Unknown Product</string>
+    <string name="checkout">Checkout</string>
+    <string name="shipping_address">Shipping Address</string>
+    <string name="select_address">Select Address</string>
+    <string name="ordered">"Ordered - "</string>
+    <string name="available">"Available - "</string>
+    <string name="out_of_stock">The following item have insufficient stock:</string>
+    <string name="out_of_stock_message">Please adjust the quantity of the item in your cart and try again later.</string>
+    <string name="order_creation_failed">Order creation failed</string>
+    <string name="contact_phone_number">Contact Phone Number</string>
+    <string name="remove_cart_item_message">Are you sure you want to remove the item from the cart?</string>
+    <string name="remove_cart_item">Remove item</string>
+    <string name="search_product_history">History</string>
+    <string name="clear_search_product_history">Clear</string>
+    <string name="no_search_product_result_message">Sorry, we couldn\'t find any matching results for your Search.</string>
+    <string name="product_explore_categories">Explore Categories</string>
+    <string name="shop_by_categories">Shop by Categories</string>
 </resources>
