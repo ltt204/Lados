@@ -14,11 +14,11 @@ import java.util.Locale
 // Enum for order status
 enum class OrderStatus {
     CREATED,
+    // Optional feature: Customer can cancel the order
     CANCELLED,
     CONFIRMED,
     SHIPPED,
     DELIVERED,
-    // Optional feature: Customer can cancel the order
     RETURNED;
     // Optional feature: Customer can return the products after delivery
     // if they are not satisfied

@@ -15,7 +15,7 @@ interface OrderRepository {
         status: OrderStatus,
         limit: Long = 10,
         lastDocument: DocumentSnapshot? = null,
-    ): Flow<OrderPage>
+    ): Result<OrderPage>
     fun getOrderByIdForStaff(orderId: String): Flow<Order>
 
     suspend fun createOrder(

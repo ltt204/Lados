@@ -13,6 +13,7 @@ import com.google.firebase.firestore.toObjects
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.tasks.await
 import org.nullgroup.lados.data.models.Order
 import org.nullgroup.lados.data.models.OrderProduct
@@ -300,31 +301,24 @@ class OrderRepositoryImplement(
         status: OrderStatus,
         limit: Long,
         lastDocument: DocumentSnapshot?,
-    ) = callbackFlow {
-        val query = firestore.collection("orders")
-            .whereEqualTo("currentStatus", status.name)
-            .orderBy("lastUpdatedAt", Query.Direction.DESCENDING)
-            .limit(limit)
+    ): Result<OrderPage> {
+        return try {
+            val query = firestore.collection("orders")
+                .whereEqualTo("currentStatus", status.name)
+                .orderBy("lastUpdatedAt", Query.Direction.DESCENDING)
+                .limit(limit)
 
-        val finalQuery = lastDocument?.let {
-            query.startAfter(it)
-        } ?: query
+            val finalQuery = lastDocument?.let {
+                query.startAfter(it)
+            } ?: query
 
-        val subscription = finalQuery.addSnapshotListener { snapshot, error ->
-            if (error != null) {
-                close(error)
-                return@addSnapshotListener
-            }
+            val snapshot = finalQuery.get().await()
+            val orders = snapshot.toObjects(Order::class.java)
+            val lastDoc = snapshot.documents.lastOrNull()
 
-            if (snapshot != null) {
-                val orders = snapshot.toObjects(Order::class.java)
-                val lastDoc = snapshot.documents.lastOrNull()
-                trySend(OrderPage(orders, lastDoc))
-            }
-        }
-
-        awaitClose {
-            subscription.remove()
+            Result.success(OrderPage(orders, lastDoc))
+        } catch (e: Exception) {
+            Result.failure(e)
         }
     }
 
@@ -351,5 +345,5 @@ class OrderRepositoryImplement(
 
 data class OrderPage(
     val orders: List<Order>,
-    val lastDocument: DocumentSnapshot?,
+    val lastDocument: DocumentSnapshot? = null,
 )

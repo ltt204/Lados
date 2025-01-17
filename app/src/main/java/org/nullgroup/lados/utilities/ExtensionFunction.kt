@@ -182,7 +182,7 @@ fun OrderStatus.getActionsForButtonOfOrder(context: Context): List<Pair<String?,
         }
 
         else -> {
-            TODO("Nothing")
+            listOf()
         }
     }
 }
@@ -234,10 +234,14 @@ fun Long.toDateTimeString(
 
 
 fun getStatusByName(name: String): OrderStatus {
-    return OrderStatus.valueOf(name.uppercase())
+    return OrderStatus.valueOf(name)
 }
 
-fun updateOrderStatusByAction(viewModel: OrderDetailViewModel, orderId: String, buttonAction: String) {
+fun updateOrderStatusByAction(
+    viewModel: OrderDetailViewModel,
+    orderId: String,
+    buttonAction: String,
+) {
     when (buttonAction) {
         "Cancel" -> {
             viewModel.handleEvent(

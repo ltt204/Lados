@@ -50,6 +50,7 @@ import org.nullgroup.lados.data.models.Order
 import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.utilities.OrderStatus
+import org.nullgroup.lados.utilities.capitalizeWords
 import org.nullgroup.lados.utilities.getActionsForButtonOfOrder
 import org.nullgroup.lados.utilities.getByLocale
 import org.nullgroup.lados.utilities.getColorByName
@@ -267,7 +268,7 @@ fun OrderStatusItem(
             )
             Spacer(modifier = Modifier.padding(horizontal = 8.dp))
             Text(
-                text = status.first.getByLocale(context),
+                text = status.first.name.capitalizeWords(),
                 color = LadosTheme.colorScheme.onBackground,
                 style = LadosTheme.typography.titleMedium,
             )

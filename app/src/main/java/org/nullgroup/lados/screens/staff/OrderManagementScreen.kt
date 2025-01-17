@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -26,11 +27,15 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -40,6 +45,7 @@ import androidx.navigation.NavController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import org.nullgroup.lados.data.models.Order
 import org.nullgroup.lados.screens.Screen
@@ -165,10 +171,28 @@ fun OrderList(
     onLoadMore: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    var listState = rememberLazyListState()
+
+    LaunchedEffect(listState) {
+        snapshotFlow {
+            val layoutInfo = listState.layoutInfo
+            val totalItemsNumber = layoutInfo.totalItemsCount
+            val lastVisibleItemIndex = (layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0) + 1
+
+            lastVisibleItemIndex > (totalItemsNumber - 5)
+        }.distinctUntilChanged()
+            .collect { shouldLoadMore ->
+                if (shouldLoadMore && hasMoreOrders && !isLoading) {
+                    onLoadMore()
+                }
+            }
+    }
+
     LazyColumn(
-        modifier = modifier.fillMaxSize()
+        modifier = modifier.fillMaxSize(),
+        state = listState,
     ) {
-        items(orders) { order ->
+        items(items = orders, key = { it.orderId }) { order ->
             OrderListItem(
                 order = order,
                 onClick = { onOrderClick(order.orderId) }
@@ -183,14 +207,6 @@ fun OrderList(
                         .padding(LadosTheme.size.medium)
                         .wrapContentWidth(Alignment.CenterHorizontally)
                 )
-            }
-        }
-
-        if (hasMoreOrders) {
-            item {
-                LaunchedEffect(true) {
-                    onLoadMore()
-                }
             }
         }
     }
