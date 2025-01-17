@@ -30,6 +30,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -39,6 +40,7 @@ import androidx.navigation.NavController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
+import kotlinx.coroutines.launch
 import org.nullgroup.lados.data.models.Order
 import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.screens.Screen.Customer.Order.OrderDetail.ID_ARG
@@ -59,6 +61,7 @@ fun OrderListScreen(
 ) {
     val orders by orderViewModel.orders.collectAsState()
     val pagerState = rememberPagerState()
+    val scope = rememberCoroutineScope()
 
     val orderStatuses = remember {
         listOf(
@@ -102,7 +105,11 @@ fun OrderListScreen(
             orderStatuses.forEachIndexed { index, status ->
                 Tab(
                     selected = pagerState.currentPage == index,
-                    onClick = {},
+                    onClick = {
+                        scope.launch {
+                            pagerState.scrollToPage(index)
+                        }
+                    },
                     text = {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
@@ -134,7 +141,7 @@ fun OrderListScreen(
                 isLoading = orders.isLoading,
                 hasMoreOrders = orders.hasMoreOrders,
                 onOrderClick = { orderId ->
-                    navController.navigate("${Screen.Customer.Order.OrderDetail.route}/$orderId")
+                    navController.navigate("${Screen.Staff.OrderDetail.route}/$orderId")
                 },
                 onLoadMore = {
                     orderViewModel.handleEvent(

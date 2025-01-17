@@ -7,16 +7,17 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.LocalShipping
 import androidx.compose.material.icons.filled.Undo
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import java.util.Locale
 
 // Enum for order status
 enum class OrderStatus {
     CREATED,
+    CANCELLED,
     CONFIRMED,
     SHIPPED,
     DELIVERED,
-    CANCELLED,
     // Optional feature: Customer can cancel the order
     RETURNED;
     // Optional feature: Customer can return the products after delivery

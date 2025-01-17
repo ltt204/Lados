@@ -296,7 +296,7 @@ class OrderRepositoryImplement(
         awaitClose { subscription.remove() }
     }
 
-    override fun getOrderByStatus(
+    override suspend fun getOrderByStatus(
         status: OrderStatus,
         limit: Long,
         lastDocument: DocumentSnapshot?,
@@ -320,6 +320,26 @@ class OrderRepositoryImplement(
                 val orders = snapshot.toObjects(Order::class.java)
                 val lastDoc = snapshot.documents.lastOrNull()
                 trySend(OrderPage(orders, lastDoc))
+            }
+        }
+
+        awaitClose {
+            subscription.remove()
+        }
+    }
+
+    override fun getOrderByIdForStaff(orderId: String) = callbackFlow {
+        val orderRef = firestore.collection("orders").document(orderId)
+
+        val subscription = orderRef.addSnapshotListener { snapshot, error ->
+            if (error != null) {
+                close(error)
+                return@addSnapshotListener
+            }
+
+            if (snapshot != null) {
+                val order = snapshot.toObject(Order::class.java)
+                trySend(order!!).isSuccess
             }
         }
 

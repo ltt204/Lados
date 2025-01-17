@@ -11,11 +11,12 @@ interface OrderRepository {
     fun getOrders(): Flow<List<Order>>
     fun getOrdersForStaff(): Flow<List<Order>>
     fun getOrderById(orderId: String): Flow<Order>
-    fun getOrderByStatus(
+    suspend fun getOrderByStatus(
         status: OrderStatus,
         limit: Long = 10,
         lastDocument: DocumentSnapshot? = null,
     ): Flow<OrderPage>
+    fun getOrderByIdForStaff(orderId: String): Flow<Order>
 
     suspend fun createOrder(
         customerId: String,

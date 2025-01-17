@@ -47,11 +47,13 @@ import androidx.navigation.navArgument
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.nullgroup.lados.screens.Screen
+import org.nullgroup.lados.screens.customer.order.OrderProductsViewScreen
 import org.nullgroup.lados.screens.customer.product.ProductDetailScreen
 import org.nullgroup.lados.screens.staff.ChatScreen
 import org.nullgroup.lados.screens.staff.ChatWithCustomerScreen
 import org.nullgroup.lados.screens.staff.OrderDetailScreen
 import org.nullgroup.lados.screens.staff.OrderListScreen
+import org.nullgroup.lados.screens.staff.OrderProductsScreen
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.viewmodels.customer.profile.ProfileViewModel
 
@@ -243,9 +245,9 @@ fun StaffGraph(
                 }
 
                 composable(
-                    Screen.Customer.Order.OrderDetail.ROUTE_WITH_ARG,
+                    Screen.Staff.OrderDetail.ROUTE_WITH_ARG,
                     arguments = listOf(
-                        navArgument(Screen.Customer.Order.OrderDetail.ID_ARG) {
+                        navArgument(Screen.Staff.OrderDetail.ID_ARG) {
                             type = NavType.StringType
                         })
                 ) {
@@ -253,6 +255,36 @@ fun StaffGraph(
                     OrderDetailScreen(
                         modifier = modifier,
                         navController = navController,
+                    )
+                }
+
+                composable(
+                    Screen.Customer.Order.OrderProductsView.ROUTE_WITH_ARG,
+                    arguments = listOf(
+                        navArgument(Screen.Customer.Order.OrderProductsView.ID_ARG) {
+                            type = NavType.StringType
+                        })
+                ) {
+                    isVisibility = false
+                    OrderProductsViewScreen(
+                        modifier = modifier,
+                        navController = navController,
+                        paddingValues = innerPadding
+                    )
+                }
+
+                composable(
+                    Screen.Staff.OrderProducts.ROUTE_WITH_ARG,
+                    arguments = listOf(
+                        navArgument(Screen.Staff.OrderProducts.ID_ARG) {
+                            type = NavType.StringType
+                        })
+                ) {
+                    isVisibility = false
+                    OrderProductsScreen(
+                        modifier = modifier,
+                        navController = navController,
+                        paddingValues = innerPadding
                     )
                 }
             }
