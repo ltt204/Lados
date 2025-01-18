@@ -271,7 +271,7 @@ fun AddProductScreen(
                 TextButton(
                     onClick = {
                         viewModel.createBlankProduct()
-                        navController.navigate("add_product/${currentProductId.value}")
+                        navController.navigate("add_variant/${currentProductId.value}")
                     }
 
                 ) {

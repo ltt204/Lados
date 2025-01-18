@@ -207,12 +207,13 @@ fun AdminGraph(
                     )
                 }
 
-                composable(  route = Screen.Admin.AddVariant.ROUTE_WITH_ARG,
+                composable(
+                    route = Screen.Admin.AddVariant.ROUTE_WITH_ARG,
                     arguments = listOf(
-                        navArgument(Screen.Admin.AddVariant.ROUTE_WITH_ARG)
+                        navArgument(Screen.Admin.AddVariant.ID_ARG)
                         { type = NavType.StringType }
                     )) {
-                    val productId = it.arguments?.getString(Screen.Admin.AddVariant.ROUTE_WITH_ARG)
+                    val productId = it.arguments?.getString(Screen.Admin.AddVariant.ID_ARG)
 
                     AddVariantScreen(
                         modifier = Modifier,
