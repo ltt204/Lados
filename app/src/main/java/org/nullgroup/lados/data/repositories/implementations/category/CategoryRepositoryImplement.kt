@@ -1,9 +1,12 @@
 package org.nullgroup.lados.data.repositories.implementations.category
 
+import android.util.Log
+import com.google.firebase.Firebase
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.tasks.await
 import org.nullgroup.lados.data.models.Category
 import org.nullgroup.lados.data.remote.models.CategoryRemoteModel
@@ -49,19 +52,20 @@ class CategoryRepositoryImplement(
         ascending: Boolean,
     ): Result<List<Category>> {
         return try {
-            var query = firestore.collection("categories")
+            val db = Firebase.firestore
 
-            // Apply filter if provided
+            var query: Query = db.collection("categories")
+
             if (filterField != null && filterValue != null) {
-                query = query.whereEqualTo(filterField, filterValue) as CollectionReference
+                query = query.whereEqualTo(filterField, filterValue)
             }
 
-            // Apply sorting
-            query = query.orderBy(sortByField, if (ascending) Query.Direction.ASCENDING else Query.Direction.ASCENDING) as CollectionReference
+            query = query.orderBy(
+                sortByField,
+                if (ascending) Query.Direction.ASCENDING else Query.Direction.DESCENDING
+            )
 
-            // Retrieve data from Firestore
             val snapshots = query.get().await()
-
             val categoryList = snapshots.documents.mapNotNull { document ->
                 document.toObject(CategoryRemoteModel::class.java)?.toLocalCategory()
             }
@@ -73,4 +77,41 @@ class CategoryRepositoryImplement(
             Result.failure(e)
         }
     }
+
+    override suspend fun getCategoryId(): Result<String>{
+        return try {
+            val id = firestore.collection("categories").document().id
+            Result.success(id)
+        } catch (e: Exception){
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun addCategory(category: CategoryRemoteModel): Result<Boolean> {
+        return try{
+            firestore.collection("categories").document().set(category)
+            Result.success(true)
+        } catch (e: Exception){
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun updateCategory(id: String, category: CategoryRemoteModel): Result<Boolean> {
+        return try{
+            firestore.collection("categories").document(id).set(category)
+            Result.success(true)
+        } catch (e: Exception){
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun deleteCategory(id: String): Result<Boolean> {
+        return try{
+            firestore.collection("categories").document(id).delete().await()
+            Result.success(true)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
 }

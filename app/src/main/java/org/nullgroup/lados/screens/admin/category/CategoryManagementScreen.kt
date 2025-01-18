@@ -1,21 +1,110 @@
 package org.nullgroup.lados.screens.admin.category
 
+import android.net.Uri
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuDefaults
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedIconButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import coil.compose.SubcomposeAsyncImage
+import coil.request.ImageRequest
+import org.nullgroup.lados.R
+import org.nullgroup.lados.compose.common.LoadOnProgress
+import org.nullgroup.lados.compose.signin.CustomTextField
 import org.nullgroup.lados.data.models.Category
+import org.nullgroup.lados.screens.Screen
+import org.nullgroup.lados.ui.theme.LadosTheme
+import org.nullgroup.lados.utilities.toByteArray
+import org.nullgroup.lados.utilities.toDrawable
+import org.nullgroup.lados.viewmodels.admin.category.CategoryManagementUiState
+import org.nullgroup.lados.viewmodels.admin.category.CategoryManagementViewModel
+import org.nullgroup.lados.viewmodels.admin.category.FilterItem
+import org.nullgroup.lados.viewmodels.admin.category.categoriesSortOption
 
 @Composable
-fun ManageCategoryScreen(
+fun CategoryManagementScreen(
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues = PaddingValues(0.dp),
+    viewModel: CategoryManagementViewModel = hiltViewModel(),
     navController: NavController
 ) {
-    val products by viewModel.editProducts.collectAsState(emptyList())
-    val categories by viewModel.categories.collectAsState(emptyList())
 
-    Log.d("ManageProductScreen", "products: $products")
+    val categoriesUiState by viewModel.categoriesUiState.collectAsState()
+
+    Log.d("ManageProductScreen", "products: $categoriesUiState")
 
     Scaffold(
         modifier = Modifier
@@ -26,20 +115,17 @@ fun ManageCategoryScreen(
         ) { it ->
 
         var searchQuery by remember { mutableStateOf("") }
-        var openFilter by remember { mutableStateOf(false) }
         var openSort by remember { mutableStateOf(false) }
-        var openCategory by remember { mutableStateOf(false) }
         var sortOption by remember { mutableStateOf("All") }
         var categoryOption by remember { mutableStateOf("All") }
-        var priceFilterOption by remember { mutableStateOf("Default") }
-        var ratingFilterOption by remember { mutableStateOf("Default") }
-
+        var showAddDialog by remember { mutableStateOf(false) }
+        var showEditDialog by remember { mutableStateOf(false) }
+        var showConfirmDialog by remember { mutableStateOf(false) }
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .background(LadosTheme.colorScheme.background)
-                .padding(it)
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
@@ -54,25 +140,11 @@ fun ManageCategoryScreen(
                     query = searchQuery,
                     onQueryChange = { value ->
                         searchQuery = value
-                        if (value.isEmpty()) {
-                            viewModel.searchProducts("")
-                        }
+                        viewModel.searchCategories(value)
                     },
                     modifier = Modifier.weight(1f),
-                    onSearch = { viewModel.searchProducts(searchQuery) }
+                    onSearch = { }
                 )
-
-                IconButton(
-                    onClick = { openFilter = !openFilter },
-                    modifier = Modifier
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.icon_filter),
-                        contentDescription = "Filter Button",
-                        tint = LadosTheme.colorScheme.onBackground
-                    )
-                }
-
             }
 
             Row(
@@ -80,8 +152,11 @@ fun ManageCategoryScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
+
                 OptionButton(
-                    item = FilterItem(title = "Sort: $sortOption"),
+                    item = FilterItem(
+                        title = "Sort: $sortOption"
+                    ),
                     modifier = Modifier.wrapContentWidth(),
                     onClick = { openSort = true }
                 )
@@ -90,21 +165,11 @@ fun ManageCategoryScreen(
 
                 Button(
                     onClick = {
-
                         sortOption = "All"
-                        categoryOption = "All"
-                        priceFilterOption = "Default"
-                        ratingFilterOption = "Default"
-
-                        viewModel.sortAndFilter(
-                            categoryOption =  sortOption,
-                            sortOption = categoryOption,
-                            priceOption = priceFilterOption,
-                            ratingOption = ratingFilterOption
-                        )
+                        viewModel.getSortedAndFilteredCategories()
                     },
                     shape = RoundedCornerShape(20.dp),
-                    colors = ButtonDefaults.buttonColors(backgroundColor = LadosTheme.colorScheme.error),
+                    colors = ButtonDefaults.buttonColors(containerColor = LadosTheme.colorScheme.error),
                     modifier = Modifier
                         .weight(1f)
 
@@ -112,96 +177,217 @@ fun ManageCategoryScreen(
                     Text(
                         text = "Reset",
                         fontWeight = FontWeight.Bold,
-                        color = androidx.compose.ui.graphics.Color.White,
+                        color = Color.White,
                         modifier = Modifier.padding(5.dp)
                     )
                 }
             }
 
-            OptionButton(
-                item = FilterItem(title = "Category: $categoryOption"),
-                modifier = Modifier.wrapContentWidth(),
-                onClick = { openCategory = true }
-            )
-
             ManageSection(
-                onAddNewProduct = {
-                    navController.navigate(Screen.Admin.AddProduct.route)
+                onAddNewCategory = {
+                    navController.navigate(Screen.Admin.AddCategory.route)
                 },
-                onDeleteAllSelected = {}
+                onDeleteAllSelected = { showConfirmDialog = true }
             )
 
-            LazyColumn(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(products.size) { index ->
-                    ProductItem(products[index])
+            when (categoriesUiState) {
+                is CategoryManagementUiState.Success -> {
+                    val categories =
+                        (categoriesUiState as CategoryManagementUiState.Success).categories
+                    LazyColumn(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(categories.size) { index ->
+                            CategoryItem(categories[index])
+                        }
+                    }
                 }
+
+                is CategoryManagementUiState.Loading -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(LadosTheme.colorScheme.background),
+                        contentAlignment = Alignment.Center,
+
+                        ) {
+                        CircularProgressIndicator(color = LadosTheme.colorScheme.primary)
+                    }
+                }
+
+                is CategoryManagementUiState.Error -> {
+                    val message = (categoriesUiState as CategoryManagementUiState.Error).message
+                    Log.d("CategoryManagementScreen", "Error: $message")
+                }
+
+            }
+
+            SortDialog(
+                isOpen = openSort,
+                onDismiss = { openSort = false },
+                onSortOptionSelected = {
+                    sortOption = it
+                },
+                currentOption = sortOption,
+                onApply = {
+                    Log.d("CategoryManagementScreen", "onApply: $sortOption")
+                    Log.d(
+                        "CategoryManagementScreen",
+                        "onApply: ${viewModel.extractSortOption(sortOption)}"
+                    )
+                    viewModel.getSortedAndFilteredCategories(
+                        sortByField = viewModel.extractSortOption(sortOption).first,
+                        ascending = viewModel.extractSortOption(sortOption).second
+                    )
+                    openSort = false
+                },
+                onReset = {
+                    openSort = false
+                }
+            )
+        }
+    }
+}
+
+@Composable
+fun CategoryDialog(
+    title: String,
+    show: Boolean,
+    modifier: Modifier = Modifier
+) {
+
+    if (show) {
+        var name by rememberSaveable {
+            mutableStateOf(
+                mapOf(
+                    "vi" to "",
+                    "en" to ""
+                )
+            )
+        }
+
+        var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+        var imageByteArray by remember { mutableStateOf<ByteArray?>(null) }
+
+        val context = LocalContext.current
+
+        val imagePickerLauncher = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.PickVisualMedia()
+        ) { uri: Uri? ->
+
+            uri?.toDrawable(context)?.toByteArray()?.let {
+                imageByteArray = it
+            }
+
+            uri?.let {
+                selectedImageUri = it
             }
         }
 
-        FilterDialog(
-            isOpen = openFilter,
-            onDismiss = { openFilter = false },
-            onRatingOptionSelected = {
-                ratingFilterOption = it
-            },
-            onPriceOptionSelected = {
-                priceFilterOption = it
-            },
-            currentPrice = priceFilterOption,
-            currentRating = ratingFilterOption,
-            onApply = {
-                viewModel.sortAndFilter(
-                    categoryOption = categoryOption,
-                    sortOption = sortOption,
-                    priceOption = priceFilterOption,
-                    ratingOption = ratingFilterOption
+        Dialog(
+            onDismissRequest = { },
+            properties = DialogProperties(
+                dismissOnBackPress = true,
+                dismissOnClickOutside = true
+            )
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(LadosTheme.colorScheme.background)
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Text(
+                    text = title,
+                    style = LadosTheme.typography.titleLarge.copy(
+                        color = LadosTheme.colorScheme.onBackground
+                    )
                 )
-                openFilter = false
-            }
-        )
 
-        SortDialog(
-            isOpen = openSort,
-            onDismiss = { openSort = false },
-            onSortOptionSelected = {
-                sortOption = it
-            },
-            currentOption = sortOption,
-            onApply = {
-                viewModel.sortAndFilter(
-                    categoryOption = categoryOption,
-                    sortOption = sortOption,
-                    priceOption = priceFilterOption,
-                    ratingOption = ratingFilterOption
-                )
-                openSort = false
-            },
-            onReset = {
-                openSort = false
-            }
-        )
+                Row(
+                    modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center
+                ) {
+                    CategoryImageSection(
+                        imageUri = selectedImageUri?.toString()
+                            ?: "https://firebasestorage.googleapis.com/v0/b/lados-8509b.firebasestorage.app/o/images%2Fproducts%2Fimg_placeholder.jpg?alt=media&token=1f1fed12-8ead-4433-b2a4-c5e1d765290e",
+                        onEditImage = {
+                            imagePickerLauncher.launch(
+                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                            )
+                        }
+                    )
+                }
 
-        CategoryDialog(
-            isOpen = openCategory,
-            onDismiss = { openCategory = false },
-            options = categories.map { it.categoryName },
-            onCategoryOptionSelected = {
-                categoryOption = it
-            },
-            currentOption = categoryOption,
-            onApply = {
-                viewModel.sortAndFilter(
-                    categoryOption = categoryOption,
-                    sortOption = sortOption,
-                    priceOption = priceFilterOption,
-                    ratingOption = ratingFilterOption
+                Text(
+                    text = "Name",
+                    style = LadosTheme.typography.titleMedium,
+                    color = LadosTheme.colorScheme.onBackground,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.fillMaxWidth()
                 )
-                openCategory = false
+
+                CustomTextField(
+                    label = "Vietnamese Name",
+                    text = name["vi"] ?: "",
+                    onValueChange = {
+                        name = name.toMutableMap().apply { this["vi"] = it }
+
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(
+                        imeAction = ImeAction.Done
+                    ),
+                    isError = false
+                )
+
+                CustomTextField(
+                    label = "English Name",
+                    text = name["en"] ?: "",
+                    onValueChange = {
+                        name = name.toMutableMap().apply { this["en"] = it }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(
+                        imeAction = ImeAction.Done
+                    ),
+                    isError = false
+                )
+
+                Spacer(modifier = Modifier.size(4.dp))
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(LadosTheme.colorScheme.background),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Button(
+                        onClick = {
+
+                        }, shape = RoundedCornerShape(12.dp), colors = ButtonDefaults.buttonColors(
+                            containerColor = LadosTheme.colorScheme.primary,
+                            contentColor = LadosTheme.colorScheme.onPrimary
+                        )
+                    ) {
+                        Text(
+                            text = "Confirm",
+                            style = LadosTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(8.dp)
+                        )
+                    }
+
+                    Button(onClick = {
+
+                    }) {
+                        Text(text = "Cancel")
+                    }
+                }
+
             }
-        )
+        }
     }
 }
 
@@ -224,12 +410,12 @@ fun SearchTextField(
             Text(
                 text = placeholder,
                 style = LadosTheme.typography.bodySmall.copy(
-                    color = androidx.compose.ui.graphics.Color.Gray
+                    color = Color.Gray
                 )
             )
         },
         leadingIcon = {
-            Icon(
+            androidx.compose.material3.Icon(
                 imageVector = Icons.Default.Search,
                 contentDescription = "Search Icon"
             )
@@ -237,7 +423,7 @@ fun SearchTextField(
         trailingIcon = {
             if (query.isNotEmpty()) {
                 IconButton(onClick = { onQueryChange("") }) {
-                    Icon(
+                    androidx.compose.material3.Icon(
                         imageVector = Icons.Default.Close,
                         contentDescription = "Clear Search"
                     )
@@ -255,9 +441,8 @@ fun SearchTextField(
         colors = TextFieldDefaults.colors(
             focusedContainerColor = LadosTheme.colorScheme.surfaceContainerHighest,
             unfocusedContainerColor = LadosTheme.colorScheme.surfaceContainerHighest,
-            focusedIndicatorColor = androidx.compose.ui.graphics.Color.Transparent,
-            unfocusedIndicatorColor = androidx.compose.ui.graphics.Color.Transparent,
-            cursorColor = MaterialTheme.colors.primary
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent
         ),
         keyboardOptions = KeyboardOptions.Default.copy(
             imeAction = ImeAction.Search
@@ -276,49 +461,8 @@ fun SearchTextField(
 }
 
 @Composable
-fun OptionButton(
-    item: FilterItem,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit = {}
-) {
-    Button(
-        onClick = { onClick() },
-        shape = RoundedCornerShape(20.dp),
-        colors = ButtonDefaults.buttonColors(
-            backgroundColor = LadosTheme.colorScheme.primary
-        ),
-        modifier = modifier
-            .height(40.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .padding(horizontal = 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = item.title,
-                style = LadosTheme.typography.bodySmall.copy(
-                    color = LadosTheme.colorScheme.onPrimary
-                )
-            )
-            Spacer(modifier = Modifier.size(8.dp))
-            Icon(
-                painter = painterResource(R.drawable.arrowright2),
-                contentDescription = "Dropdown Icon",
-                modifier = Modifier.rotate(90f),
-                tint = LadosTheme.colorScheme.onBackground
-            )
-
-        }
-    }
-
-}
-
-
-@Composable
 fun ManageSection(
-    onAddNewProduct: () -> Unit,
+    onAddNewCategory: () -> Unit,
     onDeleteAllSelected: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -328,7 +472,7 @@ fun ManageSection(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Button(
-            onClick = onAddNewProduct,
+            onClick = onAddNewCategory,
             shape = RoundedCornerShape(20.dp),
             modifier = Modifier
                 .weight(1f)
@@ -337,7 +481,7 @@ fun ManageSection(
             Text(
                 text = "+ New",
                 fontWeight = FontWeight.Bold,
-                color = androidx.compose.ui.graphics.Color.White,
+                color = Color.White,
                 modifier = Modifier.padding(5.dp)
             )
         }
@@ -348,12 +492,12 @@ fun ManageSection(
             modifier = Modifier
                 .weight(1f)
                 .padding(start = 8.dp),
-            colors = ButtonDefaults.buttonColors(backgroundColor = androidx.compose.ui.graphics.Color.Red)
+            colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
         ) {
             Text(
                 text = "Delete All",
                 fontWeight = FontWeight.Bold,
-                color = androidx.compose.ui.graphics.Color.White,
+                color = Color.White,
                 modifier = Modifier.padding(5.dp)
             )
         }
@@ -361,339 +505,89 @@ fun ManageSection(
 }
 
 @Composable
-fun ProductItem(
-    product: Product,
+fun CategoryItem(
+    category: Category,
+    onEdit: (String) -> Unit = {},
+    onDelete: (String) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-    val stockCount = product.variants.sumOf { it.quantityInStock }
-    val name = product.name
-    val salePrice = product.variants.firstOrNull()?.salePrice ?: 0.0
-    val originalPrice = product.variants.firstOrNull()?.originalPrice ?: 0.0
-    val variantCount = product.variants.size
-    val rating = product.engagements.map { it.ratings }.average()
-    val commentCount = product.engagements.size
-    val image = product.variants.firstOrNull()?.images.orEmpty().firstOrNull()?.link
+    var expanded by remember { mutableStateOf(false) }
 
     Card(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .clickable { }
-            .animateContentSize(),
-        elevation = CardDefaults.elevatedCardElevation(
-            defaultElevation = 2.dp,
-            pressedElevation = 8.dp,
-            focusedElevation = 4.dp
-        ),
+            .padding(8.dp),
+        shape = RoundedCornerShape(10.dp),
         colors = CardDefaults.cardColors(
-            containerColor = LadosTheme.colorScheme.surfaceContainer,
+            containerColor = LadosTheme.colorScheme.surfaceContainerHighest
         )
     ) {
-        Column {
-            // Image Container với overlay gradient
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(180.dp)
-            ) {
-
-                SubcomposeAsyncImage(
-                    model = coil.request.ImageRequest.Builder(LocalContext.current)
-                        .data(image)
-                        .crossfade(true)
-                        .build(),
-                    contentDescription = "Loaded Image",
-                    loading = {
-                        LoadOnProgress(
-                            modifier = Modifier,
-                            content = { CircularProgressIndicator() }
-                        )
-                    },
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Inside
-                )
-
-                // Gradient overlay
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(
-                            brush = Brush.verticalGradient(
-                                colors = listOf(
-                                    androidx.compose.ui.graphics.Color.Transparent,
-                                    androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.3f)
-                                )
-                            )
-                        )
-                )
-
-                // Stock badge
-                Surface(
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .align(Alignment.TopEnd),
-                    shape = RoundedCornerShape(12.dp),
-                    color = if (stockCount > 0)
-                        LadosTheme.colorScheme.primary.copy(0.9f)
-                    else
-                        LadosTheme.colorScheme.error.copy(alpha = 0.9f)
-                ) {
-                    Text(
-                        text = if (stockCount > 0) "In Stock: $stockCount" else "Out of Stock",
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                        color = androidx.compose.ui.graphics.Color.White
-                    )
-                }
-            }
-
-            // Content
-            Column(
-                modifier = Modifier
-                    .padding(16.dp)
-                    .fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                // Product name
-                Text(
-                    text = name,
-                    style = LadosTheme.typography.titleSmall.copy(
-                        fontWeight = FontWeight.Bold,
-                        color = LadosTheme.colorScheme.onBackground
-                    ),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-
-                // Price and Rating row
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    // Price with currency symbol
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "$originalPrice",
-                            style = LadosTheme.typography.bodySmall.copy(
-                                fontWeight = FontWeight.Bold,
-                                color = LadosTheme.colorScheme.primary
-                            )
-                        )
-                        Text(
-                            text = "$salePrice",
-                            style = LadosTheme.typography.bodySmall.copy(
-                                fontWeight = FontWeight.Bold,
-                                color = LadosTheme.colorScheme.onPrimary
-                            ),
-                            textDecoration = TextDecoration.LineThrough
-                        )
-                    }
-
-                    // Rating
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(5.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = String.format("%.2f", rating),
-                            style = LadosTheme.typography.bodySmall.copy(
-                                fontWeight = FontWeight.Bold,
-                                color = LadosTheme.colorScheme.primary
-                            )
-                        )
-
-                        Icon(
-                            painter = painterResource(R.drawable.star_icon),
-                            contentDescription = "Star",
-                            modifier = Modifier.size(16.dp),
-                            tint = LadosTheme.colorScheme.primary
-                        )
-
-                    }
-                }
-
-                // Additional info row
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    // Variants count
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.Style,
-                            contentDescription = "Variants",
-                            modifier = Modifier.size(16.dp),
-                            tint = LadosTheme.colorScheme.onBackground
-
-                        )
-                        Text(
-                            text = "$variantCount variants",
-                            style = LadosTheme.typography.bodySmall.copy(
-                                fontWeight = FontWeight.Bold,
-                                color = LadosTheme.colorScheme.onBackground
-                            )
-                        )
-                    }
-
-                    // Comments count
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.Comment,
-                            contentDescription = "Comments",
-                            modifier = Modifier.size(16.dp),
-                            tint = LadosTheme.colorScheme.onBackground
-
-                        )
-                        Text(
-                            text = "$commentCount reviews",
-                            style = LadosTheme.typography.bodySmall.copy(
-                                fontWeight = FontWeight.Bold,
-                                color = LadosTheme.colorScheme.onBackground
-                            )
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun FilterDialog(
-    modifier: Modifier = Modifier,
-    isOpen: Boolean = true,
-    onRatingOptionSelected: (String) -> Unit = {},
-    onPriceOptionSelected: (String) -> Unit = {},
-    currentPrice: String = "Default",
-    currentRating: String = "Default",
-    onDismiss: () -> Unit = {},
-    onApply: () -> Unit = {}
-) {
-
-    var isReset by remember { mutableStateOf(false) }
-
-    LaunchedEffect(isReset) {
-        Log.d("FilterDialog", "isReset: $isReset")
-    }
-
-    if (isOpen) {
-        Dialog(
-            onDismissRequest = { onDismiss() },
-            properties = androidx.compose.ui.window.DialogProperties(
-                dismissOnBackPress = true,
-                dismissOnClickOutside = true
-            )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Card(
+            SubcomposeAsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(category.categoryImage)
+                    .crossfade(true)
+                    .build(),
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = LadosTheme.colorScheme.background
-                ),
-                elevation = CardDefaults.elevatedCardElevation(8.dp)
-            ) {
-                Column(
-                    modifier = modifier
-                        .fillMaxWidth()
+                    .size(40.dp)
+                    .clip(CircleShape),
+                contentDescription = category.categoryName,
+            )
 
+            Text(
+                text = category.categoryName,
+                style = LadosTheme.typography.titleSmall.copy(
+                    color = LadosTheme.colorScheme.onBackground
+                )
+            )
+
+            Box {  // Wrap the IconButton and DropdownMenu in a Box
+                IconButton(
+                    onClick = { expanded = !expanded },
+                    modifier = Modifier
                 ) {
-                    DropdownWithTitle(
-                        title = "Price",
-                        options = priceOptions,
-                        isReset = isReset,
-                        currentOption = currentPrice,
-                        onOptionSelected = {
-                            onPriceOptionSelected(it)
-                            if(isReset) isReset = false
-                        }
-                    )
-                    DropdownWithTitle(
-                        title = "Rating",
-                        currentOption = currentRating,
-                        options = ratingOptions,
-                        isReset = isReset,
-                        onOptionSelected = {
-                            onRatingOptionSelected(it)
-                            if(isReset) isReset = false
-                        }
+                    androidx.compose.material3.Icon(
+                        imageVector = Icons.Filled.MoreVert,
+                        contentDescription = "Edit Button",
+                        tint = LadosTheme.colorScheme.onBackground
                     )
                 }
 
-                Row(
+                // Use Box with modifier to control the dropdown menu's position
+                DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false },
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp),
-                    horizontalArrangement = Arrangement.End,
-                    verticalAlignment = Alignment.CenterVertically
+                        .align(Alignment.TopEnd) // Position it below the icon
+                    // Optional: Adjust vertical position if needed
                 ) {
-                    Button(
+                    DropdownMenuItem(
+                        text = { Text("Edit") },
                         onClick = {
-                            onDismiss()
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            backgroundColor = LadosTheme.colorScheme.error
-                        ),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Text(
-                            text = "Cancel",
-                            color = LadosTheme.colorScheme.onError
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(5.dp))
-
-                    Button(
+                            onEdit(category.categoryId)
+                            expanded = false
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Delete") },
                         onClick = {
-                            isReset = true
-                            onRatingOptionSelected("Default")
-                            onPriceOptionSelected("Default")
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            backgroundColor = LadosTheme.colorScheme.background
-                        ),
-                        shape = RoundedCornerShape(12.dp),
-                        border = BorderStroke(1.dp, LadosTheme.colorScheme.primary),
-
-                        ) {
-                        Text(
-                            text = "Reset",
-                            color = LadosTheme.colorScheme.primary
-                        )
-
-                    }
-                    Spacer(modifier = Modifier.width(5.dp))
-
-                    Button(
-                        onClick = { onApply() },
-                        colors = ButtonDefaults.buttonColors(
-                            backgroundColor = LadosTheme.colorScheme.primary
-                        ),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Text(
-                            text = "Apply",
-                            color = LadosTheme.colorScheme.onPrimary
-                        )
-                    }
+                            onDelete(category.categoryId)
+                            expanded = false
+                        }
+                    )
                 }
             }
         }
     }
 }
 
-@Preview
+
 @Composable
 fun SortDialog(
     modifier: Modifier = Modifier,
@@ -709,7 +603,7 @@ fun SortDialog(
     if (isOpen) {
         Dialog(
             onDismissRequest = { onDismiss() },
-            properties = androidx.compose.ui.window.DialogProperties(
+            properties = DialogProperties(
                 dismissOnBackPress = true,
                 dismissOnClickOutside = true
             )
@@ -731,7 +625,7 @@ fun SortDialog(
                 ) {
                     DropdownWithTitle(
                         "Sort by",
-                        sortOptions,
+                        categoriesSortOption,
                         isReset = isReset,
                         currentOption = currentOption,
                         onOptionSelected = {
@@ -751,7 +645,7 @@ fun SortDialog(
                     Button(
                         onClick = { onDismiss() },
                         colors = ButtonDefaults.buttonColors(
-                            backgroundColor = LadosTheme.colorScheme.error
+                            containerColor = LadosTheme.colorScheme.error
                         ),
                         shape = RoundedCornerShape(12.dp)
                     ) {
@@ -769,7 +663,7 @@ fun SortDialog(
                             //onReset()
                         },
                         colors = ButtonDefaults.buttonColors(
-                            backgroundColor = LadosTheme.colorScheme.background
+                            containerColor = LadosTheme.colorScheme.background
                         ),
                         shape = RoundedCornerShape(12.dp),
                         border = BorderStroke(1.dp, LadosTheme.colorScheme.primary),
@@ -786,7 +680,7 @@ fun SortDialog(
                     Button(
                         onClick = { onApply() },
                         colors = ButtonDefaults.buttonColors(
-                            backgroundColor = LadosTheme.colorScheme.primary
+                            containerColor = LadosTheme.colorScheme.primary
                         ),
                         shape = RoundedCornerShape(12.dp)
                     ) {
@@ -799,117 +693,6 @@ fun SortDialog(
             }
         }
     }
-}
-
-@Composable
-fun CategoryDialog(
-    modifier: Modifier = Modifier,
-    isOpen: Boolean = true,
-    onDismiss: () -> Unit = {},
-    currentOption: String = "All",
-    options: List<String> = emptyList(),
-    onCategoryOptionSelected: (String) -> Unit = {},
-    onReset: () -> Unit = {},
-    onApply: () -> Unit = {}
-) {
-
-
-    var isReset by remember { mutableStateOf(false) }
-
-    if (isOpen) {
-        Dialog(
-            onDismissRequest = { onDismiss() },
-            properties = androidx.compose.ui.window.DialogProperties(
-                dismissOnBackPress = true,
-                dismissOnClickOutside = true
-            )
-        ) {
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = LadosTheme.colorScheme.background
-                ),
-                elevation = CardDefaults.elevatedCardElevation(8.dp)
-            ) {
-                Column(
-                    modifier = modifier
-                        .fillMaxWidth()
-
-                ) {
-                    DropdownWithTitle(
-                        "Category",
-                        options,
-                        currentOption = currentOption,
-                        isReset = isReset,
-                        onOptionSelected = {
-                            onCategoryOptionSelected(it)
-                            isReset = false
-                        }
-                    )
-                }
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp),
-                    horizontalArrangement = Arrangement.End,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Button(
-                        onClick = { onDismiss() },
-                        colors = ButtonDefaults.buttonColors(
-                            backgroundColor = LadosTheme.colorScheme.error
-                        ),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Text(
-                            text = "Cancel",
-                            color = LadosTheme.colorScheme.onError
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(5.dp))
-
-                    Button(
-                        onClick = {
-                            isReset = true
-                            onCategoryOptionSelected("All")
-                            //onReset()
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            backgroundColor = LadosTheme.colorScheme.background
-                        ),
-                        shape = RoundedCornerShape(12.dp),
-                        border = BorderStroke(1.dp, LadosTheme.colorScheme.primary),
-
-                        ) {
-                        Text(
-                            text = "Reset",
-                            color = LadosTheme.colorScheme.primary
-                        )
-
-                    }
-                    Spacer(modifier = Modifier.width(5.dp))
-
-                    Button(
-                        onClick = { onApply() },
-                        colors = ButtonDefaults.buttonColors(
-                            backgroundColor = LadosTheme.colorScheme.primary
-                        ),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Text(
-                            text = "Apply",
-                            color = LadosTheme.colorScheme.onPrimary
-                        )
-                    }
-                }
-            }
-        }
-    }
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -953,7 +736,7 @@ fun <T> GenericDropdown(
                     color = LadosTheme.colorScheme.onSurface
                 )
 
-                Icon(
+                androidx.compose.material3.Icon(
                     imageVector = Icons.Filled.KeyboardArrowDown,
                     contentDescription = "Dropdown Arrow",
                     modifier = Modifier
@@ -1013,7 +796,7 @@ fun DropdownWithTitle(
         selectedOption = currentOption
     }
 
-    if(isReset) selectedOption = options[0]
+    if (isReset) selectedOption = options[0]
 
     Column(
         modifier = Modifier
@@ -1023,7 +806,6 @@ fun DropdownWithTitle(
     ) {
         Text(
             text = title,
-            style = MaterialTheme.typography.h6,
             modifier = Modifier.padding(bottom = 16.dp),
             color = LadosTheme.colorScheme.onBackground
         )
@@ -1042,3 +824,143 @@ fun DropdownWithTitle(
     }
 }
 
+
+@Composable
+fun OptionButton(
+    item: FilterItem,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {}
+) {
+    Button(
+        onClick = { onClick() },
+        shape = RoundedCornerShape(20.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = LadosTheme.colorScheme.primary
+        ),
+        modifier = modifier
+            .height(40.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(horizontal = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = item.title,
+                style = LadosTheme.typography.bodySmall.copy(
+                    color = LadosTheme.colorScheme.onPrimary
+                )
+            )
+            Spacer(modifier = Modifier.size(8.dp))
+            androidx.compose.material3.Icon(
+                painter = painterResource(R.drawable.arrowright2),
+                contentDescription = "Dropdown Icon",
+                modifier = Modifier.rotate(90f),
+                tint = LadosTheme.colorScheme.onBackground
+            )
+
+        }
+    }
+
+}
+
+
+@Composable
+fun CategoryImageSection(
+    modifier: Modifier = Modifier,
+    imageUri: String,
+    onEditImage: () -> Unit = {},
+) {
+
+    Box(
+        modifier = modifier
+            .wrapContentSize()
+            .padding(bottom = 16.dp),
+        contentAlignment = Alignment.Center
+    ) {
+
+        SubcomposeAsyncImage(
+            modifier = Modifier
+                .height(200.dp)
+                .clip(RoundedCornerShape(12.dp)),
+            contentScale = ContentScale.Fit,
+            alignment = Alignment.Center,
+            loading = {
+                LoadOnProgress(
+                    modifier = Modifier
+                        .clip(CircleShape)
+                ) {
+                    CircularProgressIndicator(modifier = Modifier.size(48.dp))
+                    Spacer(modifier = Modifier.padding(top = 16.dp))
+                }
+            },
+            model = ImageRequest
+                .Builder(context = LocalContext.current)
+                .data(imageUri)
+                .crossfade(true)
+                .build(),
+            contentDescription = "Variant Image"
+        )
+
+        OutlinedIconButton(
+            modifier = Modifier
+                .clip(CircleShape)
+                .align(Alignment.BottomEnd)
+                .size(30.dp),
+            colors = IconButtonDefaults.outlinedIconButtonColors(
+                contentColor = Color.White,
+                containerColor = Color(0xFF8E6CEF)
+            ),
+            border = BorderStroke(2.dp, Color.White),
+            onClick = onEditImage
+        ) {
+            androidx.compose.material3.Icon(
+                modifier = Modifier.size(16.dp),
+                imageVector = Icons.Filled.Edit,
+                contentDescription = null
+            )
+        }
+    }
+}
+
+@Composable
+fun ConfirmDialog(
+    title: String,
+    message: String,
+    onConfirm: () -> Unit,
+    onCancel: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = { onDismiss() },
+        title = {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        },
+        text = {
+            Text(
+                text = message,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        },
+        confirmButton = {
+            TextButton(
+                onClick = { onConfirm() }
+            ) {
+                Text("Confirm", color = MaterialTheme.colorScheme.primary)
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = { onCancel() }
+            ) {
+                Text("Cancel", color = MaterialTheme.colorScheme.error)
+            }
+        }
+    )
+}

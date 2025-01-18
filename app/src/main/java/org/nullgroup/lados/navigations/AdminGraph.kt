@@ -44,6 +44,8 @@ import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.nullgroup.lados.screens.Screen
+import org.nullgroup.lados.screens.admin.category.AddCategoryScreen
+import org.nullgroup.lados.screens.admin.category.CategoryManagementScreen
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.viewmodels.customer.profile.ProfileViewModel
 
@@ -89,6 +91,17 @@ fun AdminGraph(
                             }
                             currentDestination = Screen.Admin.Analytics
                             navController.navigate(Screen.Admin.Analytics.route)
+                        }
+                    )
+                    NavigationDrawerItem(
+                        label = { Text(text = Screen.Admin.CategoryManagement.name!!) },
+                        selected = currentDestination.route == Screen.Admin.CategoryManagement.route,
+                        onClick = {
+                            scope.launch {
+                                drawerState.close()
+                            }
+                            currentDestination = Screen.Admin.CategoryManagement
+                            navController.navigate(Screen.Admin.CategoryManagement.route)
                         }
                     )
                     NavigationDrawerItem(
@@ -175,6 +188,22 @@ fun AdminGraph(
 
                 composable(route = Screen.Admin.UserManagement.route) {
                     // UserManagement()
+                }
+
+                composable(route = Screen.Admin.CategoryManagement.route) {
+                    CategoryManagementScreen(
+                        modifier = Modifier,
+                        paddingValues = innerPadding,
+                        navController = navController,
+                    )
+                }
+
+                composable(route = Screen.Admin.AddCategory.route) {
+                    AddCategoryScreen(
+                        modifier = Modifier,
+                        paddingValues = innerPadding,
+                        navController = navController
+                    )
                 }
 
                 composable(route = Screen.Admin.ProductManagement.route) {
