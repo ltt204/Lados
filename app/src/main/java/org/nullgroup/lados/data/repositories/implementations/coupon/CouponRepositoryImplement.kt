@@ -4,9 +4,13 @@ import android.util.Log
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import org.nullgroup.lados.data.models.CustomerCoupon
 import org.nullgroup.lados.data.models.ServerCoupon
@@ -196,6 +200,69 @@ class CouponRepositoryImplement(
             Result.success(true)
         } catch (e: Exception) {
             Log.e("CouponRepositoryImplement", "Error adding coupon to server: ", e)
+            Result.failure(e)
+        }
+    }
+
+    override fun getCouponsForAdmin(): Flow<List<ServerCoupon>> = callbackFlow {
+        val couponRef = firestore.collection(serverCouponCollectionName)
+        val listenerRegistration = couponRef
+            .addSnapshotListener { snapshot, e ->
+                if (e != null) {
+                    close(e)
+                    return@addSnapshotListener
+                }
+
+                if (snapshot == null) {
+                    return@addSnapshotListener
+                }
+
+                val serverCoupons = snapshot.documents.mapNotNull {
+                    it.toObject(ServerCoupon::class.java)
+                }
+                trySend(serverCoupons)
+            }
+
+        awaitClose { listenerRegistration.remove() }
+    }
+
+    override suspend fun updateServerCoupon(coupon: ServerCoupon): Result<Boolean> {
+        return try {
+            firestore.runTransaction { transaction ->
+                val couponRef = firestore
+                    .collection(serverCouponCollectionName)
+                    .document(coupon.id)
+                val existingCoupon = transaction.get(couponRef).toObject(ServerCoupon::class.java)
+                if (existingCoupon == null) {
+                    throw Exception("Coupon not found")
+                }
+                transaction.set(
+                    couponRef,
+                    coupon.copy(code = coupon.code.trim().uppercase()),
+                )
+                true
+            }.await().let {
+                Result.success(it)
+            }.onFailure { e: Throwable ->
+                Log.e("CouponRepositoryImplement", "Error updating server coupon: ", e)
+                Result.failure<Boolean>(e)
+            }
+        } catch (e: Exception) {
+            Log.e("CouponRepositoryImplement", "Error updating server coupon: ", e)
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun deleteServerCoupon(couponId: String): Result<Boolean> {
+        return try {
+            firestore
+                .collection(serverCouponCollectionName)
+                .document(couponId)
+                .delete()
+                .await()
+            Result.success(true)
+        } catch (e: Exception) {
+            Log.e("CouponRepositoryImplement", "Error deleting server coupon: ", e)
             Result.failure(e)
         }
     }

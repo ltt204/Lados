@@ -87,6 +87,17 @@ data class ServerCoupon(
          * Equivalent to 1 day
          */
         const val DEFAULT_USAGE_DURATION_IN_SECOND: Long = 60 * 60 * 24 + 1
+
+        enum class CouponValidationError {
+            EMPTY_CODE,
+            OUT_OF_RANGE_DISCOUNT_PERCENTAGE,
+            NEGATIVE_MAXIMUM_DISCOUNT,
+            NEGATIVE_MINIMUM_ORDER_AMOUNT,
+            END_DATE_BEFORE_START_DATE,
+            END_DATE_BEFORE_CURRENT_DATE,
+            NON_POSITIVE_USAGE_DURATION,
+            NEGATIVE_MAXIMUM_REDEMPTION,
+        }
     }
 
 }

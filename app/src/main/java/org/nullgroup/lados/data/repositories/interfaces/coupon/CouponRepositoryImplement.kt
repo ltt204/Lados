@@ -1,5 +1,6 @@
 package org.nullgroup.lados.data.repositories.interfaces.coupon
 
+import kotlinx.coroutines.flow.Flow
 import org.nullgroup.lados.data.models.CustomerCoupon
 import org.nullgroup.lados.data.models.ServerCoupon
 
@@ -17,4 +18,7 @@ interface CouponRepository {
     ): Result<Boolean>
 
     suspend fun addCouponToServer(coupon: ServerCoupon): Result<Boolean>
+    fun getCouponsForAdmin(): Flow<List<ServerCoupon>>
+    suspend fun updateServerCoupon(coupon: ServerCoupon): Result<Boolean>
+    suspend fun deleteServerCoupon(couponId: String): Result<Boolean>
 }
