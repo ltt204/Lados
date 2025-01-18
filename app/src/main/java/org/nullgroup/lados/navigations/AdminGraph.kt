@@ -44,6 +44,8 @@ import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.nullgroup.lados.screens.Screen
+import org.nullgroup.lados.screens.admin.product.AddProductScreen
+import org.nullgroup.lados.screens.admin.product.ManageProductScreen
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.viewmodels.customer.profile.ProfileViewModel
 
@@ -145,7 +147,10 @@ fun AdminGraph(
             topBar = {
                 CenterAlignedTopAppBar(
                     colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                        containerColor = LadosTheme.colorScheme.background
+                        containerColor = LadosTheme.colorScheme.background,
+                        scrolledContainerColor = LadosTheme.colorScheme.background,
+                        navigationIconContentColor = LadosTheme.colorScheme.onBackground,
+                        titleContentColor = LadosTheme.colorScheme.onBackground,
                     ),
                     title = { Text(text = currentDestination.name!!) },
                     navigationIcon = {
@@ -183,6 +188,16 @@ fun AdminGraph(
 //                        paddingValues = innerPadding,
 //                        navController = navController,
 //                    )
+
+//                     ManageProductScreen(
+//                         modifier = Modifier,
+//                         paddingValues = innerPadding,
+//                     )
+
+                    AddProductScreen(
+                        modifier = Modifier,
+                        paddingValues = innerPadding,
+                    )
                 }
 
                 composable(route = Screen.Admin.PromotionManagement.route) {

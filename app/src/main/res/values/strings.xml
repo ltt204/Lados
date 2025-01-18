@@ -111,4 +111,6 @@
     <string name="wishlist_empty">wishlist_empty</string>
     <string name="wishlist_empty_description">Empty wishlist</string>
     <string name="wishlist_back_description">Back</string>
+    <string name="english_name">English name</string>
+    <string name="vietnamese_name">Vietnamese name</string>
 </resources>

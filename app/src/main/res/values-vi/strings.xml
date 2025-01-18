@@ -109,4 +109,6 @@
     <string name="wishlist_empty">Danh sách yêu thích của bạn trống</string>
     <string name="wishlist_empty_description">Danh sách yêu thích trống</string>
     <string name="wishlist_back_description">Trở về</string>
+    <string name="english_name">Tên tiếng Anh</string>
+    <string name="vietnamese_name">Tên tiếng Việt</string>
 </resources>
