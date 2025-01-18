@@ -202,6 +202,15 @@ sealed class Screen(
         data object ProductManagement :
             Admin("Product Management", "product_management", Icons.Default.AccountCircle)
 
+        data object AddProduct :
+            Admin("Add Product", "add_product", Icons.Default.AccountCircle)
+
+        data object  AddVariant:
+            Admin("Add Variant", "add_variant", Icons.Default.AccountCircle){
+            const val ID_ARG = "product_id"
+            const val ROUTE_WITH_ARG = "add_variant/{$ID_ARG}"
+            }
+
         data object PromotionManagement :
             Admin("Promotion Management", "promotion_management", Icons.Default.AccountCircle)
 

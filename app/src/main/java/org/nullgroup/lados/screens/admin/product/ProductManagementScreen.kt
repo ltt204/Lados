@@ -73,10 +73,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import coil.compose.SubcomposeAsyncImage
 import org.nullgroup.lados.R
 import org.nullgroup.lados.compose.common.LoadOnProgress
 import org.nullgroup.lados.data.models.Product
+import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.viewmodels.admin.product.FilterItem
 import org.nullgroup.lados.viewmodels.admin.product.ProductManagementScreenViewModel
@@ -90,7 +93,8 @@ import org.nullgroup.lados.viewmodels.admin.product.sortOptions
 fun ManageProductScreen(
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues = PaddingValues(0.dp),
-    viewModel: ProductManagementScreenViewModel = hiltViewModel()
+    viewModel: ProductManagementScreenViewModel = hiltViewModel(),
+    navController: NavController
 ) {
     val products by viewModel.editProducts.collectAsState(emptyList())
     val categories by viewModel.categories.collectAsState(emptyList())
@@ -205,7 +209,9 @@ fun ManageProductScreen(
             )
 
             ManageSection(
-                onAddNewProduct = {},
+                onAddNewProduct = {
+                    navController.navigate(Screen.Admin.AddProduct.route)
+                },
                 onDeleteAllSelected = {}
             )
 

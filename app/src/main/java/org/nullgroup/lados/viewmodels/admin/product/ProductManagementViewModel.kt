@@ -183,11 +183,7 @@ class ProductManagementScreenViewModel @Inject constructor(
         }
     }
 
-    fun addProduct(product: Product) {
-        viewModelScope.launch {
-            productRepository.addProductToFireStore(product)
-        }
-    }
+
 
     private fun getSortOption(sortOption: String): Pair<String, String> {
         return when (sortOption) {

@@ -31,20 +31,22 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.screens.admin.product.AddProductScreen
+import org.nullgroup.lados.screens.admin.product.AddVariantScreen
 import org.nullgroup.lados.screens.admin.product.ManageProductScreen
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.viewmodels.customer.profile.ProfileViewModel
@@ -189,14 +191,33 @@ fun AdminGraph(
 //                        navController = navController,
 //                    )
 
-//                     ManageProductScreen(
-//                         modifier = Modifier,
-//                         paddingValues = innerPadding,
-//                     )
+                     ManageProductScreen(
+                         modifier = Modifier,
+                         paddingValues = innerPadding,
+                         navController = navController
+                     )
 
+                }
+
+                composable(route = Screen.Admin.AddProduct.route) {
                     AddProductScreen(
                         modifier = Modifier,
                         paddingValues = innerPadding,
+                        navController = navController
+                    )
+                }
+
+                composable(  route = Screen.Admin.AddVariant.ROUTE_WITH_ARG,
+                    arguments = listOf(
+                        navArgument(Screen.Admin.AddVariant.ROUTE_WITH_ARG)
+                        { type = NavType.StringType }
+                    )) {
+                    val productId = it.arguments?.getString(Screen.Admin.AddVariant.ROUTE_WITH_ARG)
+
+                    AddVariantScreen(
+                        modifier = Modifier,
+                        productId = productId,
+                        paddingValues = innerPadding
                     )
                 }
 
