@@ -66,6 +66,7 @@ import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.utilities.toByteArray
 import org.nullgroup.lados.utilities.toDrawable
 import org.nullgroup.lados.viewmodels.admin.product.AddProductScreenViewModel
+import org.nullgroup.lados.viewmodels.admin.product.AddVariantViewModel
 import org.nullgroup.lados.viewmodels.admin.product.VariantRepository
 import org.nullgroup.lados.viewmodels.admin.product.colorOptionsList
 import org.nullgroup.lados.viewmodels.admin.product.exchangePrice
@@ -81,7 +82,7 @@ fun AddVariantScreen(
     modifier: Modifier = Modifier,
     onVariantAdded: (AddProductVariant) -> Unit = {},
     productId: String? = null,
-    viewModel: AddProductScreenViewModel = hiltViewModel(),
+    viewModel: AddVariantViewModel = hiltViewModel(),
     paddingValues: PaddingValues = PaddingValues(0.dp)
 ) {
 
@@ -171,7 +172,7 @@ fun AddVariantScreen(
                                 )
                             )
 
-                            viewModel.onAddVariant(variant)
+                            viewModel.addVariant(variant)
                         }
 
 
