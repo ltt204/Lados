@@ -8,27 +8,23 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.nullgroup.lados.R
-import org.nullgroup.lados.compose.signin.CustomTextField
 import org.nullgroup.lados.ui.theme.LadosTheme
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -36,6 +32,7 @@ import java.time.format.DateTimeFormatter
 enum class ItemState {
     NORMAL,
     SELECTED,
+    DISABLED,
     INVALID
 }
 
@@ -51,10 +48,9 @@ fun CouponItem(
     minimumOrderAmount: Double?,
     maximumDiscount: Double?,
     expiredAt: LocalDateTime,
-    isClickable: Boolean = true,
     onItemClicked: (() -> Unit)? = null,
-    extraNote: String? = null, // only applied when [trailingArea] is omitted
-    trailingArea : (@Composable () -> Unit)? = extraNote?.let { { Text(it) } }, // if null, ignore [extraNote]
+    extraNote: String? = null, // only applied when [trailingArea] is null
+    trailingArea : (@Composable () -> Unit)? = null,
     itemState: ItemState = ItemState.NORMAL
 ) {
     val containerColor = when (itemState) {
@@ -84,11 +80,8 @@ fun CouponItem(
             .fillMaxWidth()
             .clip(LadosTheme.shape.medium)
         ,
-        onClick = {
-            if (isClickable) {
-                onItemClicked?.invoke()
-            }
-        },
+        onClick = { onItemClicked?.invoke() },
+        enabled = itemState != ItemState.DISABLED && itemState != ItemState.INVALID,
         colors = cardColors,
     ) {
         Row(
@@ -149,14 +142,23 @@ fun CouponItem(
                     style = bodySmallTypo,
                 )
             }
-            if (trailingArea != null) {
+            if (trailingArea != null || extraNote.isNullOrEmpty().not()) {
                 Spacer(modifier = Modifier.width(4.dp))
                 Column(
                     modifier = Modifier
                         .wrapContentWidth()
+                        .widthIn(max = 64.dp)
                         .padding(horizontal = 4.dp)
                 ) {
-                    trailingArea()
+                    if (trailingArea == null) {
+                        Text(
+                            text = extraNote!!,
+                            overflow = TextOverflow.Visible,
+                            style = bodySmallTypo.copy(fontWeight = FontWeight.Bold),
+                        )
+                    } else {
+                        trailingArea()
+                    }
                 }
             }
         }

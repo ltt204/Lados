@@ -161,5 +161,10 @@
     <string name="coupon_redeem_failed_exceed_maximum_redemption">Sorry! The maximum redemption for this code has reached!</string>
     <string name="coupon_redeem_failed_expired_coupon">Sorry! It seems that the code you entered has expired!</string>
     <string name="coupon_redeem_failed_already_redeemed_code">Sorry! The code you entered has already redeemed!</string>
+    <string name="coupon_usage_discount_desc">%1$s saved</string>
+    <string name="coupon_usage_not_effective_yet">Not effective yet</string>
+    <string name="coupon_usage_minimum_order_amount_not_reached">Not reached min. spending</string>
+    <string name="coupon_usage_expired">Expired</string>
+    <string name="coupon_usage_already_used">Used</string>
 </resources>
 

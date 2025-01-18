@@ -159,8 +159,12 @@
     <string name="coupon_redeem_failed_title">Lỗi đổi mã</string>
     <string name="coupon_redeem_failed_internal_error">Có gì đó sai sai khi hệ thống đang đổi mã</string>
     <string name="coupon_redeem_failed_unavailable_coupon">Mã bạn đã nhập hiện không có tồn tại trong hệ thống\\n(Phải chăng bạn đang nhập sai mã?)</string>
-    <string name="coupon_redeem_failed_unavailable_coupon">The code you redeemed is not currently available\\n(Have you misspelt the code?)</string>
     <string name="coupon_redeem_failed_exceed_maximum_redemption">Xin lỗi bạn, số lượng đổi mã trên đã tới giới hạn!</string>
     <string name="coupon_redeem_failed_expired_coupon">Xin lỗi bạn, có vẻ rằng mã bạn cần đổi đã hết hạn!</string>
     <string name="coupon_redeem_failed_already_redeemed_code">Xin lỗi bạn, bạn đã nhập mã đã đổi từ trước!</string>
+    <string name="coupon_usage_discount_desc">"tiết kiệm %1$s "</string>
+    <string name="coupon_usage_not_effective_yet">Chưa mở</string>
+    <string name="coupon_usage_minimum_order_amount_not_reached">Chưa đạt chi tiêu tối thiểu</string>
+    <string name="coupon_usage_expired">Đã hết hạn</string>
+    <string name="coupon_usage_already_used">Đã dùng</string>
 </resources>

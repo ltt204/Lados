@@ -49,6 +49,7 @@ import org.nullgroup.lados.R
 import org.nullgroup.lados.compose.cart.ConfirmDialog
 import org.nullgroup.lados.compose.cart.DialogInfo
 import org.nullgroup.lados.compose.coupon.CouponItem
+import org.nullgroup.lados.compose.coupon.ItemState
 import org.nullgroup.lados.compose.signin.CustomTextField
 import org.nullgroup.lados.data.models.CustomerCoupon
 import org.nullgroup.lados.data.models.currentHostTimeZoneInString
@@ -57,23 +58,89 @@ import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.viewmodels.customer.coupon.CouponUiState
 import org.nullgroup.lados.viewmodels.customer.coupon.CouponViewModel
 
+data class CouponInfo(
+    val couponState: ItemState,
+    val extraNote: String? = null,
+    val trailingArea: (@Composable () -> Unit)? = null,
+)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CouponScreen(
-    navController: NavController,
+    navController: NavController? = null,
     innerPadding: PaddingValues = PaddingValues(bottom = 0.dp),
+    isEditable: Boolean = true,
+    orderTotal: Double? = 5000.0,
     modifier: Modifier = Modifier
 ) {
     val couponViewModel: CouponViewModel = hiltViewModel()
 
     val couponUiState = couponViewModel.couponUiState.collectAsStateWithLifecycle()
     val currentCoupons = (couponUiState.value as? CouponUiState.Success)?.data ?: emptyList()
+    val selectedCoupon = (couponUiState.value as? CouponUiState.Success)?.selectedCoupon
 
     val currentDialogState = remember { mutableStateOf<DialogInfo?>(null) }
     val currentTimeZone = currentHostTimeZoneInString()
 
     val onNavigateBack = {
-        navController.popBackStack()
+        navController?.popBackStack()
+    }
+
+    val onCouponSelected = if (isEditable) { coupon: CustomerCoupon ->
+        couponViewModel.handleCouponSelection(coupon)
+    } else null
+
+    val couponDiscountDesc = stringResource(R.string.coupon_usage_discount_desc)
+
+    val couponNotEffectiveYet = stringResource(R.string.coupon_usage_not_effective_yet)
+    val minimumOrderAmountNotReached = stringResource(R.string.coupon_usage_minimum_order_amount_not_reached)
+    val couponExpired = stringResource(R.string.coupon_usage_expired)
+    val couponAlreadyUsed = stringResource(R.string.coupon_usage_already_used)
+
+    val failedUsageMessage = { error: CustomerCoupon.Companion.CouponUsageError ->
+        when (error) {
+            CustomerCoupon.Companion.CouponUsageError.COUPON_NOT_EFFECTIVE_YET -> couponNotEffectiveYet
+            CustomerCoupon.Companion.CouponUsageError.MINIMUM_ORDER_AMOUNT_NOT_REACHED -> minimumOrderAmountNotReached
+            CustomerCoupon.Companion.CouponUsageError.COUPON_EXPIRED -> couponExpired
+            CustomerCoupon.Companion.CouponUsageError.COUPON_ALREADY_USED -> couponAlreadyUsed
+        }
+    }
+
+    val couponInfoOf = { coupon: CustomerCoupon ->
+        if (orderTotal == null) {
+            CouponInfo(
+                couponState = ItemState.NORMAL
+            )
+        } else {
+            val usageResult = couponViewModel.checkCoupon(coupon, orderTotal)
+            when (usageResult) {
+                is CustomerCoupon.Companion.CouponUsageResult.Success -> {
+                    val discountAmount = usageResult.discountAmount
+                    CouponInfo(
+                        couponState = if (selectedCoupon?.code == coupon.code) ItemState.SELECTED else ItemState.NORMAL,
+                        extraNote = couponDiscountDesc.format(discountAmount),
+//                        trailingArea = {
+//                            Text(
+//                                text = stringResource(
+//                                    R.string.coupon_usage_discount_desc,
+//                                    discountAmount
+//                                ),
+//                                style = LadosTheme.typography.bodyMedium.copy(
+//                                    color = LadosTheme.colorScheme.onSecondaryContainer,
+//                                    fontWeight = FontWeight.Bold
+//                                )
+//                            )
+//                        }
+                    )
+                }
+                is CustomerCoupon.Companion.CouponUsageResult.Error -> {
+                    CouponInfo(
+                        couponState = ItemState.DISABLED,
+                        extraNote = failedUsageMessage(usageResult.error),
+                    )
+                }
+            }
+        }
     }
 
     val emptyCodeErrorTitle = stringResource(R.string.coupon_redeem_empty_title)
@@ -255,12 +322,17 @@ fun CouponScreen(
                         verticalArrangement = Arrangement.spacedBy(16.dp),
                     ) {
                         itemsIndexed(items = currentCoupons) { _, coupon ->
+                            val couponInfo = couponInfoOf(coupon)
                             CouponItem(
                                 couponCode = coupon.code,
                                 discountPercentage = coupon.discountPercentage,
                                 minimumOrderAmount = if (coupon.minimumOrderAmount <= 0.0) null else coupon.minimumOrderAmount,
                                 maximumDiscount = coupon.maximumDiscount,
                                 expiredAt = coupon.expiredAt.toLocalDateTime(currentTimeZone),
+                                onItemClicked = { onCouponSelected?.invoke(coupon) },
+                                extraNote = couponInfo.extraNote,
+                                trailingArea = couponInfo.trailingArea,
+                                itemState = couponInfo.couponState,
                             )
                         }
                     }

@@ -20,7 +20,10 @@ import javax.inject.Inject
 sealed class CouponUiState {
     object Loading : CouponUiState()
     object Empty : CouponUiState()
-    data class Success(val data: List<CustomerCoupon>) : CouponUiState()
+    data class Success(
+        val data: List<CustomerCoupon>,
+        val selectedCoupon: CustomerCoupon? = null
+    ) : CouponUiState()
     data class Error(val message: String) : CouponUiState()
 }
 
@@ -89,13 +92,34 @@ class CouponViewModel @Inject constructor(
                     is CustomerCoupon.Companion.CouponRedemptionResult.Success -> {
                         val newCoupon = redemptionResult.coupon
                         _couponUiState.value = CouponUiState.Success(
-                            ((_couponUiState.value as? CouponUiState.Success)?.data ?: emptyList()) + newCoupon
+                            ((_couponUiState.value as? CouponUiState.Success)?.data ?: emptyList()) + newCoupon,
+                            ((_couponUiState.value as? CouponUiState.Success)?.selectedCoupon ?: newCoupon)
                         )
                         onRedeemSuccess()
                     }
                 }
             }
         }
+    }
+
+    fun handleCouponSelection(coupon: CustomerCoupon) {
+        if ((_couponUiState.value as? CouponUiState.Success)?.selectedCoupon == coupon) {
+            _couponUiState.value = CouponUiState.Success(
+                ((_couponUiState.value as? CouponUiState.Success)?.data ?: emptyList())
+            )
+        } else {
+            _couponUiState.value = CouponUiState.Success(
+                ((_couponUiState.value as? CouponUiState.Success)?.data ?: emptyList()),
+                coupon
+            )
+        }
+    }
+
+    fun checkCoupon(
+        coupon: CustomerCoupon,
+        totalAmount: Double
+    ): CustomerCoupon.Companion.CouponUsageResult {
+        return coupon.checkAndCalculateForDiscount(totalAmount)
     }
 
     private suspend fun addCouponToServer() {
