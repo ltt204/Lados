@@ -130,18 +130,18 @@ fun OrderStatus.getActionForButtonOfOrderProduct(context: Context): Pair<String?
 
 fun OrderStatus.getActionForButtonOfOrder(context: Context): Pair<String?, ((NavController, String?, String?) -> Unit)> {
     return when (this) {
-        OrderStatus.RETURNED, OrderStatus.CANCELLED -> {
-            null to { _, _, _ ->
-                // Navigate to Ask for reason screen
-            }
+        OrderStatus.CREATED -> {
+            context.getString(R.string.cancel_order) to { _, _, _ -> /*TODO*/ }
         }
+
         OrderStatus.DELIVERED -> {
             context.getString(R.string.return_order) to { _, _, _ ->
-                // Navigate to Ask for reason screen
             }
         }
+
         else -> {
-            context.getString(R.string.cancel_order) to { _, _, _ -> /*TODO*/ }
+            null to { _, _, _ ->
+            }
         }
     }
 }
@@ -174,7 +174,7 @@ fun OrderStatus.getActionsForButtonOfOrder(context: Context): List<Pair<String?,
         }
 
         else -> {
-            TODO("Nothing")
+            emptyList()
         }
     }
 }
@@ -207,8 +207,13 @@ fun String.toLocale(): Locale {
     return Locale.forLanguageTag(this)
 }
 
-fun getFirstFourOrderStatuses(): List<OrderStatus> {
-    return OrderStatus.entries.toTypedArray().take(4)
+fun getOrderStatusesForCustomer(): List<OrderStatus> {
+    return listOf(
+        OrderStatus.CREATED,
+        OrderStatus.CONFIRMED,
+        OrderStatus.SHIPPED,
+        OrderStatus.DELIVERED
+    )
 }
 
 fun getOrderStatus(): List<OrderStatus> {
