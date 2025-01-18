@@ -23,6 +23,7 @@ data class ProductVariantRemoteModel(
     val color: ColorRemoteModel = ColorRemoteModel(),
     val quantityInStock: Int = 0,
     val originalPrice: Map<String, Double?> = emptyMap(),
+    val saleAmount: Int = 0,
     val salePrice: Map<String, Double?>? = emptyMap(),
     var images: List<Image> = emptyList()
 )
