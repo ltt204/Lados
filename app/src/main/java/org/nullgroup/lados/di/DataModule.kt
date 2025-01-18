@@ -19,6 +19,7 @@ import org.nullgroup.lados.data.repositories.implementations.order.OrderReposito
 import org.nullgroup.lados.data.repositories.implementations.product.ProductRepositoryImplement
 import org.nullgroup.lados.data.repositories.implementations.common.SharedPreferencesImpl
 import org.nullgroup.lados.data.repositories.implementations.common.ImageRepositoryImplement
+import org.nullgroup.lados.data.repositories.implementations.product.ProductVariantRepository
 import org.nullgroup.lados.data.repositories.implementations.product.ReviewProductRepositoryImplement
 import org.nullgroup.lados.data.repositories.implementations.user.UserAddressRepositoryImplement
 import org.nullgroup.lados.data.repositories.implementations.user.UserRepositoryImplement
@@ -141,5 +142,17 @@ object DataModule {
         storage: FirebaseStorage,
     ): ChatRepository {
         return ChatRepositoryImpl(database, auth, storage)
+    }
+
+    @Singleton
+    @Provides
+    fun provideProductVariantRepository(
+        firestore: FirebaseFirestore,
+        imageRepository: ImageRepository
+    ): ProductVariantRepository {
+        return ProductVariantRepository(
+            firestore,
+            imageRepository
+        )
     }
 }
