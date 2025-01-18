@@ -199,6 +199,9 @@ sealed class Screen(
         data object UserManagement :
             Admin("User Management", "user_management", Icons.Default.AccountCircle)
 
+        data object CategoryManagement:
+        Admin("Category Management", "category_management", Icons.Default.AccountCircle)
+
         data object ProductManagement :
             Admin("Product Management", "product_management", Icons.Default.AccountCircle)
 
