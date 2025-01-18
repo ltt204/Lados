@@ -148,7 +148,6 @@ fun AddVariantScreen(
                         originalPriceError = validatePrice(originalPrice, priceOption)
                         salePriceError = validatePrice(salePrice, priceOption)
                         saleAmountError = validateSaleAmount(saleAmount, quantity)
-                        viewModel.uploadImage(imageByteArray ?: byteArrayOf())
 
                         if (
                             variantError.first &&
@@ -175,7 +174,7 @@ fun AddVariantScreen(
                             viewModel.onAddVariant(variant)
                         }
 
-                        viewModel.uploadImage(imageByteArray ?: byteArrayOf())
+
                     }, shape = RoundedCornerShape(12.dp), colors = ButtonDefaults.buttonColors(
                         containerColor = LadosTheme.colorScheme.primary,
                         contentColor = LadosTheme.colorScheme.onPrimary
