@@ -59,7 +59,7 @@ import org.nullgroup.lados.ui.theme.Typography
 import org.nullgroup.lados.utilities.OrderStatus
 import org.nullgroup.lados.utilities.getActionForButtonOfOrder
 import org.nullgroup.lados.utilities.getByLocale
-import org.nullgroup.lados.utilities.getFirstFourOrderStatuses
+import org.nullgroup.lados.utilities.getOrderStatusesForCustomer
 import org.nullgroup.lados.utilities.getStatusByName
 import org.nullgroup.lados.utilities.toCurrency
 import org.nullgroup.lados.utilities.toDateTimeString
@@ -135,12 +135,8 @@ fun OrderDetailScreen(
             is OrderDetailState.Success -> {
                 val currentOrder = (uiState.value as OrderDetailState.Success).currentOrder
                 actionForBottomButton =
-                    getStatusByName(currentOrder.orderStatusLog.keys.last())
+                    getStatusByName(currentOrder.orderStatusLog.entries.maxBy { it.value }.key)
                         .getActionForButtonOfOrder(context)
-                Log.d(
-                    "OrderDetailScreen",
-                    "actionForBottomButton.first(): ${actionForBottomButton.first}"
-                )
                 Column(
                     modifier = Modifier.padding(
                         start = LadosTheme.size.medium,
@@ -270,7 +266,7 @@ fun OrderDetailScreen(
 fun OrderStatusArea(
     modifier: Modifier = Modifier,
     currentOrder: Order,
-    statuses: List<OrderStatus> = getFirstFourOrderStatuses(),
+    statuses: List<OrderStatus> = getOrderStatusesForCustomer(),
 ) {
     LazyColumn(modifier = modifier) {
         itemsIndexed(statuses) { _, status ->
