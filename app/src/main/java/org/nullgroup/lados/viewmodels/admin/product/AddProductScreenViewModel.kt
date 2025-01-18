@@ -6,33 +6,38 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.nullgroup.lados.data.models.AddColor
+import okhttp3.internal.wait
 import org.nullgroup.lados.data.models.AddProduct
 import org.nullgroup.lados.data.models.AddProductVariant
-import org.nullgroup.lados.data.models.AddSize
-import org.nullgroup.lados.data.models.UserProfilePicture
+import org.nullgroup.lados.data.models.Image
+import org.nullgroup.lados.data.remote.models.ColorRemoteModel
+import org.nullgroup.lados.data.remote.models.ProductRemoteModel
+import org.nullgroup.lados.data.remote.models.ProductVariantRemoteModel
+import org.nullgroup.lados.data.remote.models.SizeRemoteModel
+import org.nullgroup.lados.data.repositories.implementations.product.ProductVariantRepository
 import org.nullgroup.lados.data.repositories.interfaces.common.ImageRepository
 import org.nullgroup.lados.data.repositories.interfaces.product.ProductRepository
 import org.nullgroup.lados.utilities.EXCHANGE_RATE
-import org.nullgroup.lados.viewmodels.customer.profile.ProfilePictureUiState
 import javax.inject.Inject
 
 val colorOptionsList = listOf(
-    AddColor(colorName = mapOf("en" to "Black", "vi" to "Đen"), hexCode = "#000000"),
-    AddColor(colorName = mapOf("en" to "White", "vi" to "Trắng"), hexCode = "#FFFFFF"),
-    AddColor(colorName = mapOf("en" to "Blue", "vi" to "Xanh dương"), hexCode = "#0000FF"),
-    AddColor(colorName = mapOf("en" to "Red", "vi" to "Đỏ"), hexCode = "#FF0000"),
-    AddColor(colorName = mapOf("en" to "Gray", "vi" to "Xám"), hexCode = "#808080")
+    ColorRemoteModel(colorName = mapOf("en" to "Black", "vi" to "Đen"), hexCode = "#000000"),
+    ColorRemoteModel(colorName = mapOf("en" to "White", "vi" to "Trắng"), hexCode = "#FFFFFF"),
+    ColorRemoteModel(colorName = mapOf("en" to "Blue", "vi" to "Xanh dương"), hexCode = "#0000FF"),
+    ColorRemoteModel(colorName = mapOf("en" to "Red", "vi" to "Đỏ"), hexCode = "#FF0000"),
+    ColorRemoteModel(colorName = mapOf("en" to "Gray", "vi" to "Xám"), hexCode = "#808080")
 )
 
 val sizeOptionsList = listOf(
-    AddSize(sizeName = mapOf("en" to "S", "vi" to "S")),
-    AddSize(sizeName = mapOf("en" to "M", "vi" to "M")),
-    AddSize(sizeName = mapOf("en" to "L", "vi" to "L")),
-    AddSize(sizeName = mapOf("en" to "XL", "vi" to "XL")),
-    AddSize(sizeName = mapOf("en" to "XXL", "vi" to "XXL"))
+    SizeRemoteModel(sizeName = mapOf("en" to "S", "vi" to "S")),
+    SizeRemoteModel(sizeName = mapOf("en" to "M", "vi" to "M")),
+    SizeRemoteModel(sizeName = mapOf("en" to "L", "vi" to "L")),
+    SizeRemoteModel(sizeName = mapOf("en" to "XL", "vi" to "XL")),
+    SizeRemoteModel(sizeName = mapOf("en" to "XXL", "vi" to "XXL"))
 )
 
 fun exchangePrice(price: String, priceOption: String): Map<String, Double> {
@@ -82,7 +87,7 @@ fun validateSaleAmount(saleAmount: String, quantity: String): Pair<Boolean, Stri
 fun validateVariant(
     color: String,
     size: String,
-    variants: List<AddProductVariant>
+    variants: List<ProductVariantRemoteModel>
 ): Pair<Boolean, String> {
 
     if (color.isEmpty() || size.isEmpty()) return Pair(false, "Color and size cannot be empty")
@@ -94,31 +99,29 @@ fun validateVariant(
     return Pair(true, "")
 }
 
-object VariantRepository {
-    private val _variants = mutableListOf<AddProductVariant>()
-    val variants: List<AddProductVariant> get() = _variants
-
-    fun addVariant(variant: AddProductVariant) {
-        _variants.add(variant)
-    }
-
-    fun clearVariants() {
-        _variants.clear()
-    }
-}
-
 @HiltViewModel
 class AddProductScreenViewModel @Inject constructor(
     private val productRepository: ProductRepository,
+    private val variantRepository: ProductVariantRepository,
     private val imageRepository: ImageRepository
 ) : ViewModel() {
 
     var productUiState: MutableState<ProductUiState> = mutableStateOf(ProductUiState.Loading)
         private set
 
-    private var _currentProduct: MutableStateFlow<String> = MutableStateFlow("")
-    val currentProduct: MutableStateFlow<String> get() = _currentProduct
+    var uploadImageState = MutableStateFlow<VariantImageUiState>(VariantImageUiState.Initial(""))
+        private set
+    private var _currentProductId: MutableStateFlow<String> = MutableStateFlow("")
+    val currentProductId: MutableStateFlow<String> get() = _currentProductId
 
+    private var _productZombie: MutableStateFlow<ProductRemoteModel> =
+        MutableStateFlow(ProductRemoteModel())
+    val productZombie: MutableStateFlow<ProductRemoteModel> get() = _productZombie
+
+    var productVariants = MutableStateFlow<List<ProductVariantRemoteModel>>(
+        listOf()
+    )
+        private set
 
     init {
         createBlankProduct()
@@ -127,57 +130,84 @@ class AddProductScreenViewModel @Inject constructor(
 
     fun createBlankProduct() {
         viewModelScope.launch {
-            val result = productRepository.addProductToFireStoreAndReturnId(AddProduct())
+            val result = productRepository.getProductId()
             if (result.isSuccess) {
-                _currentProduct.value = result.getOrNull() ?: ""
+                _currentProductId.value = result.getOrNull() ?: ""
             }
         }
     }
 
-    fun onAddProduct(product: AddProduct) {
+    fun onAddProductButtonClick() {
         viewModelScope.launch {
-            Log.d(
-                "Product",
-                "onAddProduct: ${product}"
-            )
             productUiState.value = ProductUiState.Loading
             try {
-                product.variants.forEach { variant ->
-                    variant.images.forEach { image ->
-                        Log.d("Test", "onAddProduct: ${image.image}")
-                        imageRepository.uploadImage(
-                            child = "products",
-                            fileName = "${product.id}_${variant.color.colorName["en"]}_${variant.size.sizeName["en"]}",
-                            extension = "png",
-                            image = image.image ?: byteArrayOf()
-                        )
-
-                       val url = imageRepository.getImageUrl(
-                            child = "products",
-                            fileName = "${product.id}_${variant.color.colorName["en"]}_${variant.size.sizeName["en"]}",
-                            fileExtension = "png"
-                       )
-
-                        Log.d("Test url", url)
-                    }
-                }
-
-                // productRepository.addProductToFireStore(product)
+//                _productZombie.value.variants = productVariants.value
+                Log.d(
+                    "Product",
+                    "onAddProduct: Variants ${productVariants.value}"
+                )
+                Log.d(
+                    "Product",
+                    "onAddProduct: Product ${_productZombie.value}"
+                )
+                productRepository.addProductToFireStore(_productZombie.value)
             } catch (e: Exception) {
                 productUiState.value = ProductUiState.Error(e.message ?: "An error occurred")
+                Log.d("Product", "onAddProduct: ${e.message}")
             }
         }
     }
 
-    fun onAddVariant(variant: AddProductVariant) {
+    fun onAddVariant(variant: ProductVariantRemoteModel, withImageByteArray: ByteArray) {
         viewModelScope.launch {
-            VariantRepository.addVariant(variant)
+            Log.d("AddProductScreenViewModel", "variant: $variant")
+            val productVariantId = variantRepository.getProductVariantId().getOrNull() ?: ""
+            Log.d("AddProductScreenViewModel", "productVariantId: $productVariantId")
+
+            uploadImageState.value = VariantImageUiState.Loading
+            val imageUrl = imageRepository.uploadImage(
+                child = "products",
+                fileName = productVariantId,
+                extension = "png",
+                image = withImageByteArray
+            ).getOrNull() ?: throw Exception("Image upload failed")
+            Log.d("AddProductScreenViewModel", "imageUrl: $imageUrl")
+            variant.images = listOf(
+                Image(
+                    productVariantId = productVariantId,
+                    link = imageUrl,
+                    fileName = productVariantId,
+                )
+            )
+            _productZombie.value.variants += variant
+            uploadImageState.value = VariantImageUiState.Success(imageUrl)
+            Log.d("AddProductScreenViewModel", "productVariants: ${_productZombie.value.variants}")
         }
     }
 
     fun clearVariant(variant: AddProductVariant) {
         viewModelScope.launch {
-            VariantRepository.clearVariants()
+            variantRepository.clearVariants(_currentProductId.value)
+        }
+    }
+
+    fun onAddProductZombie(product: ProductRemoteModel) {
+        viewModelScope.launch {
+            _productZombie.value = product
+        }
+    }
+
+    fun onDescriptionChanged(description: Map<String, String>) {
+        viewModelScope.launch {
+            delay(500)
+            _productZombie.value = _productZombie.value.copy(description = description)
+        }
+    }
+
+    fun onNameChanged(name: Map<String, String>) {
+        viewModelScope.launch {
+            delay(500)
+            _productZombie.value = _productZombie.value.copy(name = name)
         }
     }
 }

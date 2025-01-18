@@ -218,6 +218,7 @@ fun AdminGraph(
                     AddVariantScreen(
                         modifier = Modifier,
                         productId = productId,
+                        navController = navController,
                         paddingValues = innerPadding
                     )
                 }

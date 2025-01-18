@@ -3,6 +3,7 @@ package org.nullgroup.lados.data.repositories.interfaces.product
 import kotlinx.coroutines.flow.Flow
 import org.nullgroup.lados.data.models.AddProduct
 import org.nullgroup.lados.data.models.Product
+import org.nullgroup.lados.data.remote.models.ProductRemoteModel
 
 interface ProductRepository {
     /*
@@ -14,8 +15,8 @@ interface ProductRepository {
 
     suspend fun addProductsToFireStore(products: List<Product>): Result<Boolean>
     suspend fun getAllProductsFromFireStore(): Result<List<Product>>
-    suspend fun addProductToFireStore(product: AddProduct): Result<Boolean>
+    suspend fun addProductToFireStore(product: ProductRemoteModel): Result<Boolean>
     suspend fun getProductByIdFromFireStore(id: String): Result<Product?>
     suspend fun deleteProductByIdFromFireStore(id: String): Result<Boolean>
-    suspend fun addProductToFireStoreAndReturnId(product: AddProduct): Result<String>
+    suspend fun getProductId(): Result<String>
 }

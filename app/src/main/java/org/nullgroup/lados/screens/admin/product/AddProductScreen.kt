@@ -2,12 +2,9 @@ package org.nullgroup.lados.screens.admin.product
 
 import android.util.Log
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -25,12 +22,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Email
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -39,22 +32,17 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -62,39 +50,20 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
-import org.nullgroup.lados.R
 import org.nullgroup.lados.compose.common.LoadOnProgress
 import org.nullgroup.lados.compose.signin.CustomTextField
-import org.nullgroup.lados.data.models.AddColor
-import org.nullgroup.lados.data.models.AddProduct
-import org.nullgroup.lados.data.models.AddProductVariant
-import org.nullgroup.lados.data.models.AddSize
-import org.nullgroup.lados.data.models.Image
-import org.nullgroup.lados.screens.Screen
+import org.nullgroup.lados.data.remote.models.ProductVariantRemoteModel
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.viewmodels.admin.product.AddProductScreenViewModel
-import org.nullgroup.lados.viewmodels.admin.product.VariantRepository
-import org.nullgroup.lados.viewmodels.admin.product.colorOptionsList
-import org.nullgroup.lados.viewmodels.admin.product.exchangePrice
-import org.nullgroup.lados.viewmodels.admin.product.sizeOptionsList
-import org.nullgroup.lados.viewmodels.admin.product.validatePrice
-import org.nullgroup.lados.viewmodels.admin.product.validateQuantity
-import org.nullgroup.lados.viewmodels.admin.product.validateSaleAmount
-import org.nullgroup.lados.viewmodels.admin.product.validateVariant
 
 
 @Composable
@@ -106,14 +75,10 @@ fun AddProductScreen(
 ) {
 
     val scrollState = rememberScrollState()
-    val currentProductId = viewModel.currentProduct.collectAsState()
+    val currentProductId = viewModel.currentProductId.collectAsState()
+    val productVariants = viewModel.productVariants.collectAsState()
 
-    
-    var newProduct by remember {
-        mutableStateOf(AddProduct())
-    }
-
-    var name by remember {
+    var name by rememberSaveable {
         mutableStateOf(
             mapOf(
                 "vi" to "",
@@ -122,7 +87,7 @@ fun AddProductScreen(
         )
     }
 
-    var description by remember {
+    var description by rememberSaveable {
         mutableStateOf(
             mapOf(
                 "vi" to "",
@@ -130,14 +95,6 @@ fun AddProductScreen(
             )
         )
     }
-
-    val variants = VariantRepository.variants
-
-    newProduct = newProduct.copy(
-        name = name,
-        description = description,
-        variants = variants
-    )
 
     Scaffold(
         modifier = Modifier
@@ -152,7 +109,7 @@ fun AddProductScreen(
             ) {
                 Button(
                     onClick = {
-                        viewModel.onAddProduct(newProduct)
+                        viewModel.onAddProductButtonClick()
                     }, shape = RoundedCornerShape(12.dp), colors = ButtonDefaults.buttonColors(
                         containerColor = LadosTheme.colorScheme.primary,
                         contentColor = LadosTheme.colorScheme.onPrimary
@@ -168,7 +125,6 @@ fun AddProductScreen(
             }
         }
     ) { it ->
-
 
         Column(
             modifier = Modifier
@@ -194,6 +150,7 @@ fun AddProductScreen(
                 text = name["vi"] ?: "",
                 onValueChange = {
                     name = name.toMutableMap().apply { this["vi"] = it }
+                    viewModel.onNameChanged(name)
                 },
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(
@@ -208,6 +165,7 @@ fun AddProductScreen(
                 text = name["en"] ?: "",
                 onValueChange = {
                     name = name.toMutableMap().apply { this["en"] = it }
+                    viewModel.onNameChanged(name)
                 },
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(
@@ -232,6 +190,7 @@ fun AddProductScreen(
                 text = description["vi"] ?: "",
                 onValueChange = {
                     description = description.toMutableMap().apply { this["vi"] = it }
+                    viewModel.onDescriptionChanged(description)
                 },
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(
@@ -246,6 +205,7 @@ fun AddProductScreen(
                 text = description["en"] ?: "",
                 onValueChange = {
                     description = description.toMutableMap().apply { this["en"] = it }
+                    viewModel.onDescriptionChanged(description)
                 },
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(
@@ -284,8 +244,7 @@ fun AddProductScreen(
                 }
             }
 
-            VariantsSection(VariantRepository.variants)
-
+            VariantsSection(productVariants.value)
         }
     }
 }
@@ -293,9 +252,10 @@ fun AddProductScreen(
 
 @Composable
 fun VariantsSection(
-    variants: List<AddProductVariant> = emptyList(),
+    variants: List<ProductVariantRemoteModel> = emptyList(),
     modifier: Modifier = Modifier
 ) {
+    Log.d("Variants", "Variants: $variants")
     LazyColumn(
         modifier = modifier.height(200.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -310,7 +270,7 @@ fun VariantsSection(
 
 @Composable
 fun VariantItem(
-    variant: AddProductVariant,
+    variant: ProductVariantRemoteModel,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -373,7 +333,7 @@ fun VariantItem(
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "Sale Price: ${variant.salePrice["en"]}",
+                    text = "Sale Price: ${variant.salePrice?.get("en")}",
                     color = LadosTheme.colorScheme.primary,
                 )
                 Spacer(modifier = Modifier.height(4.dp))

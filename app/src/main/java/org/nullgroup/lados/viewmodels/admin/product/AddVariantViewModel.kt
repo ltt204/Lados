@@ -11,13 +11,5 @@ import javax.inject.Inject
 @HiltViewModel
 class AddVariantViewModel @Inject constructor() : ViewModel() {
 
-    fun addVariant(variant: AddProductVariant) {
-        viewModelScope.launch {
-            try {
-                VariantRepository.addVariant(variant)
-            } catch (e: Exception) {
-                Log.d("Error", "Error adding variant")
-            }
-        }
-    }
+
 }

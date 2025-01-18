@@ -1,6 +1,7 @@
 package org.nullgroup.lados.screens.admin.product
 
 import android.net.Uri
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -36,6 +37,7 @@ import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,21 +55,21 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import org.nullgroup.lados.compose.common.LoadOnProgress
 import org.nullgroup.lados.compose.signin.CustomTextField
-import org.nullgroup.lados.data.models.AddColor
-import org.nullgroup.lados.data.models.AddImage
 import org.nullgroup.lados.data.models.AddProductVariant
-import org.nullgroup.lados.data.models.AddSize
-import org.nullgroup.lados.data.models.Image
+import org.nullgroup.lados.data.remote.models.ColorRemoteModel
+import org.nullgroup.lados.data.remote.models.ProductVariantRemoteModel
+import org.nullgroup.lados.data.remote.models.SizeRemoteModel
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.utilities.toByteArray
 import org.nullgroup.lados.utilities.toDrawable
 import org.nullgroup.lados.viewmodels.admin.product.AddProductScreenViewModel
-import org.nullgroup.lados.viewmodels.admin.product.AddVariantViewModel
-import org.nullgroup.lados.viewmodels.admin.product.VariantRepository
+import org.nullgroup.lados.viewmodels.admin.product.VariantImageUiState
 import org.nullgroup.lados.viewmodels.admin.product.colorOptionsList
 import org.nullgroup.lados.viewmodels.admin.product.exchangePrice
 import org.nullgroup.lados.viewmodels.admin.product.sizeOptionsList
@@ -82,12 +84,17 @@ fun AddVariantScreen(
     modifier: Modifier = Modifier,
     onVariantAdded: (AddProductVariant) -> Unit = {},
     productId: String? = null,
-    viewModel: AddVariantViewModel = hiltViewModel(),
+    viewModel: AddProductScreenViewModel = hiltViewModel(),
+    navController: NavController,
     paddingValues: PaddingValues = PaddingValues(0.dp)
 ) {
+    val productVariantsState by viewModel.productVariants.collectAsState()
+    val uploadImageState by viewModel.uploadImageState.collectAsState()
 
-    var size by remember { mutableStateOf(AddSize()) }
-    var color by remember { mutableStateOf(AddColor()) }
+    var submitVariantClicked by remember { mutableStateOf(false) }
+
+    var size by remember { mutableStateOf(SizeRemoteModel()) }
+    var color by remember { mutableStateOf(ColorRemoteModel()) }
     var originalPrice by remember { mutableStateOf("") }
     var salePrice by remember { mutableStateOf("") }
     var priceOption by remember { mutableStateOf("USD") }
@@ -138,11 +145,10 @@ fun AddVariantScreen(
             ) {
                 Button(
                     onClick = {
-
                         variantError = validateVariant(
                             color.colorName["en"] ?: "",
                             size.sizeName["en"] ?: "",
-                            VariantRepository.variants
+                            productVariantsState
                         )
 
                         quantityError = validateQuantity(quantity)
@@ -158,21 +164,22 @@ fun AddVariantScreen(
                             quantityError.first
                         ) {
 
-                            val variant = AddProductVariant(
+                            val variant = ProductVariantRemoteModel(
+                                productId = productId ?: "",
                                 color = color,
                                 size = size,
                                 originalPrice = exchangePrice(originalPrice, priceOption),
                                 salePrice = exchangePrice(salePrice, priceOption),
                                 saleAmount = saleAmount.toInt(),
-                                images = listOf(
-                                    AddImage(
-                                        link = selectedImageUri.toString(),
-                                        image = imageByteArray ?: byteArrayOf()
-                                    )
-                                )
+                                images = listOf()
                             )
 
-                            viewModel.addVariant(variant)
+                            viewModel.onAddVariant(
+                                variant = variant,
+                                withImageByteArray = imageByteArray ?: ByteArray(0)
+                            )
+
+                            submitVariantClicked = true
                         }
 
 
@@ -188,10 +195,13 @@ fun AddVariantScreen(
                         modifier = Modifier.padding(8.dp)
                     )
                 }
+
+                Button(onClick = { navController.navigateUp() }) {
+                    Text(text = "Cancel")
+                }
             }
         }
     ) { it ->
-
         val scrollState = rememberScrollState()
 
         Column(
@@ -209,7 +219,8 @@ fun AddVariantScreen(
                 modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center
             ) {
                 VariantImageSection(
-                    imageUri = selectedImageUri?.toString() ?: "https://firebasestorage.googleapis.com/v0/b/lados-8509b.firebasestorage.app/o/images%2Fproducts%2Fimg_placeholder.jpg?alt=media&token=1f1fed12-8ead-4433-b2a4-c5e1d765290e",
+                    imageUri = selectedImageUri?.toString()
+                        ?: "https://firebasestorage.googleapis.com/v0/b/lados-8509b.firebasestorage.app/o/images%2Fproducts%2Fimg_placeholder.jpg?alt=media&token=1f1fed12-8ead-4433-b2a4-c5e1d765290e",
                     onEditImage = {
                         imagePickerLauncher.launch(
                             PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
@@ -458,6 +469,27 @@ fun AddVariantScreen(
 
             Spacer(modifier = Modifier.width(8.dp))
 
+        }
+    }
+
+    if (submitVariantClicked) {
+        Log.d("AddVariantScreen", "Submit variant clicked")
+        when (uploadImageState) {
+            is VariantImageUiState.Initial -> {
+                Log.d("AddVariantScreen", "Initial")
+                // Initial
+            }
+            is VariantImageUiState.Loading -> {
+                // Loading
+            }
+            is VariantImageUiState.Success -> {
+                Log.d("AddVariantScreen", "Variant added")
+                submitVariantClicked = false
+                navController.navigateUp()
+            }
+            is VariantImageUiState.Error -> {
+                // Error
+            }
         }
     }
 }

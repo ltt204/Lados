@@ -223,67 +223,18 @@ class ProductRepositoryImplement(
         }
     }
 
-    override suspend fun addProductToFireStore(product: AddProduct): Result<Boolean> {
+    override suspend fun addProductToFireStore(product: ProductRemoteModel): Result<Boolean> {
         return try {
-
             val productDocRef = firestore.collection("products").document()
-
-            val productData = hashMapOf(
-                "categoryId" to product.categoryId,
-                "name" to hashMapOf(
-                    "en" to product.name.keys,
-                    "vi" to product.name.values
-                ),
-                "description" to hashMapOf(
-                    "en" to product.description.keys,
-                    "vi" to product.description.values
-                ),
-                "createdAt" to product.createdAt
-            )
-            productDocRef.set(productData).await()
+            productDocRef.set(product).await()
 
             for (variant in product.variants) {
-
                 val variantDocRef = productDocRef.collection("variants").document()
-
-                val variantData = hashMapOf(
-                    "productId" to productDocRef.id,
-                    "size" to hashMapOf(
-                        "id" to variant.size.id,
-                        "sizeName" to hashMapOf(
-                            "en" to variant.size.sizeName.keys,
-                            "vi" to variant.size.sizeName.values
-                        ),
-                        "sortOrder" to variant.size.sortOrder
-                    ),
-                    "color" to hashMapOf(
-                        "id" to variant.color.id,
-                        "colorName" to hashMapOf(
-                            "en" to variant.color.colorName.keys,
-                            "vi" to variant.color.colorName.values
-                        ),
-                        "hexCode" to variant.color.hexCode
-                    ),
-                    "quantityInStock" to variant.quantityInStock,
-                    "originalPrice" to hashMapOf(
-                        "en" to variant.originalPrice.keys,
-                        "vi" to variant.originalPrice.values
-                    ),
-                    "salePrice" to hashMapOf(
-                        "en" to variant.salePrice.keys,
-                        "vi" to variant.salePrice.values
-                    )
-                )
-                variantDocRef.set(variantData).await()
+                variantDocRef.set(variant).await()
 
                 for (image in variant.images) {
                     val imageDocRef = variantDocRef.collection("images").document()
-                    val imageData = hashMapOf(
-                        "productVariantId" to variantDocRef.id,
-                        "link" to image.link,
-                        "fileName" to image.fileName
-                    )
-                    imageDocRef.set(imageData).await()
+                    imageDocRef.set(image).await()
                 }
             }
 
@@ -305,92 +256,6 @@ class ProductRepositoryImplement(
             Result.failure(e)
         }
     }
-
-    override suspend fun addProductToFireStoreAndReturnId(product: AddProduct): Result<String> {
-        return try {
-
-            // Tạo tài liệu sản phẩm và lưu trữ tham chiếu của nó
-            val productDocRef = firestore.collection("products").document()
-
-            val productData = hashMapOf(
-                "categoryId" to product.categoryId,
-                "name" to hashMapOf(
-                    "en" to product.name["en"],
-                    "vi" to product.name["vi"]
-                ),
-                "description" to hashMapOf(
-                    "en" to product.description["en"],
-                    "vi" to product.description["vi"]
-                ),
-                "createdAt" to product.createdAt
-            )
-            productDocRef.set(productData).await()
-
-            for (variant in product.variants) {
-
-                val variantDocRef = productDocRef.collection("variants").document()
-
-                val variantData = hashMapOf(
-                    "productId" to productDocRef.id,
-                    "size" to hashMapOf(
-                        "id" to variant.size.id,
-                        "sizeName" to hashMapOf(
-                            "en" to variant.size.sizeName["en"],
-                            "vi" to variant.size.sizeName["vi"]
-                        ),
-                        "sortOrder" to variant.size.sortOrder
-                    ),
-                    "color" to hashMapOf(
-                        "id" to variant.color.id,
-                        "colorName" to hashMapOf(
-                            "en" to variant.color.colorName["en"],
-                            "vi" to variant.color.colorName["vi"]
-                        ),
-                        "hexCode" to variant.color.hexCode
-                    ),
-                    "quantityInStock" to variant.quantityInStock,
-                    "originalPrice" to hashMapOf(
-                        "en" to variant.originalPrice["en"],
-                        "vi" to variant.originalPrice["vi"]
-                    ),
-                    "salePrice" to hashMapOf(
-                        "en" to variant.salePrice["en"],
-                        "vi" to variant.salePrice["vi"]
-                    )
-                )
-                variantDocRef.set(variantData).await()
-
-                for (image in variant.images) {
-                    val imageDocRef = variantDocRef.collection("images").document()
-                    val imageData = hashMapOf(
-                        "productVariantId" to variantDocRef.id,
-                        "link" to image.link,
-                        "fileName" to image.fileName
-                    )
-                    imageDocRef.set(imageData).await()
-                }
-            }
-
-            for (engagement in product.engagements) {
-                val engagementDocRef = productDocRef.collection("engagements").document()
-                val engagementData = hashMapOf(
-                    "userId" to engagement.userId,
-                    "productId" to productDocRef.id,
-                    "ratings" to engagement.ratings,
-                    "reviews" to engagement.reviews,
-                    "createdAt" to engagement.createdAt
-                )
-                engagementDocRef.set(engagementData).await()
-            }
-
-            // Trả về ID của sản phẩm
-            Result.success(productDocRef.id)
-        } catch (e: Exception) {
-            Log.d("Caheck id product", e.message.toString())
-            Result.failure(e)
-        }
-    }
-
 
     override suspend fun getProductByIdFromFireStore(id: String): Result<Product?> {
         return try {
@@ -505,6 +370,18 @@ class ProductRepositoryImplement(
             batch.commit().await()
 
             Result.success(true)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun getProductId(): Result<String> {
+        return try {
+            val id = firestore.collection("products")
+                .document()
+                .id
+
+            Result.success(id)
         } catch (e: Exception) {
             Result.failure(e)
         }
