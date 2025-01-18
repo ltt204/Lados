@@ -57,6 +57,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -103,8 +104,17 @@ fun CategoryManagementScreen(
 ) {
 
     val categoriesUiState by viewModel.categoriesUiState.collectAsState()
+    val deleteCategory by viewModel.deleteCategory.collectAsState()
+    var deleteConfirmation by remember { mutableStateOf(false) }
+    var deleteId by remember { mutableStateOf("") }
 
     Log.d("ManageProductScreen", "products: $categoriesUiState")
+
+    LaunchedEffect(deleteCategory){
+        if(deleteCategory){
+            viewModel.getSortedAndFilteredCategories()
+        }
+    }
 
     Scaffold(
         modifier = Modifier
@@ -112,14 +122,11 @@ fun CategoryManagementScreen(
             .background(LadosTheme.colorScheme.background)
             .padding(paddingValues),
 
-        ) { it ->
+        ) { it -> val padding = it
 
         var searchQuery by remember { mutableStateOf("") }
         var openSort by remember { mutableStateOf(false) }
         var sortOption by remember { mutableStateOf("All") }
-        var categoryOption by remember { mutableStateOf("All") }
-        var showAddDialog by remember { mutableStateOf(false) }
-        var showEditDialog by remember { mutableStateOf(false) }
         var showConfirmDialog by remember { mutableStateOf(false) }
 
         Column(
@@ -199,7 +206,16 @@ fun CategoryManagementScreen(
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         items(categories.size) { index ->
-                            CategoryItem(categories[index])
+                            CategoryItem(
+                                categories[index],
+                                onEdit = {
+                                    navController.navigate(Screen.Admin.EditCategory.route + "/$it")
+                                },
+                                onDelete = {
+                                    deleteId = it
+                                    deleteConfirmation = true
+                                }
+                            )
                         }
                     }
                 }
@@ -246,151 +262,22 @@ fun CategoryManagementScreen(
                     openSort = false
                 }
             )
-        }
-    }
-}
 
-@Composable
-fun CategoryDialog(
-    title: String,
-    show: Boolean,
-    modifier: Modifier = Modifier
-) {
-
-    if (show) {
-        var name by rememberSaveable {
-            mutableStateOf(
-                mapOf(
-                    "vi" to "",
-                    "en" to ""
-                )
-            )
-        }
-
-        var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
-        var imageByteArray by remember { mutableStateOf<ByteArray?>(null) }
-
-        val context = LocalContext.current
-
-        val imagePickerLauncher = rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.PickVisualMedia()
-        ) { uri: Uri? ->
-
-            uri?.toDrawable(context)?.toByteArray()?.let {
-                imageByteArray = it
-            }
-
-            uri?.let {
-                selectedImageUri = it
-            }
-        }
-
-        Dialog(
-            onDismissRequest = { },
-            properties = DialogProperties(
-                dismissOnBackPress = true,
-                dismissOnClickOutside = true
-            )
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(LadosTheme.colorScheme.background)
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                Text(
-                    text = title,
-                    style = LadosTheme.typography.titleLarge.copy(
-                        color = LadosTheme.colorScheme.onBackground
-                    )
-                )
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center
-                ) {
-                    CategoryImageSection(
-                        imageUri = selectedImageUri?.toString()
-                            ?: "https://firebasestorage.googleapis.com/v0/b/lados-8509b.firebasestorage.app/o/images%2Fproducts%2Fimg_placeholder.jpg?alt=media&token=1f1fed12-8ead-4433-b2a4-c5e1d765290e",
-                        onEditImage = {
-                            imagePickerLauncher.launch(
-                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                            )
-                        }
-                    )
-                }
-
-                Text(
-                    text = "Name",
-                    style = LadosTheme.typography.titleMedium,
-                    color = LadosTheme.colorScheme.onBackground,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                CustomTextField(
-                    label = "Vietnamese Name",
-                    text = name["vi"] ?: "",
-                    onValueChange = {
-                        name = name.toMutableMap().apply { this["vi"] = it }
-
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    keyboardOptions = KeyboardOptions(
-                        imeAction = ImeAction.Done
-                    ),
-                    isError = false
-                )
-
-                CustomTextField(
-                    label = "English Name",
-                    text = name["en"] ?: "",
-                    onValueChange = {
-                        name = name.toMutableMap().apply { this["en"] = it }
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    keyboardOptions = KeyboardOptions(
-                        imeAction = ImeAction.Done
-                    ),
-                    isError = false
-                )
-
-                Spacer(modifier = Modifier.size(4.dp))
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(LadosTheme.colorScheme.background),
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Button(
-                        onClick = {
-
-                        }, shape = RoundedCornerShape(12.dp), colors = ButtonDefaults.buttonColors(
-                            containerColor = LadosTheme.colorScheme.primary,
-                            contentColor = LadosTheme.colorScheme.onPrimary
-                        )
-                    ) {
-                        Text(
-                            text = "Confirm",
-                            style = LadosTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(8.dp)
-                        )
+            if(deleteConfirmation){
+                ConfirmDialog(
+                    title = "Confirm delete",
+                    message = "Are you sure you want to delete this category?",
+                    onDismiss = { deleteConfirmation = false },
+                    onCancel = { deleteConfirmation = false },
+                    onConfirm = {
+                        viewModel.deleteCategory(deleteId)
+                        deleteConfirmation = false
                     }
-
-                    Button(onClick = {
-
-                    }) {
-                        Text(text = "Cancel")
-                    }
-                }
-
+                )
             }
         }
     }
 }
-
 
 @Composable
 fun SearchTextField(

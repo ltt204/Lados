@@ -45,6 +45,20 @@ class CategoryRepositoryImplement(
         }
     }
 
+    override suspend fun getCategoryRemoteByIdFromFireStore(id: String): Result<CategoryRemoteModel?> {
+        return try {
+            val categoryDoc = firestore.collection("categories")
+                .document(id)
+                .get()
+                .await()
+
+            val category = categoryDoc.toObject(CategoryRemoteModel::class.java)
+            Result.success(category)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     override suspend fun getAllSortedAndFilteredCategoriesFromFireStore(
         filterField: String?,
         filterValue: Any?,

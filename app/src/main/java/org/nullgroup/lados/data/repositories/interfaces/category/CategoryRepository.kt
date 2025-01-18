@@ -18,6 +18,7 @@ interface CategoryRepository {
     suspend fun addCategory(category: CategoryRemoteModel): Result<Boolean>
     suspend fun deleteCategory(id: String): Result<Boolean>
     suspend fun updateCategory(id: String, category: CategoryRemoteModel): Result<Boolean>
+    suspend fun getCategoryRemoteByIdFromFireStore(id: String): Result<CategoryRemoteModel?>
 
 
 }

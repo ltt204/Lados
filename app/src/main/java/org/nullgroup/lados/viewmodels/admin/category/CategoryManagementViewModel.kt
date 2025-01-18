@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.nullgroup.lados.data.models.Category
 import org.nullgroup.lados.data.repositories.interfaces.category.CategoryRepository
+import org.nullgroup.lados.data.repositories.interfaces.common.ImageRepository
 import javax.inject.Inject
 
 val categoriesSortOption = listOf(
@@ -26,21 +27,24 @@ data class FilterItem(
 
 @HiltViewModel
 class CategoryManagementViewModel @Inject constructor(
-    private val categoryRepository: CategoryRepository
-
-): ViewModel() {
+    private val categoryRepository: CategoryRepository,
+    private val imageRepository: ImageRepository
+) : ViewModel() {
 
     private val _categoriesUiState = MutableStateFlow<CategoryManagementUiState>(
         value = CategoryManagementUiState.Success(emptyList())
     )
     val categoriesUiState: StateFlow<CategoryManagementUiState> = _categoriesUiState
 
+    private val _deleteCategory = MutableStateFlow<Boolean>(false)
+    val deleteCategory: StateFlow<Boolean> = _deleteCategory
+
     init {
         getSortedAndFilteredCategories()
     }
 
-    fun extractSortOption(sortOption: String): Pair<String, Boolean>{
-        return when(sortOption){
+    fun extractSortOption(sortOption: String): Pair<String, Boolean> {
+        return when (sortOption) {
             "Name: A-Z" -> Pair("categoryName", true)
             "Name: Z-A" -> Pair("categoryName", false)
             "Newest" -> Pair("createdAt", false)
@@ -54,7 +58,7 @@ class CategoryManagementViewModel @Inject constructor(
         filterValue: Any? = null,
         sortByField: String = "categoryName",
         ascending: Boolean = true
-    ){
+    ) {
         viewModelScope.launch {
             _categoriesUiState.value = CategoryManagementUiState.Loading
 
@@ -65,10 +69,10 @@ class CategoryManagementViewModel @Inject constructor(
                 ascending = ascending
             )
 
-            if(result.isSuccess){
+            if (result.isSuccess) {
                 _categoriesUiState.value =
                     CategoryManagementUiState.Success(result.getOrDefault(emptyList()))
-            }else{
+            } else {
                 _categoriesUiState.value = CategoryManagementUiState.Error(
                     result.exceptionOrNull()?.message ?: "Unknown error"
                 )
@@ -77,12 +81,12 @@ class CategoryManagementViewModel @Inject constructor(
         }
     }
 
-    fun searchCategories(query: String){
+    fun searchCategories(query: String) {
         viewModelScope.launch {
             _categoriesUiState.value = CategoryManagementUiState.Loading
             val result = categoryRepository.getAllCategoriesFromFireStore()
             Log.d("CategoryManagementViewModel", "searchCategories: $result")
-            if(result.isSuccess){
+            if (result.isSuccess) {
                 val filteredCategories = result.getOrDefault(emptyList()).filter {
                     it.categoryName.contains(query, ignoreCase = true)
                 }
@@ -94,10 +98,26 @@ class CategoryManagementViewModel @Inject constructor(
             }
         }
     }
+
+    fun deleteCategory(id: String) {
+        viewModelScope.launch {
+            val result = categoryRepository.deleteCategory(id)
+            if (result.isSuccess) {
+                _deleteCategory.value = true
+                imageRepository.deleteImage(
+                    "categories",
+                    id,
+                    extension = "jpg"
+                )
+            } else {
+                _deleteCategory.value = false
+            }
+        }
+    }
 }
 
-sealed class CategoryManagementUiState{
-    data object Loading: CategoryManagementUiState()
-    data class Success(val categories: List<Category>): CategoryManagementUiState()
-    data class Error(val message: String): CategoryManagementUiState()
+sealed class CategoryManagementUiState {
+    data object Loading : CategoryManagementUiState()
+    data class Success(val categories: List<Category>) : CategoryManagementUiState()
+    data class Error(val message: String) : CategoryManagementUiState()
 }

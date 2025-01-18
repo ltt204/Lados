@@ -205,6 +205,12 @@ sealed class Screen(
         data object AddCategory:
         Admin("Add Category", "add_category", Icons.Default.AccountCircle)
 
+        data object EditCategory:
+        Admin("Edit Category", "edit_category", Icons.Default.AccountCircle){
+            const val ID_ARG = "category_id"
+            const val ROUTE_WITH_ARG = "edit_category/{$ID_ARG}"
+        }
+
         data object ProductManagement :
             Admin("Product Management", "product_management", Icons.Default.AccountCircle)
 

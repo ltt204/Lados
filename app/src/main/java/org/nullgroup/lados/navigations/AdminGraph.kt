@@ -38,14 +38,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.screens.admin.category.AddCategoryScreen
 import org.nullgroup.lados.screens.admin.category.CategoryManagementScreen
+import org.nullgroup.lados.screens.admin.category.EditCategoryScreen
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.viewmodels.customer.profile.ProfileViewModel
 
@@ -201,6 +204,23 @@ fun AdminGraph(
                 composable(route = Screen.Admin.AddCategory.route) {
                     AddCategoryScreen(
                         modifier = Modifier,
+                        paddingValues = innerPadding,
+                        navController = navController
+                    )
+                }
+
+                composable(
+                    route = Screen.Admin.EditCategory.ROUTE_WITH_ARG,
+                    arguments = listOf(
+                        navArgument(Screen.Admin.EditCategory.ID_ARG) {
+                            type = NavType.StringType
+                        })
+                ) {
+                    val categoryId =
+                        it.arguments?.getString(Screen.Admin.EditCategory.ID_ARG) ?: ""
+                    EditCategoryScreen(
+                        modifier = Modifier,
+                        categoryId = categoryId,
                         paddingValues = innerPadding,
                         navController = navController
                     )
