@@ -72,7 +72,12 @@ class AuthRepositoryImpl(
             val authResult = firebaseAuth.signInWithCredential(firebaseCredential).await()
 
             if (authResult != null) {
-                val user = mapToUser(authResult.user!!, "google.com", UserRole.CUSTOMER.name)
+
+
+                val user =
+                    userRepository.getUserFromFirestore(authResult.user?.uid ?: "").getOrNull()
+                        ?: mapToUser(authResult.user!!, "google.com", UserRole.CUSTOMER.name)
+                Log.d("SignIn", "Firestore user: $user")
 
                 val refreshToken = authResult.user!!.getIdToken(false).await().token ?: ""
                 sharedPreferences.saveAuthTokens(
@@ -101,7 +106,8 @@ class AuthRepositoryImpl(
             sharedPreferences.getAuthTokens() ?: return ResourceState.Idle
 
         return try {
-            val user = userRepository.getUserFromFirestore(firebaseAuth.currentUser?.uid ?: "").getOrNull()
+            val user =
+                userRepository.getUserFromFirestore(firebaseAuth.currentUser?.uid ?: "").getOrNull()
 
             if (user != null) {
                 return ResourceState.Success(user)
@@ -117,7 +123,8 @@ class AuthRepositoryImpl(
                 val authResult = firebaseAuth.signInWithCredential(credential).await()
 
                 if (authResult?.user != null) {
-                    val userAuth = userRepository.getUserFromFirestore(authResult.user?.uid ?: "").getOrNull()
+                    val userAuth =
+                        userRepository.getUserFromFirestore(authResult.user?.uid ?: "").getOrNull()
                     return ResourceState.Success(userAuth)
                 }
             }
@@ -134,7 +141,8 @@ class AuthRepositoryImpl(
 
                 if (newIdToken != null) {
                     sharedPreferences.saveAuthTokens(tokens.copy(idToken = newIdToken))
-                    val userAuth = userRepository.getUserFromFirestore(authResult.user?.uid ?: "").getOrNull()
+                    val userAuth =
+                        userRepository.getUserFromFirestore(authResult.user?.uid ?: "").getOrNull()
                     ResourceState.Success(userAuth)
                 } else {
                     ResourceState.Error("Failed to get new token")
