@@ -98,6 +98,7 @@ sealed class Screen(
         data object CartScreen : Customer("Cart", "customer_cart", Icons.Default.ShoppingCart)
         data object CheckOutScreen :
             Customer("Check Out", "customer_check_out", Icons.Filled.MailOutline)
+        data object WishlistScreen: Customer("Wishlist", "customer_wishlist", Icons.Filled.MailOutline)
 
         sealed class Address(
             name: String,
@@ -196,9 +197,10 @@ sealed class Screen(
             const val ID_ARG = "order_id"
             const val ROUTE_WITH_ARG = "staff_order_products/{$ID_ARG}"
         }
+        data object SearchScreen : Staff("Search", "staff_search", Icons.Default.MailOutline)
 
         companion object {
-            fun getAllScreens() = listOf(ChatScreen, OrderManagement)
+            fun getAllScreens() = listOf(ChatScreen, OrderManagement, SearchScreen)
         }
     }
 

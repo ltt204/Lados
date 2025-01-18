@@ -76,6 +76,7 @@ dependencies {
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.googleid)
+    implementation(libs.androidx.hilt.common)
     kapt(libs.hilt.android.compiler.v2511)
     ksp(libs.androidx.hilt.compiler)
 
@@ -154,6 +155,11 @@ dependencies {
     // For pager
     implementation(libs.accompanist.pager)
     implementation(libs.androidx.foundation)
+
+    // For async works when viewmodel is destroyed
+    implementation(libs.androidx.work.runtime.ktx)
+    // DI for WorkManager
+    implementation(libs.androidx.hilt.work)
 }
 
 kapt {

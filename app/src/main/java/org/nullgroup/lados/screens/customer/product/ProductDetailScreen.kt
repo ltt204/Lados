@@ -78,6 +78,8 @@ import org.nullgroup.lados.utilities.toCurrency
 import org.nullgroup.lados.viewmodels.customer.chat.ChatViewModel
 import org.nullgroup.lados.viewmodels.customer.chat.events.ChatScreenEvent
 import org.nullgroup.lados.viewmodels.customer.product.ProductDetailScreenViewModel
+import org.nullgroup.lados.viewmodels.customer.wishlist.SingleItemWishlistUiState
+import org.nullgroup.lados.viewmodels.customer.wishlist.SingleItemWishlistViewModel
 import java.util.Locale
 
 data class ProductDetailUiState(
@@ -98,6 +100,7 @@ data class ProductDetailUiState(
 fun ProductDetailScreen(
     productViewModel: ProductDetailScreenViewModel = hiltViewModel(),
     chatViewModel: ChatViewModel = hiltViewModel(),
+    wishlistViewModel: SingleItemWishlistViewModel = hiltViewModel(),
     productId: String,
     navController: NavController,
 ) {
@@ -120,9 +123,18 @@ fun ProductDetailScreen(
     }
     val onAddToCart = productViewModel.onAddToCartClicked(onAddedToCart, onAddedToCartFailed)
 
+    val wishlistUiState = wishlistViewModel.uiState.collectAsState().value
+    val isFavorite = when (wishlistUiState) {
+        is SingleItemWishlistUiState.Success -> wishlistUiState.isInWishList
+        else -> null
+    }
+    val onToggleFavorite = wishlistViewModel.toggleWishList
+
     // Load product details on initial composition
     LaunchedEffect(productId) {
         productViewModel.getProductById(productId)
+
+        wishlistViewModel.checkIfInWishList(productId)
     }
 
     when {
@@ -146,6 +158,8 @@ fun ProductDetailScreen(
             Scaffold(
                 topBar = {
                     ProductDetailTopBar(
+                        isFavorite = isFavorite,
+                        onToggleFavorite = { onToggleFavorite() },
                         onNavigateBack = { navController.navigateUp() },
                         onChat = {
                             chatViewModel.handleEvent(ChatScreenEvent.SendProduct(productId))
@@ -246,10 +260,12 @@ fun ProductDetailScreen(
 
 @Composable
 fun ProductDetailTopBar(
+    isFavorite: Boolean? = null,
+    onToggleFavorite: () -> Unit = {},
     onNavigateBack: () -> Unit = {},
     onChat: () -> Unit = {},
 ) {
-    var isFavorite by remember { mutableStateOf(false) }
+//    var isFavorite by remember { mutableStateOf(false) }
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
@@ -285,13 +301,15 @@ fun ProductDetailTopBar(
         }
 
         IconButton(
-            onClick = { isFavorite = isFavorite.not() },
+//            onClick = { isFavorite = isFavorite.not() },
+            onClick = onToggleFavorite,
+            enabled = isFavorite != null,
             modifier = Modifier
                 .clip(CircleShape)
                 .background(LadosTheme.colorScheme.surfaceContainerHighest)
         ) {
             Icon(
-                imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                imageVector = if (isFavorite == true) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                 contentDescription = "Favorite",
                 tint = LadosTheme.colorScheme.onBackground
             )

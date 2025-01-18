@@ -24,6 +24,7 @@ hiltAndroidCompilerVersion = "2.49"
 hiltAndroidTesting = "2.52"
 hiltCompiler = "1.2.0"
 hiltNavigationCompose = "1.2.0"
+hiltWork = "1.2.0"
 javaJwt = "3.18.2"
 javaJwtVersion = "4.4.0"
 junitJupiterApi = "5.8.1"
@@ -63,6 +64,8 @@ roomCommon = "2.6.1"
 composeMaterial3 = "1.0.0-alpha29"
 googleid = "1.1.1"
 securityCrypto = "1.1.0-alpha06"
+workRuntimeKtx = "2.9.1"
+hiltCommon = "1.2.0"
 
 [libraries]
 accompanist-pager = { module = "com.google.accompanist:accompanist-pager", version.ref = "accompanistPager" }
@@ -77,9 +80,11 @@ androidx-datastore-preferences = { module = "androidx.datastore:datastore-prefer
 androidx-foundation = { module = "androidx.compose.foundation:foundation", version.ref = "foundation" }
 androidx-hilt-compiler = { module = "androidx.hilt:hilt-compiler", version.ref = "hiltCompiler" }
 androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
+androidx-hilt-work = { module = "androidx.hilt:hilt-work", version.ref = "hiltWork" }
 androidx-material = { module = "androidx.compose.material:material", version.ref = "material" }
 androidx-material-v176 = { module = "androidx.compose.material:material", version.ref = "androidxMaterial" }
 androidx-security-crypto = { module = "androidx.security:security-crypto", version.ref = "securityCrypto" }
+androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntimeKtx" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
 coil-kt-coil-compose = { module = "io.coil-kt:coil-compose" }
 converter-gson = { module = "com.squareup.retrofit:converter-gson", version.ref = "converterGson" }
@@ -138,6 +143,7 @@ androidx-activity = { group = "androidx.activity", name = "activity", version.re
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 androidx-compose-material3 = { group = "androidx.wear.compose", name = "compose-material3", version.ref = "composeMaterial3" }
 googleid = { group = "com.google.android.libraries.identity.googleid", name = "googleid", version.ref = "googleid" }
+androidx-hilt-common = { group = "androidx.hilt", name = "hilt-common", version.ref = "hiltCommon" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

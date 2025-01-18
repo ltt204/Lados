@@ -59,6 +59,7 @@ import org.nullgroup.lados.screens.customer.profile.EditAddressScreen
 import org.nullgroup.lados.screens.customer.profile.EditProfileScreen
 import org.nullgroup.lados.screens.customer.profile.ProfileScreen
 import org.nullgroup.lados.screens.customer.profile.SettingScreen
+import org.nullgroup.lados.screens.customer.wishlist.WishlistScreen
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.viewmodels.SharedViewModel
 
@@ -383,6 +384,15 @@ fun CustomerGraph(
             composable(route = Screen.Customer.CheckOutScreen.route) {
                 isVisibility = false
                 CheckoutScreen(
+                    modifier = Modifier,
+                    innerPadding = innerPadding,
+                    navController = navController,
+                )
+            }
+
+            composable(route = Screen.Customer.WishlistScreen.route) {
+                isVisibility = false
+                WishlistScreen(
                     modifier = Modifier,
                     innerPadding = innerPadding,
                     navController = navController,
