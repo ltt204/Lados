@@ -145,8 +145,8 @@
     <string name="product_explore_categories">Explore Categories</string>
     <string name="shop_by_categories">Shop by Categories</string>
     <string name="profile_coupons">Coupons</string>
-    <string name="coupon_minimum_order_amount_desc">on order over %1$s</string>
-    <string name="coupon_maximum_discount_desc">up to %1$s</string>
+    <string name="coupon_minimum_order_amount_desc">For order over %1$s</string>
+    <string name="coupon_maximum_discount_desc">Up to %1$s</string>
     <string name="coupon_discount_percentage_desc">%1$s%% off</string>
     <string name="coupon_expire_at_desc">Expires at %1$s</string>
     <string name="coupon_back_description">Back</string>

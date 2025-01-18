@@ -143,10 +143,10 @@
     <string name="product_explore_categories">Khám phá danh mục</string>
     <string name="shop_by_categories">Mua sắm theo danh mục</string>
     <string name="profile_coupons">Phiếu giảm giá</string>
-    <string name="coupon_minimum_order_amount_desc">cho đơn hàng trên %1$s</string>
-    <string name="coupon_maximum_discount_desc">tối đa %1$s</string>
-    <string name="coupon_discount_percentage_desc">giảm %1$s%%</string>
-    <string name="coupon_expire_at_desc">hết hạn vào %1$s</string>
+    <string name="coupon_minimum_order_amount_desc">Cho đơn hàng trên %1$s</string>
+    <string name="coupon_maximum_discount_desc">Tối đa %1$s</string>
+    <string name="coupon_discount_percentage_desc">Giảm %1$s%%</string>
+    <string name="coupon_expire_at_desc">Hết hạn vào %1$s</string>
     <string name="coupon_back_description">Trở về</string>
     <string name="coupon_empty_description">Bạn chưa có phiếu giảm giá nào</string>
     <string name="coupon_empty">Bạn chưa có phiếu giảm giá nào</string>
@@ -167,4 +167,5 @@
     <string name="coupon_usage_minimum_order_amount_not_reached">Chưa đạt chi tiêu tối thiểu</string>
     <string name="coupon_usage_expired">Đã hết hạn</string>
     <string name="coupon_usage_already_used">Đã dùng</string>
+    <string name="coupon_selector_select_desc">Chọn mã giảm giá</string>
 </resources>

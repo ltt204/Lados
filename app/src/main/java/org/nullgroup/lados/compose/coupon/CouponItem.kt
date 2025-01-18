@@ -1,5 +1,7 @@
 package org.nullgroup.lados.compose.coupon
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -87,7 +89,7 @@ fun CouponItem(
         Row(
             modifier = Modifier
                 .wrapContentHeight()
-                .fillMaxWidth()
+                .weight(1f)
                 .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -148,7 +150,6 @@ fun CouponItem(
                 Column(
                     modifier = Modifier
                         .wrapContentWidth()
-                        .widthIn(max = 64.dp)
                         .padding(horizontal = 4.dp)
                 ) {
                     if (trailingArea == null) {
@@ -166,6 +167,7 @@ fun CouponItem(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Preview
 @Composable
 fun CouponItemPreview() {
