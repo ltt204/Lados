@@ -36,6 +36,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.MenuAnchorType
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -67,8 +68,11 @@ import org.nullgroup.lados.compose.cart.CartItemBar
 import org.nullgroup.lados.compose.cart.ConfirmDialog
 import org.nullgroup.lados.compose.cart.DialogInfo
 import org.nullgroup.lados.compose.cart.PricingDetails
+import org.nullgroup.lados.compose.coupon.CouponSelector
 import org.nullgroup.lados.data.models.Address
+import org.nullgroup.lados.data.models.CustomerCoupon
 import org.nullgroup.lados.screens.Screen
+import org.nullgroup.lados.screens.customer.coupon.CouponScreen
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.utilities.toCurrency
 import org.nullgroup.lados.viewmodels.customer.checkout.CheckoutError
@@ -99,6 +103,12 @@ fun CheckoutScreen(
     val userAddress = checkoutViewModel.userAddresses.collectAsStateWithLifecycle()
     val selectedAddress = checkoutViewModel.selectedAddress.collectAsStateWithLifecycle()
     val userPhoneNumber = checkoutViewModel.userPhoneNumber
+
+    val appliedCoupon = checkoutViewModel.appliedCoupon.collectAsStateWithLifecycle()
+    val setApplyingCoupon = { coupon: CustomerCoupon? ->
+        checkoutViewModel.handleCouponChanged(coupon)
+    }
+    val (isShownBottomSheet, setIsShownBottomSheet) = remember { mutableStateOf(false) }
 
     checkoutViewModel.checkoutFailureHandler = { checkoutFailure ->
         when (checkoutFailure) {
@@ -247,7 +257,8 @@ fun CheckoutScreen(
             if (checkoutDetail.value == null) {
                 return@Scaffold
             }
-            val (subtotal, productDiscount, orderDiscount, total) = checkoutDetail.value!!
+            val (subtotal, productDiscount, orderDiscount) = checkoutDetail.value!!
+            val total = checkoutDetail.value!!.total
             CheckoutBottomBar(
                 subtotal = subtotal.toCurrency(),
                 productDiscount = productDiscount.toCurrency(),
@@ -264,6 +275,10 @@ fun CheckoutScreen(
                     .padding(innerScaffoldPadding)
                     .padding(horizontal = 16.dp)
                     .fillMaxSize()
+//                    .scrollable(
+//                        rememberScrollState(),
+//                        orientation = Orientation.Vertical
+//                        )
             ) {
                 AddressSelector(
                     addresses = userAddress.value,
@@ -286,6 +301,7 @@ fun CheckoutScreen(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 LazyColumn(
+                    modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     itemsIndexed(orderingItems.value) { _, cartItem ->
@@ -317,6 +333,15 @@ fun CheckoutScreen(
 
                     }
                 } // End of LazyColumn
+                Spacer(modifier = Modifier.height(8.dp))
+
+                CouponSelector(
+                    currentCoupon = appliedCoupon.value,
+                    onClicked = {
+                        setIsShownBottomSheet(true)
+                    },
+                )
+
                 Spacer(modifier = Modifier.height(4.dp))
 
                 if (insufficientOrderItems.value.isNotEmpty()) {
@@ -326,9 +351,17 @@ fun CheckoutScreen(
                     )
                 }
             }
-
         },
         snackbarHost = { SnackbarHost(snackBarHostState.value) }
+    )
+
+    CouponBottomSheet(
+        isShownBottomSheet = isShownBottomSheet,
+        changeBottomSheetState = setIsShownBottomSheet,
+        onCouponSelected = setApplyingCoupon,
+        orderTotal = checkoutDetail.value?.let {
+            it.subtotal - it.productDiscount
+        } ?: 0.0
     )
 
     if (!isAllowedInteracting) {
@@ -347,6 +380,33 @@ fun CheckoutScreen(
         }
     }
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun CouponBottomSheet(
+    isShownBottomSheet: Boolean,
+    changeBottomSheetState: (Boolean) -> Unit,
+    onCouponSelected: (CustomerCoupon?) -> Unit,
+    orderTotal: Double,
+) {
+    if (isShownBottomSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { changeBottomSheetState(false) },
+            modifier = Modifier,
+            containerColor = LadosTheme.colorScheme.surfaceContainerLowest,
+            contentColor = LadosTheme.colorScheme.onSurface,
+            scrimColor = LadosTheme.colorScheme.surfaceContainerLowest.copy(alpha = 0.5f),
+
+            ) {
+            CouponScreen(
+                isEditable = true,
+                orderTotal = orderTotal,
+                onCouponSelected = onCouponSelected
+            )
+        }
+    }
+}
+
 
 @Composable
 private fun CheckoutBottomBar(

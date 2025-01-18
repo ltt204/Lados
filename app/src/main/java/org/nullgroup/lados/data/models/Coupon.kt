@@ -177,7 +177,9 @@ data class CustomerCoupon(
 
             // autoFetching coupons are not checked for maximum redemption
             if (!serverCoupon.autoFetching) {
-                if (serverCoupon.redeemedCount >= (serverCoupon.maximumRedemption ?: Int.MAX_VALUE)) {
+                if (serverCoupon.redeemedCount >= (serverCoupon.maximumRedemption
+                        ?: Int.MAX_VALUE)
+                ) {
                     return CouponRedemptionResult.Error(CouponRedemptionError.EXCEED_MAXIMUM_REDEMPTION)
                 }
             }
@@ -202,7 +204,7 @@ data class CustomerCoupon(
         if (totalAmount < minimumOrderAmount) {
             return CouponUsageResult.Error(CouponUsageError.MINIMUM_ORDER_AMOUNT_NOT_REACHED)
         }
-        val discountAmount = totalAmount * discountPercentage / 100
+        val discountAmount = totalAmount * discountPercentage.toDouble() / 100.0
         return if (maximumDiscount != null) {
             if (discountAmount > maximumDiscount) {
                 CouponUsageResult.Success(maximumDiscount)
@@ -211,6 +213,16 @@ data class CustomerCoupon(
             }
         } else {
             CouponUsageResult.Success(discountAmount)
+        }
+    }
+
+    fun discountAmountFrom(totalAmount: Double): Double {
+        return checkAndCalculateForDiscount(totalAmount).let {
+            if (it is CouponUsageResult.Success) {
+                it.discountAmount
+            } else {
+                0.0
+            }
         }
     }
 

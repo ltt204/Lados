@@ -316,7 +316,10 @@ fun CartScreen(
         },
         bottomBar = {
             if (isAnyItemsExisted.value) {
-                val (subtotal, productDiscount, orderDiscount, total) = checkoutDetail()
+                var total: Double
+                val (subtotal, productDiscount, orderDiscount) = checkoutDetail().also {
+                    total = it.total
+                }
                 CartBottomBar(
                     subtotal = subtotal.toCurrency(),
                     productDiscount = productDiscount.toCurrency(),

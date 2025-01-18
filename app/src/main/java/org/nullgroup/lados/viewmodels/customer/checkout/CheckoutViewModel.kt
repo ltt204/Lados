@@ -15,11 +15,13 @@ import kotlinx.coroutines.withContext
 import org.nullgroup.lados.data.models.Address
 import org.nullgroup.lados.data.models.CartItem
 import org.nullgroup.lados.data.models.CheckoutInfo
+import org.nullgroup.lados.data.models.CustomerCoupon
 import org.nullgroup.lados.data.models.Order
 import org.nullgroup.lados.data.models.OrderProduct
 import org.nullgroup.lados.data.models.Product
 import org.nullgroup.lados.data.models.ProductVariant
 import org.nullgroup.lados.data.repositories.interfaces.cart.CartItemRepository
+import org.nullgroup.lados.data.repositories.interfaces.coupon.CouponRepository
 import org.nullgroup.lados.data.repositories.interfaces.user.IUserAddressRepository
 import org.nullgroup.lados.data.repositories.interfaces.order.OrderRepository
 import org.nullgroup.lados.data.repositories.interfaces.user.UserRepository
@@ -43,7 +45,8 @@ class CheckoutViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val userAddressRepository: IUserAddressRepository,
     private val cartItemRepository: CartItemRepository,
-    private val orderRepository: OrderRepository
+    private val orderRepository: OrderRepository,
+    private val couponRepository: CouponRepository
 ): ViewModel() {
     private val _orderingItems = MutableStateFlow<List<CartItem>>(mutableListOf())
     val orderingItems = _orderingItems.asStateFlow()
@@ -58,6 +61,9 @@ class CheckoutViewModel @Inject constructor(
     // Map cartItem's id to its corresponding product and variant
     private val _insufficientOrderItems = MutableStateFlow<List<InsufficientOrderProductInfo>>(emptyList())
     val insufficientOrderItems = _insufficientOrderItems.asStateFlow()
+
+    private val _appliedCoupon = MutableStateFlow<CustomerCoupon?>(null)
+    val appliedCoupon = _appliedCoupon.asStateFlow()
 
     // Resolve the case when the view-model can't get the cached checkout info
     // when the checking-out screen is not launched from the cart screen;
@@ -102,6 +108,15 @@ class CheckoutViewModel @Inject constructor(
             viewModelScope.launch {
                 val checkoutInfoGetResult = cartItemRepository.getCheckoutInfo(customerId)
                 _checkoutInfo.value = checkoutInfoGetResult.getOrNull()
+                _checkoutInfo.value?.let { checkoutInfo ->
+                    _appliedCoupon.value?.let { coupon ->
+                        _checkoutInfo.value = checkoutInfo.copy(
+                            orderDiscount = coupon.discountAmountFrom(
+                                checkoutInfo.subtotal - checkoutInfo.productDiscount
+                            ),
+                        )
+                    }
+                }
 
                 if (checkoutInfoGetResult.isFailure) {
                     checkoutFailureHandler?.invoke(CheckoutError.FAILED_TO_GET_CHECKOUT_INFO)
@@ -122,6 +137,26 @@ class CheckoutViewModel @Inject constructor(
                 }
 
             }
+        }
+    }
+
+    fun handleCouponChanged(coupon: CustomerCoupon?) {
+        _appliedCoupon.value = coupon
+
+        if (checkoutInfo.value == null) {
+            return
+        }
+        if (coupon == null) {
+            _checkoutInfo.value = checkoutInfo.value?.copy(
+                orderDiscount = 0.0,
+            )
+            return
+        } else {
+            _checkoutInfo.value = checkoutInfo.value?.copy(
+                orderDiscount = coupon.discountAmountFrom(
+                    checkoutInfo.value!!.subtotal - checkoutInfo.value!!.productDiscount
+                ),
+            )
         }
     }
 
@@ -233,6 +268,15 @@ class CheckoutViewModel @Inject constructor(
                 cartItemRepository.clearCheckoutInfo(
                     customerId = customerId,
                 )
+            }
+            if (appliedCoupon.value != null) {
+                launch {
+                    couponRepository.updateCouponUsageStatus(
+                        customerId = customerId,
+                        couponId = appliedCoupon.value?.id ?: "",
+                        isUsed = true,
+                    )
+                }
             }
         }
 

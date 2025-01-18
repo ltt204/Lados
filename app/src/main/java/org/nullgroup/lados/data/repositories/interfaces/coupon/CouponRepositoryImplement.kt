@@ -10,5 +10,11 @@ interface CouponRepository {
         couponCode: String
     ): Result<CustomerCoupon.Companion.CouponRedemptionResult>
 
+    suspend fun updateCouponUsageStatus(
+        customerId: String,
+        couponId: String,
+        isUsed: Boolean = true,
+    ): Result<Boolean>
+
     suspend fun addCouponToServer(coupon: ServerCoupon): Result<Boolean>
 }

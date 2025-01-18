@@ -55,6 +55,7 @@ import org.nullgroup.lados.data.models.CustomerCoupon
 import org.nullgroup.lados.data.models.currentHostTimeZoneInString
 import org.nullgroup.lados.data.models.toLocalDateTime
 import org.nullgroup.lados.ui.theme.LadosTheme
+import org.nullgroup.lados.utilities.toCurrency
 import org.nullgroup.lados.viewmodels.customer.coupon.CouponUiState
 import org.nullgroup.lados.viewmodels.customer.coupon.CouponViewModel
 
@@ -69,8 +70,9 @@ data class CouponInfo(
 fun CouponScreen(
     navController: NavController? = null,
     innerPadding: PaddingValues = PaddingValues(bottom = 0.dp),
-    isEditable: Boolean = true,
-    orderTotal: Double? = 5000.0,
+    isEditable: Boolean = false,
+    orderTotal: Double? = null,
+    onCouponSelected: ((CustomerCoupon?) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     val couponViewModel: CouponViewModel = hiltViewModel()
@@ -88,6 +90,7 @@ fun CouponScreen(
 
     val onCouponSelected = if (isEditable) { coupon: CustomerCoupon ->
         couponViewModel.handleCouponSelection(coupon)
+        onCouponSelected?.invoke(if (selectedCoupon?.code == coupon.code) null else coupon)
     } else null
 
     val couponDiscountDesc = stringResource(R.string.coupon_usage_discount_desc)
@@ -118,7 +121,9 @@ fun CouponScreen(
                     val discountAmount = usageResult.discountAmount
                     CouponInfo(
                         couponState = if (selectedCoupon?.code == coupon.code) ItemState.SELECTED else ItemState.NORMAL,
-                        extraNote = couponDiscountDesc.format(discountAmount),
+                        extraNote = if (selectedCoupon?.code == coupon.code)
+                            couponDiscountDesc.format(discountAmount.toCurrency())
+                                else null,
 //                        trailingArea = {
 //                            Text(
 //                                text = stringResource(
@@ -227,16 +232,18 @@ fun CouponScreen(
                     )
                 },
                 navigationIcon = {
-                    IconButton(
-                        onClick = { onNavigateBack() },
+                    if (navController != null) {
+                        IconButton(
+                            onClick = { onNavigateBack() },
 //                        enabled = isAllowedInteracting,
-                        colors = iconButtonColors,
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Default.KeyboardArrowLeft,
-                            contentDescription = stringResource(R.string.coupon_back_description),
-                            tint = iconTintColor,
-                        )
+                            colors = iconButtonColors,
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Default.KeyboardArrowLeft,
+                                contentDescription = stringResource(R.string.coupon_back_description),
+                                tint = iconTintColor,
+                            )
+                        }
                     }
                 },
                 colors = topAppBarColor,

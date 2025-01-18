@@ -26,6 +26,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.nullgroup.lados.R
 import org.nullgroup.lados.ui.theme.LadosTheme
+import org.nullgroup.lados.utilities.toCurrency
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -50,7 +51,7 @@ fun CouponItem(
     expiredAt: LocalDateTime,
     onItemClicked: (() -> Unit)? = null,
     extraNote: String? = null, // only applied when [trailingArea] is null
-    trailingArea : (@Composable () -> Unit)? = null,
+    trailingArea: (@Composable () -> Unit)? = null,
     itemState: ItemState = ItemState.NORMAL
 ) {
     val containerColor = when (itemState) {
@@ -74,12 +75,11 @@ fun CouponItem(
         disabledContentColor = contentColor,
     )
 
-    Card (
+    Card(
         modifier = modifier
             .heightIn(max = 128.dp)
             .fillMaxWidth()
-            .clip(LadosTheme.shape.medium)
-        ,
+            .clip(LadosTheme.shape.medium),
         onClick = { onItemClicked?.invoke() },
         enabled = itemState != ItemState.DISABLED && itemState != ItemState.INVALID,
         colors = cardColors,
@@ -88,8 +88,7 @@ fun CouponItem(
             modifier = Modifier
                 .wrapContentHeight()
                 .fillMaxWidth()
-                .padding(12.dp)
-            ,
+                .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(
@@ -116,8 +115,9 @@ fun CouponItem(
                                 append(
                                     stringResource(
                                         R.string.coupon_minimum_order_amount_desc,
-                                        minimumOrderAmount
-                                    ))
+                                        minimumOrderAmount.toCurrency()
+                                    )
+                                )
                             }
                             if (minimumOrderAmount != null && maximumDiscount != null) {
                                 append(", ")
@@ -126,8 +126,9 @@ fun CouponItem(
                                 append(
                                     stringResource(
                                         R.string.coupon_maximum_discount_desc,
-                                        maximumDiscount
-                                    ))
+                                        maximumDiscount.toCurrency()
+                                    )
+                                )
                             }
                         },
                         style = bodySmallTypo,

@@ -166,5 +166,6 @@
     <string name="coupon_usage_minimum_order_amount_not_reached">Not reached min. spending</string>
     <string name="coupon_usage_expired">Expired</string>
     <string name="coupon_usage_already_used">Used</string>
+    <string name="coupon_selector_select_desc">Select a coupon</string>
 </resources>
 

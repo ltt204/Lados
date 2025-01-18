@@ -166,10 +166,10 @@ class CouponRepositoryImplement(
     }
 
     // TODO - Technical Debt: Transaction between order creation and coupon change may be not atomic
-    suspend fun updateCouponUsageStatus(
+    override suspend fun updateCouponUsageStatus(
         customerId: String,
         couponId: String,
-        isUsed: Boolean = true,
+        isUsed: Boolean,
     ): Result<Boolean> {
         return try {
             firestore
