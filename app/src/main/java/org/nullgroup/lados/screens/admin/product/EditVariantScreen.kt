@@ -60,6 +60,7 @@ import org.nullgroup.lados.viewmodels.admin.product.VariantImageUiState
 import org.nullgroup.lados.viewmodels.admin.product.colorOptionsList
 import org.nullgroup.lados.viewmodels.admin.product.exchangePrice
 import org.nullgroup.lados.viewmodels.admin.product.sizeOptionsList
+import org.nullgroup.lados.viewmodels.admin.product.validateEditVariant
 import org.nullgroup.lados.viewmodels.admin.product.validatePrice
 import org.nullgroup.lados.viewmodels.admin.product.validateQuantity
 import org.nullgroup.lados.viewmodels.admin.product.validateSaleAmount
@@ -176,7 +177,7 @@ fun EditVariantScreen(
                 Button(
                     modifier = Modifier.weight(1f).height(48.dp),
                     onClick = {
-                        variantError = validateVariant(
+                        variantError = validateEditVariant(
                             color.colorName["en"] ?: "",
                             size.sizeName["en"] ?: "",
                             productVariantsState

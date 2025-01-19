@@ -45,6 +45,7 @@ import androidx.navigation.navArgument
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.nullgroup.lados.screens.Screen
+import org.nullgroup.lados.screens.admin.product.AddEditVariantScreen
 import org.nullgroup.lados.screens.admin.product.AddProductScreen
 import org.nullgroup.lados.screens.admin.product.AddVariantScreen
 import org.nullgroup.lados.screens.admin.product.EditProductScreen
@@ -198,11 +199,11 @@ fun AdminGraph(
 //                        navController = navController,
 //                    )
 
-                     ManageProductScreen(
-                         modifier = Modifier,
-                         paddingValues = innerPadding,
-                         navController = navController
-                     )
+                    ManageProductScreen(
+                        modifier = Modifier,
+                        paddingValues = innerPadding,
+                        navController = navController
+                    )
 
                 }
 
@@ -239,7 +240,7 @@ fun AdminGraph(
                         { type = NavType.StringType }
                     )) {
                     val productId = it.arguments?.getString(Screen.Admin.EditProduct.ID_ARG)
-                    if(productId != null){
+                    if (productId != null) {
                         EditProductScreen(
                             modifier = Modifier,
                             productId = productId,
@@ -258,10 +259,10 @@ fun AdminGraph(
                         navArgument(Screen.Admin.EditVariant.VARIANT_ID_ARG)
                         { type = NavType.StringType }
                     )
-                ){
+                ) {
                     val productId = it.arguments?.getString(Screen.Admin.EditVariant.PRODUCT_ID_ARG)
                     val variantId = it.arguments?.getString(Screen.Admin.EditVariant.VARIANT_ID_ARG)
-                    if(productId != null && variantId != null){
+                    if (productId != null && variantId != null) {
                         EditVariantScreen(
                             modifier = Modifier,
                             productId = productId,
@@ -269,6 +270,24 @@ fun AdminGraph(
                             navController = navController,
                             paddingValues = innerPadding,
                             viewModel = editProductViewModel
+                        )
+                    }
+                }
+
+                composable(route = Screen.Admin.AddEditVariantScreen.ROUTE_WITH_ARG,
+                    arguments = listOf(
+                        navArgument(Screen.Admin.AddEditVariantScreen.ID_ARG)
+                        { type = NavType.StringType }
+                    )) {
+                    val productId = it.arguments?.getString(Screen.Admin.AddEditVariantScreen.ID_ARG)
+
+                    if(productId != null) {
+                        AddEditVariantScreen(
+                            modifier = Modifier,
+                            paddingValues = innerPadding,
+                            viewModel = editProductViewModel,
+                            navController = navController,
+                            productId = productId
                         )
                     }
                 }

@@ -46,7 +46,8 @@ class EditProductScreenViewModel @Inject constructor(
 
 
     val isInfoChanged = mutableStateOf(false)
-    val isVariantPictureChanged = mutableStateOf(false)
+
+    var isVariantPictureChanged = mutableStateOf(false)
 
     private var isFirstTimeLoadData = false
 
@@ -151,7 +152,6 @@ class EditProductScreenViewModel @Inject constructor(
 
     fun onUpdateVariant(variant: ProductVariantRemoteModel, withImageByteArray: ByteArray) {
         viewModelScope.launch {
-            Log.d("UpdateProductScreenViewModel", "variant: $variant")
 
             uploadImageState.value = VariantImageUiState.Loading
             val imageUrl = imageRepository.uploadImage(
@@ -160,7 +160,6 @@ class EditProductScreenViewModel @Inject constructor(
                 extension = "png",
                 image = withImageByteArray
             ).getOrNull() ?: throw Exception("Image upload failed")
-            Log.d("AddProductScreenViewModel", "imageUrl: $imageUrl")
 
             variant.images = listOf(
                 Image(
@@ -169,7 +168,6 @@ class EditProductScreenViewModel @Inject constructor(
                     fileName = variant.id,
                 )
             )
-
             productVariants.value = productVariants.value.map { it ->
                 if (it.id == variant.id) {
                     variant
@@ -177,27 +175,49 @@ class EditProductScreenViewModel @Inject constructor(
                     it
                 }
             }
-
             _productZombie.value = _productZombie.value.copy(variants = productVariants.value)
-
-            Log.d("AddProductScreenViewModel", "productVariants: ${productVariants.value}")
-
             uploadImageState.value = VariantImageUiState.Success(imageUrl)
-            Log.d("AddProductScreenViewModel", "zomebie productVariants: ${_productZombie.value.variants}")
         }
     }
 
     fun onDeleteVariant(variantId: String){
         viewModelScope.launch {
-            uploadImageState.value = VariantImageUiState.Loading
-
             imageListDelete.add(variantId)
             productVariants.value = productVariants.value.filter { it.id != variantId }
 
             _productZombie.value = _productZombie.value.copy(variants = productVariants.value)
 
             uploadImageState.value = VariantImageUiState.Success("")
-            Log.d("AddProductScreenViewModel", "zomebie productVariants: ${_productZombie.value.variants}")
+
+        }
+    }
+
+    fun onAddVariant(variant: ProductVariantRemoteModel, withImageByteArray: ByteArray) {
+        viewModelScope.launch {
+            Log.d("AddProductScreenViewModel", "variant: $variant")
+            val productVariantId = variantRepository.getProductVariantId().getOrNull() ?: ""
+            Log.d("AddProductScreenViewModel", "productVariantId: $productVariantId")
+
+            uploadImageState.value = VariantImageUiState.Loading
+            val imageUrl = imageRepository.uploadImage(
+                child = "products",
+                fileName = productVariantId,
+                extension = "png",
+                image = withImageByteArray
+            ).getOrNull() ?: throw Exception("Image upload failed")
+            Log.d("AddProductScreenViewModel", "imageUrl: $imageUrl")
+            variant.images = listOf(
+                Image(
+                    productVariantId = productVariantId,
+                    link = imageUrl,
+                    fileName = productVariantId,
+                )
+            )
+
+            productVariants.value += variant
+            _productZombie.value = _productZombie.value.copy(variants = productVariants.value)
+            uploadImageState.value = VariantImageUiState.Success(imageUrl)
+            Log.d("AddProductScreenViewModel", "productVariants: ${_productZombie.value.variants}")
         }
     }
 

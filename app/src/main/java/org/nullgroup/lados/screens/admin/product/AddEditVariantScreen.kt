@@ -53,6 +53,7 @@ import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.utilities.toByteArray
 import org.nullgroup.lados.utilities.toDrawable
 import org.nullgroup.lados.viewmodels.admin.product.AddProductScreenViewModel
+import org.nullgroup.lados.viewmodels.admin.product.EditProductScreenViewModel
 import org.nullgroup.lados.viewmodels.admin.product.VariantImageUiState
 import org.nullgroup.lados.viewmodels.admin.product.colorOptionsList
 import org.nullgroup.lados.viewmodels.admin.product.exchangePrice
@@ -62,14 +63,13 @@ import org.nullgroup.lados.viewmodels.admin.product.validatePrice
 import org.nullgroup.lados.viewmodels.admin.product.validateQuantity
 import org.nullgroup.lados.viewmodels.admin.product.validateSaleAmount
 import org.nullgroup.lados.viewmodels.admin.product.validateSalePrice
-import org.nullgroup.lados.viewmodels.admin.product.validateVariant
 
 @Composable
 fun AddEditVariantScreen(
     modifier: Modifier = Modifier,
     onVariantAdded: (AddProductVariant) -> Unit = {},
     productId: String? = null,
-    viewModel: AddProductScreenViewModel,
+    viewModel: EditProductScreenViewModel,
     navController: NavController,
     paddingValues: PaddingValues = PaddingValues(0.dp)
 ) {

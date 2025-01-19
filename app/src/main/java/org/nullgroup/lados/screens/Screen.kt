@@ -66,11 +66,11 @@ sealed class Screen(
             Icons.Default.Search
         )
 
-        data object ProductDetailScreen: Customer(
+        data object ProductDetailScreen : Customer(
             "ProductDetailScreen",
             "customer_product_detail_screen",
             Icons.Default.Search
-        ){
+        ) {
             const val ID_ARG = "product_id"
             const val ROUTE_WITH_ARG = "customer_product_detail_screen/{$ID_ARG}"
         }
@@ -96,8 +96,11 @@ sealed class Screen(
             Customer("Edit Profile", "customer_edit_profile", Icons.Default.AccountCircle)
 
         data object CartScreen : Customer("Cart", "customer_cart", Icons.Default.ShoppingCart)
-        data object CheckOutScreen: Customer("Check Out", "customer_check_out", Icons.Filled.MailOutline)
-        data object WishlistScreen: Customer("Wishlist", "customer_wishlist", Icons.Filled.MailOutline)
+        data object CheckOutScreen :
+            Customer("Check Out", "customer_check_out", Icons.Filled.MailOutline)
+
+        data object WishlistScreen :
+            Customer("Wishlist", "customer_wishlist", Icons.Filled.MailOutline)
 
         sealed class Address(
             name: String,
@@ -176,11 +179,15 @@ sealed class Screen(
         icon: ImageVector
     ) : Screen(name, route, icon) {
         data object ChatScreen : Staff("Chat", "staff_chat", Icons.Default.MailOutline)
-        data object ChatWithCustomerScreen : Staff("Chat", "staff_chat", Icons.Default.MailOutline) {
+        data object ChatWithCustomerScreen :
+            Staff("Chat", "staff_chat", Icons.Default.MailOutline) {
             const val CHAT_ROOM_ID_ARG = "chatId_id"
             const val ROUTE_WITH_ARG = "staff_chat/{$CHAT_ROOM_ID_ARG}"
         }
-        data object OrderManagement : Staff("Order Management", "staff_order_management", Icons.Default.AccountCircle)
+
+        data object OrderManagement :
+            Staff("Order Management", "staff_order_management", Icons.Default.AccountCircle)
+
         data object SearchScreen : Staff("Search", "staff_search", Icons.Default.MailOutline)
 
         companion object {
@@ -205,23 +212,29 @@ sealed class Screen(
         data object AddProduct :
             Admin("Add Product", "add_product", Icons.Default.AccountCircle)
 
-        data object  AddVariant:
-            Admin("Add Variant", "add_variant", Icons.Default.AccountCircle){
+        data object AddVariant :
+            Admin("Add Variant", "add_variant", Icons.Default.AccountCircle) {
             const val ID_ARG = "product_id"
             const val ROUTE_WITH_ARG = "add_variant/{$ID_ARG}"
-            }
+        }
 
-        data object EditProduct:
+        data object EditProduct :
             Admin("Edit Product", "edit_product", Icons.Default.AccountCircle) {
             const val ID_ARG = "product_id"
             const val ROUTE_WITH_ARG = "edit_product/{$ID_ARG}"
         }
 
-        data object EditVariant:
+        data object EditVariant :
             Admin("Edit Variant", "edit_variant", Icons.Default.AccountCircle) {
             const val PRODUCT_ID_ARG = "product_id"
             const val VARIANT_ID_ARG = "variant_id"
             const val ROUTE_WITH_ARG = "edit_variant/{$PRODUCT_ID_ARG}/{$VARIANT_ID_ARG}"
+        }
+
+        data object AddEditVariantScreen :
+            Admin("Add Edit Variant", "add_edit_variant", Icons.Default.AccountCircle) {
+            const val ID_ARG = "product_id"
+            const val ROUTE_WITH_ARG = "add_variant/{$ID_ARG}"
         }
 
         data object PromotionManagement :
@@ -230,7 +243,8 @@ sealed class Screen(
         data object Analytics : Admin("Analytics", "analytics", Icons.Default.AccountCircle)
 
         companion object {
-            fun getAllScreens() = listOf(Analytics, UserManagement, ProductManagement, PromotionManagement)
+            fun getAllScreens() =
+                listOf(Analytics, UserManagement, ProductManagement, PromotionManagement)
         }
     }
 

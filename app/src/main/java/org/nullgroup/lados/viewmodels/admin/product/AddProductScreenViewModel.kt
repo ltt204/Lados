@@ -177,19 +177,6 @@ class AddProductScreenViewModel @Inject constructor(
         }
     }
 
-    fun clearProductZombie(){
-        viewModelScope.launch {
-            _productZombie.value = ProductRemoteModel()
-        }
-    }
-
-    fun clearProductVariants(){
-        viewModelScope.launch {
-            productVariants.value = listOf()
-        }
-    }
-
-
     fun createBlankProduct() {
         viewModelScope.launch {
             val result = productRepository.getProductId()
@@ -254,22 +241,10 @@ class AddProductScreenViewModel @Inject constructor(
                     fileName = productVariantId,
                 )
             )
-//            _productZombie.value.variants += variant
+
             productVariants.value += variant
             uploadImageState.value = VariantImageUiState.Success(imageUrl)
             Log.d("AddProductScreenViewModel", "productVariants: ${_productZombie.value.variants}")
-        }
-    }
-
-    fun clearVariant(variant: AddProductVariant) {
-        viewModelScope.launch {
-            variantRepository.clearVariants(_currentProductId.value)
-        }
-    }
-
-    fun onAddProductZombie(product: ProductRemoteModel) {
-        viewModelScope.launch {
-            _productZombie.value = product
         }
     }
 
