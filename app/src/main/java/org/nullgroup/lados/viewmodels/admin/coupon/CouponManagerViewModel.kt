@@ -8,29 +8,32 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import org.nullgroup.lados.compose.coupon.ItemState
 import org.nullgroup.lados.data.models.ServerCoupon
 import org.nullgroup.lados.data.models.currentHostTimeZoneInString
+import org.nullgroup.lados.data.models.timestampFromNow
 import org.nullgroup.lados.data.models.toTimestamp
 import org.nullgroup.lados.data.repositories.interfaces.coupon.CouponRepository
+import org.nullgroup.lados.screens.customer.coupon.CouponInfo
 import java.time.LocalDateTime
 import javax.inject.Inject
 
-sealed class ServerCouponUiState {
-    object Loading : ServerCouponUiState()
-    object Empty : ServerCouponUiState()
+sealed class CouponManagerUiState {
+    object Loading : CouponManagerUiState()
+    object Empty : CouponManagerUiState()
     data class Success(
         val data: List<ServerCoupon>,
         val editingCoupon: ServerCoupon? = null
-    ) : ServerCouponUiState()
-    data class Error(val message: String) : ServerCouponUiState()
+    ) : CouponManagerUiState()
+    data class Error(val message: String) : CouponManagerUiState()
 }
 
 @HiltViewModel
-class ServerCouponViewModel @Inject constructor(
+class CouponManagerViewModel @Inject constructor(
     firebaseAuth: FirebaseAuth,
     private val couponRepository: CouponRepository
 ) : ViewModel() {
-    private val _couponUiState = MutableStateFlow<ServerCouponUiState>(ServerCouponUiState.Loading)
+    private val _couponUiState = MutableStateFlow<CouponManagerUiState>(CouponManagerUiState.Loading)
     val couponUiState = _couponUiState.asStateFlow()
 
     private val _serverCoupons = MutableStateFlow<List<ServerCoupon>>(emptyList())
@@ -48,15 +51,40 @@ class ServerCouponViewModel @Inject constructor(
         adminId?.let { id ->
             couponRepository.getCouponsForAdmin().collect { newCoupons ->
                 if (newCoupons.isEmpty()) {
-                    _couponUiState.value = ServerCouponUiState.Empty
+                    _couponUiState.value = CouponManagerUiState.Empty
                 } else {
-                    _couponUiState.value = ServerCouponUiState.Success(newCoupons)
+                    _couponUiState.value = CouponManagerUiState.Success(newCoupons)
                 }
                 _serverCoupons.value = newCoupons
             }
         }
     }
 
+    fun checkCoupon(coupon: ServerCoupon): CouponInfo {
+        val currentTimestamp = timestampFromNow()
+        if (coupon.startDate > currentTimestamp) {
+            return CouponInfo(
+                couponState = ItemState.DISABLED,
+                extraNote = "(Not started yet)"
+            )
+        } else {
+            if (coupon.endDate <= currentTimestamp) {
+                return CouponInfo(
+                    couponState = ItemState.DISABLED,
+                    extraNote = "(Expired)"
+                )
+            }
+        }
+        if (coupon.maximumRedemption != null && coupon.redeemedCount >= coupon.maximumRedemption) {
+            return CouponInfo(
+                couponState = ItemState.DISABLED,
+                extraNote = "(Out of stock)"
+            )
+        }
+        return CouponInfo(
+            couponState = ItemState.NORMAL
+        )
+    }
 
 
     private suspend fun addCouponToServer() {

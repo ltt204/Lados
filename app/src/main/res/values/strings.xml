@@ -173,7 +173,7 @@
     <string name="coupon_form_code">Code</string>
     <string name="coupon_form_discount_percentage">Discount Percentage</string>
     <string name="coupon_form_maximum_discount">Maximum Discount</string>
-    <string name="coupon_form_null_checkbox">Unspecified</string>
+    <string name="coupon_form_null_checkbox">Ignored</string>
     <string name="coupon_form_minimum_order_amount">Minimum Order Amount</string>
     <string name="coupon_form_start_date">Start Date</string>
     <string name="coupon_form_start_time">Start Time</string>
@@ -181,7 +181,13 @@
     <string name="coupon_form_end_time">End Time</string>
     <string name="coupon_form_usage_duration">Usage Duration</string>
     <string name="coupon_form_usage_duration_day">Usage Duration (day)</string>
-    <string name="coupon_form_usage_duration_time">Usage Duration (Time)</string>
     <string name="coupon_form_maximum_redemption">Maximum Redemption</string>
     <string name="coupon_form_auto_fetching">Global Coupon</string>
+    <string name="coupon_start_date_desc">Available from %1$s</string>
+    <string name="coupon_end_date_desc">to %1$s</string>
+    <string name="coupon_usage_duration_day">"day "</string>
+    <string name="coupon_usage_duration_hour">"hour "</string>
+    <string name="coupon_usage_duration_minute">"minute "</string>
+    <string name="coupon_redeemed_count_with_max_redeem_desc">%1$s / %2$s</string>
+    <string name="coupon_form_usage_duration_time">Usage Duration (time)</string>
 </resources>
