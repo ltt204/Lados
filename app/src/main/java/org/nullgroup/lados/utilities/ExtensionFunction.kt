@@ -24,6 +24,7 @@ import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.viewmodels.staff.order.OrderDetailEvent
 import org.nullgroup.lados.viewmodels.staff.order.OrderDetailViewModel
 import java.io.ByteArrayOutputStream
+import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.time.Duration
 import java.time.Instant
@@ -438,4 +439,31 @@ fun Long.getMessageTimeGapBetweenTwoMessagesDisplayment(previousMessageTime: Lon
 
     val formatter = DateTimeFormatter.ofPattern("MMM yyyy")
     return formatter.format(currentDateTime)
+}
+
+fun getAppLocale(context: Context): Locale {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        context.resources.configuration.locales[0] // Lấy locale đầu tiên trong danh sách
+    } else {
+        @Suppress("DEPRECATION")
+        context.resources.configuration.locale
+    }
+}
+
+fun formatStringByLocale(
+    value: Double,
+    locale: Locale = Locale.getDefault(),
+    isCurrency: Boolean = false
+): String {
+    return try {
+        val formatter = if (isCurrency) {
+            NumberFormat.getCurrencyInstance(locale)
+        } else {
+            NumberFormat.getNumberInstance(locale)
+        }
+        formatter.format(value)
+    } catch (e: Exception) {
+        // Handle any exception, e.g., invalid locale or value
+        value.toString() // Return as plain string if formatting fails
+    }
 }

@@ -14,7 +14,7 @@ interface ImageRepository {
         child: String,
         fileName: String,
         extension: String
-    ): String
+    ): Result<String>
 
     /**
      *  Deletes an image from the Firebase Storage

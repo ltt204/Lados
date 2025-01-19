@@ -98,7 +98,9 @@ sealed class Screen(
         data object CartScreen : Customer("Cart", "customer_cart", Icons.Default.ShoppingCart)
         data object CheckOutScreen :
             Customer("Check Out", "customer_check_out", Icons.Filled.MailOutline)
-        data object WishlistScreen: Customer("Wishlist", "customer_wishlist", Icons.Filled.MailOutline)
+
+        data object WishlistScreen :
+            Customer("Wishlist", "customer_wishlist", Icons.Filled.MailOutline)
 
         sealed class Address(
             name: String,
@@ -186,6 +188,7 @@ sealed class Screen(
         data object OrderManagement :
             Staff("Order Management", "staff_order_management", Icons.Default.AccountCircle)
 
+
         data object OrderDetail :
             Staff("Order Detail", "staff_order_detail", Icons.Default.AccountCircle) {
             const val ID_ARG = "order_id"
@@ -197,6 +200,7 @@ sealed class Screen(
             const val ID_ARG = "order_id"
             const val ROUTE_WITH_ARG = "staff_order_products/{$ID_ARG}"
         }
+
         data object SearchScreen : Staff("Search", "staff_search", Icons.Default.MailOutline)
 
         companion object {
@@ -229,6 +233,39 @@ sealed class Screen(
 
         data object ProductManagement :
             Admin("Product Management", "product_management", Icons.Default.AccountCircle)
+
+        data object AddProduct :
+            Admin("Add Product", "add_product", Icons.Default.AccountCircle)
+
+        data object AddVariant :
+            Admin("Add Variant", "add_variant", Icons.Default.AccountCircle) {
+            const val ID_ARG = "product_id"
+            const val ROUTE_WITH_ARG = "add_variant/{$ID_ARG}"
+        }
+        data object EditAddVariantScreen :
+            Admin("Edit Variant", "edit_add_variant", Icons.Default.AccountCircle){
+                const val VARIANT_ID_ARG = "variant_id"
+                const val ROUTE_WITH_ARG = "edit_add_variant/{$VARIANT_ID_ARG}"
+            }
+
+        data object EditProduct :
+            Admin("Edit Product", "edit_product", Icons.Default.AccountCircle) {
+            const val ID_ARG = "product_id"
+            const val ROUTE_WITH_ARG = "edit_product/{$ID_ARG}"
+        }
+
+        data object EditVariant :
+            Admin("Edit Variant", "edit_variant", Icons.Default.AccountCircle) {
+            const val PRODUCT_ID_ARG = "product_id"
+            const val VARIANT_ID_ARG = "variant_id"
+            const val ROUTE_WITH_ARG = "edit_variant/{$PRODUCT_ID_ARG}/{$VARIANT_ID_ARG}"
+        }
+
+        data object AddEditVariantScreen :
+            Admin("Add Edit Variant", "add_edit_variant", Icons.Default.AccountCircle) {
+            const val ID_ARG = "product_id"
+            const val ROUTE_WITH_ARG = "add_edit_variant/{$ID_ARG}"
+        }
 
         data object PromotionManagement :
             Admin("Promotion Management", "promotion_management", Icons.Default.AccountCircle)

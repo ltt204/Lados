@@ -22,7 +22,7 @@ class ImageRepositoryImplement(
         child: String,
         fileName: String,
         extension: String,
-    ): String {
+    ): Result<String> {
         val imageRef = firebaseStorage.reference
             .child("images")
             .child(child)
@@ -31,7 +31,7 @@ class ImageRepositoryImplement(
         val imageUrl: String =
             imageRef.putBytes(image).await().storage.downloadUrl.await().toString()
 
-        return imageUrl
+        return Result.success(imageUrl)
     }
 
     /**
