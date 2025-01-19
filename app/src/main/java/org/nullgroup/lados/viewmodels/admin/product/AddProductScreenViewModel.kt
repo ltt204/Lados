@@ -75,7 +75,10 @@ fun validateSalePrice(price: String, priceOption: String, ogPrice: String): Pair
         if (price.toIntOrNull() == null) return Pair(false, "Price must be VND format")
     }
 
-    if(price.toDouble() > ogPrice.toDouble()){
+    val priceDouble = price.toDoubleOrNull()
+    val ogPriceDouble = ogPrice.toDoubleOrNull()
+
+    if(priceDouble != null && ogPriceDouble != null && priceDouble > ogPriceDouble){
         return Pair(false, "Sale price must be less than original price")
     }
 
@@ -90,9 +93,13 @@ fun validateQuantity(quantity: String): Pair<Boolean, String> {
 
 fun validateSaleAmount(saleAmount: String, quantity: String): Pair<Boolean, String> {
 
-    if (saleAmount.isEmpty()) return Pair(false, "Sale amount cannot be empty")
-    if (saleAmount.toIntOrNull() == null) return Pair(false, "Sale amount must be a number")
-    if (saleAmount.toInt() > quantity.toInt()) return Pair(
+    if (
+        saleAmount.isNotEmpty() &&
+        saleAmount.toIntOrNull() != null &&
+        quantity.toIntOrNull() == null &&
+        saleAmount.toInt() > quantity.toInt()
+        )
+        return Pair(
         false,
         "Sale amount must be less than quantity"
     )

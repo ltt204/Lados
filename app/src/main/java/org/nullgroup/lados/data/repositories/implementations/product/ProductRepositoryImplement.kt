@@ -417,5 +417,61 @@ class ProductRepositoryImplement(
 
         return variants
     }
+
+    override suspend fun getProductRemoteModelByIdFromFireStore(id: String): Result<ProductRemoteModel?> {
+        return try {
+            val productDoc = firestore.collection("products")
+                .document(id)
+                .get()
+                .await()
+
+            val product = productDoc.toObject(ProductRemoteModel::class.java)
+
+            Log.d("ProductRepositoryImplement", "product: $product")
+
+            product?.let {
+                val variants = firestore.collection("products")
+                    .document(it.id)
+                    .collection("variants")
+                    .get()
+                    .await()
+                    .documents
+                    .mapNotNull { variantDoc ->
+                        val variant = variantDoc.toObject(ProductVariantRemoteModel::class.java)
+                        variant?.let { v ->
+                            val images = firestore.collection("products")
+                                .document(it.id)
+                                .collection("variants")
+                                .document(v.id)
+                                .collection("images")
+                                .get()
+                                .await()
+                                .documents
+                                .mapNotNull { imageDoc ->
+                                    imageDoc.toObject(Image::class.java)
+                                }
+                            v.images = images
+                        }
+                        variant
+                    }
+                it.variants = variants
+
+                val engagements = firestore.collection("products")
+                    .document(it.id)
+                    .collection("engagements")
+                    .get()
+                    .await()
+                    .documents
+                    .mapNotNull { engagementDoc ->
+                        engagementDoc.toObject(UserEngagement::class.java)
+                    }
+                it.engagements = engagements
+            }
+
+            Result.success(product)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }
 

@@ -211,6 +211,19 @@ sealed class Screen(
             const val ROUTE_WITH_ARG = "add_variant/{$ID_ARG}"
             }
 
+        data object EditProduct:
+            Admin("Edit Product", "edit_product", Icons.Default.AccountCircle) {
+            const val ID_ARG = "product_id"
+            const val ROUTE_WITH_ARG = "edit_product/{$ID_ARG}"
+        }
+
+        data object EditVariant:
+            Admin("Edit Variant", "edit_variant", Icons.Default.AccountCircle) {
+            const val PRODUCT_ID_ARG = "product_id"
+            const val VARIANT_ID_ARG = "variant_id"
+            const val ROUTE_WITH_ARG = "edit_variant/{$PRODUCT_ID_ARG}/{$VARIANT_ID_ARG}"
+        }
+
         data object PromotionManagement :
             Admin("Promotion Management", "promotion_management", Icons.Default.AccountCircle)
 

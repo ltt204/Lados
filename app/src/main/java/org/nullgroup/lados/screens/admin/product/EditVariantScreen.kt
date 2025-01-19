@@ -5,10 +5,8 @@ import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -20,35 +18,25 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
@@ -56,8 +44,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import coil.compose.SubcomposeAsyncImage
-import coil.request.ImageRequest
 import org.nullgroup.lados.compose.common.LoadOnProgress
 import org.nullgroup.lados.compose.signin.CustomTextField
 import org.nullgroup.lados.data.models.AddProductVariant
@@ -68,6 +54,8 @@ import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.utilities.toByteArray
 import org.nullgroup.lados.utilities.toDrawable
 import org.nullgroup.lados.viewmodels.admin.product.AddProductScreenViewModel
+import org.nullgroup.lados.viewmodels.admin.product.EditProductScreenViewModel
+import org.nullgroup.lados.viewmodels.admin.product.EditProductUiState
 import org.nullgroup.lados.viewmodels.admin.product.VariantImageUiState
 import org.nullgroup.lados.viewmodels.admin.product.colorOptionsList
 import org.nullgroup.lados.viewmodels.admin.product.exchangePrice
@@ -78,28 +66,48 @@ import org.nullgroup.lados.viewmodels.admin.product.validateSaleAmount
 import org.nullgroup.lados.viewmodels.admin.product.validateSalePrice
 import org.nullgroup.lados.viewmodels.admin.product.validateVariant
 
-
 @Composable
-fun AddVariantScreen(
+fun EditVariantScreen(
     modifier: Modifier = Modifier,
     onVariantAdded: (AddProductVariant) -> Unit = {},
     productId: String? = null,
-    viewModel: AddProductScreenViewModel,
+    variantId: String? = null,
+    viewModel: EditProductScreenViewModel,
     navController: NavController,
     paddingValues: PaddingValues = PaddingValues(0.dp)
 ) {
+
     val productVariantsState by viewModel.productVariants.collectAsState()
     val uploadImageState by viewModel.uploadImageState.collectAsState()
+    val productUiState = viewModel.productUiState.value
+
+    var currentVariant by remember {
+        mutableStateOf(ProductVariantRemoteModel())
+    }
+
+    LaunchedEffect(
+        productUiState
+    ){
+        if(productUiState is EditProductUiState.Success){
+            Log.d(
+                "Check variant",
+                "Product variants: ${productUiState.product.variants}"
+            )
+            currentVariant = productUiState.product.variants.first {
+                it.id == variantId
+            }
+        }
+    }
 
     var submitVariantClicked by remember { mutableStateOf(false) }
 
-    var size by remember { mutableStateOf(SizeRemoteModel()) }
-    var color by remember { mutableStateOf(ColorRemoteModel()) }
-    var originalPrice by remember { mutableStateOf("") }
-    var salePrice by remember { mutableStateOf("") }
+    var size by remember { mutableStateOf(currentVariant.size) }
+    var color by remember { mutableStateOf(currentVariant.color) }
+    var originalPrice by remember { mutableStateOf((currentVariant.originalPrice["en"]).toString()) }
+    var salePrice by remember { mutableStateOf((currentVariant.salePrice?.get("en")).toString()) }
     var priceOption by remember { mutableStateOf("USD") }
-    var quantity by remember { mutableStateOf("") }
-    var saleAmount by remember { mutableStateOf("") }
+    var quantity by remember { mutableStateOf(currentVariant.quantityInStock.toString()) }
+    var saleAmount by remember { mutableStateOf(currentVariant.saleAmount.toString()) }
 
     var originalPriceError by remember { mutableStateOf(Pair(true, "")) }
     var salePriceError by remember { mutableStateOf(Pair(true, "")) }
@@ -146,9 +154,7 @@ fun AddVariantScreen(
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 Button(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(48.dp),
+                    modifier = Modifier.weight(1f).height(48.dp),
                     onClick = { navController.navigateUp() },
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(
@@ -159,9 +165,7 @@ fun AddVariantScreen(
                     Text(text = "Cancel")
                 }
                 Button(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(48.dp),
+                    modifier = Modifier.weight(1f).height(48.dp),
                     onClick = {
                         variantError = validateVariant(
                             color.colorName["en"] ?: "",
@@ -189,14 +193,14 @@ fun AddVariantScreen(
                                 quantityInStock = quantity.toInt(),
                                 originalPrice = exchangePrice(originalPrice, priceOption),
                                 salePrice = exchangePrice(salePrice, priceOption),
-                                saleAmount = 0,
+                                saleAmount = saleAmount.toInt(),
                                 images = listOf()
                             )
-
-                            viewModel.onAddVariant(
-                                variant = variant,
-                                withImageByteArray = imageByteArray ?: ByteArray(0)
-                            )
+//
+//                            viewModel.onAddVariant(
+//                                variant = variant,
+//                                withImageByteArray = imageByteArray ?: ByteArray(0)
+//                            )
 
                             submitVariantClicked = true
                         }
@@ -230,8 +234,8 @@ fun AddVariantScreen(
             ) {
 
             VariantImageSection(
-                imageUri = selectedImageUri?.toString()
-                    ?: "https://firebasestorage.googleapis.com/v0/b/lados-8509b.firebasestorage.app/o/images%2Fproducts%2Fimg_placeholder.jpg?alt=media&token=1f1fed12-8ead-4433-b2a4-c5e1d765290e",
+                imageUri = (selectedImageUri?.toString()
+                    ?: currentVariant.images.firstOrNull() ?: "").toString(),
                 onEditImage = {
                     imagePickerLauncher.launch(
                         PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
@@ -395,8 +399,7 @@ fun AddVariantScreen(
                 color = LadosTheme.colorScheme.onBackground,
             )
 
-            CustomTextField(
-                label = "Enter sale price",
+            CustomTextField(label = "Enter sale price",
                 text = salePrice,
                 onValueChange = {
                     salePrice = it
@@ -418,10 +421,8 @@ fun AddVariantScreen(
                     .fillMaxWidth()
                     .onFocusChanged {
                         if (!salePriceFocus) return@onFocusChanged
-                        if (!it.isFocused) salePriceError =
-                            validateSalePrice(salePrice, priceOption, originalPrice)
-                    }
-            )
+                        if (!it.isFocused) salePriceError = validateSalePrice(salePrice, priceOption, originalPrice)
+                    })
 
             if (!salePriceError.first) {
                 Text(
@@ -431,52 +432,52 @@ fun AddVariantScreen(
                 )
             }
 
-            //           Spacer(modifier = Modifier.width(16.dp))
-//
-//            Text(
-//                text = "Sale amount",
-//                style = LadosTheme.typography.titleSmall,
-//                fontWeight = FontWeight.Bold,
-//                color = LadosTheme.colorScheme.onBackground,
-//                modifier = Modifier.fillMaxWidth()
-//            )
-//
-//            CustomTextField(label = "Sale amount",
-//                text = saleAmount,
-//                isError = !saleAmountError.first,
-//                onValueChange = {
-//                    if (it.matches(Regex("^[0-9]*$"))) {
-//                        saleAmount = it
-//                    }
-//                    saleAmountError = validateSaleAmount(saleAmount, quantity)
-//                    saleAmountFocus = true
-//                },
-//                keyboardOptions = KeyboardOptions(
-//                    keyboardType = KeyboardType.Number, imeAction = ImeAction.Done
-//                ),
-//                keyboardActions = KeyboardActions(
-//                    onDone = {
-//                        focusManager.clearFocus()
-//                        saleAmountError = validateSaleAmount(saleAmount, quantity)
-//                    }
-//                ),
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .onFocusChanged {
-//                        if (!saleAmountFocus) return@onFocusChanged
-//                        if (!it.isFocused) saleAmountError =
-//                            validateSaleAmount(saleAmount, quantity)
-//                    })
-//
-//            if (!saleAmountError.first) {
-//                Text(
-//                    text = saleAmountError.second,
-//                    style = LadosTheme.typography.bodySmall,
-//                    color = LadosTheme.colorScheme.error
-//                )
-//            }
-//
-//            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Text(
+                text = "Sale amount",
+                style = LadosTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+                color = LadosTheme.colorScheme.onBackground,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            CustomTextField(label = "Sale amount",
+                text = saleAmount,
+                isError = !saleAmountError.first,
+                onValueChange = {
+                    if (it.matches(Regex("^[0-9]*$"))) {
+                        saleAmount = it
+                    }
+                    saleAmountError = validateSaleAmount(saleAmount, quantity)
+                    saleAmountFocus = true
+                },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number, imeAction = ImeAction.Done
+                ),
+                keyboardActions = KeyboardActions(
+                    onDone = {
+                        focusManager.clearFocus()
+                        saleAmountError = validateSaleAmount(saleAmount, quantity)
+                    }
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .onFocusChanged {
+                        if (!saleAmountFocus) return@onFocusChanged
+                        if (!it.isFocused) saleAmountError =
+                            validateSaleAmount(saleAmount, quantity)
+                    })
+
+            if (!saleAmountError.first) {
+                Text(
+                    text = saleAmountError.second,
+                    style = LadosTheme.typography.bodySmall,
+                    color = LadosTheme.colorScheme.error
+                )
+            }
+
+            Spacer(modifier = Modifier.width(8.dp))
 
         }
     }
@@ -510,68 +511,3 @@ fun AddVariantScreen(
         }
     }
 }
-
-@Composable
-fun VariantImageSection(
-    modifier: Modifier = Modifier,
-    imageUri: String,
-    onEditImage: () -> Unit = {},
-) {
-
-    Box(
-        modifier = modifier
-            .wrapContentSize()
-            .padding(bottom = 16.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Box(
-            modifier = Modifier.fillMaxWidth(),
-            contentAlignment = Alignment.Center
-        ) {
-            SubcomposeAsyncImage(
-                modifier = Modifier
-                    .height(200.dp)
-                    .clip(RoundedCornerShape(12.dp)),
-                contentScale = ContentScale.Fit,
-                alignment = Alignment.Center,
-                loading = {
-                    LoadOnProgress(
-                        modifier = Modifier
-                            .clip(CircleShape)
-                    ) {
-                        CircularProgressIndicator(modifier = Modifier.size(48.dp))
-                        Spacer(modifier = Modifier.padding(top = 16.dp))
-                    }
-                },
-                model = ImageRequest
-                    .Builder(context = LocalContext.current)
-                    .data(imageUri)
-                    .crossfade(true)
-                    .build(),
-                contentDescription = "Variant Image"
-            )
-        }
-
-        OutlinedIconButton(
-            modifier = Modifier
-                .clip(CircleShape)
-                .align(Alignment.BottomEnd)
-                .size(30.dp),
-            colors = IconButtonDefaults.outlinedIconButtonColors(
-                contentColor = Color.White,
-                containerColor = Color(0xFF8E6CEF)
-            ),
-            border = BorderStroke(2.dp, Color.White),
-            onClick = onEditImage
-        ) {
-            Icon(
-                modifier = Modifier.size(16.dp),
-                imageVector = Icons.Filled.Edit,
-                contentDescription = null
-            )
-        }
-    }
-}
-
-
-

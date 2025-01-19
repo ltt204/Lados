@@ -360,6 +360,9 @@ fun ManageProductScreen(
                             selectedProduct = null
                         }
                         onUpdateSelected = true
+                        navController.navigate(
+                            Screen.Admin.EditProduct.route + "/$selectedProduct"
+                        )
                         // TODO: navigate to  product update. !!Care for variant, also image.
                     }) {
                     Text(
@@ -371,7 +374,6 @@ fun ManageProductScreen(
                     )
                 }
             }
-
         }
     }
 }

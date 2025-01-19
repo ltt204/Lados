@@ -120,13 +120,13 @@ fun AddProductScreen(
     var categoryError by remember { mutableStateOf(Pair(true, "")) }
 
     var viNameFocus by remember { mutableStateOf(false) }
-    var enNameFocus by remember  { mutableStateOf(false) }
-    var viDescriptionFocus by remember  { mutableStateOf(false) }
-    var enDescriptionFocus by remember  { mutableStateOf(false) }
+    var enNameFocus by remember { mutableStateOf(false) }
+    var viDescriptionFocus by remember { mutableStateOf(false) }
+    var enDescriptionFocus by remember { mutableStateOf(false) }
 
 
     LaunchedEffect(key1 = productUiState) {
-        if(productUiState is ProductUiState.Success){
+        if (productUiState is ProductUiState.Success) {
             viewModel.clearProductVariants()
             viewModel.clearProductZombie()
             navController.navigateUp()
@@ -146,7 +146,9 @@ fun AddProductScreen(
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 Button(
-                    modifier = Modifier.weight(1f).height(48.dp),
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(48.dp),
                     onClick = { navController.navigateUp() },
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(
@@ -158,7 +160,9 @@ fun AddProductScreen(
                 }
 
                 Button(
-                    modifier = Modifier.weight(1f).height(48.dp),
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(48.dp),
                     onClick = {
 
                         viNameError = validateEmpty(name["vi"] ?: "")
@@ -168,13 +172,13 @@ fun AddProductScreen(
                         variantError = validateVariants(productVariants.value)
                         categoryError = validateEmpty(selectedCategory.categoryName)
 
-                        if(
+                        if (
                             viNameError.first &&
                             enNameError.first &&
                             viDescriptionError.first &&
                             enDescriptionError.first &&
                             variantError.first
-                        ){
+                        ) {
                             viewModel.onAddProductButtonClick()
                         }
 
@@ -223,7 +227,8 @@ fun AddProductScreen(
                     name = name.toMutableMap().apply { this["vi"] = it }
                     viewModel.onNameChanged(name)
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
                     .onFocusChanged {
                         if (!viNameFocus) return@onFocusChanged
                         if (!it.isFocused) viNameError = validateEmpty(name["vi"] ?: "")
@@ -256,7 +261,8 @@ fun AddProductScreen(
                     name = name.toMutableMap().apply { this["en"] = it }
                     viewModel.onNameChanged(name)
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
                     .onFocusChanged {
                         if (!enNameFocus) return@onFocusChanged
                         if (!it.isFocused) enNameError = validateEmpty(name["en"] ?: "")
@@ -272,7 +278,7 @@ fun AddProductScreen(
                 ),
                 isError = !enNameError.first,
 
-            )
+                )
 
             if (!enNameError.first) {
                 Text(
@@ -299,10 +305,12 @@ fun AddProductScreen(
                     description = description.toMutableMap().apply { this["vi"] = it }
                     viewModel.onDescriptionChanged(description)
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
                     .onFocusChanged {
                         if (!viDescriptionFocus) return@onFocusChanged
-                        if (!it.isFocused) viDescriptionError = validateEmpty(description["vi"] ?: "")
+                        if (!it.isFocused) viDescriptionError =
+                            validateEmpty(description["vi"] ?: "")
                     },
                 keyboardOptions = KeyboardOptions(
                     imeAction = ImeAction.Done
@@ -317,7 +325,7 @@ fun AddProductScreen(
 
             if (!viDescriptionError.first) {
                 Text(
-                    text =viDescriptionError.second,
+                    text = viDescriptionError.second,
                     style = LadosTheme.typography.bodySmall,
                     color = LadosTheme.colorScheme.error
                 )
@@ -330,10 +338,12 @@ fun AddProductScreen(
                     description = description.toMutableMap().apply { this["en"] = it }
                     viewModel.onDescriptionChanged(description)
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
                     .onFocusChanged {
                         if (!enDescriptionFocus) return@onFocusChanged
-                        if (!it.isFocused) enDescriptionError = validateEmpty(description["en"] ?: "")
+                        if (!it.isFocused) enDescriptionError =
+                            validateEmpty(description["en"] ?: "")
                     },
                 keyboardOptions = KeyboardOptions(
                     imeAction = ImeAction.Done
@@ -413,7 +423,7 @@ fun AddProductScreen(
                 }
             }
 
-            if(!variantError.first){
+            if (!variantError.first) {
                 Text(
                     text = variantError.second,
                     style = LadosTheme.typography.bodySmall,
@@ -421,7 +431,10 @@ fun AddProductScreen(
                 )
             }
 
-            VariantsSection(productVariants.value)
+            VariantsSection(
+                productVariants.value,
+                navController = navController
+            )
         }
     }
 }
@@ -430,7 +443,9 @@ fun AddProductScreen(
 @Composable
 fun VariantsSection(
     variants: List<ProductVariantRemoteModel> = emptyList(),
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isEditable: Boolean = false,
+    navController: NavController
 ) {
     Log.d("Variants", "Variants: $variants")
     LazyColumn(
@@ -440,7 +455,14 @@ fun VariantsSection(
     {
         items(variants.size) {
             val variant = variants[it]
-            VariantItem(variant = variant)
+            VariantItem(
+                variant = variant,
+                onVariantClick = {
+                    if(isEditable){
+                        navController.navigate("edit_variant/${variant.productId}/${variant.id}")
+                    }
+                }
+            )
         }
     }
 
@@ -449,10 +471,15 @@ fun VariantsSection(
 @Composable
 fun VariantItem(
     variant: ProductVariantRemoteModel,
+    onVariantClick: (ProductVariantRemoteModel) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Card(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable {
+                onVariantClick(variant)
+            },
         shape = RoundedCornerShape(12.dp),
         border = BorderStroke(1.dp, LadosTheme.colorScheme.primary),
         colors = CardDefaults.cardColors(
