@@ -14,7 +14,7 @@ interface ProductRepository {
     fun getProductsWithRangeOfIdsFlow(ids: List<String>): Flow<List<Product>>
 
     suspend fun addProductsToFireStore(products: List<Product>): Result<Boolean>
-    suspend fun getAllProductsFromFireStore(): Result<List<Product>>
+    suspend fun getAllProductsFromFireStore(): Result<List<ProductRemoteModel>>
     suspend fun addProductToFireStore(product: ProductRemoteModel): Result<Boolean>
     suspend fun getProductByIdFromFireStore(id: String): Result<Product?>
     suspend fun deleteProductByIdFromFireStore(id: String): Result<Boolean>

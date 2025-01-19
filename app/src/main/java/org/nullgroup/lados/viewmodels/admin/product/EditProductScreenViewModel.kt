@@ -3,6 +3,7 @@ package org.nullgroup.lados.viewmodels.admin.product
 import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -26,8 +27,11 @@ class EditProductScreenViewModel @Inject constructor(
     private val productRepository: ProductRepository,
     private val categoryRepository: CategoryRepository,
     private val variantRepository: ProductVariantRepository,
-    private val imageRepository: ImageRepository
+    private val imageRepository: ImageRepository,
+    private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
+
+    val productId = savedStateHandle.get<String>("product_id") ?: ""
 
     val isInfoChanged = mutableStateOf(false)
 

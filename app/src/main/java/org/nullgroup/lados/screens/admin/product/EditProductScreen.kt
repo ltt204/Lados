@@ -56,6 +56,7 @@ fun EditProductScreen(
     viewModel: EditProductScreenViewModel,
     paddingValues: PaddingValues = PaddingValues(0.dp)
 ) {
+    Log.d("ProductItem", "Product ID: $productId")
 
     val scrollState = rememberScrollState()
     val productVariants = viewModel.productVariants.collectAsState()
