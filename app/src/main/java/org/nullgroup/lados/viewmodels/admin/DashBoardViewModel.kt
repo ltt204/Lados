@@ -1,6 +1,8 @@
 package org.nullgroup.lados.viewmodels.admin
 
 import android.util.Log
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -82,37 +84,6 @@ class DashBoardViewModel @Inject constructor(
         }
     }
 
-    /*
-    fun getAllProductsFromOrders(): List<OrderProduct> {
-        val currentList = mutableListOf<OrderProduct>()
-        viewModelScope.launch {
-            val currentState = _ordersUIState.value
-            if (currentState is OrdersUiState.Success) {
-                val orders = currentState.orders
-                for (order in orders) {
-                    order.orderProducts.forEach { orderProduct ->
-                        try {
-                            val data =
-                                productRepository.getProductByIdFromFireStore(orderProduct.productId)
-                                    .getOrNull() ?: throw Exception("Product not found")
-                            Log.d(
-                                "OrderProductsViewModel",
-                                "ProductId: ${orderProduct.productId} and data $data"
-                            )
-                            currentList.add(data)
-                        } catch (e: Exception) {
-                            Log.d("OrderProductsViewModel", "Error: ${e.message}")
-                            OrderProductsState.Error(e.message ?: "Failed to fetch products")
-                        }
-                    }
-                }
-            }
-        }
-        return currentList
-    }
-
-     */
-
 //    val users: StateFlow<List<User>> = flowOf(userRepository.getAllUsersFromFirestore())
 //        .stateIn(
 //            viewModelScope,
@@ -127,11 +98,14 @@ class DashBoardViewModel @Inject constructor(
 //            initialValue = emptyList()
 //        )
 
-    val revenue: MutableStateFlow<DashBoardRevenueState> =
+    val revenueByMonth: MutableStateFlow<DashBoardRevenueState> =
+        MutableStateFlow(DashBoardRevenueState.Loading)
+    val revenueByDay: MutableStateFlow<DashBoardRevenueState> =
         MutableStateFlow(DashBoardRevenueState.Loading)
 
+
     init {
-        //getRevenueByMonth(Calendar.getInstance().get(Calendar.YEAR).toString())
+        getRevenueByMonth(Calendar.getInstance().get(Calendar.YEAR).toString())
         getRevenueByDay(Calendar.getInstance().get(Calendar.MONTH).toString(), Calendar.getInstance().get(Calendar.YEAR).toString())
         fetchOrders()
     }
@@ -141,10 +115,10 @@ class DashBoardViewModel @Inject constructor(
             orderRepository.getOrdersForAdmin()
                 .flowOn(Dispatchers.IO)
                 .catch {
-                    revenue.value = DashBoardRevenueState.Error(it.message ?: "An error occurred")
+                    revenueByDay.value = DashBoardRevenueState.Error(it.message ?: "An error occurred")
                 }
                 .collect{
-                    val revenueByDay = it
+                    val _revenueByDay = it
                         .filter { order ->
                             order.orderStatusLog.entries.minBy { it.value }.value.getMonth().toString() == fromMonth
                                     && order.orderStatusLog.entries.minBy { it.value }.value.getYear().toString() == fromYear
@@ -161,7 +135,7 @@ class DashBoardViewModel @Inject constructor(
                                         && it.orderStatusLog.entries.firstOrNull { it.key == OrderStatus.CANCELLED.name } == null
                             }.sumOf { it.orderTotal.toUsdCurrency() }
                         }
-                    revenue.value = DashBoardRevenueState.Success(revenueByDay)
+                    revenueByDay.value = DashBoardRevenueState.Success(_revenueByDay)
                 }
 
         }
@@ -172,11 +146,11 @@ class DashBoardViewModel @Inject constructor(
             orderRepository.getOrdersForAdmin()
                 .flowOn(Dispatchers.IO)
                 .catch {
-                    revenue.value = DashBoardRevenueState.Error(it.message ?: "An error occurred")
+                    revenueByMonth.value = DashBoardRevenueState.Error(it.message ?: "An error occurred")
                 }
                 .collect {
                     Log.d("Revenue", it.map { it.orderTotal.toUsdCurrency() }.toString())
-                    val revenueByMonth = it
+                    val _revenueByMonth = it
                         .filter { order ->
                             order.orderStatusLog.entries.minBy { it.value }.value.getYear()
                                 .toString() == fromYear
@@ -194,9 +168,9 @@ class DashBoardViewModel @Inject constructor(
                                         && it.orderStatusLog.entries.firstOrNull { it.key == OrderStatus.CANCELLED.name } == null
                             }.sumOf { it.orderTotal.toUsdCurrency() }
                         }
-                    Log.d("Revenue", revenueByMonth.toString())
-                    Log.d("Revenue", "List revenue: ${revenueByMonth.values}")
-                    revenue.value = DashBoardRevenueState.Success(revenueByMonth)
+                    //Log.d("Revenue", revenueByMonth.toString())
+                    //Log.d("Revenue", "List revenue: ${revenueByMonth.values}")
+                    revenueByMonth.value = DashBoardRevenueState.Success(_revenueByMonth)
                 }
         }
     }
@@ -206,6 +180,12 @@ sealed class DashBoardRevenueState {
     data object Loading : DashBoardRevenueState()
     data class Success(val data: Map<String, Double>) : DashBoardRevenueState()
     data class Error(val message: String) : DashBoardRevenueState()
+}
+
+sealed class DashBoardProductsState {
+    data object Loading : DashBoardProductsState()
+    data class Success(val data: Map<String, Product>) : DashBoardProductsState()
+    data class Error(val message: String) : DashBoardProductsState()
 }
 
 sealed class OrdersUiState {

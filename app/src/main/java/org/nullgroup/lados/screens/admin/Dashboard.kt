@@ -67,6 +67,7 @@ import ir.ehsannarmani.compose_charts.models.AnimationMode
 import ir.ehsannarmani.compose_charts.models.BarProperties
 import ir.ehsannarmani.compose_charts.models.Bars
 import ir.ehsannarmani.compose_charts.models.DrawStyle
+import ir.ehsannarmani.compose_charts.models.LabelProperties
 import ir.ehsannarmani.compose_charts.models.Line
 import org.nullgroup.lados.compose.common.LoadOnProgress
 import org.nullgroup.lados.data.models.Order
@@ -76,31 +77,17 @@ import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.utilities.OrderStatus
 import org.nullgroup.lados.utilities.getDay
 import org.nullgroup.lados.utilities.getMonth
+import org.nullgroup.lados.utilities.toDateTimeString
 import org.nullgroup.lados.viewmodels.admin.DashBoardRevenueState
 import org.nullgroup.lados.viewmodels.admin.DashBoardViewModel
 import org.nullgroup.lados.viewmodels.admin.OrdersUiState
 import org.nullgroup.lados.viewmodels.admin.UsersUiState
+import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
+import java.util.Locale
 import kotlin.math.roundToLong
 import kotlin.random.Random
-
-fun updateList(orders: List<Order>): Pair<List<Order>, List<OrderProduct>> {
-    val listProducts = mutableListOf<OrderProduct>()
-    val listOrders = mutableListOf<Order>()
-
-    orders.forEach { order ->
-        order.orderProducts.forEach { orderProduct ->
-            listProducts.add(orderProduct)
-        }
-
-        order.orderStatusLog.forEach { (key, value) ->
-            if (key == OrderStatus.SHIPPED.name)
-                listOrders.add(order)
-        }
-    }
-    return Pair(listOrders, listProducts)
-}
 
 @SuppressLint("RememberReturnType")
 @Composable
@@ -111,7 +98,8 @@ fun SalesAndProductReportScreen(
 ) {
     val ordersUiState = viewModel.ordersUIState.collectAsStateWithLifecycle().value
 
-    val revenueByMonth by viewModel.revenue.collectAsState()
+    val revenueByMonth by viewModel.revenueByMonth.collectAsState()
+    val revenueByDay by viewModel.revenueByDay.collectAsState()
 
     val categories = listOf("All Categories", "Electronics", "Fashion", "Home")
     val sortOrderSalesTable = listOf("Ascending", "Descending")
@@ -121,7 +109,7 @@ fun SalesAndProductReportScreen(
 
     val sortOrderOrdersTable = listOf("Asc", "Desc")
     val sortByOrdersTable = listOf("Time", "No. orders", "Revenue")
-    val groupByOrdersTable = listOf("Day", "Week", "Month")
+    val groupByOrdersTable = listOf("Day", "Month")
     val selectedSortOrderOrdersTable = remember { mutableStateOf(sortOrderOrdersTable[0]) }
     val selectedSortByOrdersTable = remember { mutableStateOf(sortByOrdersTable[0]) }
     val selectedGroupByOrdersTable = remember { mutableStateOf(groupByOrdersTable[0]) }
@@ -189,6 +177,8 @@ fun SalesAndProductReportScreen(
             var listProducts by remember { mutableStateOf<List<OrderProduct>>(emptyList()) }
             var listOrders by remember { mutableStateOf<List<Order>>(emptyList()) }
 
+            var groupListProducts by remember { mutableStateOf<List<OrderProduct>>(emptyList()) }
+            var groupListOrders by remember { mutableStateOf<List<Order>>(emptyList()) }
 
             Column(
                 modifier = Modifier
@@ -256,6 +246,24 @@ fun SalesAndProductReportScreen(
                                         listOrders = filteredOrders.filter { order ->
                                             order.orderStatusLog.containsKey(OrderStatus.SHIPPED.name)
                                         }
+
+                                        // group by 2 order same date into 1 order
+
+                                        groupListProducts = listProducts
+                                            .groupBy { it.productId }
+                                            .map { (productId, products) ->
+                                                products.reduce { acc, product ->
+                                                    acc.copy(
+                                                        amount = acc.amount + product.amount, // Sum quantities
+                                                        totalPrice = acc.totalPrice + product.totalPrice // Sum total prices
+                                                    )
+                                                }
+                                            }
+                                        //listProducts = listOrders.flatMap { it.orderProducts }
+
+                                        // Group products by productId and combine them
+
+
                                     }
                                 }
                             }
@@ -290,37 +298,173 @@ fun SalesAndProductReportScreen(
                     ) {
                         Text("Orders", fontWeight = FontWeight.Bold, fontSize = 28.sp)
                     }
+
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceEvenly
+                        horizontalArrangement = Arrangement.Start
                     ) {
                         Text("Group By: ", fontWeight = FontWeight.Bold)
-                        DropdownMenu(selectedGroupByOrdersTable, groupByOrdersTable)
-                        Text("Sort By: ", fontWeight = FontWeight.Bold)
-                        DropdownMenu(selectedSortByOrdersTable, sortByOrdersTable, onClick = { type ->
-                            when(type){
-                                "Time" -> listOrders = listOrders.sortedBy { it.orderStatusLog.entries.minBy { it.value }.value }
-                                "No. orders" -> listOrders = listOrders
-                                "Revenue" -> listOrders = listOrders.sortedByDescending { it.orderTotal }
-                            }
+                        Spacer(Modifier.width(4.dp))
+                        DropdownMenu(
+                            selectedGroupByOrdersTable,
+                            groupByOrdersTable,
+                            onClick = { type ->
 
-                        }
-                            )
-                        /*
-                        Text("Sort Order", fontWeight = FontWeight.Bold)
-                        DropdownMenu(selectedSortOrderOrdersTable, sortOrderOrdersTable, onClick = { type ->
-                            when (type) {
-                                "Asc" -> listOrders = listOrders.sortedBy { it.orderStatusLog.entries.minBy { it.value }.value }
-                                "Desc" -> listOrders = listOrders
-                            }
-                        })
+                                listProducts = listOrders.flatMap { it.orderProducts }
+                                listOrders = listOrders.filter { order ->
+                                    order.orderStatusLog.containsKey(OrderStatus.SHIPPED.name)
+                                }
 
-                         */
+                                groupListProducts = listProducts
+                                    .groupBy { it.productId }
+                                    .map { (productId, products) ->
+                                        products.reduce { acc, product ->
+                                            acc.copy(
+                                                amount = acc.amount + product.amount, // Sum quantities
+                                                totalPrice = acc.totalPrice + product.totalPrice // Sum total prices
+                                            )
+                                        }
+                                    }
+
+                                when (type) {
+                                    "Day" -> {
+                                        val groupedOrders = listOrders.groupBy { order ->
+                                            val creationTimestamp =
+                                                order.orderStatusLog[OrderStatus.CREATED.name]
+                                            val creationDate = creationTimestamp?.let { Date(it) }
+                                            creationDate?.let {
+                                                SimpleDateFormat(
+                                                    "yyyy-MM-dd",
+                                                    Locale.getDefault()
+                                                ).format(it)
+                                            }
+                                        }
+
+                                        // Combine grouped orders into a single list of orders with count
+                                        groupListOrders =
+                                            groupedOrders.map { (date, ordersForDate) ->
+                                                val aggregatedOrder =
+                                                    ordersForDate.reduce { acc, order ->
+                                                        acc.copy(
+                                                            orderProducts = acc.orderProducts + order.orderProducts,
+                                                            orderTotal = acc.orderTotal + order.orderTotal
+                                                        )
+                                                    }
+
+                                                // Add metadata for the count of orders in the group
+                                                aggregatedOrder.copy(
+                                                    orderStatusLog = aggregatedOrder.orderStatusLog + ("OrderCount" to ordersForDate.size.toLong())
+                                                )
+                                            }
+                                    }
+
+                                    "Month" -> {
+                                        val groupedOrders = listOrders.groupBy { order ->
+                                            val creationTimestamp =
+                                                order.orderStatusLog[OrderStatus.CREATED.name]
+                                            val creationDate = creationTimestamp?.let { Date(it) }
+                                            creationDate?.let {
+                                                SimpleDateFormat(
+                                                    "yyyy-MM",
+                                                    Locale.getDefault()
+                                                ).format(it)
+                                            }
+                                        }
+
+                                        // Combine grouped orders into a single list of orders with count
+                                        groupListOrders =
+                                            groupedOrders.map { (month, ordersForMonth) ->
+                                                val aggregatedOrder =
+                                                    ordersForMonth.reduce { acc, order ->
+                                                        acc.copy(
+                                                            orderProducts = acc.orderProducts + order.orderProducts,
+                                                            orderTotal = acc.orderTotal + order.orderTotal
+                                                        )
+                                                    }
+
+                                                // Add metadata for the count of orders in the group
+                                                aggregatedOrder.copy(
+                                                    orderStatusLog = aggregatedOrder.orderStatusLog + ("OrderCount" to ordersForMonth.size.toLong())
+                                                )
+                                            }
+                                    }
+                                }
+                            }
+                        )
                     }
 
-                    OrderTable(data = listOrders)
+                    Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.End
+                        ) {
+                        Text("Sort By: ", fontWeight = FontWeight.Bold)
+                        Spacer(Modifier.width(4.dp))
+                        DropdownMenu(
+                            selectedSortByOrdersTable,
+                            sortByOrdersTable,
+                            onClick = { type ->
+                                when (type) {
+                                    "Time" -> groupListOrders =
+                                        groupListOrders.sortedByDescending { it.orderStatusLog.entries.minBy { it.value }.value }
 
+                                    "No. orders" -> {
+                                        groupListOrders =
+                                            groupListOrders.sortedByDescending { order ->
+                                                order.orderStatusLog["OrderCount"] ?: 0L
+                                            }
+                                    }
+
+                                    "Revenue" -> groupListOrders =
+                                        groupListOrders.sortedByDescending { it.orderTotal }
+                                }
+
+                            })
+                        Spacer(Modifier.width(4.dp))
+                        Text("Sort Order: ", fontWeight = FontWeight.Bold)
+                        Spacer(Modifier.width(4.dp))
+                        DropdownMenu(
+                            selectedSortOrderOrdersTable,
+                            sortOrderOrdersTable,
+                            onClick = { type ->
+                                when (type) {
+                                    "Asc" -> when (selectedSortByOrdersTable.value) {
+                                        "Time" -> groupListOrders =
+                                            groupListOrders.sortedBy { it.orderStatusLog.entries.minBy { it.value }.value }
+
+                                        "No. orders" -> {
+                                            groupListOrders =
+                                                groupListOrders.sortedBy { order ->
+                                                    order.orderStatusLog["OrderCount"] ?: 0L
+                                                }
+                                        }
+
+                                        "Revenue" -> groupListOrders =
+                                            groupListOrders.sortedBy { it.orderTotal }
+                                    }
+
+                                    "Desc" -> when (selectedSortByOrdersTable.value) {
+                                        "Time" -> groupListOrders =
+                                            groupListOrders.sortedByDescending { it.orderStatusLog.entries.minBy { it.value }.value }
+
+                                        "No. orders" -> {
+                                            groupListOrders =
+                                                groupListOrders.sortedByDescending { order ->
+                                                    order.orderStatusLog["OrderCount"] ?: 0L
+                                                }
+                                        }
+
+                                        "Revenue" -> groupListOrders =
+                                            groupListOrders.sortedByDescending { it.orderTotal }
+                                    }
+                                }
+                            })
+
+                    }
+
+
+                    OrderTable(data = groupListOrders, cusFormatPattern = if (selectedGroupByOrdersTable.value == "Month") "MM/yyyy" else "dd/MM/yyyy")
 
                     Spacer(Modifier.width(16.dp))
 
@@ -328,24 +472,43 @@ fun SalesAndProductReportScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.Center
                     ) {
-                        Text("Revenue by Category", fontWeight = FontWeight.Bold, fontSize = 28.sp)
+                        Text("Revenue", fontWeight = FontWeight.Bold, fontSize = 28.sp)
                     }
 
-                    when (revenueByMonth) {
-                        is DashBoardRevenueState.Loading -> {
-                            Text("Loading Revenue Data")
-                        }
+                    if (selectedGroupByOrdersTable.value == "Month") {
+                        when (revenueByMonth) {
+                            is DashBoardRevenueState.Loading -> {
+                                Text("Loading Revenue Data")
+                            }
 
-                        is DashBoardRevenueState.Success -> {
-                            val revenueByMonthSuccess =
-                                (revenueByMonth as DashBoardRevenueState.Success).data
-                            Log.d("Revenue", revenueByMonthSuccess.toString())
-                            RevenueChart(Modifier.height(512.dp), revenueByMonthSuccess)
-                        }
+                            is DashBoardRevenueState.Success -> {
+                                val revenueByMonthSuccess =
+                                    (revenueByMonth as DashBoardRevenueState.Success).data
+                                Log.d("Revenue", revenueByMonthSuccess.toString())
+                                RevenueChart(Modifier.height(512.dp), revenueByMonthSuccess)
+                            }
 
-                        is DashBoardRevenueState.Error -> {}
+                            is DashBoardRevenueState.Error -> {}
+                        }
+                    } else
+                    {
+                        when (revenueByDay) {
+                            is DashBoardRevenueState.Loading -> {
+                                Text("Loading Revenue Data")
+                            }
+
+                            is DashBoardRevenueState.Success -> {
+                                val revenueByDaySuccess =
+                                    (revenueByDay as DashBoardRevenueState.Success).data
+                                RevenueChart(Modifier.height(512.dp), revenueByDaySuccess)
+                            }
+
+                            is DashBoardRevenueState.Error -> {}
+                        }
                     }
                     ///////////////
+                    Spacer(Modifier.height(32.dp))
+
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.Center
@@ -379,7 +542,7 @@ fun SalesAndProductReportScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.Center
                     ) {
-                        Text("Revenue by Category", fontWeight = FontWeight.Bold, fontSize = 28.sp)
+                        Text("Revenue by Product", fontWeight = FontWeight.Bold, fontSize = 28.sp)
                     }
 
                     ChartPlaceholder()
@@ -446,6 +609,7 @@ fun DropdownMenu(
 @Composable
 fun OrderTable(
     data: List<Order>,
+    cusFormatPattern: String = "dd/MM/yyyy"
 ) {
     LazyColumn(modifier = Modifier.border(1.dp, Color.Black, RoundedCornerShape(8.dp))) {
         item {
@@ -455,10 +619,10 @@ fun OrderTable(
                     .fillMaxWidth()
                     .padding(8.dp)
             ) {
-                Text("Time", Modifier.weight(1.2f))
+                Text("Time", Modifier.weight(0.5f))
                 Text(
                     "No. orders",
-                    Modifier.weight(0.5f),
+                    Modifier.weight(0.45f),
 
                 )
                 Text(
@@ -476,11 +640,16 @@ fun OrderTable(
                     .padding(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    modifier = Modifier
-                        .weight(1.2f),
-                    text = item.orderStatusLog[OrderStatus.CREATED.name]?.let { Date(it) }.toString(),
-                )
+                item.orderStatusLog[OrderStatus.CREATED.name]?.toDateTimeString(
+                    cusFormatPattern,
+                    Locale.getDefault()
+                )?.let {
+                    Text(
+                        modifier = Modifier
+                            .weight(0.5f),
+                        text = it
+                    )
+                }
                 VerticalDivider(
                     modifier = Modifier
                         .padding(horizontal = 16.dp)
@@ -488,8 +657,8 @@ fun OrderTable(
                 )
                 Text(
                     modifier = Modifier
-                        .weight(0.5f),
-                    text = "1"
+                        .weight(0.35f),
+                    text = item.orderStatusLog["OrderCount"].toString()
                 )
                 VerticalDivider(
                     modifier = Modifier
@@ -560,9 +729,7 @@ fun RevenueChart(
     val primaryColor = LadosTheme.colorScheme.primary
     val listData = mutableListOf<Bars>()
     revenueMap.forEach { (mon, rev) ->
-        Log.d("Revenue", "Month: $mon, Revenue: $rev")
         val revWith = ((rev*100).roundToLong().toDouble())/100
-        Log.d("Revenue", "Month: $mon, Revenue: $revWith")
         listData.add(
             Bars(
                 label = mon, values = listOf(
@@ -571,6 +738,7 @@ fun RevenueChart(
             )
         )
     }
+
     ColumnChart(
         modifier = modifier,
         data = listData,
@@ -579,6 +747,7 @@ fun RevenueChart(
             thickness = 10.dp,
         )
     )
+
 }
 
 data class ProductData(
