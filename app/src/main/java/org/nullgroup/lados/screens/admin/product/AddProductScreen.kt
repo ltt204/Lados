@@ -25,6 +25,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -33,6 +34,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
@@ -445,6 +447,7 @@ fun VariantsSection(
     variants: List<ProductVariantRemoteModel> = emptyList(),
     modifier: Modifier = Modifier,
     isEditable: Boolean = false,
+    onDelete: (String) -> Unit = {},
     navController: NavController
 ) {
     Log.d("Variants", "Variants: $variants")
@@ -453,7 +456,7 @@ fun VariantsSection(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     )
     {
-        items(variants.size) {
+        items(variants.size) { it ->
             val variant = variants[it]
             VariantItem(
                 variant = variant,
@@ -461,17 +464,20 @@ fun VariantsSection(
                     if(isEditable){
                         navController.navigate("edit_variant/${variant.productId}/${variant.id}")
                     }
+                },
+                onDelete = {
+                   onDelete(variant.id)
                 }
             )
         }
     }
-
 }
 
 @Composable
 fun VariantItem(
     variant: ProductVariantRemoteModel,
     onVariantClick: (ProductVariantRemoteModel) -> Unit = {},
+    onDelete: (String) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -490,8 +496,8 @@ fun VariantItem(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp), // Thêm khoảng cách
-            horizontalArrangement = Arrangement.spacedBy(16.dp), // Khoảng cách giữa hình ảnh và thông tin
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Hình ảnh variant
@@ -525,7 +531,7 @@ fun VariantItem(
                     text = "Color: ${variant.color.colorName["en"]}",
                     color = LadosTheme.colorScheme.primary
                 )
-                Spacer(modifier = Modifier.height(4.dp)) // Khoảng cách giữa các dòng
+                Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = "Size: ${variant.size.sizeName["en"]}",
                     color = LadosTheme.colorScheme.primary
@@ -545,6 +551,18 @@ fun VariantItem(
                 Text(
                     text = "Quantity: ${variant.quantityInStock}",
                     color = LadosTheme.colorScheme.onBackground
+                )
+            }
+
+            IconButton(
+                onClick = {
+                    onDelete(variant.id)
+                }
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Delete,
+                    contentDescription = "Delete Variant",
+                    tint = LadosTheme.colorScheme.outline
                 )
             }
         }

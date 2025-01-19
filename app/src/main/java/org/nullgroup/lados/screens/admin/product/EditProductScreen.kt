@@ -40,6 +40,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import org.nullgroup.lados.compose.profile.ConfirmDialog
 import org.nullgroup.lados.compose.signin.CustomTextField
 import org.nullgroup.lados.data.models.Category
 import org.nullgroup.lados.screens.Screen
@@ -61,52 +62,30 @@ fun EditProductScreen(
 
     val scrollState = rememberScrollState()
     val productVariants = viewModel.productVariants.collectAsState()
-    Log.d("AddProductScreen", "Current Product variants: ${productVariants.value.size}")
     val categories by viewModel.categories.collectAsState()
 
     val productUiState = viewModel.productUiState.value
     val currentProduct by viewModel.productZombie.collectAsState()
     val updateSuccess by viewModel.updateSuccess.collectAsState()
 
-    Log.d("Test current product", "Current product: $currentProduct")
+    var confirmUpdate by remember { mutableStateOf(false) }
 
     LaunchedEffect(key1 = Unit) {
         viewModel.loadProduct(productId)
         viewModel.getCategories()
     }
 
-    var confirmUpdate by remember { mutableStateOf(false) }
-
-    LaunchedEffect(key1 = updateSuccess){
+    LaunchedEffect(updateSuccess){
         if(updateSuccess){
-            viewModel.clearProductVariants()
-            viewModel.clearProductZombie()
-            viewModel.setFirstTimeLoadData(false)
-            navController.navigate(
-                Screen.Admin.ProductManagement.route
-            ) {
-                popUpTo( Screen.Admin.ProductManagement.route) {
-                    inclusive = true // Xóa cả màn hình hiện tại khỏi back stack
-                }
-            }
-
+            viewModel.handleUpdateSuccess()
+            navController.navigateUp()
         }
     }
 
     BackHandler {
-        viewModel.clearProductVariants()
-        viewModel.clearProductZombie()
-        viewModel.setFirstTimeLoadData(false)
+       viewModel.handleUpdateSuccess()
         navController.navigateUp()
     }
-
-//    LaunchedEffect(key1 = productUiState) {
-//        if(productUiState is ProductUiState.Success){
-//            viewModel.clearProductVariants()
-//            viewModel.clearProductZombie()
-//            navController.navigateUp()
-//        }
-//    }
 
     Scaffold(
         modifier = Modifier
@@ -178,7 +157,6 @@ fun EditProductScreen(
                         color = LadosTheme.colorScheme.error
                     )
                 }
-
             }
 
             is EditProductUiState.Success -> {
@@ -221,6 +199,9 @@ fun EditProductScreen(
                 var enNameFocus by remember { mutableStateOf(false) }
                 var viDescriptionFocus by remember { mutableStateOf(false) }
                 var enDescriptionFocus by remember { mutableStateOf(false) }
+
+                var deleteVariantConfirm by remember { mutableStateOf(false) }
+                var selectedVariant by remember { mutableStateOf("") }
 
                 Column(
                     modifier = Modifier
@@ -453,7 +434,24 @@ fun EditProductScreen(
                     VariantsSection(
                         productVariants.value,
                         isEditable = true,
+                        onDelete = {
+                            deleteVariantConfirm = true
+                            selectedVariant = it
+                        },
                         navController = navController,
+                    )
+                }
+
+                if(deleteVariantConfirm){
+                    ConfirmDialog(
+                        title = { Text(text = "Delete this variant?") },
+                        message = { Text(text = "Are you sure you want to delete this variant?") },
+                        onDismissRequest = { deleteVariantConfirm = false },
+                        confirmButton = {
+
+                            viewModel.onDeleteVariant(selectedVariant)
+                            deleteVariantConfirm = false
+                        }
                     )
                 }
 
@@ -475,6 +473,8 @@ fun EditProductScreen(
                     ) {
                         viewModel.onUpdateProductButtonClick()
                     }
+
+                    confirmUpdate = false
                 }
             }
         }

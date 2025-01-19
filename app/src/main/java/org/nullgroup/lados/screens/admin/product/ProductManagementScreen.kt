@@ -1,6 +1,7 @@
 package org.nullgroup.lados.screens.admin.product
 
 import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -28,6 +29,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Checkbox
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
@@ -67,6 +69,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
@@ -78,12 +81,15 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.SubcomposeAsyncImage
+import coil.request.ImageRequest
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.nullgroup.lados.R
+import org.nullgroup.lados.compose.cart.ConfirmDialog
 import org.nullgroup.lados.compose.common.LoadOnProgress
 import org.nullgroup.lados.data.models.Product
 import org.nullgroup.lados.screens.Screen
@@ -109,11 +115,8 @@ fun ManageProductScreen(
     val isLoading by viewModel.isLoading.collectAsState(false)
 
     LaunchedEffect(Unit) {
-
-            viewModel.loadProducts()
-            viewModel.loadCategories()
-
-
+        viewModel.loadProducts()
+        viewModel.loadCategories()
     }
 
     var selectedProduct by remember {
@@ -125,10 +128,16 @@ fun ManageProductScreen(
     var onUpdateSelected by remember {
         mutableStateOf(false)
     }
+
+    var onDeleteAllSelected by remember {
+        mutableStateOf(false)
+    }
+
+    var selectedProducts by remember {
+        mutableStateOf(emptyList<String>())
+    }
+
     val sheetState = rememberModalBottomSheetState()
-
-    Log.d("ManageProductScreen", "products: $products")
-
 
     Scaffold(
         modifier = Modifier
@@ -147,6 +156,7 @@ fun ManageProductScreen(
         var priceFilterOption by remember { mutableStateOf("Default") }
         var ratingFilterOption by remember { mutableStateOf("Default") }
 
+        var showFunction by remember { mutableStateOf(false) }
 
         Column(
             modifier = Modifier
@@ -176,7 +186,7 @@ fun ManageProductScreen(
                 )
 
                 IconButton(
-                    onClick = { openFilter = !openFilter },
+                    onClick = { showFunction = !showFunction },
                     modifier = Modifier
                 ) {
                     Icon(
@@ -185,75 +195,123 @@ fun ManageProductScreen(
                         tint = LadosTheme.colorScheme.onBackground
                     )
                 }
-
             }
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+            AnimatedVisibility(
+                visible = showFunction && !isLoading
             ) {
-                OptionButton(
-                    item = FilterItem(title = "Sort: $sortOption"),
-                    modifier = Modifier.wrapContentWidth(),
-                    onClick = { openSort = true }
-                )
-
-                Spacer(modifier = Modifier.width(8.dp))
-
-                Button(
-                    onClick = {
-
-                        sortOption = "All"
-                        categoryOption = "All"
-                        priceFilterOption = "Default"
-                        ratingFilterOption = "Default"
-
-                        viewModel.sortAndFilter(
-                            categoryOption = sortOption,
-                            sortOption = categoryOption,
-                            priceOption = priceFilterOption,
-                            ratingOption = ratingFilterOption
-                        )
-                    },
-                    shape = RoundedCornerShape(20.dp),
-                    colors = ButtonDefaults.buttonColors(backgroundColor = LadosTheme.colorScheme.error),
-                    modifier = Modifier
-                        .weight(1f)
-
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
-                    Text(
-                        text = "Reset",
-                        fontWeight = FontWeight.Bold,
-                        color = androidx.compose.ui.graphics.Color.White,
-                        modifier = Modifier.padding(5.dp)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        OptionButton(
+                            item = FilterItem(title = "Sort: $sortOption"),
+                            modifier = Modifier.wrapContentWidth(),
+                            onClick = { openSort = true }
+                        )
+
+                        Spacer(modifier = Modifier.width(8.dp))
+
+                        Button(
+                            onClick = {
+
+                                sortOption = "All"
+                                categoryOption = "All"
+                                priceFilterOption = "Default"
+                                ratingFilterOption = "Default"
+
+                                viewModel.sortAndFilter(
+                                    categoryOption = sortOption,
+                                    sortOption = categoryOption,
+                                    priceOption = priceFilterOption,
+                                    ratingOption = ratingFilterOption
+                                )
+                            },
+                            shape = RoundedCornerShape(20.dp),
+                            colors = ButtonDefaults.buttonColors(backgroundColor = LadosTheme.colorScheme.error),
+                            modifier = Modifier
+                                .weight(1f)
+
+                        ) {
+                            Text(
+                                text = "Reset",
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White,
+                                modifier = Modifier.padding(5.dp)
+                            )
+                        }
+                    }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        OptionButton(
+                            item = FilterItem(title = "Category: $categoryOption"),
+                            modifier = Modifier.wrapContentWidth(),
+                            onClick = { openCategory = true }
+                        )
+
+                        Button(
+                            onClick = {
+                                openFilter = !openFilter
+                            },
+                            shape = RoundedCornerShape(20.dp),
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(start = 8.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                backgroundColor = LadosTheme.colorScheme.primary,
+                                contentColor = LadosTheme.colorScheme.onPrimary
+                            )
+                        ) {
+                            Text(
+                                text = "Filter",
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(5.dp)
+                            )
+                        }
+                    }
+
+                    ManageSection(
+                        onAddNewProduct = {
+                            navController.navigate(Screen.Admin.AddProduct.route)
+                        },
+                        onDeleteAllSelected = {
+                            onDeleteAllSelected = true
+                        }
                     )
                 }
+
             }
 
-            OptionButton(
-                item = FilterItem(title = "Category: $categoryOption"),
-                modifier = Modifier.wrapContentWidth(),
-                onClick = { openCategory = true }
-            )
-
-            ManageSection(
-                onAddNewProduct = {
-                    navController.navigate(Screen.Admin.AddProduct.route)
-                },
-                onDeleteAllSelected = {}
-            )
-
-            if(isLoading){
+            if (isLoading) {
                 Box(
                     modifier = Modifier.fillMaxSize()
-                ){
+                ) {
                     CircularProgressIndicator(
                         color = LadosTheme.colorScheme.primary,
                         modifier = Modifier.align(Alignment.Center)
                     )
                 }
             } else {
+
+                if(products.isEmpty()){
+                    Box(modifier = Modifier.fillMaxSize()){
+                        Text(
+                            text = "No products found",
+                            style = LadosTheme.typography.bodyLarge,
+                            color = LadosTheme.colorScheme.onBackground,
+                            fontWeight = FontWeight.SemiBold,
+                            modifier = Modifier.align(Alignment.Center)
+                        )
+                    }
+                }
                 LazyColumn(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -265,7 +323,17 @@ fun ManageProductScreen(
                                 scope.launch {
                                     sheetState.show()
                                 }
-                            })
+                            },
+                            onCheckClick = {
+                                if (selectedProducts.contains(it)) {
+                                    selectedProducts =
+                                        selectedProducts.filter { product -> product != it }
+                                } else {
+                                    selectedProducts = selectedProducts + it
+                                }
+                                Log.d("Seleclted PROducr", selectedProducts.toString())
+                            }
+                        )
                     }
                 }
             }
@@ -340,10 +408,11 @@ fun ManageProductScreen(
                 selectedProduct = null
             },
             sheetState = sheetState,
+            containerColor = LadosTheme.colorScheme.background
         ) {
             Column {
 
-                TextButton(
+                Button(
                     modifier = Modifier
                         .height(84.dp)
                         .fillMaxWidth()
@@ -357,8 +426,11 @@ fun ManageProductScreen(
                             selectedProduct = null
                         }
                         onDeleteSelected = true
-                        // TODO: call viewModel to delete product. Care for variant, also image.
-                    }) {
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = LadosTheme.colorScheme.error
+                    )
+                ) {
                     Text(
                         "Remove product",
                         style = LadosTheme.typography.bodyLarge.copy(
@@ -367,7 +439,7 @@ fun ManageProductScreen(
                         )
                     )
                 }
-                TextButton(
+                Button(
                     modifier = Modifier
                         .height(84.dp)
                         .fillMaxWidth()
@@ -387,20 +459,51 @@ fun ManageProductScreen(
                                 inclusive = true // Xóa cả màn hình hiện tại khỏi back stack
                             }
                         }
-
-                        // TODO: navigate to  product update. !!Care for variant, also image.
-                    }) {
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = LadosTheme.colorScheme.primary
+                    )
+                ) {
                     Text(
                         "Update product",
                         style = LadosTheme.typography.bodyLarge.copy(
                             fontWeight = FontWeight.SemiBold,
-                            color = LadosTheme.colorScheme.outline
+                            color = LadosTheme.colorScheme.onPrimary
                         )
                     )
                 }
             }
-
         }
+    }
+
+    if (onDeleteSelected) {
+        org.nullgroup.lados.compose.profile.ConfirmDialog(
+            title = { Text(text = "Delete this variant?") },
+            message = { Text(text = "Are you sure you want to delete this variant?") },
+            onDismissRequest = { onDeleteSelected = false },
+            confirmButton = {
+                if (selectedProduct != null) {
+                    viewModel.deleteProduct(selectedProduct!!)
+                }
+                onDeleteSelected = false
+            }
+        )
+    }
+
+    if (onDeleteAllSelected) {
+        org.nullgroup.lados.compose.profile.ConfirmDialog(
+            title = { Text(text = "Delete all selected products?") },
+            message = { Text(text = "Are you sure you want to delete all selected product?") },
+            onDismissRequest = { onDeleteAllSelected = false },
+            confirmButton = {
+                Log.d("Show", selectedProducts.toString())
+                if (selectedProducts.size != 0) {
+                    Log.d("Deleet all", selectedProducts.toString())
+                    viewModel.deleteChosenProducts(selectedProducts)
+                }
+                onDeleteAllSelected = false
+            }
+        )
     }
 }
 
@@ -423,7 +526,7 @@ fun SearchTextField(
             Text(
                 text = placeholder,
                 style = LadosTheme.typography.bodySmall.copy(
-                    color = androidx.compose.ui.graphics.Color.Gray
+                    color = Color.Gray
                 )
             )
         },
@@ -454,8 +557,8 @@ fun SearchTextField(
         colors = TextFieldDefaults.colors(
             focusedContainerColor = LadosTheme.colorScheme.surfaceContainerHighest,
             unfocusedContainerColor = LadosTheme.colorScheme.surfaceContainerHighest,
-            focusedIndicatorColor = androidx.compose.ui.graphics.Color.Transparent,
-            unfocusedIndicatorColor = androidx.compose.ui.graphics.Color.Transparent,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
             cursorColor = MaterialTheme.colors.primary
         ),
         keyboardOptions = KeyboardOptions.Default.copy(
@@ -536,7 +639,7 @@ fun ManageSection(
             Text(
                 text = "+ New",
                 fontWeight = FontWeight.Bold,
-                color = androidx.compose.ui.graphics.Color.White,
+                color = Color.White,
                 modifier = Modifier.padding(5.dp)
             )
         }
@@ -547,12 +650,12 @@ fun ManageSection(
             modifier = Modifier
                 .weight(1f)
                 .padding(start = 8.dp),
-            colors = ButtonDefaults.buttonColors(backgroundColor = androidx.compose.ui.graphics.Color.Red)
+            colors = ButtonDefaults.buttonColors(backgroundColor = Color.Red)
         ) {
             Text(
                 text = "Delete All",
                 fontWeight = FontWeight.Bold,
-                color = androidx.compose.ui.graphics.Color.White,
+                color = Color.White,
                 modifier = Modifier.padding(5.dp)
             )
         }
@@ -564,6 +667,7 @@ fun ManageSection(
 fun ProductItem(
     product: Product,
     modifier: Modifier = Modifier,
+    onCheckClick: (String) -> Unit = {},
     onLongClick: () -> Unit = {}
 ) {
     val stockCount = product.variants.sumOf { it.quantityInStock }
@@ -574,6 +678,8 @@ fun ProductItem(
     val rating = product.engagements.map { it.ratings }.average()
     val commentCount = product.engagements.size
     val image = product.variants.firstOrNull()?.images.orEmpty().firstOrNull()?.link
+
+    var isCheck by remember { mutableStateOf(false) }
 
     Card(
         modifier = modifier
@@ -607,7 +713,7 @@ fun ProductItem(
             ) {
 
                 SubcomposeAsyncImage(
-                    model = coil.request.ImageRequest.Builder(LocalContext.current)
+                    model = ImageRequest.Builder(LocalContext.current)
                         .data(image)
                         .crossfade(true)
                         .build(),
@@ -629,8 +735,8 @@ fun ProductItem(
                         .background(
                             brush = Brush.verticalGradient(
                                 colors = listOf(
-                                    androidx.compose.ui.graphics.Color.Transparent,
-                                    androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.3f)
+                                    Color.Transparent,
+                                    Color.Black.copy(alpha = 0.3f)
                                 )
                             )
                         )
@@ -650,9 +756,21 @@ fun ProductItem(
                     Text(
                         text = if (stockCount > 0) "In Stock: $stockCount" else "Out of Stock",
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                        color = androidx.compose.ui.graphics.Color.White
+                        color = Color.White
                     )
                 }
+
+                Checkbox(
+                    checked = isCheck,
+                    onCheckedChange = {
+                        isCheck = it
+                        onCheckClick(product.id)
+                    },
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .align(Alignment.TopStart)
+                )
+
             }
 
             // Content
@@ -797,7 +915,7 @@ fun FilterDialog(
     if (isOpen) {
         Dialog(
             onDismissRequest = { onDismiss() },
-            properties = androidx.compose.ui.window.DialogProperties(
+            properties = DialogProperties(
                 dismissOnBackPress = true,
                 dismissOnClickOutside = true
             )
@@ -917,7 +1035,7 @@ fun SortDialog(
     if (isOpen) {
         Dialog(
             onDismissRequest = { onDismiss() },
-            properties = androidx.compose.ui.window.DialogProperties(
+            properties = DialogProperties(
                 dismissOnBackPress = true,
                 dismissOnClickOutside = true
             )
@@ -1027,7 +1145,7 @@ fun CategoryDialog(
     if (isOpen) {
         Dialog(
             onDismissRequest = { onDismiss() },
-            properties = androidx.compose.ui.window.DialogProperties(
+            properties = DialogProperties(
                 dismissOnBackPress = true,
                 dismissOnClickOutside = true
             )
@@ -1249,3 +1367,5 @@ fun DropdownWithTitle(
         Spacer(modifier = Modifier.height(16.dp))
     }
 }
+
+
