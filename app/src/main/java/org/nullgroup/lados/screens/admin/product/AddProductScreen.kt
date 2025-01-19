@@ -20,6 +20,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -48,15 +49,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
@@ -66,6 +68,8 @@ import org.nullgroup.lados.data.remote.models.ProductVariantRemoteModel
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.viewmodels.admin.product.AddProductScreenViewModel
 import org.nullgroup.lados.viewmodels.admin.product.ProductUiState
+import org.nullgroup.lados.viewmodels.admin.product.validateEmpty
+import org.nullgroup.lados.viewmodels.admin.product.validateVariants
 
 
 @Composable
@@ -101,17 +105,17 @@ fun AddProductScreen(
         )
     }
 
-    var nameError by remember {
-        mutableStateOf(Pair(true, ""))
-    }
+    var viNameError by remember { mutableStateOf(Pair(true, "")) }
+    var enNameError by remember { mutableStateOf(Pair(true, "")) }
+    var viDescriptionError by remember { mutableStateOf(Pair(true, "")) }
+    var enDescriptionError by remember { mutableStateOf(Pair(true, "")) }
+    var variantError by remember { mutableStateOf(Pair(true, "")) }
 
-    var descriptionError by remember {
-        mutableStateOf(Pair(true, ""))
-    }
+    var viNameFocus by remember { mutableStateOf(false) }
+    var enNameFocus by remember  { mutableStateOf(false) }
+    var viDescriptionFocus by remember  { mutableStateOf(false) }
+    var enDescriptionFocus by remember  { mutableStateOf(false) }
 
-    var variantError by remember {
-        mutableStateOf(Pair(true, ""))
-    }
 
     LaunchedEffect(key1 = productUiState) {
         if(productUiState is ProductUiState.Success){
@@ -148,7 +152,23 @@ fun AddProductScreen(
                 Button(
                     modifier = Modifier.weight(1f).height(48.dp),
                     onClick = {
-                        viewModel.onAddProductButtonClick()
+
+                        viNameError = validateEmpty(name["vi"] ?: "")
+                        enNameError = validateEmpty(name["en"] ?: "")
+                        viDescriptionError = validateEmpty(description["vi"] ?: "")
+                        enDescriptionError = validateEmpty(description["en"] ?: "")
+                        variantError = validateVariants(productVariants.value)
+
+                        if(
+                            viNameError.first &&
+                            enNameError.first &&
+                            viDescriptionError.first &&
+                            enDescriptionError.first &&
+                            variantError.first
+                        ){
+                            viewModel.onAddProductButtonClick()
+                        }
+
                     }, shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = LadosTheme.colorScheme.primary,
@@ -165,6 +185,8 @@ fun AddProductScreen(
             }
         }
     ) { it ->
+
+        val focusManage = LocalFocusManager.current
 
         Column(
             modifier = Modifier
@@ -192,13 +214,31 @@ fun AddProductScreen(
                     name = name.toMutableMap().apply { this["vi"] = it }
                     viewModel.onNameChanged(name)
                 },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth()
+                    .onFocusChanged {
+                        if (!viNameFocus) return@onFocusChanged
+                        if (!it.isFocused) viNameError = validateEmpty(name["vi"] ?: "")
+                    },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Email,
                     imeAction = ImeAction.Done
                 ),
-                isError = false
+                keyboardActions = KeyboardActions(
+                    onDone = {
+                        focusManage.clearFocus()
+                        viNameError = validateEmpty(name["vi"] ?: "")
+                    }
+                ),
+                isError = !viNameError.first
             )
+
+            if (!viNameError.first) {
+                Text(
+                    text = viNameError.second,
+                    style = LadosTheme.typography.bodySmall,
+                    color = LadosTheme.colorScheme.error
+                )
+            }
 
             CustomTextField(
                 label = "English Name",
@@ -207,13 +247,31 @@ fun AddProductScreen(
                     name = name.toMutableMap().apply { this["en"] = it }
                     viewModel.onNameChanged(name)
                 },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth()
+                    .onFocusChanged {
+                        if (!enNameFocus) return@onFocusChanged
+                        if (!it.isFocused) enNameError = validateEmpty(name["en"] ?: "")
+                    },
                 keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Email,
                     imeAction = ImeAction.Done
                 ),
-                isError = false
+                keyboardActions = KeyboardActions(
+                    onDone = {
+                        focusManage.clearFocus()
+                        enNameError = validateEmpty(name["en"] ?: "")
+                    }
+                ),
+                isError = !enNameError.first,
+
             )
+
+            if (!enNameError.first) {
+                Text(
+                    text = enNameError.second,
+                    style = LadosTheme.typography.bodySmall,
+                    color = LadosTheme.colorScheme.error
+                )
+            }
 
             Spacer(modifier = Modifier.size(4.dp))
 
@@ -232,13 +290,29 @@ fun AddProductScreen(
                     description = description.toMutableMap().apply { this["vi"] = it }
                     viewModel.onDescriptionChanged(description)
                 },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth()
+                    .onFocusChanged {
+                        if (!viDescriptionFocus) return@onFocusChanged
+                        if (!it.isFocused) viDescriptionError = validateEmpty(description["vi"] ?: "")
+                    },
                 keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Email,
                     imeAction = ImeAction.Done
                 ),
-                isError = false
+                keyboardActions = KeyboardActions(
+                    onDone = {
+                        focusManage.clearFocus()
+                        viDescriptionError = validateEmpty(description["vi"] ?: "")
+                    }),
+                isError = !viDescriptionError.first
             )
+
+            if (!viDescriptionError.first) {
+                Text(
+                    text =viDescriptionError.second,
+                    style = LadosTheme.typography.bodySmall,
+                    color = LadosTheme.colorScheme.error
+                )
+            }
 
             CustomTextField(
                 label = "English Description",
@@ -247,13 +321,29 @@ fun AddProductScreen(
                     description = description.toMutableMap().apply { this["en"] = it }
                     viewModel.onDescriptionChanged(description)
                 },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth()
+                    .onFocusChanged {
+                        if (!enDescriptionFocus) return@onFocusChanged
+                        if (!it.isFocused) enDescriptionError = validateEmpty(description["en"] ?: "")
+                    },
                 keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Email,
                     imeAction = ImeAction.Done
                 ),
-                isError = false
+                keyboardActions = KeyboardActions(
+                    onDone = {
+                        focusManage.clearFocus()
+                        enDescriptionError = validateEmpty(description["en"] ?: "")
+                    }),
+                isError = !enDescriptionError.first
             )
+
+            if (!enDescriptionError.first) {
+                Text(
+                    text = enDescriptionError.second,
+                    style = LadosTheme.typography.bodySmall,
+                    color = LadosTheme.colorScheme.error
+                )
+            }
 
             Spacer(modifier = Modifier.size(4.dp))
 
@@ -284,6 +374,14 @@ fun AddProductScreen(
                 }
             }
 
+            if(!variantError.first){
+                Text(
+                    text = variantError.second,
+                    style = LadosTheme.typography.bodySmall,
+                    color = LadosTheme.colorScheme.error
+                )
+            }
+
             VariantsSection(productVariants.value)
         }
     }
@@ -306,6 +404,7 @@ fun VariantsSection(
             VariantItem(variant = variant)
         }
     }
+
 }
 
 @Composable

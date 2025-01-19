@@ -66,6 +66,20 @@ fun validatePrice(price: String, priceOption: String): Pair<Boolean, String> {
     return Pair(true, "")
 }
 
+fun validateSalePrice(price: String, priceOption: String, ogPrice: String): Pair<Boolean, String > {
+    if (priceOption == "USD" && price.isNotEmpty()) {
+        return Pair(price.toDoubleOrNull() != null, "Price must be USD format")
+    } else if(priceOption == "VND" && price.isNotEmpty()) {
+        if (price.toIntOrNull() == null) return Pair(false, "Price must be VND format")
+    }
+
+    if(price.toDouble() > ogPrice.toDouble()){
+        return Pair(false, "Sale price must be less than original price")
+    }
+
+    return Pair(true, "")
+}
+
 fun validateQuantity(quantity: String): Pair<Boolean, String> {
     if (quantity.isEmpty()) return Pair(false, "Quantity cannot be empty")
     if (quantity.toIntOrNull() == null) return Pair(false, "Quantity must be a number")
@@ -99,17 +113,12 @@ fun validateVariant(
     return Pair(true, "")
 }
 
-fun validateDescription(description: Map<String, String>): Pair<Boolean, String> {
-    if (description.isEmpty()) return Pair(false, "Description cannot be empty")
+fun validateEmpty(s: String): Pair<Boolean, String> {
+    if (s.isEmpty()) return Pair(false, "This field cannot be empty")
     return Pair(true, "")
 }
 
-fun validateName(name: Map<String, String>): Pair<Boolean, String> {
-    if (name.isEmpty()) return Pair(false, "Name cannot be empty")
-    return Pair(true, "")
-}
-
-fun validateVariant(variants: List<ProductVariantRemoteModel>): Pair<Boolean, String>{
+fun validateVariants(variants: List<ProductVariantRemoteModel>): Pair<Boolean, String>{
     if (variants.isEmpty()) return Pair(false, "You must add at least one variant")
     return Pair(true, "")
 }

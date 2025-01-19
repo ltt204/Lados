@@ -75,6 +75,7 @@ import org.nullgroup.lados.viewmodels.admin.product.sizeOptionsList
 import org.nullgroup.lados.viewmodels.admin.product.validatePrice
 import org.nullgroup.lados.viewmodels.admin.product.validateQuantity
 import org.nullgroup.lados.viewmodels.admin.product.validateSaleAmount
+import org.nullgroup.lados.viewmodels.admin.product.validateSalePrice
 import org.nullgroup.lados.viewmodels.admin.product.validateVariant
 
 
@@ -166,7 +167,7 @@ fun AddVariantScreen(
 
                         quantityError = validateQuantity(quantity)
                         originalPriceError = validatePrice(originalPrice, priceOption)
-                        salePriceError = validatePrice(salePrice, priceOption)
+                        salePriceError = validateSalePrice(salePrice, priceOption, originalPrice)
                         saleAmountError = validateSaleAmount(saleAmount, quantity)
 
                         if (
@@ -395,7 +396,7 @@ fun AddVariantScreen(
                 onValueChange = {
                     salePrice = it
                     salePriceFocus = true
-                    salePriceError = validatePrice(salePrice, priceOption)
+                    salePriceError = validateSalePrice(salePrice, priceOption, originalPrice)
                 },
                 isError = !salePriceError.first,
                 singleLine = true,
@@ -405,14 +406,14 @@ fun AddVariantScreen(
                 keyboardActions = KeyboardActions(
                     onDone = {
                         focusManager.clearFocus()
-                        salePriceError = validatePrice(salePrice, priceOption)
+                        salePriceError = validateSalePrice(salePrice, priceOption, originalPrice)
                     }
                 ),
                 modifier = Modifier
                     .fillMaxWidth()
                     .onFocusChanged {
                         if (!salePriceFocus) return@onFocusChanged
-                        if (!it.isFocused) salePriceError = validatePrice(salePrice, priceOption)
+                        if (!it.isFocused) salePriceError = validateSalePrice(salePrice, priceOption, originalPrice)
                     })
 
             if (!salePriceError.first) {
