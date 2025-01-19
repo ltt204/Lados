@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import okhttp3.internal.wait
 import org.nullgroup.lados.data.models.User
 import org.nullgroup.lados.data.models.UserProfilePicture
 import org.nullgroup.lados.data.repositories.interfaces.common.ImageRepository
@@ -61,11 +62,11 @@ class EditProfileViewModel @Inject constructor(
                                     userProfilePicture.value.child,
                                     userProfilePicture.value.fileName,
                                     userProfilePicture.value.extension
-                                )
+                                ).getOrNull()
 
                             delay(500)
                             profilePictureUiState.value =
-                                ProfilePictureUiState.Success(firebaseStorageUrl)
+                                ProfilePictureUiState.Success(firebaseStorageUrl!!)
                             } else {
                                 profilePictureUiState.value =
                                     ProfilePictureUiState.Success(user.avatarUri)
