@@ -238,6 +238,12 @@ fun Long.getYear(): Int {
     return calendar.get(Calendar.YEAR)
 }
 
+fun Long.getYearString(): String {
+    val date = Date(this)
+    val calendar = Calendar.getInstance(Locale.ENGLISH).apply { time = date }
+    return calendar.getDisplayName(Calendar.YEAR, Calendar.LONG, Locale.getDefault())!!
+}
+
 fun Long.getMonth(): Int {
     val date = Date(this)
     val calendar = Calendar.getInstance().apply { time = date }
@@ -256,6 +262,11 @@ fun Long.getDay(): Int {
     return calendar.get(Calendar.DAY_OF_MONTH)
 }
 
+fun Long.getDayString(): String {
+    val date = Date(this)
+    val calendar = Calendar.getInstance(Locale.ENGLISH).apply { time = date }
+    return calendar.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.LONG, Locale.getDefault())!!
+}
 
 fun getStatusByName(name: String): OrderStatus {
     return OrderStatus.valueOf(name.uppercase())

@@ -74,6 +74,8 @@ import org.nullgroup.lados.data.models.OrderProduct
 import org.nullgroup.lados.data.models.Product
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.utilities.OrderStatus
+import org.nullgroup.lados.utilities.getDay
+import org.nullgroup.lados.utilities.getMonth
 import org.nullgroup.lados.viewmodels.admin.DashBoardRevenueState
 import org.nullgroup.lados.viewmodels.admin.DashBoardViewModel
 import org.nullgroup.lados.viewmodels.admin.OrdersUiState
@@ -183,19 +185,11 @@ fun SalesAndProductReportScreen(
 
         is OrdersUiState.Success -> {
             val orders = ordersUiState.orders
-            val listProducts = mutableListOf<OrderProduct>()
-            val listOrders = mutableListOf<Order>()
 
-            orders.forEach { order ->
-                order.orderProducts.forEach { orderProduct ->
-                    listProducts.add(orderProduct)
-                }
+            var listProducts by remember { mutableStateOf<List<OrderProduct>>(emptyList()) }
+            var listOrders by remember { mutableStateOf<List<Order>>(emptyList()) }
 
-                order.orderStatusLog.forEach { (key, value) ->
-                    if (key == OrderStatus.SHIPPED.name)
-                        listOrders.add(order)
-                }
-            }
+
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -250,15 +244,20 @@ fun SalesAndProductReportScreen(
                         IconButton(
                             modifier = Modifier.border(1.dp, Color.Gray, RoundedCornerShape(50)),
                             onClick = {
-                                startDatePicker?.let {
-                                    endDatePicker?.let { it1 ->
-                                        viewModel.filterOrders(
-                                            it,
-                                            it1
-                                        )
+                                startDatePicker?.let { start ->
+                                    endDatePicker?.let { end ->
+                                        val filteredOrders = orders.filter { order ->
+                                            val creationTimestamp = order.orderStatusLog[OrderStatus.CREATED.name]
+                                            val creationDate = creationTimestamp?.let { Date(it) }
+                                            creationDate != null && creationDate >= start && creationDate <= end
+                                        }
+
+                                        listProducts = filteredOrders.flatMap { it.orderProducts }
+                                        listOrders = filteredOrders.filter { order ->
+                                            order.orderStatusLog.containsKey(OrderStatus.SHIPPED.name)
+                                        }
                                     }
                                 }
-
                             }
                         ) {
                             Icon(
@@ -299,9 +298,25 @@ fun SalesAndProductReportScreen(
                         Text("Group By: ", fontWeight = FontWeight.Bold)
                         DropdownMenu(selectedGroupByOrdersTable, groupByOrdersTable)
                         Text("Sort By: ", fontWeight = FontWeight.Bold)
-                        DropdownMenu(selectedSortByOrdersTable, sortByOrdersTable)
+                        DropdownMenu(selectedSortByOrdersTable, sortByOrdersTable, onClick = { type ->
+                            when(type){
+                                "Time" -> listOrders = listOrders.sortedBy { it.orderStatusLog.entries.minBy { it.value }.value }
+                                "No. orders" -> listOrders = listOrders
+                                "Revenue" -> listOrders = listOrders.sortedByDescending { it.orderTotal }
+                            }
+
+                        }
+                            )
+                        /*
                         Text("Sort Order", fontWeight = FontWeight.Bold)
-                        DropdownMenu(selectedSortOrderOrdersTable, sortOrderOrdersTable)
+                        DropdownMenu(selectedSortOrderOrdersTable, sortOrderOrdersTable, onClick = { type ->
+                            when (type) {
+                                "Asc" -> listOrders = listOrders.sortedBy { it.orderStatusLog.entries.minBy { it.value }.value }
+                                "Desc" -> listOrders = listOrders
+                            }
+                        })
+
+                         */
                     }
 
                     OrderTable(data = listOrders)
@@ -343,10 +358,16 @@ fun SalesAndProductReportScreen(
                     ) {
                         Spacer(Modifier.weight(1f))
                         Text("Sort By", fontWeight = FontWeight.Bold)
-                        DropdownMenu(selectedSortBySalesTable, sortBySalesTable)
-                        Spacer(Modifier.width(8.dp))
-                        Text("Sort Order", fontWeight = FontWeight.Bold)
-                        DropdownMenu(selectedSortOrderSalesTable, sortOrderSalesTable)
+                        DropdownMenu(selectedSortBySalesTable, sortBySalesTable, onClick = { type ->
+                            when(type){
+                                "Product" -> listProducts = listProducts.sortedByDescending { it.productId }
+                                "Category" -> listProducts = listProducts.sortedByDescending { it.variantId }
+                                "Units Sold" -> listProducts = listProducts.sortedByDescending { it.amount }
+                                "Revenue" -> listProducts = listProducts.sortedByDescending { it.totalPrice }
+                        }})
+                        //Spacer(Modifier.width(8.dp))
+                        //Text("Sort Order", fontWeight = FontWeight.Bold)
+                        //DropdownMenu(selectedSortOrderSalesTable, sortOrderSalesTable)
                     }
 
                     SalesTable(data = listProducts)
@@ -384,7 +405,11 @@ fun SalesAndProductReportScreen(
 }
 
 @Composable
-fun DropdownMenu(selected: MutableState<String>, options: List<String>) {
+fun DropdownMenu(
+    selected: MutableState<String>,
+    options: List<String>,
+    onClick: (String) -> Unit = {}
+) {
     var expanded by remember { mutableStateOf(false) }
     Box(
         modifier = Modifier.background(
@@ -407,6 +432,7 @@ fun DropdownMenu(selected: MutableState<String>, options: List<String>) {
                 DropdownMenuItem(
                     onClick = {
                         selected.value = option
+                        onClick(selected.value)
                         expanded = false
                     },
                     text = {
@@ -429,16 +455,15 @@ fun OrderTable(
                     .fillMaxWidth()
                     .padding(8.dp)
             ) {
-                Text("Time", Modifier.weight(1.2f), style = MaterialTheme.typography.headlineSmall)
+                Text("Time", Modifier.weight(1.2f))
                 Text(
                     "No. orders",
                     Modifier.weight(0.5f),
-                    style = MaterialTheme.typography.headlineSmall
+
                 )
                 Text(
                     "Revenue",
                     Modifier.weight(0.5f),
-                    style = MaterialTheme.typography.headlineSmall
                 )
             }
         }
@@ -484,11 +509,11 @@ fun OrderTable(
 
 @Composable
 fun SalesTable(data: List<OrderProduct>) {
-    LazyColumn(modifier = Modifier.border(1.dp, Color.Black)) {
+    LazyColumn(modifier = Modifier.border(1.dp, Color.Black, RoundedCornerShape(8.dp))) {
         item {
             Row(
                 modifier = Modifier
-                    .background(Color.Gray)
+                    .background(LadosTheme.colorScheme.primaryContainer)
                     .fillMaxWidth()
                     .padding(8.dp)
             ) {

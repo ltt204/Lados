@@ -22,6 +22,9 @@ import org.nullgroup.lados.data.repositories.interfaces.order.OrderRepository
 import org.nullgroup.lados.data.repositories.interfaces.product.ProductRepository
 import org.nullgroup.lados.data.repositories.interfaces.user.UserRepository
 import org.nullgroup.lados.utilities.OrderStatus
+import org.nullgroup.lados.utilities.getDay
+import org.nullgroup.lados.utilities.getDayString
+import org.nullgroup.lados.utilities.getMonth
 import org.nullgroup.lados.utilities.getMonthString
 import org.nullgroup.lados.utilities.getYear
 import org.nullgroup.lados.utilities.toUsdCurrency
@@ -128,8 +131,40 @@ class DashBoardViewModel @Inject constructor(
         MutableStateFlow(DashBoardRevenueState.Loading)
 
     init {
-        getRevenueByMonth(Calendar.getInstance().get(Calendar.YEAR).toString())
+        //getRevenueByMonth(Calendar.getInstance().get(Calendar.YEAR).toString())
+        getRevenueByDay(Calendar.getInstance().get(Calendar.MONTH).toString(), Calendar.getInstance().get(Calendar.YEAR).toString())
         fetchOrders()
+    }
+
+    fun getRevenueByDay(fromMonth: String, fromYear: String){
+        viewModelScope.launch {
+            orderRepository.getOrdersForAdmin()
+                .flowOn(Dispatchers.IO)
+                .catch {
+                    revenue.value = DashBoardRevenueState.Error(it.message ?: "An error occurred")
+                }
+                .collect{
+                    val revenueByDay = it
+                        .filter { order ->
+                            order.orderStatusLog.entries.minBy { it.value }.value.getMonth().toString() == fromMonth
+                                    && order.orderStatusLog.entries.minBy { it.value }.value.getYear().toString() == fromYear
+                        }
+                        .groupBy { order ->
+                            val day =
+                                order.orderStatusLog.entries.minBy { it.value }.value.getDayString()
+                            Log.d("Revenue", "Day: $day")
+                            day
+                        }
+                        .mapValues {
+                            it.value.filter {
+                                it.orderStatusLog.entries.firstOrNull { it.key == OrderStatus.RETURNED.name } == null
+                                        && it.orderStatusLog.entries.firstOrNull { it.key == OrderStatus.CANCELLED.name } == null
+                            }.sumOf { it.orderTotal.toUsdCurrency() }
+                        }
+                    revenue.value = DashBoardRevenueState.Success(revenueByDay)
+                }
+
+        }
     }
 
     fun getRevenueByMonth(fromYear: String) {
