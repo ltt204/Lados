@@ -16,4 +16,5 @@ interface ProductRepository {
     suspend fun addProductToFireStore(product: Product): Result<Boolean>
     suspend fun getProductByIdFromFireStore(id: String): Result<Product?>
     suspend fun deleteProductByIdFromFireStore(id: String): Result<Boolean>
+    suspend fun getProductById(id: String): Product?
 }

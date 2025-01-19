@@ -30,6 +30,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -39,6 +40,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -56,6 +58,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.google.firestore.v1.StructuredQuery
 import ir.ehsannarmani.compose_charts.ColumnChart
 import ir.ehsannarmani.compose_charts.LineChart
 import ir.ehsannarmani.compose_charts.models.AnimationMode
@@ -63,12 +68,37 @@ import ir.ehsannarmani.compose_charts.models.BarProperties
 import ir.ehsannarmani.compose_charts.models.Bars
 import ir.ehsannarmani.compose_charts.models.DrawStyle
 import ir.ehsannarmani.compose_charts.models.Line
+import org.nullgroup.lados.compose.common.LoadOnProgress
+import org.nullgroup.lados.data.models.Order
+import org.nullgroup.lados.data.models.OrderProduct
+import org.nullgroup.lados.data.models.Product
 import org.nullgroup.lados.ui.theme.LadosTheme
+import org.nullgroup.lados.utilities.OrderStatus
 import org.nullgroup.lados.viewmodels.admin.DashBoardRevenueState
 import org.nullgroup.lados.viewmodels.admin.DashBoardViewModel
+import org.nullgroup.lados.viewmodels.admin.OrdersUiState
+import org.nullgroup.lados.viewmodels.admin.UsersUiState
 import java.util.Calendar
+import java.util.Date
 import kotlin.math.roundToLong
 import kotlin.random.Random
+
+fun updateList(orders: List<Order>): Pair<List<Order>, List<OrderProduct>> {
+    val listProducts = mutableListOf<OrderProduct>()
+    val listOrders = mutableListOf<Order>()
+
+    orders.forEach { order ->
+        order.orderProducts.forEach { orderProduct ->
+            listProducts.add(orderProduct)
+        }
+
+        order.orderStatusLog.forEach { (key, value) ->
+            if (key == OrderStatus.SHIPPED.name)
+                listOrders.add(order)
+        }
+    }
+    return Pair(listOrders, listProducts)
+}
 
 @SuppressLint("RememberReturnType")
 @Composable
@@ -76,8 +106,9 @@ fun SalesAndProductReportScreen(
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues = PaddingValues(),
     viewModel: DashBoardViewModel = hiltViewModel(),
-    //filterState: FilterState = FilterState(),
 ) {
+    val ordersUiState = viewModel.ordersUIState.collectAsStateWithLifecycle().value
+
     val revenueByMonth by viewModel.revenue.collectAsState()
 
     val categories = listOf("All Categories", "Electronics", "Fashion", "Home")
@@ -103,10 +134,17 @@ fun SalesAndProductReportScreen(
     val month = calendar.get(Calendar.MONTH)
     val day = calendar.get(Calendar.DAY_OF_MONTH)
 
+    var startDatePicker by remember { mutableStateOf<Date?>(null) }
+    var endDatePicker by remember { mutableStateOf<Date?>(null) }
+
     val startDatePickerDialog = DatePickerDialog(
         LocalContext.current,
         { _, selectedYear, selectedMonth, selectedDay ->
             startDate = "$selectedDay/${selectedMonth + 1}/$selectedYear"
+
+            val _calendar = Calendar.getInstance()
+            _calendar.set(selectedYear, selectedMonth, selectedDay)
+            startDatePicker = _calendar.time
         },
         year,
         month,
@@ -117,187 +155,233 @@ fun SalesAndProductReportScreen(
         LocalContext.current,
         { _, selectedYear, selectedMonth, selectedDay ->
             endDate = "$selectedDay/${selectedMonth + 1}/$selectedYear"
+            val _calendar = Calendar.getInstance()
+            _calendar.set(selectedYear, selectedMonth, selectedDay)
+            endDatePicker = _calendar.time
         },
         year,
         month,
         day
     )
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(top = paddingValues.calculateTopPadding())
-            .padding(horizontal = 8.dp)
-            .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-
-        ) {
-        Text(
-            "Sales and Product Report",
-            fontWeight = FontWeight.Bold,
-            fontSize = 24.sp,
-        )
-        Box(
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "View report of sales and product performance.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color.Gray,
-                modifier = Modifier.fillMaxWidth()
+    when (ordersUiState) {
+        is OrdersUiState.Loading -> {
+            LoadOnProgress(
+                modifier = modifier,
+                content = { CircularProgressIndicator() }
             )
         }
-        Divider()
-        Spacer(Modifier.height(8.dp))
-        Column(
-            verticalArrangement = Arrangement.Center
-        ) {
-            Row {
-                Text(
-                    text = if (startDate.isEmpty() && endDate.isEmpty()) {
-                        "Select Date Range"
-                    } else {
-                        "Selected Range: $startDate - $endDate"
-                    },
-                    style = MaterialTheme.typography.bodyMedium
+
+        is OrdersUiState.Error -> {
+            Text(
+                text = "Failed to load data",
+                style = LadosTheme.typography.headlineSmall.copy(
+                    color = LadosTheme.colorScheme.error,
                 )
+            )
+        }
+
+        is OrdersUiState.Success -> {
+            val orders = ordersUiState.orders
+            val listProducts = mutableListOf<OrderProduct>()
+            val listOrders = mutableListOf<Order>()
+
+            orders.forEach { order ->
+                order.orderProducts.forEach { orderProduct ->
+                    listProducts.add(orderProduct)
+                }
+
+                order.orderStatusLog.forEach { (key, value) ->
+                    if (key == OrderStatus.SHIPPED.name)
+                        listOrders.add(order)
+                }
             }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                Button(onClick = { startDatePickerDialog.show() }) {
-                    Text("Pick Start Date")
-                }
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = paddingValues.calculateTopPadding())
+                    .padding(horizontal = 8.dp)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
 
-                Button(onClick = { endDatePickerDialog.show() }) {
-                    Text("Pick End Date")
-                }
-
-                IconButton(
-                    modifier = Modifier.border(1.dp, Color.Gray, RoundedCornerShape(50)),
-                    onClick = {}
                 ) {
-                    Icon(
-                        imageVector = Icons.Outlined.Search,
-                        contentDescription = "search"
+                Text(
+                    "Sales and Product Report",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 24.sp,
+                )
+                Box(
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "View report of sales and product performance.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.Gray,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+                Divider()
+                Spacer(Modifier.height(8.dp))
+                Column(
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Row {
+                        Text(
+                            text = if (startDate.isEmpty() && endDate.isEmpty()) {
+                                "Select Date Range"
+                            } else {
+                                "Selected Range: $startDate - $endDate"
+                            },
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        Button(onClick = { startDatePickerDialog.show() }) {
+                            Text("Pick Start Date")
+                        }
+
+                        Button(onClick = { endDatePickerDialog.show() }) {
+                            Text("Pick End Date")
+                        }
+
+                        IconButton(
+                            modifier = Modifier.border(1.dp, Color.Gray, RoundedCornerShape(50)),
+                            onClick = {
+                                startDatePicker?.let {
+                                    endDatePicker?.let { it1 ->
+                                        viewModel.filterOrders(
+                                            it,
+                                            it1
+                                        )
+                                    }
+                                }
+
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.Search,
+                                contentDescription = "search"
+                            )
+                        }
+                    }
+                }
+                if (startDate.isNotEmpty() && endDate.isNotEmpty()) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text(
+                            text = "The result is from $startDate to $endDate",
+                            fontStyle = FontStyle.Italic
+                        )
+                    }
+                }
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(900.dp, 5000.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Text("Orders", fontWeight = FontWeight.Bold, fontSize = 28.sp)
+                    }
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        Text("Group By: ", fontWeight = FontWeight.Bold)
+                        DropdownMenu(selectedGroupByOrdersTable, groupByOrdersTable)
+                        Text("Sort By: ", fontWeight = FontWeight.Bold)
+                        DropdownMenu(selectedSortByOrdersTable, sortByOrdersTable)
+                        Text("Sort Order", fontWeight = FontWeight.Bold)
+                        DropdownMenu(selectedSortOrderOrdersTable, sortOrderOrdersTable)
+                    }
+
+                    OrderTable(data = listOrders)
+
+
+                    Spacer(Modifier.width(16.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Text("Revenue by Category", fontWeight = FontWeight.Bold, fontSize = 28.sp)
+                    }
+
+                    when (revenueByMonth) {
+                        is DashBoardRevenueState.Loading -> {
+                            Text("Loading Revenue Data")
+                        }
+
+                        is DashBoardRevenueState.Success -> {
+                            val revenueByMonthSuccess =
+                                (revenueByMonth as DashBoardRevenueState.Success).data
+                            Log.d("Revenue", revenueByMonthSuccess.toString())
+                            RevenueChart(Modifier.height(512.dp), revenueByMonthSuccess)
+                        }
+
+                        is DashBoardRevenueState.Error -> {}
+                    }
+                    ///////////////
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Text("Sales Table", fontWeight = FontWeight.Bold, fontSize = 28.sp)
+                    }
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Spacer(Modifier.weight(1f))
+                        Text("Sort By", fontWeight = FontWeight.Bold)
+                        DropdownMenu(selectedSortBySalesTable, sortBySalesTable)
+                        Spacer(Modifier.width(8.dp))
+                        Text("Sort Order", fontWeight = FontWeight.Bold)
+                        DropdownMenu(selectedSortOrderSalesTable, sortOrderSalesTable)
+                    }
+
+                    SalesTable(data = listProducts)
+
+
+                    Spacer(Modifier.width(16.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Text("Revenue by Category", fontWeight = FontWeight.Bold, fontSize = 28.sp)
+                    }
+
+                    ChartPlaceholder()
+
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Button(onClick = { /* Export logic */ }) {
+                        Text("Export as CSV")
+                    }
+                    Text(
+                        "Total Revenue: $${sampleData.sumOf { it.revenue }}",
+                        fontWeight = FontWeight.Bold
                     )
                 }
             }
         }
-        if (startDate.isNotEmpty() && endDate.isNotEmpty()) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Text(
-                    text = "The result is from $startDate to $endDate",
-                    fontStyle = FontStyle.Italic
-                )
-            }
-        }
-
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(900.dp, 5000.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Text("Orders", fontWeight = FontWeight.Bold, fontSize = 28.sp)
-            }
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                Text("Group By: ", fontWeight = FontWeight.Bold)
-                DropdownMenu(selectedGroupByOrdersTable, groupByOrdersTable)
-                Text("Sort By: ", fontWeight = FontWeight.Bold)
-                DropdownMenu(selectedSortByOrdersTable, sortByOrdersTable)
-                Text("Sort Order", fontWeight = FontWeight.Bold)
-                DropdownMenu(selectedSortOrderOrdersTable, sortOrderOrdersTable)
-            }
-
-            OrderTable(data = sampleData)
-
-
-            Spacer(Modifier.width(16.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Text("Revenue by Category", fontWeight = FontWeight.Bold, fontSize = 28.sp)
-            }
-
-            when (revenueByMonth) {
-                is DashBoardRevenueState.Loading -> {
-                    Text("Loading Revenue Data")
-                }
-
-                is DashBoardRevenueState.Success -> {
-                    val revenueByMonthSuccess =
-                        (revenueByMonth as DashBoardRevenueState.Success).data
-                    Log.d("Revenue", revenueByMonthSuccess.toString())
-                    RevenueChart(Modifier.height(512.dp), revenueByMonthSuccess)
-                }
-
-                is DashBoardRevenueState.Error -> {}
-            }
-            ///////////////
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Text("Sales Table", fontWeight = FontWeight.Bold, fontSize = 28.sp)
-            }
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Spacer(Modifier.weight(1f))
-                Text("Sort By", fontWeight = FontWeight.Bold)
-                DropdownMenu(selectedSortBySalesTable, sortBySalesTable)
-                Spacer(Modifier.width(8.dp))
-                Text("Sort Order", fontWeight = FontWeight.Bold)
-                DropdownMenu(selectedSortOrderSalesTable, sortOrderSalesTable)
-            }
-
-            SalesTable(data = sampleData)
-
-
-            Spacer(Modifier.width(16.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Text("Revenue by Category", fontWeight = FontWeight.Bold, fontSize = 28.sp)
-            }
-
-            ChartPlaceholder()
-
-        }
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Button(onClick = { /* Export logic */ }) {
-                Text("Export as CSV")
-            }
-            Text(
-                "Total Revenue: $${sampleData.sumOf { it.revenue }}",
-                fontWeight = FontWeight.Bold
-            )
-        }
     }
 }
-
 
 @Composable
 fun DropdownMenu(selected: MutableState<String>, options: List<String>) {
@@ -334,7 +418,9 @@ fun DropdownMenu(selected: MutableState<String>, options: List<String>) {
 }
 
 @Composable
-fun OrderTable(data: List<ProductData>) {
+fun OrderTable(
+    data: List<Order>,
+) {
     LazyColumn(modifier = Modifier.border(1.dp, Color.Black, RoundedCornerShape(8.dp))) {
         item {
             Row(
@@ -368,7 +454,7 @@ fun OrderTable(data: List<ProductData>) {
                 Text(
                     modifier = Modifier
                         .weight(1.2f),
-                    text = item.productName
+                    text = item.orderStatusLog[OrderStatus.CREATED.name]?.let { Date(it) }.toString(),
                 )
                 VerticalDivider(
                     modifier = Modifier
@@ -378,7 +464,7 @@ fun OrderTable(data: List<ProductData>) {
                 Text(
                     modifier = Modifier
                         .weight(0.5f),
-                    text = item.unitsSold.toString(),
+                    text = "1"
                 )
                 VerticalDivider(
                     modifier = Modifier
@@ -388,7 +474,7 @@ fun OrderTable(data: List<ProductData>) {
                 Text(
                     modifier = Modifier
                         .weight(0.5f),
-                    text = "$${item.revenue}",
+                    text = "$${item.orderTotal}",
                 )
             }
         }
@@ -397,7 +483,7 @@ fun OrderTable(data: List<ProductData>) {
 
 
 @Composable
-fun SalesTable(data: List<ProductData>) {
+fun SalesTable(data: List<OrderProduct>) {
     LazyColumn(modifier = Modifier.border(1.dp, Color.Black)) {
         item {
             Row(
@@ -419,10 +505,10 @@ fun SalesTable(data: List<ProductData>) {
                     .fillMaxWidth()
                     .padding(8.dp)
             ) {
-                Text(item.productName, Modifier.weight(1.5f))
-                Text(item.category, Modifier.weight(1f))
-                Text(item.unitsSold.toString(), Modifier.weight(1f))
-                Text("$${item.revenue}", Modifier.weight(1f))
+                Text(item.productId, Modifier.weight(1.5f))
+                Text(item.variantId, Modifier.weight(1f))
+                Text(item.amount.toString(), Modifier.weight(1f))
+                Text("$${item.totalPrice}", Modifier.weight(1f))
             }
         }
     }

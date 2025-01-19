@@ -434,5 +434,19 @@ class ProductRepositoryImplement(
 
         return variants
     }
+
+    override suspend fun getProductById(id: String): Product? {
+        try {
+            val product = firestore.collection("products").document(id).get().await()
+                .toObject(Product::class.java)
+            return product
+        } catch (
+            e: Exception
+        ) {
+            Log.d("ProductRepositoryImplement", "getProductById: ${e.message}")
+            return null
+        }
+    }
+
 }
 

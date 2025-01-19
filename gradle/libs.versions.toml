@@ -1,7 +1,10 @@
 [versions]
 agp = "8.5.0"
+chart = "0.0.5"
 coilCompose = "2.4.0"
 coil = "2.4.0"
+composeCharts = "latest_version"
+composeChartsVersion = "1.0.0"
 constraintlayoutCompose = "1.0.1"
 converterGson = "2.9.0"
 converterGsonVersion = "2.11.0"
@@ -45,6 +48,7 @@ mockitoCore = "3.12.4"
 mockitoInline = "3.12.4"
 mockitoJunitJupiter = "4.0.0"
 mockitoKotlin = "3.2.0"
+mpandroidchart = "3.1.0"
 playServicesAuth = "21.2.0"
 playServicesAuthVersion = "21.3.0"
 runtimeLivedata = "1.7.5"
@@ -77,8 +81,11 @@ androidx-hilt-work = { module = "androidx.hilt:hilt-work", version.ref = "hiltWo
 androidx-material = { module = "androidx.compose.material:material", version.ref = "material" }
 androidx-security-crypto = { module = "androidx.security:security-crypto", version.ref = "securityCrypto" }
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntimeKtx" }
+chart = { module = "io.github.thechance101:chart", version.ref = "chart" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
 coil-kt-coil-compose = { module = "io.coil-kt:coil-compose" }
+compose-charts = { module = "io.github.ehsannarmani:compose-charts", version.ref = "composeCharts" }
+composecharts-compose-charts = { module = "com.github.composecharts:compose-charts", version.ref = "composeChartsVersion" }
 converter-gson = { module = "com.squareup.retrofit:converter-gson", version.ref = "converterGson" }
 coil = { module = "io.coil-kt:coil", version.ref = "coil" }
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
@@ -121,6 +128,7 @@ mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockitoCore
 mockito-inline = { module = "org.mockito:mockito-inline", version.ref = "mockitoInline" }
 mockito-junit-jupiter = { module = "org.mockito:mockito-junit-jupiter", version.ref = "mockitoJunitJupiter" }
 mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version.ref = "mockitoKotlin" }
+mpandroidchart = { module = "com.github.PhilJay:MPAndroidChart", version.ref = "mpandroidchart" }
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 play-services-auth-v2130 = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuthVersion" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
