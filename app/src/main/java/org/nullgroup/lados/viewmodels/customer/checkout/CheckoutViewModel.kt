@@ -23,6 +23,7 @@ import org.nullgroup.lados.data.repositories.interfaces.cart.CartItemRepository
 import org.nullgroup.lados.data.repositories.interfaces.user.IUserAddressRepository
 import org.nullgroup.lados.data.repositories.interfaces.order.OrderRepository
 import org.nullgroup.lados.data.repositories.interfaces.user.UserRepository
+import org.nullgroup.lados.utilities.toVnCurrency
 import javax.inject.Inject
 
 enum class CheckoutError {
@@ -168,7 +169,7 @@ class CheckoutViewModel @Inject constructor(
         val newOrder = Order(
             customerId = customerId,
             orderProducts = orderProductList,
-            orderTotal = checkoutDetail.total,
+            orderTotal = checkoutDetail.total.toVnCurrency(),
             deliveryAddress = selectedAddress.value!!.toString(),
             customerPhoneNumber = userPhoneNumber.value,
         )

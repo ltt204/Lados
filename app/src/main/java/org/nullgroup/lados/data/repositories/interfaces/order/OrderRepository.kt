@@ -6,6 +6,8 @@ import org.nullgroup.lados.data.models.OrderProduct
 import org.nullgroup.lados.utilities.OrderStatus
 
 interface OrderRepository {
+    fun getOrdersForAdmin(): Flow<List<Order>>
+
     fun getOrders(): Flow<List<Order>>
     fun getOrderById(orderId: String): Flow<Order>
 

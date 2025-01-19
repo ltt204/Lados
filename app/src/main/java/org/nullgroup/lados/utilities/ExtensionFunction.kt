@@ -135,11 +135,13 @@ fun OrderStatus.getActionForButtonOfOrder(context: Context): Pair<String?, ((Nav
                 // Navigate to Ask for reason screen
             }
         }
+
         OrderStatus.DELIVERED -> {
             context.getString(R.string.return_order) to { _, _, _ ->
                 // Navigate to Ask for reason screen
             }
         }
+
         else -> {
             context.getString(R.string.cancel_order) to { _, _, _ -> /*TODO*/ }
         }
@@ -185,6 +187,30 @@ fun Long.toDateTimeString(
     val date = Date(this)
     val format = SimpleDateFormat(formatPattern, locale)
     return format.format(date)
+}
+
+fun Long.getYear(): Int {
+    val date = Date(this)
+    val calendar = Calendar.getInstance().apply { time = date }
+    return calendar.get(Calendar.YEAR)
+}
+
+fun Long.getMonth(): Int {
+    val date = Date(this)
+    val calendar = Calendar.getInstance().apply { time = date }
+    return calendar.get(Calendar.MONTH)
+}
+
+fun Long.getMonthString(): String {
+    val date = Date(this)
+    val calendar = Calendar.getInstance(Locale.ENGLISH).apply { time = date }
+    return calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.getDefault())!!
+}
+
+fun Long.getDay(): Int {
+    val date = Date(this)
+    val calendar = Calendar.getInstance().apply { time = date }
+    return calendar.get(Calendar.DAY_OF_MONTH)
 }
 
 
@@ -298,7 +324,8 @@ fun Long.getMinuteInTimestamp(): Int {
 @RequiresApi(Build.VERSION_CODES.O)
 fun Long.getMessageTimeGapBetweenTwoMessagesDisplayment(previousMessageTime: Long): String {
     val zoneId = ZoneId.systemDefault()
-    val previousDateTime = Instant.ofEpochMilli(previousMessageTime).atZone(zoneId).toLocalDateTime()
+    val previousDateTime =
+        Instant.ofEpochMilli(previousMessageTime).atZone(zoneId).toLocalDateTime()
     val currentDateTime = Instant.ofEpochMilli(this).atZone(zoneId).toLocalDateTime()
 
     val duration = Duration.between(previousDateTime, currentDateTime)
@@ -328,4 +355,25 @@ fun Long.getMessageTimeGapBetweenTwoMessagesDisplayment(previousMessageTime: Lon
 
     val formatter = DateTimeFormatter.ofPattern("MMM yyyy")
     return formatter.format(currentDateTime)
+}
+
+
+// Only use for Order Total
+fun Double.toVnCurrency(): Double {
+    val locale = Locale.getDefault()
+
+    if (locale.language == "vi") {
+        return this
+    }
+    return this * 23.000
+}
+
+// Only use for Order Total
+fun Double.toUsdCurrency(): Double {
+    val locale = Locale.getDefault()
+
+    if (locale.language == "en") {
+        return this
+    }
+    return this / 23.000
 }

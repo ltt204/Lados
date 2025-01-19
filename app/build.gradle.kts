@@ -156,6 +156,10 @@ dependencies {
     implementation(libs.androidx.work.runtime.ktx)
     // DI for WorkManager
     implementation(libs.androidx.hilt.work)
+
+
+    //Chart
+    implementation("io.github.ehsannarmani:compose-charts:0.1.0")
 }
 
 kapt {

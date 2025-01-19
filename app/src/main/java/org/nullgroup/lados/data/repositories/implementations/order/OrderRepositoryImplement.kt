@@ -152,6 +152,26 @@ class OrderRepositoryImplement(
         }
     }
 
+    override fun getOrdersForAdmin(): Flow<List<Order>> {
+        return callbackFlow {
+            val orderRef = firestore.collection("orders")
+
+            val subscription = orderRef.addSnapshotListener { snapshot, e ->
+                if (e != null) {
+                    close(e)
+                    return@addSnapshotListener
+                }
+
+                if (snapshot != null) {
+                    val orders = snapshot.documents.mapNotNull { it.toObject(Order::class.java) }
+                    trySend(orders).isSuccess
+                }
+            }
+
+            awaitClose { subscription.remove() }
+        }
+    }
+
     override fun getOrders(): Flow<List<Order>> = callbackFlow {
         val orderRef = firestore.collection("users").document(firebaseAuth.currentUser?.uid!!).collection("orders")
 
