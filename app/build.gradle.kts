@@ -156,6 +156,9 @@ dependencies {
     implementation(libs.androidx.work.runtime.ktx)
     // DI for WorkManager
     implementation(libs.androidx.hilt.work)
+
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.coroutines.android)
 }
 
 kapt {

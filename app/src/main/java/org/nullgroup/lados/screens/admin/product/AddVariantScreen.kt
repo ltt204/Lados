@@ -385,7 +385,6 @@ fun AddVariantScreen(
                         )
                     }
                 }
-
             }
 
             Text(

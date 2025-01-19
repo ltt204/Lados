@@ -94,13 +94,8 @@ class ProductManagementScreenViewModel @Inject constructor(
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
-    init {
-        loadProducts()
-        loadCategories()
 
-    }
-
-    private fun loadProducts() {
+    fun loadProducts() {
         viewModelScope.launch {
             _isLoading.value = true
             val response = withContext(Dispatchers.IO) {
@@ -117,7 +112,7 @@ class ProductManagementScreenViewModel @Inject constructor(
         }
     }
 
-    private fun loadCategories() {
+    fun loadCategories() {
         viewModelScope.launch {
             val response = withContext(Dispatchers.IO) {
                 categoryRepository.getAllCategoriesFromFireStore()

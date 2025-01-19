@@ -108,6 +108,14 @@ fun ManageProductScreen(
     val categories by viewModel.categories.collectAsState(emptyList())
     val isLoading by viewModel.isLoading.collectAsState(false)
 
+    LaunchedEffect(Unit) {
+
+            viewModel.loadProducts()
+            viewModel.loadCategories()
+
+
+    }
+
     var selectedProduct by remember {
         mutableStateOf(null as String?)
     }
@@ -120,6 +128,7 @@ fun ManageProductScreen(
     val sheetState = rememberModalBottomSheetState()
 
     Log.d("ManageProductScreen", "products: $products")
+
 
     Scaffold(
         modifier = Modifier
@@ -372,9 +381,9 @@ fun ManageProductScreen(
                             selectedProduct = null
                         }
                         onUpdateSelected = true
-                        navController.navigate(
-                            Screen.Admin.EditProduct.route + "/$selectedProduct"
-                        )
+
+                        navController.navigate(Screen.Admin.EditProduct.route + "/$selectedProduct")
+
                         // TODO: navigate to  product update. !!Care for variant, also image.
                     }) {
                     Text(
@@ -386,6 +395,7 @@ fun ManageProductScreen(
                     )
                 }
             }
+
         }
     }
 }

@@ -3,6 +3,7 @@ package org.nullgroup.lados.screens.admin.product
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -35,17 +36,15 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import org.nullgroup.lados.compose.signin.CustomTextField
 import org.nullgroup.lados.data.models.Category
+import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.screens.customer.profile.LoadingContent
 import org.nullgroup.lados.ui.theme.LadosTheme
-import org.nullgroup.lados.viewmodels.admin.product.AddProductScreenViewModel
 import org.nullgroup.lados.viewmodels.admin.product.EditProductScreenViewModel
 import org.nullgroup.lados.viewmodels.admin.product.EditProductUiState
-import org.nullgroup.lados.viewmodels.admin.product.ProductUiState
 import org.nullgroup.lados.viewmodels.admin.product.validateEmpty
 import org.nullgroup.lados.viewmodels.admin.product.validateVariants
 
@@ -64,10 +63,25 @@ fun EditProductScreen(
     val categories by viewModel.categories.collectAsState()
 
     val productUiState = viewModel.productUiState.value
+    val currentProduct by viewModel.productZombie.collectAsState()
+    val updateSuccess by viewModel.updateSuccess.collectAsState()
+
+    Log.d("Test current product", "Current product: $currentProduct")
 
     LaunchedEffect(key1 = Unit) {
         viewModel.loadProduct(productId)
         viewModel.getCategories()
+    }
+
+    var confirmUpdate by remember { mutableStateOf(false) }
+
+    LaunchedEffect(key1 = updateSuccess){
+        if(updateSuccess){
+            viewModel.clearProductVariants()
+            viewModel.clearProductZombie()
+            navController.navigateUp()
+
+        }
     }
 
 
@@ -92,7 +106,9 @@ fun EditProductScreen(
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 Button(
-                    modifier = Modifier.weight(1f).height(48.dp),
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(48.dp),
                     onClick = { navController.navigateUp() },
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(
@@ -104,27 +120,11 @@ fun EditProductScreen(
                 }
 
                 Button(
-                    modifier = Modifier.weight(1f).height(48.dp),
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(48.dp),
                     onClick = {
-
-//                        updateProduct = true
-//                        viNameError = validateEmpty(name["vi"] ?: "")
-//                        enNameError = validateEmpty(name["en"] ?: "")
-//                        viDescriptionError = validateEmpty(description["vi"] ?: "")
-//                        enDescriptionError = validateEmpty(description["en"] ?: "")
-//                        variantError = validateVariants(productVariants.value)
-//                        categoryError = validateEmpty(selectedCategory.categoryName)
-//
-//                        if(
-//                            viNameError.first &&
-//                            enNameError.first &&
-//                            viDescriptionError.first &&
-//                            enDescriptionError.first &&
-//                            variantError.first
-//                        ){
-//                            viewModel.onAddProductButtonClick()
-//                        }
-
+                        confirmUpdate = true
                     }, shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = LadosTheme.colorScheme.primary,
@@ -132,7 +132,7 @@ fun EditProductScreen(
                     )
                 ) {
                     Text(
-                        text = "Add",
+                        text = "Update",
                         style = LadosTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(8.dp)
@@ -142,17 +142,33 @@ fun EditProductScreen(
         }
     ) { it ->
 
-        when(productUiState){
+        when (productUiState) {
             is EditProductUiState.Loading -> {
-                LoadingContent()
+                LoadingContent(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(LadosTheme.colorScheme.background)
+                )
             }
+
             is EditProductUiState.Error -> {
+                Box(
+                    modifier = Modifier.fillMaxSize()
+                        .background(LadosTheme.colorScheme.background),
+                    contentAlignment = androidx.compose.ui.Alignment.Center
+                ){
+                    Text(
+                        text = productUiState.message,
+                        style = LadosTheme.typography.titleMedium,
+                        color = LadosTheme.colorScheme.error
+                    )
+                }
 
             }
+
             is EditProductUiState.Success -> {
 
                 val focusManage = LocalFocusManager.current
-                val currentProduct = productUiState.product
 
                 var name by rememberSaveable {
                     mutableStateOf(
@@ -172,9 +188,12 @@ fun EditProductScreen(
                     )
                 }
 
-                var selectedCategory by remember { mutableStateOf(
-                    categories.first { it.categoryId == currentProduct.categoryId }
-                ) }
+                var selectedCategory by remember {
+                    mutableStateOf(
+                        Category()
+                        //categories.first { it.categoryId == currentProduct.categoryId }
+                    )
+                }
 
                 var viNameError by remember { mutableStateOf(Pair(true, "")) }
                 var enNameError by remember { mutableStateOf(Pair(true, "")) }
@@ -184,11 +203,9 @@ fun EditProductScreen(
                 var categoryError by remember { mutableStateOf(Pair(true, "")) }
 
                 var viNameFocus by remember { mutableStateOf(false) }
-                var enNameFocus by remember  { mutableStateOf(false) }
-                var viDescriptionFocus by remember  { mutableStateOf(false) }
-                var enDescriptionFocus by remember  { mutableStateOf(false) }
-
-                var updateProduct by remember { mutableStateOf(false) }
+                var enNameFocus by remember { mutableStateOf(false) }
+                var viDescriptionFocus by remember { mutableStateOf(false) }
+                var enDescriptionFocus by remember { mutableStateOf(false) }
 
                 Column(
                     modifier = Modifier
@@ -216,7 +233,8 @@ fun EditProductScreen(
                             name = name.toMutableMap().apply { this["vi"] = it }
                             viewModel.onNameChanged(name)
                         },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
                             .onFocusChanged {
                                 if (!viNameFocus) return@onFocusChanged
                                 if (!it.isFocused) viNameError = validateEmpty(name["vi"] ?: "")
@@ -248,7 +266,8 @@ fun EditProductScreen(
                             name = name.toMutableMap().apply { this["en"] = it }
                             viewModel.onNameChanged(name)
                         },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
                             .onFocusChanged {
                                 if (!enNameFocus) return@onFocusChanged
                                 if (!it.isFocused) enNameError = validateEmpty(name["en"] ?: "")
@@ -291,10 +310,12 @@ fun EditProductScreen(
                             description = description.toMutableMap().apply { this["vi"] = it }
                             viewModel.onDescriptionChanged(description)
                         },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
                             .onFocusChanged {
                                 if (!viDescriptionFocus) return@onFocusChanged
-                                if (!it.isFocused) viDescriptionError = validateEmpty(description["vi"] ?: "")
+                                if (!it.isFocused) viDescriptionError =
+                                    validateEmpty(description["vi"] ?: "")
                             },
                         keyboardOptions = KeyboardOptions(
                             imeAction = ImeAction.Done
@@ -309,7 +330,7 @@ fun EditProductScreen(
 
                     if (!viDescriptionError.first) {
                         Text(
-                            text =viDescriptionError.second,
+                            text = viDescriptionError.second,
                             style = LadosTheme.typography.bodySmall,
                             color = LadosTheme.colorScheme.error
                         )
@@ -322,10 +343,12 @@ fun EditProductScreen(
                             description = description.toMutableMap().apply { this["en"] = it }
                             viewModel.onDescriptionChanged(description)
                         },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
                             .onFocusChanged {
                                 if (!enDescriptionFocus) return@onFocusChanged
-                                if (!it.isFocused) enDescriptionError = validateEmpty(description["en"] ?: "")
+                                if (!it.isFocused) enDescriptionError =
+                                    validateEmpty(description["en"] ?: "")
                             },
                         keyboardOptions = KeyboardOptions(
                             imeAction = ImeAction.Done
@@ -404,7 +427,7 @@ fun EditProductScreen(
                         }
                     }
 
-                    if(!variantError.first){
+                    if (!variantError.first) {
                         Text(
                             text = variantError.second,
                             style = LadosTheme.typography.bodySmall,
@@ -413,10 +436,30 @@ fun EditProductScreen(
                     }
 
                     VariantsSection(
-                        currentProduct.variants,
+                        productVariants.value,
                         isEditable = true,
                         navController = navController,
                     )
+                }
+
+                if (confirmUpdate) {
+
+                    viNameError = validateEmpty(name["vi"] ?: "")
+                    enNameError = validateEmpty(name["en"] ?: "")
+                    viDescriptionError = validateEmpty(description["vi"] ?: "")
+                    enDescriptionError = validateEmpty(description["en"] ?: "")
+                    variantError = validateVariants(currentProduct.variants)
+                    categoryError = validateEmpty(selectedCategory.categoryName)
+
+                    if (
+                        viNameError.first &&
+                        enNameError.first &&
+                        viDescriptionError.first &&
+                        enDescriptionError.first &&
+                        variantError.first
+                    ) {
+                        viewModel.onUpdateProductButtonClick()
+                    }
                 }
             }
         }

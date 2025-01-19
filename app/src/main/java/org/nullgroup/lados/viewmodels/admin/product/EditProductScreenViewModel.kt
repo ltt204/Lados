@@ -9,7 +9,9 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import org.nullgroup.lados.data.models.AddProduct
 import org.nullgroup.lados.data.models.Category
+import org.nullgroup.lados.data.models.Image
 import org.nullgroup.lados.data.models.UserProfilePicture
 import org.nullgroup.lados.data.remote.models.ProductRemoteModel
 import org.nullgroup.lados.data.remote.models.ProductVariantRemoteModel
@@ -31,6 +33,8 @@ class EditProductScreenViewModel @Inject constructor(
 
     val isVariantPictureChanged = mutableStateOf(false)
 
+    private var isFirstTimeLoadData = false
+
     var productUiState: MutableState<EditProductUiState> = mutableStateOf(EditProductUiState.Loading)
         private set
 
@@ -48,27 +52,121 @@ class EditProductScreenViewModel @Inject constructor(
     )
         private set
 
+    private val _updateSuccess = MutableStateFlow(false)
+    val updateSuccess: MutableStateFlow<Boolean> get() = _updateSuccess
+
     private val _categories = MutableStateFlow<List<Category>>(listOf())
     val categories: MutableStateFlow<List<Category>> get() = _categories
 
+     fun clearProductZombie(){
+        viewModelScope.launch {
+            _productZombie.value = ProductRemoteModel()
+        }
+    }
+
+    fun clearProductVariants(){
+        viewModelScope.launch {
+            productVariants.value = listOf()
+        }
+    }
+
     fun loadProduct(productId: String){
-        productUiState.value =EditProductUiState.Loading
+        productUiState.value = EditProductUiState.Loading
         viewModelScope.launch {
             try {
+
+                Log.d("Product", "loadProduct: $productId")
                 val result = productRepository.getProductRemoteModelByIdFromFireStore(productId)
                 if(result.isSuccess){
                     val product = result.getOrNull()
                     if(product != null){
                         productUiState.value = EditProductUiState.Success(product)
+                        if(!isFirstTimeLoadData){
+                            isFirstTimeLoadData = true
+                            _productZombie.value = product
+                            productVariants.value = product.variants
+                        }
+                    } else {
+                        productUiState.value = EditProductUiState.Error("Product not found")
                     }
                 } else {
                     productUiState.value =
                         EditProductUiState.Error(result.exceptionOrNull()?.message.toString())
                 }
-
             } catch (e: Exception){
                 productUiState.value = EditProductUiState.Error(e.message.toString())
             }
+        }
+    }
+
+    fun onUpdateProductButtonClick() {
+        viewModelScope.launch {
+            productUiState.value = EditProductUiState.Loading
+            try {
+                Log.d(
+                    "Product",
+                    "onAddProduct: Variants ${productVariants.value}"
+                )
+                _productZombie.value.variants = productVariants.value
+
+                Log.d(
+                    "Product After Update",
+                    "onAddProduct: Product ${_productZombie.value}"
+                )
+
+                val result = productRepository.updateProductInFireStore(_productZombie.value)
+
+                if (result.isSuccess) {
+                    productUiState.value = EditProductUiState.Success(ProductRemoteModel())
+                    _updateSuccess.value = true
+                } else {
+                    productUiState.value = EditProductUiState.Error(result.exceptionOrNull()?.message ?: "An error occurred")
+                    _updateSuccess.value = false
+                }
+
+            } catch (e: Exception) {
+                productUiState.value = EditProductUiState.Error(e.message ?: "An error occurred")
+                Log.d("Product", "onUpdateProduct: ${e.message}")
+            }
+        }
+    }
+
+    fun onUpdateVariant(variant: ProductVariantRemoteModel, withImageByteArray: ByteArray) {
+        viewModelScope.launch {
+            Log.d("UpdateProductScreenViewModel", "variant: $variant")
+           // val productVariantId = variantRepository.getProductVariantId().getOrNull() ?: ""
+           // Log.d("AddProductScreenViewModel", "productVariantId: $productVariantId")
+
+            uploadImageState.value = VariantImageUiState.Loading
+            val imageUrl = imageRepository.uploadImage(
+                child = "products",
+                fileName = variant.id,
+                extension = "png",
+                image = withImageByteArray
+            ).getOrNull() ?: throw Exception("Image upload failed")
+            Log.d("AddProductScreenViewModel", "imageUrl: $imageUrl")
+
+            variant.images = listOf(
+                Image(
+                    productVariantId = variant.id,
+                    link = imageUrl,
+                    fileName = variant.id,
+                )
+            )
+
+            productVariants.value = productVariants.value.map { it ->
+                if (it.id == variant.id) {
+                    variant
+                } else {
+                    it
+                }
+            }
+            _productZombie.value = _productZombie.value.copy(variants = productVariants.value)
+
+            Log.d("AddProductScreenViewModel", "productVariants: ${productVariants.value}")
+
+            uploadImageState.value = VariantImageUiState.Success(imageUrl)
+            Log.d("AddProductScreenViewModel", "zomebie productVariants: ${_productZombie.value.variants}")
         }
     }
 

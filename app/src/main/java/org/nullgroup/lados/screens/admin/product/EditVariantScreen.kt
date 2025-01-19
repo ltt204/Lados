@@ -89,15 +89,9 @@ fun EditVariantScreen(
         productUiState
     ){
         if(productUiState is EditProductUiState.Success){
-
             currentVariant = productUiState.product.variants.first {
                 it.id == variantId
             }
-
-            Log.d(
-                "Check variant",
-                "Product variants: ${currentVariant}"
-            )
         }
     }
 
@@ -121,6 +115,7 @@ fun EditVariantScreen(
     var salePriceFocus by remember { mutableStateOf(false) }
     var quantityFocus by remember { mutableStateOf(false) }
     var saleAmountFocus by remember { mutableStateOf(false) }
+    var imageUrl by remember { mutableStateOf("") }
 
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
     var imageByteArray by remember { mutableStateOf<ByteArray?>(null) }
@@ -132,6 +127,7 @@ fun EditVariantScreen(
         salePrice = if(currentVariant.salePrice?.get("en") == null) "" else currentVariant.salePrice!!["en"].toString()
         quantity = currentVariant.quantityInStock.toString()
         saleAmount = currentVariant.saleAmount.toString()
+        imageUrl = currentVariant.images.firstOrNull()?.link ?: ""
     }
 
     val context = LocalContext.current
@@ -164,6 +160,7 @@ fun EditVariantScreen(
                     .background(LadosTheme.colorScheme.background),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
             ) {
+
                 Button(
                     modifier = Modifier.weight(1f).height(48.dp),
                     onClick = { navController.navigateUp() },
@@ -175,6 +172,7 @@ fun EditVariantScreen(
                 ) {
                     Text(text = "Cancel")
                 }
+
                 Button(
                     modifier = Modifier.weight(1f).height(48.dp),
                     onClick = {
@@ -198,32 +196,31 @@ fun EditVariantScreen(
                         ) {
 
                             val variant = ProductVariantRemoteModel(
+                                id = variantId ?: "",
                                 productId = productId ?: "",
                                 color = color,
                                 size = size,
-                                quantityInStock = quantity.toInt(),
+                                quantityInStock = if(quantity.isEmpty()) 0 else quantity.toInt(),
                                 originalPrice = exchangePrice(originalPrice, priceOption),
                                 salePrice = exchangePrice(salePrice, priceOption),
-                                saleAmount = saleAmount.toInt(),
+                                saleAmount = if(saleAmount.isEmpty()) 0 else saleAmount.toInt(),
                                 images = listOf()
                             )
-//
-//                            viewModel.onAddVariant(
-//                                variant = variant,
-//                                withImageByteArray = imageByteArray ?: ByteArray(0)
-//                            )
 
+                            viewModel.onUpdateVariant(
+                                variant = variant,
+                                withImageByteArray = imageByteArray ?: ByteArray(0)
+                            )
                             submitVariantClicked = true
                         }
-
-
                     }, shape = RoundedCornerShape(12.dp), colors = ButtonDefaults.buttonColors(
                         containerColor = LadosTheme.colorScheme.primary,
                         contentColor = LadosTheme.colorScheme.onPrimary
                     )
+
                 ) {
                     Text(
-                        text = "Add",
+                        text = "Update",
                         style = LadosTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(8.dp)
@@ -246,7 +243,7 @@ fun EditVariantScreen(
 
             VariantImageSection(
                 imageUri = (selectedImageUri?.toString()
-                    ?: currentVariant.images.firstOrNull() ?: "").toString(),
+                    ?: imageUrl),
                 onEditImage = {
                     imagePickerLauncher.launch(
                         PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
