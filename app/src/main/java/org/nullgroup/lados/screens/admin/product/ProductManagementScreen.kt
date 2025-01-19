@@ -317,7 +317,11 @@ fun ManageProductScreen(
                     items(products.size) { index ->
                         ProductItem(products[index],
                             onLongClick = {
+                                Log.d("ProductItem", "Long Clicked: ${products[index].name}")
                                 selectedProduct = products[index].id
+                                Log.d("ProductItem", "Product id: ${products[index].id}")
+                                Log.d("ProductItem", "Selected Product: $selectedProduct")
+
                                 scope.launch {
                                     sheetState.show()
                                 }

@@ -14,6 +14,7 @@ import org.nullgroup.lados.data.models.Category
 import org.nullgroup.lados.data.models.Product
 import org.nullgroup.lados.data.repositories.interfaces.category.CategoryRepository
 import org.nullgroup.lados.data.repositories.interfaces.product.ProductRepository
+import org.nullgroup.lados.utilities.toLocalProduct
 import javax.inject.Inject
 
 val ratingOptions = listOf(
@@ -102,10 +103,16 @@ class ProductManagementScreenViewModel @Inject constructor(
                 productRepository.getAllProductsFromFireStore()
             }
 
-            if(response.isSuccess){
+            if (response.isSuccess) {
                 response.getOrNull()?.let {
-                    _products.value = it
-                    _editProducts.value = it
+                    val localeProduct = withContext(Dispatchers.Default) {
+                        it.map { product ->
+                            product.toLocalProduct()
+                        }
+                    }
+
+                    _products.value = localeProduct
+                    _editProducts.value = localeProduct
                 }
                 _isLoading.value = false
             }
@@ -118,7 +125,7 @@ class ProductManagementScreenViewModel @Inject constructor(
                 categoryRepository.getAllCategoriesFromFireStore()
             }
 
-            if(response.isSuccess){
+            if (response.isSuccess) {
                 response.getOrNull()?.let {
                     _categories.value += Category(categoryName = "All")
                     _categories.value += it
@@ -150,7 +157,7 @@ class ProductManagementScreenViewModel @Inject constructor(
             val ratingRange = getRange(ratingOption)
             val category = _categories.value.find { it.categoryName == categoryOption }
 
-            if(category?.categoryId == null || category.categoryId == ""){
+            if (category?.categoryId == null || category.categoryId == "") {
                 Log.d("View model ", "Yes")
                 _editProducts.value = _products.value
             } else {
@@ -160,14 +167,14 @@ class ProductManagementScreenViewModel @Inject constructor(
                 Log.d("View model ", _editProducts.value.toString())
             }
 
-            if(priceRange.first != null && priceRange.second != null){
+            if (priceRange.first != null && priceRange.second != null) {
                 _editProducts.value = _editProducts.value.filter { product ->
                     product.variants.first().originalPrice <= priceRange.second!! &&
                             product.variants.first().originalPrice >= priceRange.first!!
                 }
             }
 
-            if (ratingRange.first != null && ratingRange.second != null){
+            if (ratingRange.first != null && ratingRange.second != null) {
                 _editProducts.value = _editProducts.value.filter { product ->
                     calculateAverageEngagementRating(product) <= (ratingRange.second
                         ?: Double.MAX_VALUE) &&
@@ -229,7 +236,10 @@ class ProductManagementScreenViewModel @Inject constructor(
         }
     }
 
-    private fun getRange(option: String, defaultMax: Double? = Double.MAX_VALUE): Pair<Double?, Double?> {
+    private fun getRange(
+        option: String,
+        defaultMax: Double? = Double.MAX_VALUE
+    ): Pair<Double?, Double?> {
         return when {
             option == "Default" -> null to null
             option.contains("+") -> {

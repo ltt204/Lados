@@ -32,6 +32,8 @@ class EditProductScreenViewModel @Inject constructor(
     private  val saveStateHandle: SavedStateHandle
 ) : ViewModel() {
 
+    val productId = savedStateHandle.get<String>("product_id") ?: ""
+
     val isInfoChanged = mutableStateOf(false)
     val isVariantPictureChanged = mutableStateOf(false)
 

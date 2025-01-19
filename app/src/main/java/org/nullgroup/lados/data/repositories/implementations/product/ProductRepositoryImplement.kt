@@ -9,6 +9,7 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import org.nullgroup.lados.data.models.AddProduct
 import org.nullgroup.lados.data.models.Image
@@ -25,18 +26,35 @@ class ProductRepositoryImplement(
 ) : ProductRepository {
     override fun getProductsFlow(): Flow<List<Product>> = callbackFlow {
         val subscription = firestore.collection("products")
-            .addSnapshotListener { value, error ->
-                if (error != null) {
-                    throw error
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) throw error
+
+                snapshot?.documents?.let { docs ->
+                    launch {
+                        val products = docs.mapNotNull { doc ->
+                            val remote = doc.toObject(ProductRemoteModel::class.java) ?: return@mapNotNull null
+                            coroutineScope {
+                                val variantsDeferred = async {
+                                    firestore.collection("products")
+                                        .document(remote.id).collection("variants").get().await()
+                                }
+                                val engagementsDeferred = async {
+                                    firestore.collection("products")
+                                        .document(remote.id).collection("engagements").get().await()
+                                }
+                                // Await subcollections
+                                val variantsSnap = variantsDeferred.await()
+                                val engagementsSnap = engagementsDeferred.await()
+                                // Map them to local model
+                                remote.variants = variantsSnap.documents.mapNotNull { it.toObject(ProductVariantRemoteModel::class.java) }
+                                remote.engagements = engagementsSnap.documents.mapNotNull { it.toObject(UserEngagement::class.java) }
+                                // Finally convert to local
+                                remote.toLocalProduct()
+                            }
+                        }
+                        trySend(products).isSuccess
+                    }
                 }
-
-                val products = value?.documents?.mapNotNull { document ->
-                    val remoteProduct = document.toObject(ProductRemoteModel::class.java)
-                    remoteProduct?.toLocalProduct()
-//                    document.toObject(Product::class.java)
-                } ?: emptyList()
-
-                trySend(products).isSuccess
             }
 
         awaitClose { subscription.remove() }
@@ -168,7 +186,7 @@ class ProductRepositoryImplement(
         }
     }
 
-    override suspend fun getAllProductsFromFireStore(): Result<List<Product>> {
+    override suspend fun getAllProductsFromFireStore(): Result<List<ProductRemoteModel>> {
         return try {
             // 1. Lấy tất cả products một lần
             val productsSnapshot = firestore.collection("products")
@@ -220,7 +238,7 @@ class ProductRepositoryImplement(
                         engagements = engagementsDeferred.await()
                     }
 
-                    product.toLocalProduct()
+                    product
                 }
             }
 
