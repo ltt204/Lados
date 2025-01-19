@@ -1,6 +1,9 @@
 package org.nullgroup.lados.navigations
 
 import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -28,6 +31,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -73,6 +77,9 @@ fun AdminGraph(
     }")
     var currentDestination by remember {
         mutableStateOf(startDestination)
+    }
+    var topAppBarVisibility by rememberSaveable {
+        mutableStateOf(true)
     }
     ModalNavigationDrawer(
         modifier = modifier,
@@ -150,27 +157,33 @@ fun AdminGraph(
         Scaffold(
             containerColor = LadosTheme.colorScheme.background,
             topBar = {
-                CenterAlignedTopAppBar(
-                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                        containerColor = LadosTheme.colorScheme.background
-                    ),
-                    title = { Text(text = currentDestination.name!!) },
-                    navigationIcon = {
-                        IconButton(onClick = {
-                            Log.d("AdminTopAppBar", "onDrawerClick")
-                            scope.launch {
-                                Log.d(TAG, "AdminGraph: onDrawerClick: ${drawerState.isClosed}")
-                                if (drawerState.isClosed) drawerState.open() else drawerState.close()
+                AnimatedVisibility(
+                    visible = topAppBarVisibility,
+                    enter = expandVertically(),
+                    exit = shrinkVertically()
+                ) {
+                    CenterAlignedTopAppBar(
+                        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                            containerColor = LadosTheme.colorScheme.background
+                        ),
+                        title = { Text(text = currentDestination.name!!) },
+                        navigationIcon = {
+                            IconButton(onClick = {
+                                Log.d("AdminTopAppBar", "onDrawerClick")
+                                scope.launch {
+                                    Log.d(TAG, "AdminGraph: onDrawerClick: ${drawerState.isClosed}")
+                                    if (drawerState.isClosed) drawerState.open() else drawerState.close()
+                                }
+                            }) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Default.List,
+                                    contentDescription = "Back button"
+                                )
                             }
-                        }) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Default.List,
-                                contentDescription = "Back button"
-                            )
-                        }
-                    },
-                    scrollBehavior = scrollBehavior
-                )
+                        },
+                        scrollBehavior = scrollBehavior
+                    )
+                }
             }
         ) { innerPadding ->
             val padding = innerPadding
@@ -183,7 +196,7 @@ fun AdminGraph(
                 }
 
                 composable(route = Screen.Admin.UserManagement.route) {
-                    // UserManagement()
+                    topAppBarVisibility = true
                     UserManagementScreen(
                         modifier = Modifier,
                         paddingValues = innerPadding,
@@ -194,12 +207,13 @@ fun AdminGraph(
                 }
 
                 composable(route = Screen.Admin.UserDetailScreen.route) {
+                    topAppBarVisibility = false
                     UserDetailScreen(
                         modifier = Modifier,
                         paddingValues = innerPadding,
                         navController = navController,
                         sharedViewModel = sharedViewModel,
-                        userManagementViewModel= userManagementViewModel,
+                        userManagementViewModel = userManagementViewModel,
                         context = LocalContext.current
                     )
                 }
