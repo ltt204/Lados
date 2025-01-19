@@ -64,3 +64,9 @@ enum class AttributeType {
     SIZE, // Tương ứng với Size
     COLOR // Tương ứng với Color
 }
+
+data class ProductNameAndCategory(
+    val id: String,
+    val name: String,
+    val category: String
+)

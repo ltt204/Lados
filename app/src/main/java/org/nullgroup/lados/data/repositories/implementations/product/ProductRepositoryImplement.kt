@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import org.nullgroup.lados.data.models.Image
 import org.nullgroup.lados.data.models.Product
+import org.nullgroup.lados.data.models.ProductNameAndCategory
 import org.nullgroup.lados.data.models.ProductVariant
 import org.nullgroup.lados.data.models.UserEngagement
 import org.nullgroup.lados.data.remote.models.ProductRemoteModel
@@ -435,18 +436,25 @@ class ProductRepositoryImplement(
         return variants
     }
 
-    override suspend fun getProductById(id: String): Product? {
-        try {
-            val product = firestore.collection("products").document(id).get().await()
-                .toObject(Product::class.java)
-            return product
-        } catch (
-            e: Exception
-        ) {
-            Log.d("ProductRepositoryImplement", "getProductById: ${e.message}")
-            return null
+    override suspend fun getAllProductsWithNameAndCategoryFromFireStore(): Result<List<Product>> {
+        return try {
+            val productList = firestore.collection("products")
+                .get()
+                .await()
+                .documents
+                .mapNotNull { document ->
+                    val product = document.toObject(ProductRemoteModel::class.java)
+                    product?.let {
+
+                        it.toLocalProduct()
+                    }
+                }
+
+            Result.success(productList)
+        } catch (e: Exception) {
+            Log.d("ProductRepositoryImplement", "getAllProductsFromFireStore: ${e.message}")
+            Result.failure(e)
         }
     }
-
 }
 

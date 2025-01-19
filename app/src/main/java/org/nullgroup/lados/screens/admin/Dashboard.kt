@@ -3,8 +3,6 @@ package org.nullgroup.lados.screens.admin
 import android.annotation.SuppressLint
 import android.app.DatePickerDialog
 import android.util.Log
-import androidx.compose.animation.core.EaseInOutCubic
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -21,7 +19,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -59,29 +56,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.google.firestore.v1.StructuredQuery
 import ir.ehsannarmani.compose_charts.ColumnChart
-import ir.ehsannarmani.compose_charts.LineChart
-import ir.ehsannarmani.compose_charts.models.AnimationMode
 import ir.ehsannarmani.compose_charts.models.BarProperties
 import ir.ehsannarmani.compose_charts.models.Bars
-import ir.ehsannarmani.compose_charts.models.DrawStyle
-import ir.ehsannarmani.compose_charts.models.LabelProperties
-import ir.ehsannarmani.compose_charts.models.Line
 import org.nullgroup.lados.compose.common.LoadOnProgress
 import org.nullgroup.lados.data.models.Order
 import org.nullgroup.lados.data.models.OrderProduct
-import org.nullgroup.lados.data.models.Product
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.utilities.OrderStatus
-import org.nullgroup.lados.utilities.getDay
-import org.nullgroup.lados.utilities.getMonth
 import org.nullgroup.lados.utilities.toDateTimeString
 import org.nullgroup.lados.viewmodels.admin.DashBoardRevenueState
 import org.nullgroup.lados.viewmodels.admin.DashBoardViewModel
 import org.nullgroup.lados.viewmodels.admin.OrdersUiState
-import org.nullgroup.lados.viewmodels.admin.UsersUiState
+import org.nullgroup.lados.viewmodels.customer.home.CategoryUiState
+import org.nullgroup.lados.viewmodels.customer.home.ProductUiState
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -528,12 +516,41 @@ fun SalesAndProductReportScreen(
                                 "Units Sold" -> listProducts = listProducts.sortedByDescending { it.amount }
                                 "Revenue" -> listProducts = listProducts.sortedByDescending { it.totalPrice }
                         }})
-                        //Spacer(Modifier.width(8.dp))
-                        //Text("Sort Order", fontWeight = FontWeight.Bold)
-                        //DropdownMenu(selectedSortOrderSalesTable, sortOrderSalesTable)
+                        Spacer(Modifier.width(8.dp))
+                        Text("Sort Order", fontWeight = FontWeight.Bold)
+                        DropdownMenu(selectedSortOrderSalesTable, sortOrderSalesTable, onClick = { type ->
+                            when(type){
+                                "Ascending" -> {
+                                    when (selectedSortBySalesTable.value) {
+                                        "Product" -> listProducts = listProducts.sortedBy { it.productId }
+                                        "Category" -> listProducts = listProducts.sortedBy { it.variantId }
+                                        "Units Sold" -> listProducts = listProducts.sortedBy { it.amount }
+                                        "Revenue" -> listProducts = listProducts.sortedBy { it.totalPrice }
+                                    }
+                                }
+                                "Descending" -> {
+                                    when (selectedSortBySalesTable.value) {
+                                        "Product" -> listProducts = listProducts.sortedByDescending { it.productId }
+                                        "Category" -> listProducts = listProducts.sortedByDescending { it.variantId }
+                                        "Units Sold" -> listProducts = listProducts.sortedByDescending { it.amount }
+                                        "Revenue" -> listProducts = listProducts.sortedByDescending { it.totalPrice }
+                                    }
+                                }
+                            }
+                        })
                     }
 
-                    SalesTable(data = listProducts)
+                    //val mapName= mutableMapOf<String, String>()
+
+                    SalesTable(
+                        data = listProducts,
+                        //onUpdateResult = { result ->
+                        //    mapName.putAll(result)
+                            // Handle the result map here (e.g., save it in the ViewModel or handle it locally)
+                         //   Log.d("SalesTable", "Updated result: $result")
+                        //    Log.d("SalesTable", "Updated result_: $mapName")
+                        //}
+                    )
 
 
                     Spacer(Modifier.width(16.dp))
@@ -545,7 +562,15 @@ fun SalesAndProductReportScreen(
                         Text("Revenue by Product", fontWeight = FontWeight.Bold, fontSize = 28.sp)
                     }
 
-                    ChartPlaceholder()
+                       /*
+                    ChartPlaceholder(
+                            modifier = Modifier.height(512.dp),
+                            amountMap = groupListProducts.associate { it.productId to it.amount },
+
+                        )
+
+
+                        */
 
                 }
 
@@ -558,7 +583,7 @@ fun SalesAndProductReportScreen(
                         Text("Export as CSV")
                     }
                     Text(
-                        "Total Revenue: $${sampleData.sumOf { it.revenue }}",
+                        "Total Revenue: $${listOrders.sumOf { it.orderTotal }}",
                         fontWeight = FontWeight.Bold
                     )
                 }
@@ -677,48 +702,117 @@ fun OrderTable(
 
 
 @Composable
-fun SalesTable(data: List<OrderProduct>) {
-    LazyColumn(modifier = Modifier.border(1.dp, Color.Black, RoundedCornerShape(8.dp))) {
-        item {
-            Row(
-                modifier = Modifier
-                    .background(LadosTheme.colorScheme.primaryContainer)
-                    .fillMaxWidth()
-                    .padding(8.dp)
-            ) {
-                Text("Product", Modifier.weight(1.5f))
-                Text("Category", Modifier.weight(1f))
-                Text("Units Sold", Modifier.weight(1f))
-                Text("Revenue", Modifier.weight(1f))
-            }
+fun SalesTable(
+    data: List<OrderProduct>,
+    viewModel: DashBoardViewModel = hiltViewModel(),
+    //onUpdateResult: (Map<String, String>) -> Unit
+) {
+    val result = mutableMapOf<String, String>()
+    val productUiState = viewModel.productUiState.collectAsStateWithLifecycle()
+    val categoryUiState = viewModel.categoryUiState.collectAsStateWithLifecycle()
+
+    when (productUiState.value) {
+        is ProductUiState.Loading -> {
+            LoadOnProgress(
+                modifier = Modifier,
+                content = { CircularProgressIndicator() }
+            )
         }
 
-        items(data) { item ->
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
-            ) {
-                Text(item.productId, Modifier.weight(1.5f))
-                Text(item.variantId, Modifier.weight(1f))
-                Text(item.amount.toString(), Modifier.weight(1f))
-                Text("$${item.totalPrice}", Modifier.weight(1f))
+        is ProductUiState.Error -> {
+            Text(
+                text = "Failed to load data",
+                style = LadosTheme.typography.headlineSmall.copy(
+                    color = LadosTheme.colorScheme.error,
+                )
+            )
+        }
+
+        is ProductUiState.Success -> {
+            val productNamesAndCategories =
+                (productUiState.value as ProductUiState.Success).products
+            val categories = (categoryUiState.value as CategoryUiState.Success).categories
+            LazyColumn(modifier = Modifier.border(1.dp, Color.Black, RoundedCornerShape(8.dp))) {
+                item {
+                    Row(
+                        modifier = Modifier
+                            .background(LadosTheme.colorScheme.primaryContainer)
+                            .fillMaxWidth()
+                            .padding(8.dp)
+                    ) {
+                        Text("Product", Modifier.weight(1.5f))
+                        Text("Category", Modifier.weight(1f))
+                        Text("Units Sold", Modifier.weight(1f))
+                        Text("Revenue", Modifier.weight(1f))
+                    }
+                }
+
+                items(data) { item ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp)
+                    ) {
+                        // show product name instead of id
+                        //Log.d("SalesTable", "productNamesAndCategories: $productNamesAndCategories")
+                        val product =
+                            productNamesAndCategories.find { it.id == item.productId }
+                        if (product?.name != null) {
+                            Text(product.name, Modifier.weight(1.5f))
+                        }
+
+                        //result[item.productId]= product?.name ?: ""
+
+                        val categoryName =
+                            categories.find { it.categoryId == product?.categoryId }?.categoryName
+
+                        Text(categoryName ?: "", Modifier.weight(1f))
+                        //Text(item.variantId, Modifier.weight(1f))
+                        Text(item.amount.toString(), Modifier.weight(1f))
+                        Text("$${item.totalPrice}", Modifier.weight(1f))
+                    }
+                }
             }
+            //LaunchedEffect(result) {
+            //    onUpdateResult(result)
+            //}
+
         }
     }
+
 }
 
+
+
 @Composable
-fun ChartPlaceholder() {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(200.dp)
-            .background(Color.LightGray),
-        contentAlignment = Alignment.Center
-    ) {
-        Text("Chart Placeholder (e.g., Bar or Pie Chart)")
+fun ChartPlaceholder(
+    modifier: Modifier = Modifier,
+    amountMap: Map<String?, Int>
+) {
+    val primaryColor = LadosTheme.colorScheme.primary
+    val listData = mutableListOf<Bars>()
+    amountMap.forEach { (mon, rev) ->
+        mon?.let {
+            Bars(
+                label = it, values = listOf(
+                    Bars.Data(value = rev.toDouble(), color = SolidColor(primaryColor)),
+                )
+            )
+        }?.let {
+            listData.add(
+                it
+            )
+        }
     }
+
+    ColumnChart(
+        modifier = modifier,
+        data = listData,
+        barProperties = BarProperties(
+            spacing = 1.dp,
+            thickness = 10.dp,
+        )
+    )
 }
 
 @Composable

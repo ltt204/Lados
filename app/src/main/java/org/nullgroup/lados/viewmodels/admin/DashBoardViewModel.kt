@@ -19,7 +19,9 @@ import kotlinx.coroutines.launch
 import org.nullgroup.lados.data.models.Order
 import org.nullgroup.lados.data.models.OrderProduct
 import org.nullgroup.lados.data.models.Product
+import org.nullgroup.lados.data.models.ProductNameAndCategory
 import org.nullgroup.lados.data.models.User
+import org.nullgroup.lados.data.repositories.interfaces.category.CategoryRepository
 import org.nullgroup.lados.data.repositories.interfaces.order.OrderRepository
 import org.nullgroup.lados.data.repositories.interfaces.product.ProductRepository
 import org.nullgroup.lados.data.repositories.interfaces.user.UserRepository
@@ -30,6 +32,8 @@ import org.nullgroup.lados.utilities.getMonth
 import org.nullgroup.lados.utilities.getMonthString
 import org.nullgroup.lados.utilities.getYear
 import org.nullgroup.lados.utilities.toUsdCurrency
+import org.nullgroup.lados.viewmodels.customer.home.CategoryUiState
+import org.nullgroup.lados.viewmodels.customer.home.ProductUiState
 import org.nullgroup.lados.viewmodels.customer.order.OrderProductsState
 import java.util.Calendar
 import java.util.Date
@@ -39,7 +43,8 @@ import javax.inject.Inject
 class DashBoardViewModel @Inject constructor(
     private val productRepository: ProductRepository,
     private val userRepository: UserRepository,
-    private val orderRepository: OrderRepository
+    private val orderRepository: OrderRepository,
+    private val categoryRepository: CategoryRepository
 ) : ViewModel() {
 
     val products: StateFlow<List<Product>> = productRepository.getProductsFlow()
@@ -83,6 +88,47 @@ class DashBoardViewModel @Inject constructor(
             )
         }
     }
+
+    private val _categoryUiState = MutableStateFlow<CategoryUiState>(CategoryUiState.Loading)
+    val categoryUiState = _categoryUiState.asStateFlow()
+
+    private val _productUiState = MutableStateFlow<ProductUiState>(ProductUiState.Loading)
+    val productUiState = _productUiState.asStateFlow()
+
+    private val _originalProducts = MutableStateFlow<List<Product>>(emptyList())
+
+    init {
+        fetchCategories()
+        fetchProducts()
+    }
+
+    private fun fetchCategories() {
+        viewModelScope.launch {
+            try {
+                val getCategoriesResult = categoryRepository.getAllCategoriesFromFireStore()
+                _categoryUiState.value =
+                    CategoryUiState.Success(getCategoriesResult.getOrNull() ?: emptyList())
+            } catch (e: Exception) {
+                Log.d("HomeViewModel", "fetchCategories: ${e.message}")
+                _categoryUiState.value = CategoryUiState.Error(e.message ?: "An error occurred")
+            }
+        }
+    }
+
+    private fun fetchProducts() {
+        viewModelScope.launch {
+            try {
+                val getProductsResult = productRepository.getAllProductsWithNameAndCategoryFromFireStore()
+                val products = getProductsResult.getOrNull() ?: emptyList()
+                _originalProducts.value = products
+                _productUiState.value = ProductUiState.Success(products)
+            } catch (e: Exception) {
+                Log.d("HomeViewModel", "fetchProducts: ${e.message}")
+                _productUiState.value = ProductUiState.Error(e.message ?: "An error occurred")
+            }
+        }
+    }
+
 
 //    val users: StateFlow<List<User>> = flowOf(userRepository.getAllUsersFromFirestore())
 //        .stateIn(
