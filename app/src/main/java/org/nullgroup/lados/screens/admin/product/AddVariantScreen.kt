@@ -173,14 +173,15 @@ fun AddVariantScreen(
                             variantError.first &&
                             salePriceError.first &&
                             originalPriceError.first &&
-                            saleAmountError.first &&
-                            quantityError.first
+                            quantityError.first &&
+                            saleAmountError.first
                         ) {
 
                             val variant = ProductVariantRemoteModel(
                                 productId = productId ?: "",
                                 color = color,
                                 size = size,
+                                quantityInStock = quantity.toInt(),
                                 originalPrice = exchangePrice(originalPrice, priceOption),
                                 salePrice = exchangePrice(salePrice, priceOption),
                                 saleAmount = saleAmount.toInt(),

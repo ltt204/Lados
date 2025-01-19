@@ -99,6 +99,21 @@ fun validateVariant(
     return Pair(true, "")
 }
 
+fun validateDescription(description: Map<String, String>): Pair<Boolean, String> {
+    if (description.isEmpty()) return Pair(false, "Description cannot be empty")
+    return Pair(true, "")
+}
+
+fun validateName(name: Map<String, String>): Pair<Boolean, String> {
+    if (name.isEmpty()) return Pair(false, "Name cannot be empty")
+    return Pair(true, "")
+}
+
+fun validateVariant(variants: List<ProductVariantRemoteModel>): Pair<Boolean, String>{
+    if (variants.isEmpty()) return Pair(false, "You must add at least one variant")
+    return Pair(true, "")
+}
+
 @HiltViewModel
 class AddProductScreenViewModel @Inject constructor(
     private val productRepository: ProductRepository,
@@ -127,6 +142,18 @@ class AddProductScreenViewModel @Inject constructor(
         createBlankProduct()
     }
 
+    fun clearProductZombie(){
+        viewModelScope.launch {
+            _productZombie.value = ProductRemoteModel()
+        }
+    }
+
+    fun clearProductVariants(){
+        viewModelScope.launch {
+            productVariants.value = listOf()
+        }
+    }
+
 
     fun createBlankProduct() {
         viewModelScope.launch {
@@ -150,7 +177,12 @@ class AddProductScreenViewModel @Inject constructor(
                     "Product",
                     "onAddProduct: Product ${_productZombie.value}"
                 )
-                productRepository.addProductToFireStore(_productZombie.value)
+                val result = productRepository.addProductToFireStore(_productZombie.value)
+                if (result.isSuccess) {
+                    productUiState.value = ProductUiState.Success(AddProduct())
+                } else {
+                    productUiState.value = ProductUiState.Error(result.exceptionOrNull()?.message ?: "An error occurred")
+                }
             } catch (e: Exception) {
                 productUiState.value = ProductUiState.Error(e.message ?: "An error occurred")
                 Log.d("Product", "onAddProduct: ${e.message}")

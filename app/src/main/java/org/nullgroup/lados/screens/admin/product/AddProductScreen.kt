@@ -38,6 +38,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -64,6 +65,7 @@ import org.nullgroup.lados.compose.signin.CustomTextField
 import org.nullgroup.lados.data.remote.models.ProductVariantRemoteModel
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.viewmodels.admin.product.AddProductScreenViewModel
+import org.nullgroup.lados.viewmodels.admin.product.ProductUiState
 
 
 @Composable
@@ -78,6 +80,8 @@ fun AddProductScreen(
     val currentProductId = viewModel.currentProductId.collectAsState()
     val productVariants = viewModel.productVariants.collectAsState()
     Log.d("AddProductScreen", "Current Product variants: ${productVariants.value.size}")
+    val productUiState = viewModel.productUiState.value
+
 
     var name by rememberSaveable {
         mutableStateOf(
@@ -95,6 +99,26 @@ fun AddProductScreen(
                 "en" to ""
             )
         )
+    }
+
+    var nameError by remember {
+        mutableStateOf(Pair(true, ""))
+    }
+
+    var descriptionError by remember {
+        mutableStateOf(Pair(true, ""))
+    }
+
+    var variantError by remember {
+        mutableStateOf(Pair(true, ""))
+    }
+
+    LaunchedEffect(key1 = productUiState) {
+        if(productUiState is ProductUiState.Success){
+            viewModel.clearProductVariants()
+            viewModel.clearProductZombie()
+            navController.navigateUp()
+        }
     }
 
     Scaffold(
