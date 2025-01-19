@@ -24,4 +24,5 @@ interface OrderRepository {
     ): Result<Pair<Boolean, Map<OrderProduct, Int>>>
 
     suspend fun updateOrderStatus(orderId: String, newStatus: OrderStatus): Result<Boolean>
+    suspend fun searchOrdersById(query: String): Result<List<Order>>
 }
