@@ -4,7 +4,6 @@ import android.util.Log
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.SetOptions
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.channels.awaitClose
@@ -190,14 +189,15 @@ class CouponRepositoryImplement(
         }
     }
 
-    override suspend fun addCouponToServer(coupon: ServerCoupon): Result<Boolean> {
+    override suspend fun addCouponToServer(coupon: ServerCoupon): Result<String> {
         return try {
-            firestore
+            val couponRef = firestore
                 .collection(serverCouponCollectionName)
                 .document()
+            couponRef
                 .set(coupon.copy(code = coupon.code.trim().uppercase()))
                 .await()
-            Result.success(true)
+            Result.success(couponRef.id)
         } catch (e: Exception) {
             Log.e("CouponRepositoryImplement", "Error adding coupon to server: ", e)
             Result.failure(e)

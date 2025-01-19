@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
+import org.nullgroup.lados.compose.cart.ConfirmDialog
 import org.nullgroup.lados.compose.cart.DialogInfo
 import org.nullgroup.lados.data.models.currentHostTimeZoneInString
 import org.nullgroup.lados.data.models.timestampFromNow
@@ -47,10 +48,11 @@ fun DatePickerTextField(
 
     val dialogInfoState = remember { mutableStateOf<DialogInfo?>(null) }
     val datePickerState = rememberDatePickerState(
-        initialSelectedDateMillis = LocalDateTime.of(currentDate, LocalTime.MIDNIGHT).toTimestamp(zoneId).seconds * 1000
+        initialSelectedDateMillis = LocalDateTime.of(currentDate, LocalTime.MIDNIGHT)
+            .toTimestamp(zoneId).seconds * 1000
     )
 
-    var showDatePickerDialog = {currentDate: LocalDate ->
+    var showDatePickerDialog = { currentDate: LocalDate ->
         dialogInfoState.value = DialogInfo(
             message = @Composable {
                 DatePicker(
@@ -69,6 +71,8 @@ fun DatePickerTextField(
             }
         )
     }
+
+    ConfirmDialog(dialogInfoState.value)
 
     OutlinedTextField(
         value = currentDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
@@ -120,7 +124,7 @@ fun TimePickerTextField(
         is24Hour = true,
     )
 
-    var showTimePickerDialog = {currentTime: LocalTime ->
+    var showTimePickerDialog = { currentTime: LocalTime ->
         dialogInfoState.value = DialogInfo(
             message = @Composable {
                 TimePicker(
@@ -137,6 +141,8 @@ fun TimePickerTextField(
             }
         )
     }
+
+    ConfirmDialog(dialogInfoState.value)
 
     OutlinedTextField(
         value = currentTime.format(DateTimeFormatter.ofPattern("HH:mm")),

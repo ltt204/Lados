@@ -17,7 +17,7 @@ interface CouponRepository {
         isUsed: Boolean = true,
     ): Result<Boolean>
 
-    suspend fun addCouponToServer(coupon: ServerCoupon): Result<Boolean>
+    suspend fun addCouponToServer(coupon: ServerCoupon): Result<String>
     fun getCouponsForAdmin(): Flow<List<ServerCoupon>>
     suspend fun updateServerCoupon(coupon: ServerCoupon): Result<Boolean>
     suspend fun deleteServerCoupon(couponId: String): Result<Boolean>

@@ -181,8 +181,8 @@
     <string name="coupon_form_end_time">End Time</string>
     <string name="coupon_form_usage_duration">Usage Duration</string>
     <string name="coupon_form_usage_duration_day">Usage Duration (day)</string>
-    <string name="coupon_form_maximum_redemption">Maximum Redemption</string>
-    <string name="coupon_form_auto_fetching">Global Coupon</string>
+    <string name="coupon_form_maximum_redemption">Maximum</string>
+    <string name="coupon_form_auto_fetching">Global</string>
     <string name="coupon_start_date_desc">Available from %1$s</string>
     <string name="coupon_end_date_desc">to %1$s</string>
     <string name="coupon_usage_duration_day">"day "</string>
@@ -194,4 +194,14 @@
     <string name="coupon_delete_failed_title">Delete Coupon Failed</string>
     <string name="coupon_delete_success_message">The selected coupon has been successfully deleted!</string>
     <string name="coupon_delete_failed_message">Can\'t delete the selected coupon for some reasons!</string>
+    <string name="coupon_form_fail_submit_title">Submit Rejected</string>
+    <string name="coupon_form_fail_submit_message">Please check the fields of the form and try again.</string>
+    <string name="coupon_create_success_title">Coupon Added Successfully</string>
+    <string name="coupon_create_failed_title">Coupon Creation Failed</string>
+    <string name="coupon_update_success_title">Coupon Updated Successfully</string>
+    <string name="coupon_update_failed_title">Coupon Update Failed</string>
+    <string name="coupon_create_success_message">"The corresponding newly coupon has been added to the database! "</string>
+    <string name="coupon_update_success_message">The corresponding coupon has been updated!</string>
+    <string name="coupon_create_failed_message">Can\'t create the coupon for some reasons!</string>
+    <string name="coupon_update_failed_message">Can\'t update the coupon for some reasons!</string>
 </resources>

@@ -4,9 +4,9 @@ import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import org.nullgroup.lados.compose.cart.DialogInfo
 import org.nullgroup.lados.data.models.ServerCoupon
 import org.nullgroup.lados.data.models.toLocalDateTime
+import org.nullgroup.lados.data.models.toTimestamp
 import java.time.LocalDateTime
 import javax.inject.Inject
 
@@ -33,7 +33,7 @@ data class FieldInfo<T>(
 }
 
 data class CouponFormUiState(
-    val code: FieldInfo<String> = FieldInfo(""),
+    val code: FieldInfo<String> = FieldInfo("NEW_CODE"),
     val discountPercentage: FieldInfo<Int> = FieldInfo(10),
     val maximumDiscount: FieldInfo<Double?> = FieldInfo(null),
     val minimumOrderAmount: FieldInfo<Double> = FieldInfo(0.0),
@@ -45,8 +45,7 @@ data class CouponFormUiState(
     val maximumRedemption: FieldInfo<Int?> = FieldInfo(null),
     val autoFetching: FieldInfo<Boolean> = FieldInfo(false),
 
-    val isProcessing: Boolean = false,
-    val dialogInfo: DialogInfo? = null,
+    val dateZoneId: String = "UTC",
 ) {
     companion object {
         fun fromServerCoupon(serverCoupon: ServerCoupon, zoneId: String): CouponFormUiState {
@@ -59,6 +58,7 @@ data class CouponFormUiState(
                 usageDuration = FieldInfo(serverCoupon.usageDuration),
                 maximumRedemption = FieldInfo(serverCoupon.maximumRedemption),
                 autoFetching = FieldInfo(serverCoupon.autoFetching),
+                dateZoneId = zoneId,
             )
         }
     }
@@ -91,7 +91,10 @@ sealed class CouponFormEvent {
     object UsageDurationNullMarkChanged : CouponFormEvent()
     object MaximumRedemptionNullMarkChanged : CouponFormEvent()
 
-    object Submit : CouponFormEvent()
+    data class Submit(
+        val onApproved: ((ServerCoupon) -> Unit)? = null,
+        val onRejected: (() -> Unit)? = null,
+    ) : CouponFormEvent()
 }
 
 @HiltViewModel
@@ -100,8 +103,12 @@ class CouponFormViewModel @Inject constructor(
     private var _couponFormUiState = MutableStateFlow(CouponFormUiState())
     val couponFormUiState = _couponFormUiState.asStateFlow()
 
-    fun initialize(coupon: ServerCoupon, zoneId: String) {
-        _couponFormUiState.value = CouponFormUiState.fromServerCoupon(coupon, zoneId)
+    fun initialize(coupon: ServerCoupon?, zoneId: String) {
+        if (coupon == null) {
+            _couponFormUiState.value = CouponFormUiState()
+        } else {
+            _couponFormUiState.value = CouponFormUiState.fromServerCoupon(coupon, zoneId)
+        }
     }
 
     fun handleEvent(event: CouponFormEvent) {
@@ -118,15 +125,30 @@ class CouponFormViewModel @Inject constructor(
             is CouponFormEvent.MaximumDiscountNullMarkChanged -> updateMaximumDiscountNullMark()
             is CouponFormEvent.UsageDurationNullMarkChanged -> updateUsageDurationNullMark()
             is CouponFormEvent.MaximumRedemptionNullMarkChanged -> updateMaximumRedemptionNullMark()
-            is CouponFormEvent.Submit -> submitCoupon()
+            is CouponFormEvent.Submit -> submitCoupon(event.onApproved)
         }
     }
 
-    private fun submitCoupon() {
+    private fun submitCoupon(
+        onApproved: ((ServerCoupon) -> Unit)? = null,
+        onRejected: (() -> Unit)? = null,
+    ) {
         if (couponFormUiState.value.isValid()) {
-            _couponFormUiState.value = _couponFormUiState.value.copy(
-                isProcessing = true,
+            onApproved?.invoke(
+                ServerCoupon(
+                    code = couponFormUiState.value.code.value,
+                    discountPercentage = couponFormUiState.value.discountPercentage.value,
+                    maximumDiscount = couponFormUiState.value.maximumDiscount.value,
+                    minimumOrderAmount = couponFormUiState.value.minimumOrderAmount.value,
+                    startDate = couponFormUiState.value.startDate.value.toTimestamp(couponFormUiState.value.dateZoneId),
+                    endDate = couponFormUiState.value.endDate.value.toTimestamp(couponFormUiState.value.dateZoneId),
+                    usageDuration = couponFormUiState.value.usageDuration.value,
+                    maximumRedemption = couponFormUiState.value.maximumRedemption.value,
+                    autoFetching = couponFormUiState.value.autoFetching.value,
+                )
             )
+        } else {
+            onRejected?.invoke()
         }
     }
 

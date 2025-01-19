@@ -1,5 +1,6 @@
 package org.nullgroup.lados.viewmodels.admin.coupon
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
@@ -24,7 +25,7 @@ sealed class CouponManagerUiState {
     object Empty : CouponManagerUiState()
     data class Success(
         val data: List<ServerCoupon>,
-        val selectedCoupon: ServerCoupon? = null,
+        val selectedCouponId: String? = null,
         val isProcessing: Boolean = false
     ) : CouponManagerUiState()
 
@@ -67,15 +68,92 @@ class CouponManagerViewModel @Inject constructor(
     fun handleCouponSelection(coupon: ServerCoupon) {
         _couponUiState.value = when (val currentState = _couponUiState.value) {
             is CouponManagerUiState.Success -> {
-                val selectedCoupon = if (currentState.selectedCoupon == coupon) {
+                val selectedCoupon = if (currentState.selectedCouponId == coupon.id) {
                     null
                 } else {
                     coupon
                 }
-                currentState.copy(selectedCoupon = selectedCoupon)
+                Log.d("CouponManagerViewModel", "Selected coupon: ${selectedCoupon?.id ?: "null"}")
+                currentState.copy(selectedCouponId = selectedCoupon?.id)
             }
 
             else -> currentState
+        }
+
+    }
+
+    suspend fun handleCouponCreation(
+        coupon: ServerCoupon,
+        onCreateSuccess: (() -> Unit)? = null,
+        onCreateFailure: ((Throwable?) -> Unit)? = null
+    ) {
+        _couponUiState.value = when (val currentState = _couponUiState.value) {
+            is CouponManagerUiState.Success -> {
+                currentState.copy(
+                    isProcessing = true,
+                )
+            }
+            else -> currentState
+        }
+        val insertionResult = viewModelScope.async(Dispatchers.IO) {
+            couponRepository.addCouponToServer(coupon)
+        }.await()
+
+        if (insertionResult.isSuccess) {
+            _couponUiState.value = when (val currentState = _couponUiState.value) {
+                is CouponManagerUiState.Success -> {
+                    currentState.copy(
+                        selectedCouponId = insertionResult.getOrNull()!!,
+                        isProcessing = false,
+                    )
+                }
+                else -> currentState
+            }
+
+            onCreateSuccess?.invoke()
+        } else {
+            _couponUiState.value = when (val currentState = _couponUiState.value) {
+                is CouponManagerUiState.Success -> {
+                    currentState.copy(
+                        isProcessing = false,
+                    )
+                }
+                else -> currentState
+            }
+            onCreateFailure?.invoke(insertionResult.exceptionOrNull())
+        }
+    }
+
+    suspend fun handleCouponUpdate(
+        updatedCoupon: ServerCoupon,
+        onUpdateSuccess: (() -> Unit)? = null,
+        onUpdateFailure: ((Throwable?) -> Unit)? = null
+    ) {
+        _couponUiState.value = when (val currentState = _couponUiState.value) {
+            is CouponManagerUiState.Success -> {
+                currentState.copy(
+                    isProcessing = true,
+                )
+            }
+            else -> currentState
+        }
+        val updateResult = viewModelScope.async(Dispatchers.IO) {
+            couponRepository.updateServerCoupon(updatedCoupon)
+        }.await()
+
+        _couponUiState.value = when (val currentState = _couponUiState.value) {
+            is CouponManagerUiState.Success -> {
+                currentState.copy(
+                    isProcessing = false,
+                )
+            }
+            else -> currentState
+        }
+
+        if (updateResult.isSuccess) {
+            onUpdateSuccess?.invoke()
+        } else {
+            onUpdateFailure?.invoke(updateResult.exceptionOrNull())
         }
     }
 
@@ -83,28 +161,31 @@ class CouponManagerViewModel @Inject constructor(
         onDeleteSuccess: (() -> Unit)? = null,
         onDeleteFailure: ((Throwable?) -> Unit)? = null
     ) {
-        val selectedCoupon = (_couponUiState.value as? CouponManagerUiState.Success)?.selectedCoupon
-        if (selectedCoupon != null) {
+        val selectedCouponId =
+            (_couponUiState.value as? CouponManagerUiState.Success)?.selectedCouponId
+        if (selectedCouponId != null) {
             _couponUiState.value = when (val currentState = _couponUiState.value) {
                 is CouponManagerUiState.Success -> {
                     currentState.copy(
                         isProcessing = true,
                     )
                 }
+
                 else -> currentState
             }
             val deleteResult = viewModelScope.async(Dispatchers.IO) {
-                couponRepository.deleteServerCoupon(selectedCoupon.id)
+                couponRepository.deleteServerCoupon(selectedCouponId)
             }.await()
 
             if (deleteResult.getOrNull() == true) {
                 _couponUiState.value = when (val currentState = _couponUiState.value) {
                     is CouponManagerUiState.Success -> {
                         currentState.copy(
-                            selectedCoupon = null,
+                            selectedCouponId = null,
                             isProcessing = false,
                         )
                     }
+
                     else -> currentState
                 }
                 onDeleteSuccess?.invoke()
@@ -115,6 +196,7 @@ class CouponManagerViewModel @Inject constructor(
                             isProcessing = false,
                         )
                     }
+
                     else -> currentState
                 }
                 onDeleteFailure?.invoke(deleteResult.exceptionOrNull())
@@ -123,8 +205,10 @@ class CouponManagerViewModel @Inject constructor(
     }
 
     fun checkCoupon(coupon: ServerCoupon): CouponInfo {
-        val selectedCoupon = (_couponUiState.value as? CouponManagerUiState.Success)?.selectedCoupon
-        val isSelectedState = selectedCoupon?.let { if (it == coupon) ItemState.SELECTED else null }
+        val selectedCouponId =
+            (_couponUiState.value as? CouponManagerUiState.Success)?.selectedCouponId
+        val isSelectedState =
+            selectedCouponId?.let { if (it == coupon.id) ItemState.SELECTED else null }
 
         val currentTimestamp = timestampFromNow()
         if (coupon.startDate > currentTimestamp) {

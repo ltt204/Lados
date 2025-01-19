@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -25,6 +26,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonColors
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarColors
@@ -65,15 +67,26 @@ fun CouponManager(
     modifier: Modifier = Modifier,
     navController: NavController? = null,
     innerPadding: PaddingValues = PaddingValues(0.dp),
+    hideReturnButton: Boolean = true
 ) {
     val couponManagerViewModel = hiltViewModel<CouponManagerViewModel>()
 
     val couponUiState = couponManagerViewModel.couponUiState.collectAsStateWithLifecycle()
-    val currentCoupons = (couponUiState.value as? CouponManagerUiState.Success)?.data ?: emptyList()
-    val selectedCoupon = (couponUiState.value as? CouponManagerUiState.Success)?.selectedCoupon
-    val isProcessing = (couponUiState.value as? CouponManagerUiState.Success)?.isProcessing == true
+    val currentCoupons = remember(couponUiState.value) {
+        (couponUiState.value as? CouponManagerUiState.Success)?.data ?: emptyList()
+    }
+    val selectedCouponId = remember(couponUiState.value) {
+        (couponUiState.value as? CouponManagerUiState.Success)?.selectedCouponId
+    }
+    val selectedCoupon = remember(currentCoupons, selectedCouponId) {
+        currentCoupons.find { it.id == selectedCouponId }
+    }
+    val isProcessing = remember(couponUiState.value) {
+        (couponUiState.value as? CouponManagerUiState.Success)?.isProcessing == true
+    }
 
     val currentDialogState = remember { mutableStateOf<DialogInfo?>(null) }
+    val formOpenState = remember { mutableStateOf(false) }
     val currentTimeZone = currentHostTimeZoneInString()
     val scope = couponManagerViewModel.viewModelScope
 
@@ -85,8 +98,67 @@ fun CouponManager(
         couponManagerViewModel.handleCouponSelection(coupon)
     }
 
-    val onEditSelectedCoupon = { coupon: ServerCoupon ->
+    val onAddNewCoupon = {
+        formOpenState.value = true
+    }
 
+    val onEditSelectedCoupon = { coupon: ServerCoupon ->
+        formOpenState.value = true
+    }
+
+    val createCouponSucceededTitle = stringResource(R.string.coupon_create_success_title)
+    val createCouponSucceededMessage = stringResource(R.string.coupon_create_success_message)
+    val createCouponFailedTitle = stringResource(R.string.coupon_create_failed_title)
+    val createCouponFailedMessage = stringResource(R.string.coupon_create_failed_message)
+    val updateCouponSucceededTitle = stringResource(R.string.coupon_update_success_title)
+    val updateCouponSucceededMessage = stringResource(R.string.coupon_update_success_message)
+    val updateCouponFailedTitle = stringResource(R.string.coupon_update_failed_title)
+    val updateCouponFailedMessage = stringResource(R.string.coupon_update_failed_message)
+
+    val onFormSubmitted = { coupon: ServerCoupon ->
+        if (selectedCoupon == null) {
+            scope.launch(Dispatchers.IO) {
+                couponManagerViewModel.handleCouponCreation(
+                    coupon = coupon,
+                    onCreateSuccess = {
+                        currentDialogState.value = DialogInfo(
+                            titleText = createCouponSucceededTitle,
+                            messageText = createCouponSucceededMessage,
+                            onConfirm = { currentDialogState.value = null }
+                        )
+                        formOpenState.value = false
+                    },
+                    onCreateFailure = { error ->
+                        currentDialogState.value = DialogInfo(
+                            titleText = createCouponFailedTitle,
+                            messageText = createCouponFailedMessage + " (${error?.message ?: "Unknown error"})",
+                            onConfirm = { currentDialogState.value = null }
+                        )
+                    }
+                )
+            }
+        } else {
+            scope.launch(Dispatchers.IO) {
+                couponManagerViewModel.handleCouponUpdate(
+                    updatedCoupon = coupon,
+                    onUpdateSuccess = {
+                        currentDialogState.value = DialogInfo(
+                            titleText = updateCouponSucceededTitle,
+                            messageText = updateCouponSucceededMessage,
+                            onConfirm = { currentDialogState.value = null }
+                        )
+                        formOpenState.value = false
+                    },
+                    onUpdateFailure = { error ->
+                        currentDialogState.value = DialogInfo(
+                            titleText = updateCouponFailedTitle,
+                            messageText = updateCouponFailedMessage + " (${error?.message ?: "Unknown error"})",
+                            onConfirm = { currentDialogState.value = null }
+                        )
+                    }
+                )
+            }
+        }
     }
 
     val deleteCouponSucceededTitle = stringResource(R.string.coupon_delete_success_title)
@@ -107,7 +179,7 @@ fun CouponManager(
                 onDeleteFailure = { error ->
                     currentDialogState.value = DialogInfo(
                         titleText = deleteCouponFailedTitle,
-                        messageText = deleteCouponFailedMessage + "(${error?.message ?: "Unknown error"})",
+                        messageText = deleteCouponFailedMessage + " (${error?.message ?: "Unknown error"})",
                         onConfirm = { currentDialogState.value = null }
                     )
                 }
@@ -115,14 +187,9 @@ fun CouponManager(
         }
     }
 
-    val onAddNewCoupon = {
-
-    }
-
     val couponInfoOf = { coupon: ServerCoupon ->
         couponManagerViewModel.checkCoupon(coupon)
     }
-
 
     val iconButtonColors = IconButtonColors(
         contentColor = LadosTheme.colorScheme.onSecondaryContainer,
@@ -141,7 +208,7 @@ fun CouponManager(
 
     Scaffold(
         containerColor = LadosTheme.colorScheme.surfaceContainerLowest,
-        modifier = modifier.padding(innerPadding),
+        modifier = modifier.padding(top = innerPadding.calculateTopPadding()),
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
@@ -155,7 +222,7 @@ fun CouponManager(
                     )
                 },
                 navigationIcon = {
-                    if (navController != null) {
+                    if (navController != null && !hideReturnButton) {
                         IconButton(
                             onClick = { onNavigateBack() },
 //                        enabled = isAllowedInteracting,
@@ -226,6 +293,26 @@ fun CouponManager(
         }
     ) { innerScaffoldPadding ->
         ConfirmDialog(currentDialogState.value)
+
+//        CouponFormEditor(
+//            isOpened = formOpenState.value,
+//            onSubmitted = {
+//                onFormSubmitted(it)
+//            },
+//            onDismissed = { formOpenState.value = false },
+//            modifier = Modifier
+//                .width(400.dp)
+//                .wrapContentHeight()
+//                .padding(16.dp),
+//            initialCoupon = selectedCoupon,
+//        )
+
+        CouponFormBottomSheet(
+            isShownBottomSheet = formOpenState.value,
+            changeBottomSheetState = { formOpenState.value = it },
+            onFormSubmitted = { onFormSubmitted(it) },
+            selectedCoupon = selectedCoupon,
+        )
 
         when (couponUiState.value) {
             is CouponManagerUiState.Loading -> {
@@ -344,6 +431,35 @@ fun CouponManager(
             is CouponManagerUiState.Error -> {
                 // Error
             }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CouponFormBottomSheet(
+    isShownBottomSheet: Boolean,
+    changeBottomSheetState: (Boolean) -> Unit,
+    onFormSubmitted: (ServerCoupon) -> Unit,
+    selectedCoupon: ServerCoupon? = null,
+) {
+    if (isShownBottomSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { changeBottomSheetState(false) },
+            modifier = Modifier,
+            containerColor = LadosTheme.colorScheme.surfaceContainerLowest,
+            contentColor = LadosTheme.colorScheme.onSurface,
+            scrimColor = LadosTheme.colorScheme.surfaceContainerLowest.copy(alpha = 0.5f),
+        ) {
+            CouponFormEditor(
+                onSubmitted = {
+                    onFormSubmitted(it)
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                initialCoupon = selectedCoupon,
+            )
         }
     }
 }
