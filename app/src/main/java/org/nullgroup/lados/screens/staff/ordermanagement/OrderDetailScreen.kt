@@ -1,10 +1,7 @@
-package org.nullgroup.lados.screens.customer.order
+package org.nullgroup.lados.screens.staff.ordermanagement
 
-import android.content.ClipData
-import android.content.ClipboardManager
 import android.content.Context
 import android.util.Log
-import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -20,12 +17,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.CopyAll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -37,10 +32,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -49,73 +42,82 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import org.nullgroup.lados.R
-import org.nullgroup.lados.compose.common.CustomCenterTopAppBar
+import org.nullgroup.lados.compose.common.DefaultCenterTopAppBar
 import org.nullgroup.lados.compose.common.TwoColsItem
 import org.nullgroup.lados.compose.profile.ConfirmDialog
 import org.nullgroup.lados.data.models.Order
 import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.ui.theme.LadosTheme
-import org.nullgroup.lados.ui.theme.Typography
 import org.nullgroup.lados.utilities.OrderStatus
-import org.nullgroup.lados.utilities.getActionForButtonOfOrder
+import org.nullgroup.lados.utilities.capitalizeWords
+import org.nullgroup.lados.utilities.getActionsForButtonOfOrder
 import org.nullgroup.lados.utilities.getByLocale
-import org.nullgroup.lados.utilities.getOrderStatusesForCustomer
+import org.nullgroup.lados.utilities.getColorByName
+import org.nullgroup.lados.utilities.getOrderStatus
 import org.nullgroup.lados.utilities.getStatusByName
 import org.nullgroup.lados.utilities.toCurrency
 import org.nullgroup.lados.utilities.toDateTimeString
-import org.nullgroup.lados.viewmodels.customer.order.OrderDetailState
-import org.nullgroup.lados.viewmodels.customer.order.OrderDetailViewModel
+import org.nullgroup.lados.utilities.updateOrderStatusByAction
+import org.nullgroup.lados.viewmodels.staff.order.OrderDetailState
+import org.nullgroup.lados.viewmodels.staff.order.OrderDetailViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OrderDetailScreen(
     modifier: Modifier = Modifier,
-    navController: NavController? = null,
+    navController: NavController,
     viewModel: OrderDetailViewModel = hiltViewModel<OrderDetailViewModel>(),
     context: Context = LocalContext.current,
     paddingValues: PaddingValues = PaddingValues(0.dp),
 ) {
-    val uiState = viewModel.orderDetailState.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
     var isConfirmedToCancelOrReturn by remember {
         mutableStateOf(false)
     }
     var actionForBottomButton by remember {
-        mutableStateOf(Pair(null as String?) { _: NavController, _: String?, _: String? -> })
+        mutableStateOf(listOf(Pair(null as String?) { _: NavController, _: String?, _: String? -> }))
+    }
+    var currentAction by remember {
+        mutableStateOf("")
     }
 
-    val clipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
     Scaffold(
         topBar = {
-            CustomCenterTopAppBar(
+            DefaultCenterTopAppBar(
                 onBackClick = {
-                    navController?.navigateUp()
+                    navController.navigateUp()
                 },
-                content = {
-                    Text(
-                        text = stringResource(R.string.order_title),
-                        style = Typography.titleLarge.copy(
-                            color = LadosTheme.colorScheme.onBackground,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    )
-                }
+                content = "Order Detail"
             )
         },
         bottomBar = {
-            actionForBottomButton.first?.let {
-                if (it.isNotEmpty()) {
-                    TextButton(modifier = Modifier
-                        .fillMaxWidth()
-                        .heightIn(min = 64.dp), onClick = {
-                        isConfirmedToCancelOrReturn = true
-                    }) {
-                        Text(
-                            textAlign = TextAlign.Center,
-                            text = it,
-                            color = Color.Red,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.SemiBold
-                        )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(LadosTheme.size.small)
+            ) {
+                if (actionForBottomButton.isNotEmpty()) {
+                    actionForBottomButton.forEach { action ->
+                        action.first?.let {
+                            if (it.isNotEmpty()) {
+                                TextButton(modifier = Modifier
+                                    .heightIn(min = 64.dp),
+                                    onClick = {
+                                        currentAction = it
+                                        isConfirmedToCancelOrReturn = true
+                                    }) {
+                                    Text(
+                                        textAlign = TextAlign.Center,
+                                        text = it,
+                                        color = getColorByName(it),
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -123,9 +125,9 @@ fun OrderDetailScreen(
         containerColor = LadosTheme.colorScheme.background,
     ) { innerPadding ->
         // Column for showing order status
-        when (uiState.value) {
+        when (uiState) {
             is OrderDetailState.Error -> {
-                Text(text = (uiState.value as OrderDetailState.Error).message)
+                (uiState as OrderDetailState.Error).message?.let { Text(text = it) }
             }
 
             is OrderDetailState.Loading -> {
@@ -133,10 +135,10 @@ fun OrderDetailScreen(
             }
 
             is OrderDetailState.Success -> {
-                val currentOrder = (uiState.value as OrderDetailState.Success).currentOrder
+                val currentOrder = (uiState as OrderDetailState.Success).order
+                Log.d("Staff:OrderDetailScreen", "Current Order: $currentOrder")
                 actionForBottomButton =
-                    getStatusByName(currentOrder.orderStatusLog.entries.maxBy { it.value }.key)
-                        .getActionForButtonOfOrder(context)
+                    getStatusByName(currentOrder.currentStatus).getActionsForButtonOfOrder(context)
                 Column(
                     modifier = Modifier.padding(
                         start = LadosTheme.size.medium,
@@ -144,51 +146,6 @@ fun OrderDetailScreen(
                         top = innerPadding.calculateTopPadding()
                     )
                 ) {
-                    Column(
-                        modifier = Modifier.padding(top = LadosTheme.size.medium),
-                    ) {
-                        Text(
-                            text = stringResource(
-                                id = R.string.order_title_with_id
-                            ),
-                            style = Typography.titleLarge
-                                .copy(
-                                    color = LadosTheme.colorScheme.onBackground,
-                                    fontSize = 18.sp
-                                ),
-                            fontWeight = FontWeight.SemiBold,
-                        )
-                        Row(
-                            modifier = Modifier
-                                .wrapContentHeight(),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Text(
-                                text = viewModel.orderId,
-                                style = Typography.bodyLarge
-                                    .copy(
-                                        color = LadosTheme.colorScheme.onBackground
-                                    ),
-                                fontWeight = FontWeight.SemiBold,
-                            )
-
-                            IconButton(onClick = {
-                                val text = viewModel.orderId
-                                val clipData = ClipData.newPlainText("text", text)
-                                clipboardManager.setPrimaryClip(clipData)
-                                Toast.makeText(
-                                    context,
-                                    context.getString(R.string.order_id_is_copied_message),
-                                    Toast.LENGTH_LONG
-                                ).show()
-                            }) {
-                                Icon(
-                                    imageVector = Icons.Default.CopyAll,
-                                    contentDescription = "Copy order id"
-                                )
-                            }
-                        }
-                    }
                     OrderStatusArea(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -198,10 +155,10 @@ fun OrderDetailScreen(
                             ),
                         currentOrder = currentOrder
                     )
-                    Spacer(modifier = Modifier.padding(top = LadosTheme.size.medium))
+                    Spacer(modifier = Modifier.padding(top = LadosTheme.size.small))
                     Column {
                         Text(
-                            text = stringResource(R.string.order_items),
+                            text = "Order Items",
                             style = LadosTheme.typography.titleLarge.copy(
                                 fontWeight = FontWeight.SemiBold,
                             ),
@@ -212,16 +169,16 @@ fun OrderDetailScreen(
                             modifier = Modifier,
                             order = currentOrder,
                             onViewProductsClick = {
-                                navController?.navigate(
-                                    "${Screen.Customer.Order.OrderProductsView.route}/${currentOrder.orderId}"
+                                navController.navigate(
+                                    "${Screen.Staff.OrderProducts.route}/${currentOrder.orderId}"
                                 )
                             }
                         )
                     }
-                    Spacer(modifier = Modifier.padding(LadosTheme.size.medium))
+                    Spacer(modifier = Modifier.padding(LadosTheme.size.small))
                     Column {
                         Text(
-                            text = stringResource(R.string.delivery_detail),
+                            text = "Delivery Details",
                             style = LadosTheme.typography.titleLarge.copy(
                                 fontWeight = FontWeight.SemiBold,
                             ),
@@ -243,20 +200,27 @@ fun OrderDetailScreen(
     if (isConfirmedToCancelOrReturn) {
         ConfirmDialog(
             title = {
-                Text(text = stringResource(R.string.are_you_sure))
+                Text(text = "Are you sure?")
             },
             message = {
                 Text(
-                    text = stringResource(R.string.order_cancel_return_message)
+                    text = "Are you sure you want to change the order status?"
                 )
             },
-            primaryButtonText = stringResource(R.string.dialog_agree),
-            secondaryButtonText = stringResource(R.string.dialog_cancel),
+            primaryButtonText = "Submit",
+            secondaryButtonText = "Cancel",
             onDismissRequest = {
                 isConfirmedToCancelOrReturn = false
             },
             confirmButton = {
                 isConfirmedToCancelOrReturn = false
+                if (uiState is OrderDetailState.Success) {
+                    updateOrderStatusByAction(
+                        viewModel,
+                        (uiState as OrderDetailState.Success).order.orderId,
+                        currentAction
+                    )
+                }
             }
         )
     }
@@ -266,9 +230,9 @@ fun OrderDetailScreen(
 fun OrderStatusArea(
     modifier: Modifier = Modifier,
     currentOrder: Order,
-    statuses: List<OrderStatus> = getOrderStatusesForCustomer(),
+    statuses: List<OrderStatus> = getOrderStatus(),
 ) {
-    LazyColumn(modifier = modifier) {
+    LazyColumn(modifier = modifier.height(250.dp)) {
         itemsIndexed(statuses) { _, status ->
             val time: Long? = currentOrder.orderStatusLog[status.name]
             OrderStatusItem(
@@ -290,9 +254,9 @@ fun OrderStatusItem(
     var tintColor = LadosTheme.colorScheme.primary
     val time: String = if (status.second == null) {
         tintColor = tintColor.copy(0.5f)
-        stringResource(R.string.time_not_updated)
+        "Not updated"
     } else {
-        status.second!!.toDateTimeString("dd MMM")
+        status.second!!.toDateTimeString("dd/MM/yy HH:mm")
     }
     Row(
         modifier = modifier,
@@ -306,7 +270,7 @@ fun OrderStatusItem(
             )
             Spacer(modifier = Modifier.padding(horizontal = 8.dp))
             Text(
-                text = status.first.getByLocale(context),
+                text = status.first.name.capitalizeWords(),
                 color = LadosTheme.colorScheme.onBackground,
                 style = LadosTheme.typography.titleMedium,
             )
@@ -344,10 +308,7 @@ fun OrderItemsArea(
                     verticalArrangement = Arrangement.SpaceEvenly
                 ) {
                     Text(
-                        text = stringResource(
-                            R.string.order_items_header,
-                            order.orderProducts.size
-                        ),
+                        text = "${order.orderProducts.size} items",
                         style = LadosTheme.typography.bodyLarge.copy(
                             fontWeight = FontWeight.SemiBold,
                             fontSize = 18.sp
@@ -365,7 +326,7 @@ fun OrderItemsArea(
         trailingAction = {
             TextButton(onClick = { onViewProductsClick() }) {
                 Text(
-                    text = stringResource(R.string.view_all),
+                    text = "View all",
                     fontWeight = FontWeight.SemiBold,
                     color = LadosTheme.colorScheme.primary.copy(alpha = 0.8f)
                 )
@@ -399,7 +360,7 @@ fun DeliveryDetailArea(
         ) {
             Column {
                 Text(
-                    text = stringResource(R.string.delivery_address),
+                    text = "Delivery Address: ",
                     style = LadosTheme.typography.bodyLarge.copy(
                         fontWeight = FontWeight.SemiBold,
                     ),
@@ -412,7 +373,7 @@ fun DeliveryDetailArea(
             Spacer(modifier = Modifier.height(LadosTheme.size.small))
             Row {
                 Text(
-                    text = stringResource(R.string.customer_phone),
+                    text = "Customer Phone: ",
                     style = LadosTheme.typography.bodyLarge.copy(
                         fontWeight = FontWeight.SemiBold,
                     ),
