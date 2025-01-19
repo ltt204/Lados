@@ -317,11 +317,8 @@ fun ManageProductScreen(
                     items(products.size) { index ->
                         ProductItem(products[index],
                             onLongClick = {
-                                Log.d("ProductItem", "Long Clicked: ${products[index].name}")
-                                selectedProduct = products[index].id
-                                Log.d("ProductItem", "Product id: ${products[index].id}")
-                                Log.d("ProductItem", "Selected Product: $selectedProduct")
 
+                                selectedProduct = products[index].id
                                 scope.launch {
                                     sheetState.show()
                                 }
@@ -332,7 +329,7 @@ fun ManageProductScreen(
                                 } else {
                                     selectedProducts + it
                                 }
-                                Log.d("Seleclted PROducr", selectedProducts.toString())
+
                             }
                         )
                     }
@@ -436,7 +433,7 @@ fun ManageProductScreen(
                         "Remove product",
                         style = LadosTheme.typography.bodyLarge.copy(
                             fontWeight = FontWeight.SemiBold,
-                            color = LadosTheme.colorScheme.error
+                            color = LadosTheme.colorScheme.onError
                         )
                     )
                 }
@@ -498,7 +495,7 @@ fun ManageProductScreen(
             onDismissRequest = { onDeleteAllSelected = false },
             confirmButton = {
                 Log.d("Show", selectedProducts.toString())
-                if (selectedProducts.size != 0) {
+                if (selectedProducts.isNotEmpty()) {
                     Log.d("Deleet all", selectedProducts.toString())
                     viewModel.deleteChosenProducts(selectedProducts)
                 }

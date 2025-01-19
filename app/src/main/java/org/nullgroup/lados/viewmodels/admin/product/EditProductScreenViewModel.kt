@@ -23,6 +23,18 @@ import org.nullgroup.lados.data.repositories.interfaces.product.ProductRepositor
 import org.nullgroup.lados.screens.Screen
 import javax.inject.Inject
 
+
+fun validateEditVariant(
+    color: String,
+    size: String,
+    variants: List<ProductVariantRemoteModel>
+): Pair<Boolean, String> {
+
+    if (color.isEmpty() || size.isEmpty()) return Pair(false, "Color and size cannot be empty")
+
+    return Pair(true, "")
+}
+
 @HiltViewModel
 class EditProductScreenViewModel @Inject constructor(
     private val productRepository: ProductRepository,

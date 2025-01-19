@@ -5,10 +5,8 @@ import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -20,21 +18,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -43,12 +34,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
@@ -56,8 +43,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import coil.compose.SubcomposeAsyncImage
-import coil.request.ImageRequest
 import org.nullgroup.lados.compose.common.LoadOnProgress
 import org.nullgroup.lados.compose.signin.CustomTextField
 import org.nullgroup.lados.data.models.AddProductVariant
@@ -72,15 +57,15 @@ import org.nullgroup.lados.viewmodels.admin.product.VariantImageUiState
 import org.nullgroup.lados.viewmodels.admin.product.colorOptionsList
 import org.nullgroup.lados.viewmodels.admin.product.exchangePrice
 import org.nullgroup.lados.viewmodels.admin.product.sizeOptionsList
+import org.nullgroup.lados.viewmodels.admin.product.validateEditVariant
 import org.nullgroup.lados.viewmodels.admin.product.validatePrice
 import org.nullgroup.lados.viewmodels.admin.product.validateQuantity
 import org.nullgroup.lados.viewmodels.admin.product.validateSaleAmount
 import org.nullgroup.lados.viewmodels.admin.product.validateSalePrice
 import org.nullgroup.lados.viewmodels.admin.product.validateVariant
 
-
 @Composable
-fun AddVariantScreen(
+fun AddEditVariantScreen(
     modifier: Modifier = Modifier,
     onVariantAdded: (AddProductVariant) -> Unit = {},
     productId: String? = null,
@@ -163,7 +148,7 @@ fun AddVariantScreen(
                         .weight(1f)
                         .height(48.dp),
                     onClick = {
-                        variantError = validateVariant(
+                        variantError = validateEditVariant(
                             color.colorName["en"] ?: "",
                             size.sizeName["en"] ?: "",
                             productVariantsState
@@ -186,7 +171,7 @@ fun AddVariantScreen(
                                 productId = productId ?: "",
                                 color = color,
                                 size = size,
-                                quantityInStock = quantity.toInt(),
+                                quantityInStock = if(quantity.isEmpty()) 0 else quantity.toInt(),
                                 originalPrice = exchangePrice(originalPrice, priceOption),
                                 salePrice =  exchangePrice(salePrice.ifEmpty { "0" }, priceOption),
                                 saleAmount = 0,
@@ -461,68 +446,3 @@ fun AddVariantScreen(
         }
     }
 }
-
-@Composable
-fun VariantImageSection(
-    modifier: Modifier = Modifier,
-    imageUri: String,
-    onEditImage: () -> Unit = {},
-) {
-
-    Box(
-        modifier = modifier
-            .wrapContentSize()
-            .padding(bottom = 16.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Box(
-            modifier = Modifier.fillMaxWidth(),
-            contentAlignment = Alignment.Center
-        ) {
-            SubcomposeAsyncImage(
-                modifier = Modifier
-                    .height(200.dp)
-                    .clip(RoundedCornerShape(12.dp)),
-                contentScale = ContentScale.Fit,
-                alignment = Alignment.Center,
-                loading = {
-                    LoadOnProgress(
-                        modifier = Modifier
-                            .clip(CircleShape)
-                    ) {
-                        CircularProgressIndicator(modifier = Modifier.size(48.dp))
-                        Spacer(modifier = Modifier.padding(top = 16.dp))
-                    }
-                },
-                model = ImageRequest
-                    .Builder(context = LocalContext.current)
-                    .data(imageUri)
-                    .crossfade(true)
-                    .build(),
-                contentDescription = "Variant Image"
-            )
-        }
-
-        OutlinedIconButton(
-            modifier = Modifier
-                .clip(CircleShape)
-                .align(Alignment.BottomEnd)
-                .size(30.dp),
-            colors = IconButtonDefaults.outlinedIconButtonColors(
-                contentColor = Color.White,
-                containerColor = Color(0xFF8E6CEF)
-            ),
-            border = BorderStroke(2.dp, Color.White),
-            onClick = onEditImage
-        ) {
-            Icon(
-                modifier = Modifier.size(16.dp),
-                imageVector = Icons.Filled.Edit,
-                contentDescription = null
-            )
-        }
-    }
-}
-
-
-
