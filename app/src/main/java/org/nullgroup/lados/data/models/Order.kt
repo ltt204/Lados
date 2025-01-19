@@ -11,10 +11,11 @@ data class Order(
     val orderStatusLog: Map<String, Long> = mapOf(
         OrderStatus.CREATED.name to System.currentTimeMillis()
     ),
+    val currentStatus: String = OrderStatus.CREATED.name,
     val orderProducts: List<OrderProduct> = listOf(),
     val orderTotal: Double = orderProducts.sumOf { it.totalPrice },
-        // Maybe different that the total of individual products
-        // If discount is applied
+    // Maybe different that the total of individual products
+    // If discount is applied
     val lastUpdatedAt: Long = System.currentTimeMillis(),
     val deliveryAddress: String = "",
     val customerPhoneNumber: String = "",
@@ -33,6 +34,6 @@ data class OrderProduct(
     val variantId: String = "",
     val amount: Int = 0,
     val totalPrice: Double = 0.0,
-        // Maybe different that the total of individual products
-        // If discount is applied
+    // Maybe different that the total of individual products
+    // If discount is applied
 )

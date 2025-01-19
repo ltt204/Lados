@@ -148,7 +148,7 @@ fun ChatWithCustomerScreen(
                                     text = staffChatViewModel.chatWith.first,
                                     style = LadosTheme.typography.titleLarge.copy(
                                         fontSize = 18.sp,
-                                        fontWeight = FontWeight.SemiBold
+                                        fontWeight = FontWeight.SemiBold,
                                     ),
                                     color = LadosTheme.colorScheme.onBackground,
                                 )
@@ -158,7 +158,8 @@ fun ChatWithCustomerScreen(
                                 Icon(
                                     modifier = Modifier.size(24.dp),
                                     painter = painterResource(id = R.drawable.arrowleft2),
-                                    contentDescription = null
+                                    contentDescription = null,
+                                    tint = LadosTheme.colorScheme.onBackground,
                                 )
                             }
                         }

@@ -12,12 +12,12 @@ import org.nullgroup.lados.utilities.UserRole
 sealed class Screen(
     val name: String? = null,
     val route: String,
-    val icon: ImageVector? = null
+    val icon: ImageVector? = null,
 ) {
     sealed class Common(
         name: String? = null,
         route: String,
-        icon: ImageVector? = null
+        icon: ImageVector? = null,
     ) : Screen(name, route, icon) {
         data object LoginScreen : Common(route = "login")
         data object RegisterScreen : Common(route = "register")
@@ -40,7 +40,7 @@ sealed class Screen(
     sealed class Customer(
         name: String,
         route: String,
-        icon: ImageVector
+        icon: ImageVector,
     ) : Screen(name, route, icon) {
 
         data object ChatScreen : Customer("Chat", "customer_chat", Icons.Default.MailOutline)
@@ -105,7 +105,7 @@ sealed class Screen(
         sealed class Address(
             name: String,
             route: String,
-            icon: ImageVector
+            icon: ImageVector,
         ) : Customer(name, route, icon) {
             data object AddressList :
                 Address("Address List", "customer_address_list", Icons.Default.AccountCircle)
@@ -126,7 +126,7 @@ sealed class Screen(
         sealed class Order(
             name: String,
             route: String,
-            icon: ImageVector
+            icon: ImageVector,
         ) : Customer(name, route, icon) {
             data object OrderList :
                 Order("Order", "customer_order_list", Icons.Default.ShoppingCart)
@@ -176,7 +176,7 @@ sealed class Screen(
     sealed class Staff(
         name: String,
         route: String,
-        icon: ImageVector
+        icon: ImageVector,
     ) : Screen(name, route, icon) {
         data object ChatScreen : Staff("Chat", "staff_chat", Icons.Default.MailOutline)
         data object ChatWithCustomerScreen :
@@ -187,6 +187,19 @@ sealed class Screen(
 
         data object OrderManagement :
             Staff("Order Management", "staff_order_management", Icons.Default.AccountCircle)
+
+
+        data object OrderDetail :
+            Staff("Order Detail", "staff_order_detail", Icons.Default.AccountCircle) {
+            const val ID_ARG = "order_id"
+            const val ROUTE_WITH_ARG = "staff_order_detail/{$ID_ARG}"
+        }
+
+        data object OrderProducts :
+            Staff("Order Products", "staff_order_products", Icons.Default.AccountCircle) {
+            const val ID_ARG = "order_id"
+            const val ROUTE_WITH_ARG = "staff_order_products/{$ID_ARG}"
+        }
 
         data object SearchScreen : Staff("Search", "staff_search", Icons.Default.MailOutline)
 
@@ -201,7 +214,7 @@ sealed class Screen(
     sealed class Admin(
         name: String,
         route: String,
-        icon: ImageVector
+        icon: ImageVector,
     ) : Screen(name, route, icon) {
         data object UserManagement :
             Admin("User Management", "user_management", Icons.Default.AccountCircle)

@@ -39,6 +39,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -72,9 +73,11 @@ enum class ItemState {
 @Composable
 fun CartScreen(
     navController: NavController,
-    innerPadding: PaddingValues = PaddingValues(bottom = 0.dp),
+    innerPadding: PaddingValues = PaddingValues(0.dp),
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
+
     val cartViewModel: CartViewModel = hiltViewModel()
 
     val snackBarHostState = remember { mutableStateOf(SnackbarHostState()) }
@@ -127,8 +130,8 @@ fun CartScreen(
 
     val onItemRemove = { cartItem: CartItem ->
         currentDialogState.value = DialogInfo(
-            titleText = "Remove item",
-            messageText = "Are you sure you want to remove the item from the cart?",
+            titleText = context.getString(R.string.remove_cart_item),
+            messageText = context.getString(R.string.remove_cart_item_message),
             onConfirm = {
                 onItemAmountChanged(cartItem, -cartItem.amount)
                 currentDialogState.value = null
@@ -141,8 +144,8 @@ fun CartScreen(
 
     val onSelectedItemsRemoved = {
         currentDialogState.value = DialogInfo(
-            titleText = "Remove selected item(s)",
-            messageText = "Are you sure you want to remove the selected item(s) from the cart?",
+            titleText = "Remove selected item${if (selectedItems.size > 1) "s" else ""}",
+            messageText = "Are you sure you want to remove the selected item${if (selectedItems.size > 1) "s" else ""} from the cart?",
             onConfirm = {
                 cartViewModel.removeSelectedCartItemLocally()
                 currentDialogState.value = null
@@ -160,23 +163,6 @@ fun CartScreen(
             scope.async {
                 cartViewModel.commitChangesToDatabase()
             }.await()
-
-//            var result = scope.async {
-//                cartViewModel.commitChangesToDatabase()
-//            }.await()
-//            if (result.isFailure) {
-//                snackBarHostState.value.showSnackbar(
-//                    message = result.exceptionOrNull()!!.message.toString(),
-//                    duration = SnackbarDuration.Short
-//                )
-//            }
-//            else {
-//                snackBarHostState.value.showSnackbar(
-//                    message = "Successfully saved change(s) to the database",
-//                    duration = SnackbarDuration.Short
-//                )
-//            }
-//            delay(100)
             navController.popBackStack()
         }
     }
@@ -211,13 +197,6 @@ fun CartScreen(
     }
 
     val onSuccessfulCheckout: () -> Unit = {
-//        scope.launch {
-//            snackBarHostState.value.showSnackbar(
-//                message = "Checking out successful",
-//                duration = SnackbarDuration.Short
-//            )
-//        }
-
         navController.navigate(Screen.Customer.CheckOutScreen.route)
     }
 

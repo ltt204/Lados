@@ -4,6 +4,7 @@ package org.nullgroup.lados.screens.customer.home
 //noinspection UsingMaterialAndMaterial3Libraries
 //noinspection UsingMaterialAndMaterial3Libraries
 //noinspection UsingMaterialAndMaterial3Libraries
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -53,6 +54,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -74,6 +76,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import android.content.Context
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -86,6 +89,8 @@ import org.nullgroup.lados.compose.common.LoadOnProgress
 import org.nullgroup.lados.data.models.Category
 import org.nullgroup.lados.data.models.Product
 import org.nullgroup.lados.screens.Screen
+import org.nullgroup.lados.screens.customer.product.FilterCategory
+import org.nullgroup.lados.screens.customer.product.FilterState
 import org.nullgroup.lados.screens.customer.product.PriceSlider
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.ui.theme.Primary
@@ -149,7 +154,7 @@ fun SearchBar(
             singleLine = true,
             placeholder = {
                 Text(
-                    "Search",
+                    stringResource(R.string.search),
                     style = LadosTheme.typography.bodyLarge.copy(
                         color = LadosTheme.colorScheme.onBackground
                     )
@@ -605,8 +610,8 @@ fun DrawProductScreenContent(
 
                 item {
                     TitleTextRow(
-                        contentLeft = "On Sale",
-                        contentRight = "See all",
+                        contentLeft = stringResource(R.string.on_sale),
+                        contentRight = stringResource(R.string.home_see_all),
                         onClick = {
                             sharedViewModel.updateTypeScreen("On Sale")
                             navController.navigate(
@@ -672,8 +677,8 @@ fun DrawProductScreenContent(
 
                 item {
                     TitleTextRow(
-                        contentLeft = "All products",
-                        contentRight = "See all",
+                        contentLeft = stringResource(R.string.all_products),
+                        contentRight = stringResource(R.string.home_see_all),
                         onClick = {
                             sharedViewModel.updateTypeScreen("All Products")
                             navController.navigate(
@@ -695,18 +700,31 @@ fun DrawProductScreenContent(
     }
 }
 
+private fun getFilterCategoryAndIndex(context: Context, title: String, index: Int? = null): Pair<FilterCategory, Int?> {
+    return when (title) {
+        context.getString(R.string.category) -> FilterCategory.CATEGORIES to index
+        context.getString(R.string.sort_by) -> FilterCategory.SORT_BY to index
+        context.getString(R.string.rating) -> FilterCategory.RATING_RANGE to index
+        context.getString(R.string.pricing_range) -> FilterCategory.PRICING_RANGE to null // or appropriate index if needed
+        else -> FilterCategory.PRICE to index
+    }
+}
+
 @Composable
 fun BottomSheetContent(
     modifier: Modifier = Modifier,
     title: String,
     options: List<String>,
+    context: Context,
     onSelectionChanged: (String) -> Unit = {},
     paddingValues: PaddingValues,
     onCloseClick: () -> Unit,
     onClearClick: (String) -> Unit = {},
-    onSliderChanged: (ClosedFloatingPointRange<Float>) -> Unit = {}
+    onSliderChanged: (ClosedFloatingPointRange<Float>) -> Unit = {},
+    selectedFilters: MutableMap<FilterCategory, Int?> = mutableMapOf(),
+    minPrice: Float = 0f,
+    maxPrice: Float = 500f,
 ) {
-    var selectedButtonIndex by remember { mutableStateOf<Int?>(null) }
     Box(
         modifier = Modifier
             .fillMaxHeight(0.5f)
@@ -732,28 +750,15 @@ fun BottomSheetContent(
             ) {
                 TextButton(
                     onClick = {
-                        if (title == "Sort by" && selectedButtonIndex!! >= 2) {
-                            selectedButtonIndex = null
-                            onClearClick("Sort by")
-                        } else
-                            if (title == "Price" && selectedButtonIndex!! < 2) {
-                                selectedButtonIndex = null
-                                onClearClick("Price")
-                            } else if (title == "Category") {
-                                selectedButtonIndex = null
-                                onClearClick("Category")
-                            } else
-                                if (title == "Rating") {
-                                    selectedButtonIndex = null
-                                    onClearClick("Rating")
-                                } else if (title == "Pricing Range") {
-                                    onClearClick("Pricing Range")
-                                }
+                        val (category, _) = getFilterCategoryAndIndex(title=title, context = context)
+                        selectedFilters[category] = null
+                        onClearClick(title)
                         onCloseClick()
+
                     }
                 ) {
                     Text(
-                        "Clear", style = LadosTheme.typography.titleMedium.copy(
+                        stringResource(R.string.clear), style = LadosTheme.typography.titleMedium.copy(
                             color = LadosTheme.colorScheme.primary,
                         )
                     )
@@ -774,9 +779,7 @@ fun BottomSheetContent(
                 }
             }
             Spacer(modifier = Modifier.height(8.dp))
-            if (title == "Pricing Range") {
-                val minPrice = 0f
-                val maxPrice = 200f
+            if (title == stringResource(R.string.pricing_range)) {
                 var currentPriceRange by remember { mutableStateOf(minPrice..maxPrice) }
                 PriceSlider(
                     minPrice = minPrice,
@@ -789,20 +792,22 @@ fun BottomSheetContent(
                 )
             } else
                 options.forEachIndexed { index, option ->
+                    val (category, index) = getFilterCategoryAndIndex(title=title, context = context, index = index)
+                    val isSelected = selectedFilters[category] == index
                     Button(
+
                         onClick = {
-                            selectedButtonIndex = index
-                            if (title == "Sort by")
-                                selectedButtonIndex = selectedButtonIndex!! + 2
-                            //onCloseClick()
+                            val (category, index) = getFilterCategoryAndIndex(title=title, context = context, index = index)
+                            selectedFilters[category] = index
+
                             onSelectionChanged(option)
                         },
                         modifier = Modifier
                             .fillMaxWidth(0.95f)
                             .height(56.dp),
                         colors = ButtonDefaults.buttonColors(
-                            if ((title != "Sort by" && selectedButtonIndex == index) ||
-                                (title == "Sort by" && selectedButtonIndex == index + 2)
+
+                            if (isSelected
                             )
                                 LadosTheme.colorScheme.primary else
                                 LadosTheme.colorScheme.surfaceContainerHighest
@@ -818,21 +823,21 @@ fun BottomSheetContent(
                                 text = option,
                                 fontWeight = FontWeight.Bold,
                                 style = MaterialTheme.typography.bodyLarge,
-                                color = if ((title != "Sort by" && selectedButtonIndex == index) ||
-                                    (title == "Sort by" && selectedButtonIndex == index + 2)
+                                color = if (isSelected
                                 )
+
                                     Color.White else
                                     LadosTheme.colorScheme.onBackground
                             )
-                            if ((title != "Sort by" && selectedButtonIndex == index) ||
-                                (title == "Sort by" && selectedButtonIndex == index + 2)
+                            if (isSelected
                             )
+
                                 Icon(
                                     Icons.Outlined.Done,
                                     contentDescription = null,
-                                    tint = if ((title != "Sort by" && selectedButtonIndex == index) ||
-                                        (title == "Sort by" && selectedButtonIndex == index + 2)
+                                    tint = if (isSelected
                                     )
+
                                         LadosTheme.colorScheme.primary else
                                         LadosTheme.colorScheme.surfaceContainerHighest
                                 )

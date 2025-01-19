@@ -21,6 +21,8 @@ import org.nullgroup.lados.data.models.Size
 import org.nullgroup.lados.data.remote.models.CategoryRemoteModel
 import org.nullgroup.lados.data.remote.models.ProductRemoteModel
 import org.nullgroup.lados.screens.Screen
+import org.nullgroup.lados.viewmodels.staff.order.OrderDetailEvent
+import org.nullgroup.lados.viewmodels.staff.order.OrderDetailViewModel
 import java.io.ByteArrayOutputStream
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
@@ -33,10 +35,11 @@ import java.time.temporal.ChronoUnit
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import androidx.compose.ui.graphics.Color as ColorUi
 
 fun Drawable.toByteArray(
     format: Bitmap.CompressFormat = Bitmap.CompressFormat.JPEG,
-    quality: Int = 25
+    quality: Int = 25,
 ): ByteArray {
     val bitmap = (this as BitmapDrawable).bitmap
 
@@ -131,18 +134,51 @@ fun OrderStatus.getActionForButtonOfOrderProduct(context: Context): Pair<String?
 
 fun OrderStatus.getActionForButtonOfOrder(context: Context): Pair<String?, ((NavController, String?, String?) -> Unit)> {
     return when (this) {
-        OrderStatus.RETURNED, OrderStatus.CANCELLED -> {
-            null to { _, _, _ ->
-                // Navigate to Ask for reason screen
-            }
+        OrderStatus.CREATED -> {
+            context.getString(R.string.cancel_order) to { _, _, _ -> /*TODO*/ }
         }
+
         OrderStatus.DELIVERED -> {
             context.getString(R.string.return_order) to { _, _, _ ->
-                // Navigate to Ask for reason screen
             }
         }
+
         else -> {
-            context.getString(R.string.cancel_order) to { _, _, _ -> /*TODO*/ }
+            null to { _, _, _ ->
+            }
+        }
+    }
+}
+
+fun OrderStatus.getActionsForButtonOfOrder(context: Context): List<Pair<String?, ((NavController, String?, String?) -> Unit)>> {
+    return when (this) {
+        OrderStatus.CREATED -> {
+            listOf(
+                "Cancel" to { _, _, _ -> },
+                "Confirm" to { _, _, _ -> }
+            )
+        }
+
+        OrderStatus.CONFIRMED -> {
+            listOf(
+                "Ship" to { _, _, _ -> }
+            )
+        }
+
+        OrderStatus.SHIPPED -> {
+            listOf(
+                "Delivered" to { _, _, _ -> }
+            )
+        }
+
+        OrderStatus.DELIVERED -> {
+            listOf(
+                "Return" to { _, _, _ -> }
+            )
+        }
+
+        else -> {
+            emptyList()
         }
     }
 }
@@ -175,13 +211,22 @@ fun String.toLocale(): Locale {
     return Locale.forLanguageTag(this)
 }
 
-fun getFirstFourOrderStatuses(): List<OrderStatus> {
-    return OrderStatus.entries.toTypedArray().take(4)
+fun getOrderStatusesForCustomer(): List<OrderStatus> {
+    return listOf(
+        OrderStatus.CREATED,
+        OrderStatus.CONFIRMED,
+        OrderStatus.SHIPPED,
+        OrderStatus.DELIVERED
+    )
+}
+
+fun getOrderStatus(): List<OrderStatus> {
+    return OrderStatus.entries.toTypedArray().take(6)
 }
 
 fun Long.toDateTimeString(
     formatPattern: String,
-    locale: Locale = Locale.getDefault()
+    locale: Locale = Locale.getDefault(),
 ): String {
     val date = Date(this)
     val format = SimpleDateFormat(formatPattern, locale)
@@ -191,6 +236,71 @@ fun Long.toDateTimeString(
 
 fun getStatusByName(name: String): OrderStatus {
     return OrderStatus.valueOf(name.uppercase())
+}
+
+fun updateOrderStatusByAction(
+    viewModel: OrderDetailViewModel,
+    orderId: String,
+    buttonAction: String,
+) {
+    when (buttonAction) {
+        "Cancel" -> {
+            viewModel.handleEvent(
+                OrderDetailEvent.UpdateOrderStatus(
+                    orderId,
+                    OrderStatus.CANCELLED
+                )
+            )
+        }
+
+        "Confirm" -> {
+            viewModel.handleEvent(
+                OrderDetailEvent.UpdateOrderStatus(
+                    orderId,
+                    OrderStatus.CONFIRMED
+                )
+            )
+        }
+
+        "Ship" -> {
+            viewModel.handleEvent(
+                OrderDetailEvent.UpdateOrderStatus(
+                    orderId,
+                    OrderStatus.SHIPPED
+                )
+            )
+        }
+
+        "Delivered" -> {
+            viewModel.handleEvent(
+                OrderDetailEvent.UpdateOrderStatus(
+                    orderId,
+                    OrderStatus.DELIVERED
+                )
+            )
+        }
+
+        "Return" -> {
+            viewModel.handleEvent(
+                OrderDetailEvent.UpdateOrderStatus(
+                    orderId,
+                    OrderStatus.RETURNED
+                )
+            )
+        }
+    }
+}
+
+fun getColorByName(name: String): ColorUi {
+    return when (name) {
+        "Create" -> ColorUi.Green
+        "Cancel" -> ColorUi.Red
+        "Confirm" -> ColorUi.Yellow
+        "Ship" -> ColorUi.Blue
+        "Delivered" -> ColorUi.Green
+        "Return" -> ColorUi.Red
+        else -> ColorUi.Gray
+    }
 }
 
 fun updateLocale(context: Context, locale: Locale) {
