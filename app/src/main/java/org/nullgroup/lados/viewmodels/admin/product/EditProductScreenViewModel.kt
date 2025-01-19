@@ -63,24 +63,6 @@ class EditProductScreenViewModel @Inject constructor(
     private val _categories = MutableStateFlow<List<Category>>(listOf())
     val categories: MutableStateFlow<List<Category>> get() = _categories
 
-     fun clearProductZombie(){
-        viewModelScope.launch {
-            _productZombie.value = ProductRemoteModel()
-        }
-    }
-
-    fun clearProductVariants(){
-        viewModelScope.launch {
-            productVariants.value = listOf()
-        }
-    }
-
-    fun setFirstTimeLoadData(value: Boolean){
-        viewModelScope.launch {
-            isFirstTimeLoadData = value
-        }
-    }
-
     fun loadProduct(productId: String){
         productUiState.value = EditProductUiState.Loading
         viewModelScope.launch {
@@ -149,6 +131,7 @@ class EditProductScreenViewModel @Inject constructor(
             _productZombie.value = ProductRemoteModel()
             productVariants.value = listOf()
             isFirstTimeLoadData = false
+            _updateSuccess.value = false
             productUiState.value = EditProductUiState.Loading
         }
     }

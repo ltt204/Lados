@@ -6,7 +6,6 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -34,6 +33,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.Comment
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Search
@@ -52,7 +52,6 @@ import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -89,7 +88,6 @@ import coil.request.ImageRequest
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.nullgroup.lados.R
-import org.nullgroup.lados.compose.cart.ConfirmDialog
 import org.nullgroup.lados.compose.common.LoadOnProgress
 import org.nullgroup.lados.data.models.Product
 import org.nullgroup.lados.screens.Screen
@@ -325,11 +323,10 @@ fun ManageProductScreen(
                                 }
                             },
                             onCheckClick = {
-                                if (selectedProducts.contains(it)) {
-                                    selectedProducts =
-                                        selectedProducts.filter { product -> product != it }
+                                selectedProducts = if (selectedProducts.contains(it)) {
+                                    selectedProducts.filter { product -> product != it }
                                 } else {
-                                    selectedProducts = selectedProducts + it
+                                    selectedProducts + it
                                 }
                                 Log.d("Seleclted PROducr", selectedProducts.toString())
                             }
@@ -874,7 +871,7 @@ fun ProductItem(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
-                            imageVector = Icons.Outlined.Comment,
+                            imageVector = Icons.AutoMirrored.Outlined.Comment,
                             contentDescription = "Comments",
                             modifier = Modifier.size(16.dp),
                             tint = LadosTheme.colorScheme.onBackground

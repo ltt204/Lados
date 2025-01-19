@@ -76,6 +76,7 @@ fun EditProductScreen(
     }
 
     LaunchedEffect(updateSuccess){
+        Log.d("UpdateSuccess", updateSuccess.toString())
         if(updateSuccess){
             viewModel.handleUpdateSuccess()
             navController.navigateUp()
@@ -83,7 +84,7 @@ fun EditProductScreen(
     }
 
     BackHandler {
-       viewModel.handleUpdateSuccess()
+        viewModel.handleUpdateSuccess()
         navController.navigateUp()
     }
 

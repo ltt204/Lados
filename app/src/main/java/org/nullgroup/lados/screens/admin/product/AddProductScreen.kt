@@ -1,6 +1,7 @@
 package org.nullgroup.lados.screens.admin.product
 
 import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -129,10 +130,14 @@ fun AddProductScreen(
 
     LaunchedEffect(key1 = productUiState) {
         if (productUiState is ProductUiState.Success) {
-            viewModel.clearProductVariants()
-            viewModel.clearProductZombie()
+            viewModel.handleAddSuccess()
             navController.navigateUp()
         }
+    }
+
+    BackHandler {
+        viewModel.handleAddSuccess()
+        navController.navigateUp()
     }
 
     Scaffold(
