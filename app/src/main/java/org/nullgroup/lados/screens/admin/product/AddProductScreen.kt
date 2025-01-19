@@ -70,13 +70,14 @@ import org.nullgroup.lados.viewmodels.admin.product.AddProductScreenViewModel
 fun AddProductScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
-    viewModel: AddProductScreenViewModel = hiltViewModel(),
+    viewModel: AddProductScreenViewModel,
     paddingValues: PaddingValues = PaddingValues(0.dp)
 ) {
 
     val scrollState = rememberScrollState()
     val currentProductId = viewModel.currentProductId.collectAsState()
     val productVariants = viewModel.productVariants.collectAsState()
+    Log.d("AddProductScreen", "Current Product variants: ${productVariants.value.size}")
 
     var name by rememberSaveable {
         mutableStateOf(
@@ -104,13 +105,28 @@ fun AddProductScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .padding(16.dp)
                     .background(LadosTheme.colorScheme.background),
-                horizontalArrangement = Arrangement.Center
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 Button(
+                    modifier = Modifier.weight(1f).height(48.dp),
+                    onClick = { navController.navigateUp() },
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = LadosTheme.colorScheme.error,
+                        contentColor = LadosTheme.colorScheme.onError
+                    )
+                ) {
+                    Text(text = "Cancel")
+                }
+
+                Button(
+                    modifier = Modifier.weight(1f).height(48.dp),
                     onClick = {
                         viewModel.onAddProductButtonClick()
-                    }, shape = RoundedCornerShape(12.dp), colors = ButtonDefaults.buttonColors(
+                    }, shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(
                         containerColor = LadosTheme.colorScheme.primary,
                         contentColor = LadosTheme.colorScheme.onPrimary
                     )

@@ -88,7 +88,6 @@ import org.nullgroup.lados.viewmodels.admin.product.ratingOptions
 import org.nullgroup.lados.viewmodels.admin.product.sortOptions
 
 
-@Preview
 @Composable
 fun ManageProductScreen(
     modifier: Modifier = Modifier,

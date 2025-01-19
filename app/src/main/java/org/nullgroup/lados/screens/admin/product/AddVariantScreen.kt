@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -54,8 +55,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
@@ -84,7 +83,7 @@ fun AddVariantScreen(
     modifier: Modifier = Modifier,
     onVariantAdded: (AddProductVariant) -> Unit = {},
     productId: String? = null,
-    viewModel: AddProductScreenViewModel = hiltViewModel(),
+    viewModel: AddProductScreenViewModel,
     navController: NavController,
     paddingValues: PaddingValues = PaddingValues(0.dp)
 ) {
@@ -136,14 +135,28 @@ fun AddVariantScreen(
         modifier = Modifier
             .fillMaxSize()
             .padding(top = paddingValues.calculateTopPadding()),
+        containerColor = LadosTheme.colorScheme.background,
         bottomBar = {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .padding(16.dp)
                     .background(LadosTheme.colorScheme.background),
-                horizontalArrangement = Arrangement.Center
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 Button(
+                    modifier = Modifier.weight(1f).height(48.dp),
+                    onClick = { navController.navigateUp() },
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = LadosTheme.colorScheme.error,
+                        contentColor = LadosTheme.colorScheme.onError
+                    )
+                ) {
+                    Text(text = "Cancel")
+                }
+                Button(
+                    modifier = Modifier.weight(1f).height(48.dp),
                     onClick = {
                         variantError = validateVariant(
                             color.colorName["en"] ?: "",
@@ -196,39 +209,29 @@ fun AddVariantScreen(
                     )
                 }
 
-                Button(onClick = { navController.navigateUp() }) {
-                    Text(text = "Cancel")
-                }
             }
         }
     ) { it ->
         val scrollState = rememberScrollState()
-
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .verticalScroll(scrollState)
-                .background(LadosTheme.colorScheme.background)
                 .padding(it)
                 .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
 
             ) {
 
-            Row(
-                modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center
-            ) {
-                VariantImageSection(
-                    imageUri = selectedImageUri?.toString()
-                        ?: "https://firebasestorage.googleapis.com/v0/b/lados-8509b.firebasestorage.app/o/images%2Fproducts%2Fimg_placeholder.jpg?alt=media&token=1f1fed12-8ead-4433-b2a4-c5e1d765290e",
-                    onEditImage = {
-                        imagePickerLauncher.launch(
-                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                        )
-                    }
-                )
-            }
-
+            VariantImageSection(
+                imageUri = selectedImageUri?.toString()
+                    ?: "https://firebasestorage.googleapis.com/v0/b/lados-8509b.firebasestorage.app/o/images%2Fproducts%2Fimg_placeholder.jpg?alt=media&token=1f1fed12-8ead-4433-b2a4-c5e1d765290e",
+                onEditImage = {
+                    imagePickerLauncher.launch(
+                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                    )
+                }
+            )
             if (!variantError.first) {
                 Text(
                     text = variantError.second,
@@ -237,150 +240,147 @@ fun AddVariantScreen(
                 )
             }
 
-            Text(
-                text = "Color",
-                style = LadosTheme.typography.titleSmall,
-                fontWeight = FontWeight.Bold,
-                color = LadosTheme.colorScheme.onBackground,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            DropdownMenuWithTextField(
-                options = colorOptionsList,
-                label = "Choose color",
-                onOptionSelected = {
-                    color = it
-                },
-                displayName = { it.colorName["en"] ?: "" },
-                selectedOption = color
-            )
-
-            Spacer(modifier = Modifier.width(16.dp))
-
-            Text(
-                text = "Size",
-                style = LadosTheme.typography.titleSmall,
-                fontWeight = FontWeight.Bold,
-                color = LadosTheme.colorScheme.onBackground,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            DropdownMenuWithTextField(
-                options = sizeOptionsList,
-                label = "Choose size",
-                onOptionSelected = {
-                    size = it
-                },
-                displayName = { it.sizeName["en"] ?: "" },
-                selectedOption = size
-            )
-
-            Spacer(modifier = Modifier.width(16.dp))
-
-            Text(
-                text = "Quantity",
-                style = LadosTheme.typography.titleSmall,
-                fontWeight = FontWeight.Bold,
-                color = LadosTheme.colorScheme.onBackground,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            CustomTextField(label = "Quantity",
-                text = quantity,
-                onValueChange = {
-                    if (it.matches(Regex("^[0-9]*$"))) {
-                        quantity = it
-                        quantityError = validateQuantity(quantity)
-                    }
-
-                    quantityFocus = true
-
-                },
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Number, imeAction = ImeAction.Done
-                ),
-                keyboardActions = KeyboardActions(
-                    onDone = {
-                        focusManager.clearFocus()
-                        quantityError = validateQuantity(quantity)
-                    }
-                ),
-                isError = !quantityError.first,
+            // Row for color and size dropdown menus
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .onFocusChanged {
-                        if (!quantityFocus) return@onFocusChanged
-                        if (!it.isFocused) quantityError = validateQuantity(quantity)
-                    })
+                    .wrapContentHeight(), horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
 
-            if (!quantityError.first) {
-                Text(
-                    text = quantityError.second,
-                    style = LadosTheme.typography.bodySmall,
-                    color = LadosTheme.colorScheme.error
-                )
+                    Text(
+                        text = "Color",
+                        style = LadosTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = LadosTheme.colorScheme.onBackground,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    DropdownMenuWithTextField(
+                        options = colorOptionsList,
+                        label = "Choose color",
+                        onOptionSelected = {
+                            color = it
+                        },
+                        displayName = { it.colorName["en"] ?: "" },
+                        selectedOption = color
+                    )
+                }
+
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Size",
+                        style = LadosTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = LadosTheme.colorScheme.onBackground,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    DropdownMenuWithTextField(
+                        options = sizeOptionsList,
+                        label = "Choose size",
+                        onOptionSelected = {
+                            size = it
+                        },
+                        displayName = { it.sizeName["en"] ?: "" },
+                        selectedOption = size
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.width(16.dp))
-
-            Text(
-                text = "Price",
-                style = LadosTheme.typography.titleSmall,
-                fontWeight = FontWeight.Bold,
-                color = LadosTheme.colorScheme.onBackground,
-            )
 
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                CustomTextField(label = "Enter price",
-                    text = originalPrice,
-                    onValueChange = {
-                        originalPrice = it
-                        originalPriceFocus = true
-                        originalPriceError = validatePrice(originalPrice, priceOption)
-                    },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Number, imeAction = ImeAction.Done
-                    ),
-                    keyboardActions = KeyboardActions(
-                        onDone = {
-                            focusManager.clearFocus()
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Quantity",
+                        style = LadosTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = LadosTheme.colorScheme.onBackground,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    CustomTextField(label = "Quantity",
+                        text = quantity,
+                        onValueChange = {
+                            if (it.matches(Regex("^[0-9]*$"))) {
+                                quantity = it
+                                quantityError = validateQuantity(quantity)
+                            }
+
+                            quantityFocus = true
+
+                        },
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Number, imeAction = ImeAction.Done
+                        ),
+                        keyboardActions = KeyboardActions(
+                            onDone = {
+                                focusManager.clearFocus()
+                                quantityError = validateQuantity(quantity)
+                            }
+                        ),
+                        isError = !quantityError.first,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .onFocusChanged {
+                                if (!quantityFocus) return@onFocusChanged
+                                if (!it.isFocused) quantityError = validateQuantity(quantity)
+                            })
+                    if (!quantityError.first) {
+                        Text(
+                            text = quantityError.second,
+                            style = LadosTheme.typography.bodySmall,
+                            color = LadosTheme.colorScheme.error
+                        )
+                    }
+                }
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Price (USD only)",
+                        style = LadosTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = LadosTheme.colorScheme.onBackground,
+                    )
+                    CustomTextField(label = "Enter price",
+                        text = originalPrice,
+                        onValueChange = {
+                            originalPrice = it
+                            originalPriceFocus = true
                             originalPriceError = validatePrice(originalPrice, priceOption)
-                        }
-                    ),
-                    isError = !originalPriceError.first,
-                    modifier = Modifier
-                        .weight(1f)
-                        .onFocusChanged {
-                            if (!originalPriceFocus) return@onFocusChanged
-                            if (!it.isFocused) originalPriceError =
-                                validatePrice(originalPrice, priceOption)
-                        })
+                        },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Number, imeAction = ImeAction.Done
+                        ),
+                        keyboardActions = KeyboardActions(
+                            onDone = {
+                                focusManager.clearFocus()
+                                originalPriceError = validatePrice(originalPrice, priceOption)
+                            }
+                        ),
+                        isError = !originalPriceError.first,
+                        modifier = Modifier
+                            .onFocusChanged {
+                                if (!originalPriceFocus) return@onFocusChanged
+                                if (!it.isFocused) originalPriceError =
+                                    validatePrice(originalPrice, priceOption)
+                            })
 
-                Spacer(modifier = Modifier.width(8.dp))
+                    if (!originalPriceError.first) {
+                        Text(
+                            text = originalPriceError.second,
+                            style = LadosTheme.typography.bodySmall,
+                            color = LadosTheme.colorScheme.error
+                        )
+                    }
+                }
 
-                DropdownMenuWithButton(options = listOf("USD", "VND"),
-                    label = "",
-                    onOptionSelected = {
-                        originalPrice = ""
-                        salePrice = ""
-                        priceOption = it
-                    })
             }
-
-            if (!originalPriceError.first) {
-                Text(
-                    text = originalPriceError.second,
-                    style = LadosTheme.typography.bodySmall,
-                    color = LadosTheme.colorScheme.error
-                )
-            }
-
-            Spacer(modifier = Modifier.width(16.dp))
 
             Text(
                 text = "Sale",
@@ -479,17 +479,25 @@ fun AddVariantScreen(
                 Log.d("AddVariantScreen", "Initial")
                 // Initial
             }
+
             is VariantImageUiState.Loading -> {
-                // Loading
+                LoadOnProgress {
+                    CircularProgressIndicator(modifier = Modifier.size(48.dp))
+                    Spacer(modifier = Modifier.padding(top = 16.dp))
+                }
             }
+
             is VariantImageUiState.Success -> {
                 Log.d("AddVariantScreen", "Variant added")
                 submitVariantClicked = false
                 navController.navigateUp()
             }
+
             is VariantImageUiState.Error -> {
                 // Error
             }
+
+            else -> {}
         }
     }
 }
@@ -507,29 +515,33 @@ fun VariantImageSection(
             .padding(bottom = 16.dp),
         contentAlignment = Alignment.Center
     ) {
-
-        SubcomposeAsyncImage(
-            modifier = Modifier
-                .height(200.dp)
-                .clip(RoundedCornerShape(12.dp)),
-            contentScale = ContentScale.Fit,
-            alignment = Alignment.Center,
-            loading = {
-                LoadOnProgress(
-                    modifier = Modifier
-                        .clip(CircleShape)
-                ) {
-                    CircularProgressIndicator(modifier = Modifier.size(48.dp))
-                    Spacer(modifier = Modifier.padding(top = 16.dp))
-                }
-            },
-            model = ImageRequest
-                .Builder(context = LocalContext.current)
-                .data(imageUri)
-                .crossfade(true)
-                .build(),
-            contentDescription = "Variant Image"
-        )
+        Box(
+            modifier = Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.Center
+        ) {
+            SubcomposeAsyncImage(
+                modifier = Modifier
+                    .height(200.dp)
+                    .clip(RoundedCornerShape(12.dp)),
+                contentScale = ContentScale.Fit,
+                alignment = Alignment.Center,
+                loading = {
+                    LoadOnProgress(
+                        modifier = Modifier
+                            .clip(CircleShape)
+                    ) {
+                        CircularProgressIndicator(modifier = Modifier.size(48.dp))
+                        Spacer(modifier = Modifier.padding(top = 16.dp))
+                    }
+                },
+                model = ImageRequest
+                    .Builder(context = LocalContext.current)
+                    .data(imageUri)
+                    .crossfade(true)
+                    .build(),
+                contentDescription = "Variant Image"
+            )
+        }
 
         OutlinedIconButton(
             modifier = Modifier
