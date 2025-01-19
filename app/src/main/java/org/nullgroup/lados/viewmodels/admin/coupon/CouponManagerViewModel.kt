@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -23,8 +24,10 @@ sealed class CouponManagerUiState {
     object Empty : CouponManagerUiState()
     data class Success(
         val data: List<ServerCoupon>,
-        val editingCoupon: ServerCoupon? = null
+        val selectedCoupon: ServerCoupon? = null,
+        val isProcessing: Boolean = false
     ) : CouponManagerUiState()
+
     data class Error(val message: String) : CouponManagerUiState()
 }
 
@@ -33,7 +36,8 @@ class CouponManagerViewModel @Inject constructor(
     firebaseAuth: FirebaseAuth,
     private val couponRepository: CouponRepository
 ) : ViewModel() {
-    private val _couponUiState = MutableStateFlow<CouponManagerUiState>(CouponManagerUiState.Loading)
+    private val _couponUiState =
+        MutableStateFlow<CouponManagerUiState>(CouponManagerUiState.Loading)
     val couponUiState = _couponUiState.asStateFlow()
 
     private val _serverCoupons = MutableStateFlow<List<ServerCoupon>>(emptyList())
@@ -60,29 +64,90 @@ class CouponManagerViewModel @Inject constructor(
         }
     }
 
+    fun handleCouponSelection(coupon: ServerCoupon) {
+        _couponUiState.value = when (val currentState = _couponUiState.value) {
+            is CouponManagerUiState.Success -> {
+                val selectedCoupon = if (currentState.selectedCoupon == coupon) {
+                    null
+                } else {
+                    coupon
+                }
+                currentState.copy(selectedCoupon = selectedCoupon)
+            }
+
+            else -> currentState
+        }
+    }
+
+    suspend fun handleCouponDeletion(
+        onDeleteSuccess: (() -> Unit)? = null,
+        onDeleteFailure: ((Throwable?) -> Unit)? = null
+    ) {
+        val selectedCoupon = (_couponUiState.value as? CouponManagerUiState.Success)?.selectedCoupon
+        if (selectedCoupon != null) {
+            _couponUiState.value = when (val currentState = _couponUiState.value) {
+                is CouponManagerUiState.Success -> {
+                    currentState.copy(
+                        isProcessing = true,
+                    )
+                }
+                else -> currentState
+            }
+            val deleteResult = viewModelScope.async(Dispatchers.IO) {
+                couponRepository.deleteServerCoupon(selectedCoupon.id)
+            }.await()
+
+            if (deleteResult.getOrNull() == true) {
+                _couponUiState.value = when (val currentState = _couponUiState.value) {
+                    is CouponManagerUiState.Success -> {
+                        currentState.copy(
+                            selectedCoupon = null,
+                            isProcessing = false,
+                        )
+                    }
+                    else -> currentState
+                }
+                onDeleteSuccess?.invoke()
+            } else {
+                _couponUiState.value = when (val currentState = _couponUiState.value) {
+                    is CouponManagerUiState.Success -> {
+                        currentState.copy(
+                            isProcessing = false,
+                        )
+                    }
+                    else -> currentState
+                }
+                onDeleteFailure?.invoke(deleteResult.exceptionOrNull())
+            }
+        }
+    }
+
     fun checkCoupon(coupon: ServerCoupon): CouponInfo {
+        val selectedCoupon = (_couponUiState.value as? CouponManagerUiState.Success)?.selectedCoupon
+        val isSelectedState = selectedCoupon?.let { if (it == coupon) ItemState.SELECTED else null }
+
         val currentTimestamp = timestampFromNow()
         if (coupon.startDate > currentTimestamp) {
             return CouponInfo(
-                couponState = ItemState.DISABLED,
+                couponState = isSelectedState ?: ItemState.DISABLED,
                 extraNote = "(Not started yet)"
             )
         } else {
             if (coupon.endDate <= currentTimestamp) {
                 return CouponInfo(
-                    couponState = ItemState.DISABLED,
+                    couponState = isSelectedState ?: ItemState.DISABLED,
                     extraNote = "(Expired)"
                 )
             }
         }
         if (coupon.maximumRedemption != null && coupon.redeemedCount >= coupon.maximumRedemption) {
             return CouponInfo(
-                couponState = ItemState.DISABLED,
+                couponState = isSelectedState ?: ItemState.DISABLED,
                 extraNote = "(Out of stock)"
             )
         }
         return CouponInfo(
-            couponState = ItemState.NORMAL
+            couponState = isSelectedState ?: ItemState.NORMAL
         )
     }
 

@@ -15,9 +15,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonColors
@@ -39,7 +43,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.nullgroup.lados.R
 import org.nullgroup.lados.compose.cart.ConfirmDialog
 import org.nullgroup.lados.compose.cart.DialogInfo
@@ -60,26 +67,63 @@ fun CouponManager(
     innerPadding: PaddingValues = PaddingValues(0.dp),
 ) {
     val couponManagerViewModel = hiltViewModel<CouponManagerViewModel>()
-    
+
     val couponUiState = couponManagerViewModel.couponUiState.collectAsStateWithLifecycle()
     val currentCoupons = (couponUiState.value as? CouponManagerUiState.Success)?.data ?: emptyList()
-    val editingCoupon = (couponUiState.value as? CouponManagerUiState.Success)?.editingCoupon
+    val selectedCoupon = (couponUiState.value as? CouponManagerUiState.Success)?.selectedCoupon
+    val isProcessing = (couponUiState.value as? CouponManagerUiState.Success)?.isProcessing == true
 
     val currentDialogState = remember { mutableStateOf<DialogInfo?>(null) }
     val currentTimeZone = currentHostTimeZoneInString()
-    
+    val scope = couponManagerViewModel.viewModelScope
+
     val onNavigateBack = {
         navController?.popBackStack()
+    }
+
+    val onCouponClicked = { coupon: ServerCoupon ->
+        couponManagerViewModel.handleCouponSelection(coupon)
+    }
+
+    val onEditSelectedCoupon = { coupon: ServerCoupon ->
+
+    }
+
+    val deleteCouponSucceededTitle = stringResource(R.string.coupon_delete_success_title)
+    val deleteCouponSucceededMessage = stringResource(R.string.coupon_delete_success_message)
+    val deleteCouponFailedTitle = stringResource(R.string.coupon_delete_failed_title)
+    val deleteCouponFailedMessage = stringResource(R.string.coupon_delete_failed_message)
+
+    val onRemoveSelectedCoupon = {
+        scope.launch(Dispatchers.IO) {
+            couponManagerViewModel.handleCouponDeletion(
+                onDeleteSuccess = {
+                    currentDialogState.value = DialogInfo(
+                        titleText = deleteCouponSucceededTitle,
+                        messageText = deleteCouponSucceededMessage,
+                        onConfirm = { currentDialogState.value = null }
+                    )
+                },
+                onDeleteFailure = { error ->
+                    currentDialogState.value = DialogInfo(
+                        titleText = deleteCouponFailedTitle,
+                        messageText = deleteCouponFailedMessage + "(${error?.message ?: "Unknown error"})",
+                        onConfirm = { currentDialogState.value = null }
+                    )
+                }
+            )
+        }
+    }
+
+    val onAddNewCoupon = {
+
     }
 
     val couponInfoOf = { coupon: ServerCoupon ->
         couponManagerViewModel.checkCoupon(coupon)
     }
 
-    val onCouponClicked = { coupon: ServerCoupon ->
 
-    }
-    
     val iconButtonColors = IconButtonColors(
         contentColor = LadosTheme.colorScheme.onSecondaryContainer,
         containerColor = LadosTheme.colorScheme.secondaryContainer,
@@ -97,7 +141,7 @@ fun CouponManager(
 
     Scaffold(
         containerColor = LadosTheme.colorScheme.surfaceContainerLowest,
-        modifier = modifier.padding(bottom = innerPadding.calculateBottomPadding()),
+        modifier = modifier.padding(innerPadding),
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
@@ -125,9 +169,61 @@ fun CouponManager(
                         }
                     }
                 },
+                actions = {
+                    IconButton(
+                        onClick = {
+                            if (selectedCoupon != null) {
+                                onEditSelectedCoupon(selectedCoupon)
+                            }
+                        },
+                        content = {
+                            Icon(
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = "Edit this coupon",
+                                tint = iconTintColor,
+                            )
+                        },
+                        enabled = selectedCoupon != null && !isProcessing,
+                        colors = iconButtonColors,
+                    )
+
+
+                    IconButton(
+                        onClick = {
+                            onRemoveSelectedCoupon()
+                        },
+                        content = {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = "Remove this coupon",
+                                tint = iconTintColor,
+                            )
+                        },
+                        enabled = selectedCoupon != null && !isProcessing,
+                        colors = iconButtonColors
+                    )
+                },
                 colors = topAppBarColor,
             )
         },
+        floatingActionButton = {
+            if (selectedCoupon == null && !isProcessing) {
+                FloatingActionButton(
+                    onClick = {
+                        onAddNewCoupon()
+                    },
+                    content = @Composable {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "Add a new coupon",
+                            tint = iconTintColor,
+                        )
+                    },
+                    containerColor = LadosTheme.colorScheme.secondaryContainer,
+                    contentColor = LadosTheme.colorScheme.onSecondaryContainer,
+                )
+            }
+        }
     ) { innerScaffoldPadding ->
         ConfirmDialog(currentDialogState.value)
 
@@ -218,6 +314,7 @@ fun CouponManager(
                                 redeemedCount = coupon.redeemedCount,
                                 maximumRedemption = coupon.maximumRedemption,
                                 autoFetching = coupon.autoFetching,
+                                enabled = !isProcessing,
                                 onItemClicked = { onCouponClicked(coupon) },
                                 extraNote = couponInfo.extraNote,
                                 trailingArea = couponInfo.trailingArea,
@@ -225,6 +322,21 @@ fun CouponManager(
                             )
 
                         }
+                    }
+                }
+
+                if (isProcessing) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(LadosTheme.colorScheme.surfaceContainerLowest),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(
+                            color = LadosTheme.colorScheme.onSurface,
+                            modifier = Modifier
+                                .background(LadosTheme.colorScheme.surfaceContainerLowest)
+                        )
                     }
                 }
             }

@@ -190,4 +190,8 @@
     <string name="coupon_usage_duration_minute">"minute "</string>
     <string name="coupon_redeemed_count_with_max_redeem_desc">%1$s / %2$s</string>
     <string name="coupon_form_usage_duration_time">Usage Duration (time)</string>
+    <string name="coupon_delete_success_title">Delete Coupon Successfully</string>
+    <string name="coupon_delete_failed_title">Delete Coupon Failed</string>
+    <string name="coupon_delete_success_message">The selected coupon has been successfully deleted!</string>
+    <string name="coupon_delete_failed_message">Can\'t delete the selected coupon for some reasons!</string>
 </resources>

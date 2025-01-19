@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.Card
@@ -19,9 +18,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.nullgroup.lados.R
@@ -52,11 +54,13 @@ fun ServerCouponItem(
     val containerColor = when (itemState) {
         ItemState.SELECTED -> LadosTheme.colorScheme.primaryContainer
         ItemState.INVALID -> LadosTheme.colorScheme.errorContainer
+        ItemState.DISABLED -> LadosTheme.colorScheme.secondaryContainer.copy(alpha = 0.38f)
         else -> LadosTheme.colorScheme.secondaryContainer
     }
     val contentColor = when (itemState) {
         ItemState.SELECTED -> LadosTheme.colorScheme.onPrimaryContainer
         ItemState.INVALID -> LadosTheme.colorScheme.onErrorContainer
+        ItemState.DISABLED -> LadosTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.38f)
         else -> LadosTheme.colorScheme.onSecondaryContainer
     }
     val bodySmallTypo = LadosTheme.typography.bodySmall
@@ -79,112 +83,22 @@ fun ServerCouponItem(
         enabled = enabled,
         colors = cardColors,
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .wrapContentHeight()
-                .weight(1f)
                 .padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            Column(
+            // Coupon code, auto-fetching indicator and extra note (or trailing area)
+            Row(
                 modifier = Modifier
-                    .weight(1f)
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = couponCode + if (autoFetching) " \uD83C\uDF10" else "",
                     style = bodyLargeTypo.copy(fontWeight = FontWeight.ExtraBold),
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = stringResource(
-                        R.string.coupon_discount_percentage_desc,
-                        discountPercentage
-                    ),
-                    style = bodyMediumTypo.copy(fontWeight = FontWeight.Bold),
-                )
-                if (minimumOrderAmount != null || maximumDiscount != null) {
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = buildAnnotatedString {
-                            if (minimumOrderAmount != null) {
-                                append(
-                                    stringResource(
-                                        R.string.coupon_minimum_order_amount_desc,
-                                        minimumOrderAmount.toCurrency()
-                                    )
-                                )
-                            }
-                            if (minimumOrderAmount != null && maximumDiscount != null) {
-                                append(", ")
-                            }
-                            if (maximumDiscount != null) {
-                                append(
-                                    stringResource(
-                                        R.string.coupon_maximum_discount_desc,
-                                        maximumDiscount.toCurrency()
-                                    )
-                                )
-                            }
-                        },
-                        style = bodySmallTypo,
-                    )
-                }
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = buildAnnotatedString {
-                        append(
-                            stringResource(
-                                R.string.coupon_start_date_desc,
-                                startDate.toAlternateString()
-                            )
-                        )
-                        append(", ")
-                        append(
-                            stringResource(
-                                R.string.coupon_end_date_desc,
-                                endDate.toAlternateString()
-                            )
-                        )
-                    },
-                    style = bodySmallTypo,
-                )
-            }
-            Spacer(modifier = Modifier.width(4.dp))
-            Column(
-                modifier = Modifier
-                    .wrapContentWidth()
-                    .padding(horizontal = 4.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                if (usageDuration != null) {
-                    val dayPart = usageDuration.inWholeDays
-                    val hourPart = usageDuration.inWholeHours % 24
-                    val minutePart = usageDuration.inWholeMinutes % 60
-                    Text(
-                        text = buildAnnotatedString {
-                            append("\u231B")
-                            if (dayPart > 0) {
-                                append("$dayPart ${stringResource(R.string.coupon_usage_duration_day)}")
-                            }
-                            if (hourPart > 0) {
-                                append("$hourPart ${stringResource(R.string.coupon_usage_duration_hour)}")
-                            }
-                            if (minutePart > 0) {
-                                append("$minutePart ${stringResource(R.string.coupon_usage_duration_minute)}")
-                            }
-                        },
-                        style = bodySmallTypo,
-                    )
-                }
-
-                Text(
-                    text =
-                    stringResource(
-                        R.string.coupon_redeemed_count_with_max_redeem_desc,
-                        redeemedCount,
-                        maximumRedemption ?: "\u221E"
-                    ),
-                    style = bodyLargeTypo.copy(fontWeight = FontWeight.Bold),
                 )
 
                 if (trailingArea != null || extraNote.isNullOrEmpty().not()) {
@@ -200,7 +114,280 @@ fun ServerCouponItem(
                     }
                 }
             }
+
+
+            // 2 columns
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Discount percentage, minimum order amount, maximum discount
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                ) {
+                    Text(
+                        text = stringResource(
+                            R.string.coupon_discount_percentage_desc,
+                            discountPercentage
+                        ),
+                        style = bodyMediumTypo.copy(fontWeight = FontWeight.Bold),
+                    )
+                    if (minimumOrderAmount != null || maximumDiscount != null) {
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = buildAnnotatedString {
+                                if (minimumOrderAmount != null) {
+                                    append(
+                                        stringResource(
+                                            R.string.coupon_minimum_order_amount_desc,
+                                            minimumOrderAmount.toCurrency()
+                                        )
+                                    )
+                                }
+                                if (minimumOrderAmount != null && maximumDiscount != null) {
+                                    append(", ")
+                                }
+                                if (maximumDiscount != null) {
+                                    append(
+                                        stringResource(
+                                            R.string.coupon_maximum_discount_desc,
+                                            maximumDiscount.toCurrency()
+                                        )
+                                    )
+                                }
+                            },
+                            style = bodySmallTypo,
+                        )
+                    }
+                }
+
+                // Redeemed count
+                Column(
+                    modifier = Modifier
+                        .wrapContentWidth()
+                        .padding(horizontal = 4.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalAlignment = Alignment.End,
+                ) {
+                    Text(
+                        text = buildAnnotatedString {
+                            append("\uD83C\uDFF7\uFE0F - ")
+
+                            val errorSpanStyle = SpanStyle(
+                                color = LadosTheme.colorScheme.error,
+                                fontWeight = FontWeight.Bold
+                            )
+                            val isExceeded = redeemedCount > (maximumRedemption ?: Int.MAX_VALUE)
+
+                            if (isExceeded) {
+                                withStyle(errorSpanStyle) {
+                                    append(
+                                        stringResource(
+                                            R.string.coupon_redeemed_count_with_max_redeem_desc,
+                                            redeemedCount,
+                                            maximumRedemption ?: "\u221E"
+                                        )
+                                    )
+                                }
+                            } else {
+                                append(
+                                    stringResource(
+                                        R.string.coupon_redeemed_count_with_max_redeem_desc,
+                                        redeemedCount,
+                                        maximumRedemption ?: "\u221E"
+                                    )
+                                )
+                            }
+                        },
+                        style = bodyLargeTypo.copy(fontWeight = FontWeight.Bold),
+                    )
+                }
+            }
+
+            // Start date, end date
+            Text(
+                text = buildAnnotatedString {
+                    val errorSpanStyle = SpanStyle(
+                        color = LadosTheme.colorScheme.error,
+                        fontWeight = FontWeight.Bold
+                    )
+                    val normalSpanStyle = SpanStyle(
+                        color = LadosTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Bold
+                    )
+
+                    val currentTimeStamp = LocalDateTime.now()
+                    val startDateSpanStyle =
+                        if (startDate > currentTimeStamp) errorSpanStyle else normalSpanStyle
+                    val endDateSpanStyle =
+                        if (endDate <= currentTimeStamp) errorSpanStyle else normalSpanStyle
+
+                    append("\uD83D\uDCC5 ")
+                    withStyle(startDateSpanStyle) {
+                        append(
+                            startDate.toAlternateString()
+                        )
+                    }
+                    append(" → ")
+                    append("\uD83D\uDCC5 ")
+                    withStyle(endDateSpanStyle) {
+                        append(
+                            endDate.toAlternateString()
+                        )
+                    }
+                },
+                style = bodySmallTypo,
+            )
+
+            // Usage duration
+            if (usageDuration != null) {
+                val dayPart = usageDuration.inWholeDays
+                val hourPart = usageDuration.inWholeHours % 24
+                val minutePart = usageDuration.inWholeMinutes % 60
+                Text(
+                    text = buildAnnotatedString {
+                        append("\u231B - ")
+                        if (dayPart > 0) {
+                            append("$dayPart ${stringResource(R.string.coupon_usage_duration_day)}")
+                        }
+                        if (hourPart > 0) {
+                            append("$hourPart ${stringResource(R.string.coupon_usage_duration_hour)}")
+                        }
+                        if (minutePart > 0) {
+                            append("$minutePart ${stringResource(R.string.coupon_usage_duration_minute)}")
+                        }
+                    },
+                    textAlign = TextAlign.Center,
+                    style = bodySmallTypo,
+                )
+            }
         }
+
+//        Row(
+//            modifier = Modifier
+//                .wrapContentHeight()
+//                .weight(1f)
+//                .padding(12.dp),
+//            verticalAlignment = Alignment.CenterVertically
+//        ) {
+//            Column(
+//                modifier = Modifier
+//                    .weight(1f)
+//            ) {
+//                Text(
+//                    text = couponCode + if (autoFetching) " \uD83C\uDF10" else "",
+//                    style = bodyLargeTypo.copy(fontWeight = FontWeight.ExtraBold),
+//                )
+//                Spacer(modifier = Modifier.height(4.dp))
+//                Text(
+//                    text = stringResource(
+//                        R.string.coupon_discount_percentage_desc,
+//                        discountPercentage
+//                    ),
+//                    style = bodyMediumTypo.copy(fontWeight = FontWeight.Bold),
+//                )
+//                if (minimumOrderAmount != null || maximumDiscount != null) {
+//                    Spacer(modifier = Modifier.height(4.dp))
+//                    Text(
+//                        text = buildAnnotatedString {
+//                            if (minimumOrderAmount != null) {
+//                                append(
+//                                    stringResource(
+//                                        R.string.coupon_minimum_order_amount_desc,
+//                                        minimumOrderAmount.toCurrency()
+//                                    )
+//                                )
+//                            }
+//                            if (minimumOrderAmount != null && maximumDiscount != null) {
+//                                append(", ")
+//                            }
+//                            if (maximumDiscount != null) {
+//                                append(
+//                                    stringResource(
+//                                        R.string.coupon_maximum_discount_desc,
+//                                        maximumDiscount.toCurrency()
+//                                    )
+//                                )
+//                            }
+//                        },
+//                        style = bodySmallTypo,
+//                    )
+//                }
+//                Spacer(modifier = Modifier.height(4.dp))
+//                Text(
+//                    text = buildAnnotatedString {
+//                        append(
+//                            stringResource(
+//                                R.string.coupon_start_date_desc,
+//                                startDate.toAlternateString()
+//                            )
+//                        )
+//                        append(", ")
+//                        append(
+//                            stringResource(
+//                                R.string.coupon_end_date_desc,
+//                                endDate.toAlternateString()
+//                            )
+//                        )
+//                    },
+//                    style = bodySmallTypo,
+//                )
+//            }
+//            Spacer(modifier = Modifier.width(4.dp))
+//            Column(
+//                modifier = Modifier
+//                    .wrapContentWidth()
+//                    .padding(horizontal = 4.dp),
+//                verticalArrangement = Arrangement.spacedBy(8.dp)
+//            ) {
+//                if (usageDuration != null) {
+//                    val dayPart = usageDuration.inWholeDays
+//                    val hourPart = usageDuration.inWholeHours % 24
+//                    val minutePart = usageDuration.inWholeMinutes % 60
+//                    Text(
+//                        text = buildAnnotatedString {
+//                            append("\u231B")
+//                            if (dayPart > 0) {
+//                                append("$dayPart ${stringResource(R.string.coupon_usage_duration_day)}")
+//                            }
+//                            if (hourPart > 0) {
+//                                append("$hourPart ${stringResource(R.string.coupon_usage_duration_hour)}")
+//                            }
+//                            if (minutePart > 0) {
+//                                append("$minutePart ${stringResource(R.string.coupon_usage_duration_minute)}")
+//                            }
+//                        },
+//                        style = bodySmallTypo,
+//                    )
+//                }
+//
+//                Text(
+//                    text =
+//                    stringResource(
+//                        R.string.coupon_redeemed_count_with_max_redeem_desc,
+//                        redeemedCount,
+//                        maximumRedemption ?: "\u221E"
+//                    ),
+//                    style = bodyLargeTypo.copy(fontWeight = FontWeight.Bold),
+//                )
+//
+//                if (trailingArea != null || extraNote.isNullOrEmpty().not()) {
+//                    if (trailingArea == null) {
+//                        Text(
+//                            text = extraNote!!,
+//                            modifier = Modifier.padding(vertical = 2.dp),
+//                            overflow = TextOverflow.Visible,
+//                            style = bodySmallTypo.copy(fontWeight = FontWeight.Bold),
+//                        )
+//                    } else {
+//                        trailingArea()
+//                    }
+//                }
+//            }
+//        }
     }
 }
 
