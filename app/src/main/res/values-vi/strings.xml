@@ -120,8 +120,10 @@
     <string name="cancel_order">Hủy đơn</string>
     <string name="return_order">Hoàn trả</string>
     <string name="are_you_sure">Bạn có chắc không?</string>
-    <string name="order_cancel_return_message">Hãy liên hệ với nhân viên cửa hàng để được hỗ trợ.</string>
+    <string name="order_cancel_return_message">Hãy liên hệ với nhân viên cửa hàng kèm với mã hóa đơn để được hỗ trợ.</string>
     <string name="delivery_detail">Chi tiết giao hàng</string>
+    <string name="order_title_with_id">Mã hóa đơn:</string>
+    <string name="order_id_is_copied_message">Mã đơn hàng đã được sao chép</string>
     <string name="wishlist_empty">Danh sách yêu thích của bạn trống</string>
     <string name="wishlist_empty_description">Danh sách yêu thích trống</string>
     <string name="wishlist_back_description">Trở về</string>

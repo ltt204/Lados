@@ -9,6 +9,7 @@
     <string name="address_title">Address</string>
     <string name="edit_address_title">Edit Address</string>
     <string name="add_address_title">Add Address</string>
+    <string name="order_title_with_id">Order Code:</string>
     <string name="order_title">Order</string>
     <string name="order_detail_title">Order detail</string>
     <string name="order_products_title">Order products</string>
@@ -124,6 +125,7 @@
     <string name="are_you_sure">Are you sure?</string>
     <string name="order_cancel_return_message">Please contact store staff for assistance.</string>
     <string name="delivery_detail">Delivery Details</string>
+    <string name="order_id_is_copied_message">Order id is copied to clipboard</string>
     <string name="wishlist_empty">Your wishlist is empty</string>
     <string name="wishlist_empty_description">Empty wishlist</string>
     <string name="wishlist_back_description">Back</string>

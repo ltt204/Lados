@@ -154,6 +154,10 @@ dependencies {
     implementation(libs.androidx.credentials.play.services.auth)
     implementation(libs.androidx.security.crypto)
 
+    // For pager
+    implementation(libs.accompanist.pager)
+    implementation(libs.androidx.foundation)
+
     // For async works when viewmodel is destroyed
     implementation(libs.androidx.work.runtime.ktx)
     // DI for WorkManager
