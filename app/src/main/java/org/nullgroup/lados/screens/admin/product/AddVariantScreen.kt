@@ -99,18 +99,15 @@ fun AddVariantScreen(
     var salePrice by remember { mutableStateOf("") }
     var priceOption by remember { mutableStateOf("USD") }
     var quantity by remember { mutableStateOf("") }
-    var saleAmount by remember { mutableStateOf("") }
 
     var originalPriceError by remember { mutableStateOf(Pair(true, "")) }
     var salePriceError by remember { mutableStateOf(Pair(true, "")) }
     var quantityError by remember { mutableStateOf(Pair(true, "")) }
-    var saleAmountError by remember { mutableStateOf(Pair(true, "")) }
     var variantError by remember { mutableStateOf(Pair(true, "")) }
 
     var originalPriceFocus by remember { mutableStateOf(false) }
     var salePriceFocus by remember { mutableStateOf(false) }
     var quantityFocus by remember { mutableStateOf(false) }
-    var saleAmountFocus by remember { mutableStateOf(false) }
 
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
     var imageByteArray by remember { mutableStateOf<ByteArray?>(null) }
@@ -131,6 +128,8 @@ fun AddVariantScreen(
     }
 
     val focusManager = LocalFocusManager.current
+
+
 
     Scaffold(
         modifier = Modifier
@@ -172,14 +171,12 @@ fun AddVariantScreen(
                         quantityError = validateQuantity(quantity)
                         originalPriceError = validatePrice(originalPrice, priceOption)
                         salePriceError = validateSalePrice(salePrice, priceOption, originalPrice)
-                        saleAmountError = validateSaleAmount(saleAmount, quantity)
 
                         if (
                             variantError.first &&
                             salePriceError.first &&
                             originalPriceError.first &&
-                            quantityError.first &&
-                            saleAmountError.first
+                            quantityError.first
                         ) {
 
                             val variant = ProductVariantRemoteModel(
@@ -188,7 +185,7 @@ fun AddVariantScreen(
                                 size = size,
                                 quantityInStock = quantity.toInt(),
                                 originalPrice = exchangePrice(originalPrice, priceOption),
-                                salePrice =  exchangePrice(salePrice.ifEmpty { "0" }, priceOption),
+                                salePrice =  exchangePrice(salePrice, priceOption),
                                 saleAmount = 0,
                                 images = listOf()
                             )

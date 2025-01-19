@@ -42,16 +42,28 @@ val sizeOptionsList = listOf(
     SizeRemoteModel(sizeName = mapOf("en" to "XXL", "vi" to "XXL"))
 )
 
-fun exchangePrice(price: String, priceOption: String): Map<String, Double> {
-    return if (priceOption == "USD") {
+fun exchangePrice(price: String, priceOption: String): Map<String, Double?> {
+    return if(price.isEmpty()) {
+        mapOf(
+            "en" to null,
+            "vi" to null
+        )
+    }
+    else if (priceOption == "USD") {
         mapOf(
             "en" to price.toDouble(),
             "vi" to price.toDouble() * EXCHANGE_RATE
         )
-    } else {
+    } else if (priceOption == "VND") {
         mapOf(
             "en" to price.toDouble(),
             "vi" to price.toDouble() * EXCHANGE_RATE
+        )
+    }
+    else {
+        mapOf(
+            "en" to null,
+            "vi" to null
         )
     }
 }
@@ -69,6 +81,9 @@ fun validatePrice(price: String, priceOption: String): Pair<Boolean, String> {
 }
 
 fun validateSalePrice(price: String, priceOption: String, ogPrice: String): Pair<Boolean, String > {
+
+    if(price.isEmpty()) return Pair(true, "")
+
     if (priceOption == "USD" && price.isNotEmpty()) {
         return Pair(price.toDoubleOrNull() != null, "Price must be USD format")
     } else if(priceOption == "VND" && price.isNotEmpty()) {
@@ -150,6 +165,9 @@ class AddProductScreenViewModel @Inject constructor(
     private var _currentProductId: MutableStateFlow<String> = MutableStateFlow("")
     val currentProductId: MutableStateFlow<String> get() = _currentProductId
 
+    private val _addSuccess: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val addSuccess: MutableStateFlow<Boolean> get() = _addSuccess
+
     private var _productZombie: MutableStateFlow<ProductRemoteModel> =
         MutableStateFlow(ProductRemoteModel())
     val productZombie: MutableStateFlow<ProductRemoteModel> get() = _productZombie
@@ -188,6 +206,7 @@ class AddProductScreenViewModel @Inject constructor(
 
     fun handleAddSuccess(){
         viewModelScope.launch {
+            _addSuccess.value = false
             _productZombie.value = ProductRemoteModel()
             productVariants.value = listOf()
             productUiState.value = ProductUiState.Loading
@@ -210,6 +229,7 @@ class AddProductScreenViewModel @Inject constructor(
                 val result = productRepository.addProductToFireStore(_productZombie.value)
                 if (result.isSuccess) {
                     productUiState.value = ProductUiState.Success(AddProduct())
+                    _addSuccess.value = true
                 } else {
                     productUiState.value = ProductUiState.Error(result.exceptionOrNull()?.message ?: "An error occurred")
                 }
@@ -244,7 +264,7 @@ class AddProductScreenViewModel @Inject constructor(
 
             productVariants.value += variant
             uploadImageState.value = VariantImageUiState.Success(imageUrl)
-            Log.d("AddProductScreenViewModel", "productVariants: ${_productZombie.value.variants}")
+            Log.d("AddProductScreenViewModel", "productVariants: ${productVariants.value}")
         }
     }
 

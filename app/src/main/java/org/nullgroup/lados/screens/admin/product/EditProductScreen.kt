@@ -412,7 +412,7 @@ fun EditProductScreen(
 
                         TextButton(
                             onClick = {
-                                navController.navigate("add_variant/${currentProduct.id}")
+                                navController.navigate("add_edit_variant/${currentProduct.id}")
                             }
 
                         ) {

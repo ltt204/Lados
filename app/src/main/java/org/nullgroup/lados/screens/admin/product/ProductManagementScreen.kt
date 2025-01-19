@@ -271,6 +271,7 @@ fun ManageProductScreen(
                             Text(
                                 text = "Filter",
                                 fontWeight = FontWeight.Bold,
+                                color = Color.White,
                                 modifier = Modifier.padding(5.dp)
                             )
                         }
@@ -811,7 +812,7 @@ fun ProductItem(
                             text = "$salePrice",
                             style = LadosTheme.typography.bodySmall.copy(
                                 fontWeight = FontWeight.Bold,
-                                color = LadosTheme.colorScheme.onPrimary
+                                color = LadosTheme.colorScheme.outline
                             ),
                             textDecoration = TextDecoration.LineThrough
                         )

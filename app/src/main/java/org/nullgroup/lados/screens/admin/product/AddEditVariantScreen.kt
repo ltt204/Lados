@@ -173,7 +173,7 @@ fun AddEditVariantScreen(
                                 size = size,
                                 quantityInStock = if(quantity.isEmpty()) 0 else quantity.toInt(),
                                 originalPrice = exchangePrice(originalPrice, priceOption),
-                                salePrice =  exchangePrice(salePrice.ifEmpty { "0" }, priceOption),
+                                salePrice =  exchangePrice(salePrice, priceOption),
                                 saleAmount = 0,
                                 images = listOf()
                             )

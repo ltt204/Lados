@@ -234,7 +234,7 @@ sealed class Screen(
         data object AddEditVariantScreen :
             Admin("Add Edit Variant", "add_edit_variant", Icons.Default.AccountCircle) {
             const val ID_ARG = "product_id"
-            const val ROUTE_WITH_ARG = "add_variant/{$ID_ARG}"
+            const val ROUTE_WITH_ARG = "add_edit_variant/{$ID_ARG}"
         }
 
         data object PromotionManagement :

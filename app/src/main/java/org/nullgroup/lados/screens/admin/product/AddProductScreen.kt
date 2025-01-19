@@ -86,10 +86,19 @@ fun AddProductScreen(
 
     val scrollState = rememberScrollState()
     val currentProductId = viewModel.currentProductId.collectAsState()
-    val productVariants = viewModel.productVariants.collectAsState()
-    Log.d("AddProductScreen", "Current Product variants: ${productVariants.value.size}")
+    val productVariants by viewModel.productVariants.collectAsState()
     val productUiState = viewModel.productUiState.value
     val categories by viewModel.categories.collectAsState()
+
+    Log.d("Variants in product screen", "here my Variants: $productVariants")
+
+    var variants by remember {
+        mutableStateOf(emptyList<ProductVariantRemoteModel>())
+    }
+
+    LaunchedEffect(productVariants) {
+        variants = productVariants
+    }
 
     LaunchedEffect(key1 = Unit) {
         viewModel.getCategories()
@@ -127,9 +136,10 @@ fun AddProductScreen(
     var viDescriptionFocus by remember { mutableStateOf(false) }
     var enDescriptionFocus by remember { mutableStateOf(false) }
 
+    val addSuccess by viewModel.addSuccess.collectAsState()
 
-    LaunchedEffect(key1 = productUiState) {
-        if (productUiState is ProductUiState.Success) {
+    LaunchedEffect(key1 = addSuccess) {
+        if (addSuccess) {
             viewModel.handleAddSuccess()
             navController.navigateUp()
         }
@@ -176,7 +186,7 @@ fun AddProductScreen(
                         enNameError = validateEmpty(name["en"] ?: "")
                         viDescriptionError = validateEmpty(description["vi"] ?: "")
                         enDescriptionError = validateEmpty(description["en"] ?: "")
-                        variantError = validateVariants(productVariants.value)
+                        variantError = validateVariants(productVariants)
                         categoryError = validateEmpty(selectedCategory.categoryName)
 
                         if (
@@ -439,7 +449,7 @@ fun AddProductScreen(
             }
 
             VariantsSection(
-                productVariants.value,
+                variants,
                 navController = navController
             )
         }
