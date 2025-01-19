@@ -368,12 +368,13 @@ fun DrawFilterScreenContent(
             ),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        DrawProductInCategoryScreenContent(
-            navController = navController,
-            textStyle = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.SemiBold),
-            paddingValues = PaddingValues(horizontal = 8.dp),
-            onButtonClick = {},
-        )
+//        DrawProductInCategoryScreenContent(
+//            navController = navController,
+//            textStyle = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.SemiBold),
+//            paddingValues = PaddingValues(horizontal = 8.dp),
+//            onButtonClick = {},
+//            isSelected = null,
+//        )
         //FilterMenuSelection(title = "Test", options = listOf("Option 1", "Option 2", "Option 3"), onSelectionChanged = {})
     }
 }
