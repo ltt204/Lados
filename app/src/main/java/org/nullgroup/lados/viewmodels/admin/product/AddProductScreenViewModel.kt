@@ -43,13 +43,12 @@ val sizeOptionsList = listOf(
 )
 
 fun exchangePrice(price: String, priceOption: String): Map<String, Double?> {
-    return if(price.isEmpty()) {
+    return if (price.isEmpty()) {
         mapOf(
             "en" to null,
             "vi" to null
         )
-    }
-    else if (priceOption == "USD") {
+    } else if (priceOption == "USD") {
         mapOf(
             "en" to price.toDouble(),
             "vi" to price.toDouble() * EXCHANGE_RATE
@@ -59,8 +58,7 @@ fun exchangePrice(price: String, priceOption: String): Map<String, Double?> {
             "en" to price.toDouble(),
             "vi" to price.toDouble() * EXCHANGE_RATE
         )
-    }
-    else {
+    } else {
         mapOf(
             "en" to null,
             "vi" to null
@@ -80,20 +78,20 @@ fun validatePrice(price: String, priceOption: String): Pair<Boolean, String> {
     return Pair(true, "")
 }
 
-fun validateSalePrice(price: String, priceOption: String, ogPrice: String): Pair<Boolean, String > {
+fun validateSalePrice(price: String, priceOption: String, ogPrice: String): Pair<Boolean, String> {
 
-    if(price.isEmpty()) return Pair(true, "")
+    if (price.isEmpty()) return Pair(true, "")
 
     if (priceOption == "USD" && price.isNotEmpty()) {
         return Pair(price.toDoubleOrNull() != null, "Price must be USD format")
-    } else if(priceOption == "VND" && price.isNotEmpty()) {
+    } else if (priceOption == "VND" && price.isNotEmpty()) {
         if (price.toIntOrNull() == null) return Pair(false, "Price must be VND format")
     }
 
     val priceDouble = price.toDoubleOrNull()
     val ogPriceDouble = ogPrice.toDoubleOrNull()
 
-    if(priceDouble != null && ogPriceDouble != null && priceDouble > ogPriceDouble){
+    if (priceDouble != null && ogPriceDouble != null && priceDouble > ogPriceDouble) {
         return Pair(false, "Sale price must be less than original price")
     }
 
@@ -113,11 +111,11 @@ fun validateSaleAmount(saleAmount: String, quantity: String): Pair<Boolean, Stri
         saleAmount.toIntOrNull() != null &&
         quantity.toIntOrNull() == null &&
         saleAmount.toInt() > quantity.toInt()
-        )
-        return Pair(
-        false,
-        "Sale amount must be less than quantity"
     )
+        return Pair(
+            false,
+            "Sale amount must be less than quantity"
+        )
 
     return Pair(true, "")
 }
@@ -142,11 +140,10 @@ fun validateEmpty(s: String): Pair<Boolean, String> {
     return Pair(true, "")
 }
 
-fun validateVariants(variants: List<ProductVariantRemoteModel>): Pair<Boolean, String>{
+fun validateVariants(variants: List<ProductVariantRemoteModel>): Pair<Boolean, String> {
     if (variants.isEmpty()) return Pair(false, "You must add at least one variant")
     return Pair(true, "")
 }
-
 
 
 @HiltViewModel
@@ -204,7 +201,7 @@ class AddProductScreenViewModel @Inject constructor(
         }
     }
 
-    fun handleAddSuccess(){
+    fun handleAddSuccess() {
         viewModelScope.launch {
             _addSuccess.value = false
             _productZombie.value = ProductRemoteModel()
@@ -231,7 +228,9 @@ class AddProductScreenViewModel @Inject constructor(
                     productUiState.value = ProductUiState.Success(AddProduct())
                     _addSuccess.value = true
                 } else {
-                    productUiState.value = ProductUiState.Error(result.exceptionOrNull()?.message ?: "An error occurred")
+                    productUiState.value = ProductUiState.Error(
+                        result.exceptionOrNull()?.message ?: "An error occurred"
+                    )
                 }
             } catch (e: Exception) {
                 productUiState.value = ProductUiState.Error(e.message ?: "An error occurred")
@@ -264,6 +263,66 @@ class AddProductScreenViewModel @Inject constructor(
 
             productVariants.value += variant
             uploadImageState.value = VariantImageUiState.Success(imageUrl)
+            Log.d("AddProductScreenViewModel", "productVariants: ${productVariants.value}")
+        }
+    }
+
+    fun onDeleteVariant(variantIndex: Int) {
+        viewModelScope.launch {
+            productVariants.value =
+                productVariants.value.filterIndexed { index, _ -> index != variantIndex }
+        }
+    }
+
+    fun onUpdateVariant(
+        index: Int,
+        variant: ProductVariantRemoteModel,
+        withImageByteArray: ByteArray
+    ) {
+        viewModelScope.launch {
+
+            Log.d(
+                "AddProductScreenViewModel",
+                "variant: $variant"
+            )
+
+            if (variant.images.isNotEmpty()) {
+                val imageName = variant.images.first().fileName
+
+                uploadImageState.value = VariantImageUiState.Loading
+                imageRepository.deleteImage(
+                    child = "products",
+                    fileName = imageName,
+                    extension = "png"
+                )
+
+                val imageUrl = imageRepository.uploadImage(
+                    child = "products",
+                    fileName = imageName,
+                    extension = "png",
+                    image = withImageByteArray
+                ).getOrNull() ?: throw Exception("Image upload failed")
+
+
+                Log.d("UpdateProductScreenViewModel", "imageUrl: $imageUrl")
+                variant.images = listOf(
+                    Image(
+                        productVariantId = imageName,
+                        link = imageUrl,
+                        fileName = imageName,
+                    )
+                )
+            }
+
+            val updatedList = productVariants.value.toMutableList()
+            if (index in updatedList.indices) {
+                updatedList[index] = variant
+                productVariants.value = updatedList
+            } else {
+                Log.e("Update Error", "Index $index out of bounds for productVariants")
+            }
+
+            uploadImageState.value = VariantImageUiState.Success("")
             Log.d("AddProductScreenViewModel", "productVariants: ${productVariants.value}")
         }
     }

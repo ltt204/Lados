@@ -114,17 +114,6 @@ class EditProductScreenViewModel @Inject constructor(
 
                 val result = productRepository.updateProductInFireStore(_productZombie.value)
 
-                if(imageListDelete.isNotEmpty()){
-                    imageListDelete.forEach{
-                        imageRepository.deleteImage(
-                            child = "products",
-                            fileName = it,
-                            extension = "png",
-                        )
-                    }
-                }
-                imageListDelete.clear()
-
                 if (result.isSuccess) {
                     productUiState.value = EditProductUiState.Success(ProductRemoteModel())
                     _updateSuccess.value = true
@@ -184,11 +173,8 @@ class EditProductScreenViewModel @Inject constructor(
         viewModelScope.launch {
             imageListDelete.add(variantId)
             productVariants.value = productVariants.value.filter { it.id != variantId }
-
             _productZombie.value = _productZombie.value.copy(variants = productVariants.value)
-
             uploadImageState.value = VariantImageUiState.Success("")
-
         }
     }
 

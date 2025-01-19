@@ -48,6 +48,7 @@ import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.screens.admin.product.AddEditVariantScreen
 import org.nullgroup.lados.screens.admin.product.AddProductScreen
 import org.nullgroup.lados.screens.admin.product.AddVariantScreen
+import org.nullgroup.lados.screens.admin.product.EditAddVariantScreen
 import org.nullgroup.lados.screens.admin.product.EditProductScreen
 import org.nullgroup.lados.screens.admin.product.EditVariantScreen
 import org.nullgroup.lados.screens.admin.product.ManageProductScreen
@@ -234,6 +235,30 @@ fun AdminGraph(
                 }
 
                 composable(
+                    route = Screen.Admin.EditAddVariantScreen.ROUTE_WITH_ARG,
+                    arguments = listOf(
+                        navArgument(Screen.Admin.EditAddVariantScreen.VARIANT_ID_ARG)
+                        { type = NavType.StringType }
+                    )) {
+                    val variantId =
+                        it.arguments?.getString(Screen.Admin.EditAddVariantScreen.VARIANT_ID_ARG)
+
+                    if (variantId != null) {
+                        EditAddVariantScreen(
+                            modifier = Modifier,
+                            variantId = variantId.toInt(),
+                            navController = navController,
+                            paddingValues = innerPadding,
+                            viewModel = addProductViewModel
+                        )
+                    }
+
+                }
+
+
+
+
+                composable(
                     route = Screen.Admin.EditProduct.ROUTE_WITH_ARG,
                     arguments = listOf(
                         navArgument(Screen.Admin.EditProduct.ID_ARG)
@@ -279,9 +304,10 @@ fun AdminGraph(
                         navArgument(Screen.Admin.AddEditVariantScreen.ID_ARG)
                         { type = NavType.StringType }
                     )) {
-                    val productId = it.arguments?.getString(Screen.Admin.AddEditVariantScreen.ID_ARG)
+                    val productId =
+                        it.arguments?.getString(Screen.Admin.AddEditVariantScreen.ID_ARG)
 
-                    if(productId != null) {
+                    if (productId != null) {
                         AddEditVariantScreen(
                             modifier = Modifier,
                             paddingValues = innerPadding,

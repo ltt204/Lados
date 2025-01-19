@@ -66,6 +66,7 @@ import androidx.navigation.NavController
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import org.nullgroup.lados.compose.common.LoadOnProgress
+import org.nullgroup.lados.compose.profile.ConfirmDialog
 import org.nullgroup.lados.compose.signin.CustomTextField
 import org.nullgroup.lados.data.models.Category
 import org.nullgroup.lados.data.remote.models.ProductVariantRemoteModel
@@ -137,6 +138,9 @@ fun AddProductScreen(
     var enDescriptionFocus by remember { mutableStateOf(false) }
 
     val addSuccess by viewModel.addSuccess.collectAsState()
+
+    var confirmDeleteDialog by remember { mutableStateOf(false) }
+    var selectedVariant by remember { mutableStateOf("") }
 
     LaunchedEffect(key1 = addSuccess) {
         if (addSuccess) {
@@ -450,12 +454,27 @@ fun AddProductScreen(
 
             VariantsSection(
                 variants,
+                onDelete = {
+                    confirmDeleteDialog = true
+                    selectedVariant = it
+                },
                 navController = navController
             )
         }
     }
-}
 
+    if(confirmDeleteDialog){
+        ConfirmDialog(
+            title = { Text(text = "Delete this variant?") },
+            message = { Text(text = "Are you sure you want to delete this variant?") },
+            onDismissRequest = { confirmDeleteDialog= false },
+            confirmButton = {
+                viewModel.onDeleteVariant(selectedVariant.toInt())
+                confirmDeleteDialog = false
+            }
+        )
+    }
+}
 
 @Composable
 fun VariantsSection(
@@ -467,21 +486,28 @@ fun VariantsSection(
 ) {
     Log.d("Variants", "Variants: $variants")
     LazyColumn(
-        modifier = modifier.height(200.dp),
+        modifier = modifier.height(500.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     )
     {
-        items(variants.size) { it ->
-            val variant = variants[it]
+        items(variants.size) { index ->
+            val variant = variants[index]
             VariantItem(
                 variant = variant,
                 onVariantClick = {
                     if(isEditable){
                         navController.navigate("edit_variant/${variant.productId}/${variant.id}")
+                    } else{
+                        navController.navigate("edit_add_variant/${index}")
                     }
                 },
                 onDelete = {
-                   onDelete(variant.id)
+                    if(isEditable){
+                        onDelete(variant.id)
+                    } else {
+                        onDelete(index.toString())
+                    }
+
                 }
             )
         }
@@ -533,7 +559,7 @@ fun VariantItem(
                 },
                 model = ImageRequest
                     .Builder(context = LocalContext.current)
-                    .data(variant.images.first().link)
+                    .data(if(variant.images.isNotEmpty()) variant.images.first().link else "")
                     .crossfade(true)
                     .build(),
                 contentDescription = "Variant Image"
