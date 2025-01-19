@@ -8,6 +8,7 @@ data class ChatRoom(
     val customerId: String = "",
     var lastMessage: String = "",
     var lastMessageTime: Long = System.currentTimeMillis(),
+    val lastMessageSendBy: String = "",
     val unreadCount: Int = 0,
 ) {
     fun toMap(): Map<String, Any?> {

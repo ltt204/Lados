@@ -1,6 +1,7 @@
 package org.nullgroup.lados.screens.staff.ordermanagement
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -97,22 +98,24 @@ fun OrderDetailScreen(
                     .fillMaxWidth()
                     .padding(LadosTheme.size.small)
             ) {
-                actionForBottomButton.forEach { action ->
-                    action.first?.let {
-                        if (it.isNotEmpty()) {
-                            TextButton(modifier = Modifier
-                                .heightIn(min = 64.dp),
-                                onClick = {
-                                    currentAction = it
-                                    isConfirmedToCancelOrReturn = true
-                                }) {
-                                Text(
-                                    textAlign = TextAlign.Center,
-                                    text = it,
-                                    color = getColorByName(it),
-                                    fontSize = 16.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                )
+                if (actionForBottomButton.isNotEmpty()) {
+                    actionForBottomButton.forEach { action ->
+                        action.first?.let {
+                            if (it.isNotEmpty()) {
+                                TextButton(modifier = Modifier
+                                    .heightIn(min = 64.dp),
+                                    onClick = {
+                                        currentAction = it
+                                        isConfirmedToCancelOrReturn = true
+                                    }) {
+                                    Text(
+                                        textAlign = TextAlign.Center,
+                                        text = it,
+                                        color = getColorByName(it),
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                    )
+                                }
                             }
                         }
                     }
@@ -133,6 +136,7 @@ fun OrderDetailScreen(
 
             is OrderDetailState.Success -> {
                 val currentOrder = (uiState as OrderDetailState.Success).order
+                Log.d("Staff:OrderDetailScreen", "Current Order: $currentOrder")
                 actionForBottomButton =
                     getStatusByName(currentOrder.currentStatus).getActionsForButtonOfOrder(context)
                 Column(

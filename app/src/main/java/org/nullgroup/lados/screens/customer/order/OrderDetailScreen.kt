@@ -6,7 +6,6 @@ import android.content.Context
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -28,7 +27,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -61,7 +59,7 @@ import org.nullgroup.lados.ui.theme.Typography
 import org.nullgroup.lados.utilities.OrderStatus
 import org.nullgroup.lados.utilities.getActionForButtonOfOrder
 import org.nullgroup.lados.utilities.getByLocale
-import org.nullgroup.lados.utilities.getFirstFourOrderStatuses
+import org.nullgroup.lados.utilities.getOrderStatusesForCustomer
 import org.nullgroup.lados.utilities.getStatusByName
 import org.nullgroup.lados.utilities.toCurrency
 import org.nullgroup.lados.utilities.toDateTimeString
@@ -137,12 +135,8 @@ fun OrderDetailScreen(
             is OrderDetailState.Success -> {
                 val currentOrder = (uiState.value as OrderDetailState.Success).currentOrder
                 actionForBottomButton =
-                    getStatusByName(currentOrder.orderStatusLog.keys.last())
+                    getStatusByName(currentOrder.orderStatusLog.entries.maxBy { it.value }.key)
                         .getActionForButtonOfOrder(context)
-                Log.d(
-                    "OrderDetailScreen",
-                    "actionForBottomButton.first(): ${actionForBottomButton.first}"
-                )
                 Column(
                     modifier = Modifier.padding(
                         start = LadosTheme.size.medium,
@@ -150,36 +144,49 @@ fun OrderDetailScreen(
                         top = innerPadding.calculateTopPadding()
                     )
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .wrapContentHeight(),
-                        verticalAlignment = Alignment.CenterVertically,
+                    Column(
+                        modifier = Modifier.padding(top = LadosTheme.size.medium),
                     ) {
                         Text(
                             text = stringResource(
-                                id = R.string.order_title_with_id,
-                                viewModel.orderId.take(8)
+                                id = R.string.order_title_with_id
                             ),
-                            style = Typography.bodyLarge
+                            style = Typography.titleLarge
                                 .copy(
-                                    color = LadosTheme.colorScheme.onBackground
+                                    color = LadosTheme.colorScheme.onBackground,
+                                    fontSize = 18.sp
                                 ),
                             fontWeight = FontWeight.SemiBold,
                         )
-                        IconButton(onClick = {
-                            val text = viewModel.orderId.take(8)
-                            val clipData = ClipData.newPlainText("text", text)
-                            clipboardManager.setPrimaryClip(clipData)
-                            Toast.makeText(
-                                context,
-                                context.getString(R.string.order_id_is_copied_message),
-                                Toast.LENGTH_LONG
-                            ).show()
-                        }) {
-                            Icon(
-                                imageVector = Icons.Default.CopyAll,
-                                contentDescription = "Copy order id"
+                        Row(
+                            modifier = Modifier
+                                .wrapContentHeight(),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                text = viewModel.orderId,
+                                style = Typography.bodyLarge
+                                    .copy(
+                                        color = LadosTheme.colorScheme.onBackground
+                                    ),
+                                fontWeight = FontWeight.SemiBold,
                             )
+
+                            IconButton(onClick = {
+                                val text = viewModel.orderId
+                                val clipData = ClipData.newPlainText("text", text)
+                                clipboardManager.setPrimaryClip(clipData)
+                                Toast.makeText(
+                                    context,
+                                    context.getString(R.string.order_id_is_copied_message),
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Default.CopyAll,
+                                    contentDescription = "Copy order id"
+                                )
+                            }
                         }
                     }
                     OrderStatusArea(
@@ -191,7 +198,7 @@ fun OrderDetailScreen(
                             ),
                         currentOrder = currentOrder
                     )
-                    Spacer(modifier = Modifier.padding(top = 24.dp))
+                    Spacer(modifier = Modifier.padding(top = LadosTheme.size.medium))
                     Column {
                         Text(
                             text = stringResource(R.string.order_items),
@@ -211,7 +218,7 @@ fun OrderDetailScreen(
                             }
                         )
                     }
-                    Spacer(modifier = Modifier.padding(LadosTheme.size.large))
+                    Spacer(modifier = Modifier.padding(LadosTheme.size.medium))
                     Column {
                         Text(
                             text = stringResource(R.string.delivery_detail),
@@ -259,7 +266,7 @@ fun OrderDetailScreen(
 fun OrderStatusArea(
     modifier: Modifier = Modifier,
     currentOrder: Order,
-    statuses: List<OrderStatus> = getFirstFourOrderStatuses(),
+    statuses: List<OrderStatus> = getOrderStatusesForCustomer(),
 ) {
     LazyColumn(modifier = modifier) {
         itemsIndexed(statuses) { _, status ->

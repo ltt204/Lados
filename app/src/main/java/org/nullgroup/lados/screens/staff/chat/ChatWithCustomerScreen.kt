@@ -6,20 +6,24 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Image
-import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -55,6 +59,7 @@ import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.screens.customer.chat.MessageItem
 import org.nullgroup.lados.screens.customer.profile.LoadingContent
 import org.nullgroup.lados.ui.theme.LadosTheme
+import org.nullgroup.lados.utilities.getMessageTimeGapBetweenTwoMessagesDisplayment
 import org.nullgroup.lados.viewmodels.customer.chat.ChatViewModel
 import org.nullgroup.lados.viewmodels.customer.chat.events.ChatScreenEvent
 import org.nullgroup.lados.viewmodels.customer.chat.states.ChatUiState
@@ -168,17 +173,31 @@ fun ChatWithCustomerScreen(
                         .fillMaxSize()
                 ) {
 
-                    val messages = (uiState as MessageUiState.Success).messages
+                    val messages = (uiState as MessageUiState.Success).messages.reversed()
                     LazyColumn(
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxWidth(),
                         reverseLayout = true,
                     ) {
-                        items(items = messages.reversed(), key = { it.id }) { message ->
-                            Log.d("ChatWithCustomerScreen", "Sender: ${message.senderId} \n current: ${staffChatViewModel.currentStaff.id}")
+                        itemsIndexed(items = messages) { index, message ->
+                            val previousMessage = if (index == 0) message else messages[index - 1]
+                            Box(
+                                modifier = Modifier.fillMaxWidth(),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                Text(
+                                    text = message.timestamp.getMessageTimeGapBetweenTwoMessagesDisplayment(
+                                        previousMessage.timestamp
+                                    ),
+                                    modifier = Modifier.padding(top = 8.dp),
+                                    style = LadosTheme.typography.bodySmall,
+                                    color = LadosTheme.colorScheme.onBackground,
+                                )
+                            }
                             MessageItem(
                                 message = message,
+                                userAvatar = staffChatViewModel.chatWith.second,
                                 isFromCurrentUser = message.senderId == staffChatViewModel.currentStaff.id,
                                 onProductClick = { productId ->
                                     navController.navigate("${Screen.Customer.ProductDetailScreen.route}/$productId")
@@ -197,7 +216,6 @@ fun ChatWithCustomerScreen(
                             onClick = {
                                 launcher.launch("image/*")
                             },
-                            enabled = uiState !is MessageUiState.Loading
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Image,
@@ -207,10 +225,13 @@ fun ChatWithCustomerScreen(
                         }
 
                         CustomTextField(
+                            modifier = Modifier
+                                .height(48.dp)
+                                .weight(1f),
                             text = messageText,
                             onValueChange = { messageText = it },
-                            modifier = Modifier.weight(1f),
                             label = "Type a message...",
+                            shape = RoundedCornerShape(24.dp)
                         )
 
                         IconButton(
@@ -220,10 +241,10 @@ fun ChatWithCustomerScreen(
                                     messageText = ""
                                 }
                             },
-                            enabled = uiState !is MessageUiState.Loading && messageText.isNotEmpty()
+                            enabled = messageText.isNotEmpty()
                         ) {
                             Icon(
-                                imageVector = Icons.Default.Send,
+                                imageVector = Icons.AutoMirrored.Filled.Send,
                                 contentDescription = "Send message",
                                 tint = LadosTheme.colorScheme.primary,
                             )

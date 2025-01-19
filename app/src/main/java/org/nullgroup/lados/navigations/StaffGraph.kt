@@ -50,6 +50,7 @@ import org.nullgroup.lados.screens.customer.order.OrderProductsViewScreen
 import org.nullgroup.lados.screens.customer.product.ProductDetailScreen
 import org.nullgroup.lados.screens.staff.chat.ChatScreen
 import org.nullgroup.lados.screens.staff.chat.ChatWithCustomerScreen
+import org.nullgroup.lados.screens.staff.chat.SearchScreen
 import org.nullgroup.lados.screens.staff.ordermanagement.OrderDetailScreen
 import org.nullgroup.lados.screens.staff.ordermanagement.OrderListScreen
 import org.nullgroup.lados.screens.staff.ordermanagement.OrderProductsScreen
@@ -210,6 +211,28 @@ fun StaffGraph(
                             }
                         }
                     }
+                }
+
+                composable(
+                    route = Screen.Staff.SearchScreen.route
+                ) {
+                    isVisibility = false
+                    SearchScreen(
+                        modifier = Modifier,
+                        navController = navController,
+                        paddingValues = innerPadding,
+                    )
+                }
+
+                composable(
+                    route = Screen.Staff.SearchScreen.route
+                ) {
+                    isVisibility = false
+                    SearchScreen(
+                        modifier = Modifier,
+                        navController = navController,
+                        paddingValues = innerPadding,
+                    )
                 }
 
                 composable(

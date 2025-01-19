@@ -34,9 +34,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -45,6 +47,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -54,6 +57,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import kotlinx.coroutines.launch
+import org.nullgroup.lados.R
 import org.nullgroup.lados.compose.common.LoadOnProgress
 import org.nullgroup.lados.data.local.SearchHistoryManager
 import org.nullgroup.lados.data.models.Product
@@ -66,8 +70,10 @@ import org.nullgroup.lados.screens.customer.home.hasNoSalePrice
 import org.nullgroup.lados.screens.customer.home.sumOfSaleAmount
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.viewmodels.SharedViewModel
+import org.nullgroup.lados.viewmodels.customer.home.CategoryUiState
 import org.nullgroup.lados.viewmodels.customer.home.HomeViewModel
 import org.nullgroup.lados.viewmodels.customer.home.ProductUiState
+import kotlin.math.roundToInt
 
 
 @Composable
@@ -149,7 +155,7 @@ fun DrawProductInCategoryScreenContent(
     sharedViewModel: SharedViewModel = SharedViewModel(),
     onButtonClick: (String) -> Unit ={},
     onNormalButtonClick: (String) -> Unit={},
-    isSelected: List<Boolean> = listOf(false,false,false,false,false),
+    isSelected: MutableMap<FilterCategory, Boolean>,
     inCategory: Boolean = false,
     inNewest: Boolean=false,
     inTopSelling: Boolean=false,
@@ -178,61 +184,61 @@ fun DrawProductInCategoryScreenContent(
             ) {
                 items(6) { index ->
                     when (index) {
-                        0 -> if (inAllProducts) FilterButton(
-                            text = "Category",
+                        0 -> if (!inCategory) FilterButton(
+                            text = stringResource(R.string.category),
                             icon = Icons.Outlined.KeyboardArrowDown,
                             contentDescription = "Category Filter",
-                            type = "Category",
+                            type = stringResource(R.string.category),
                             onButtonClick = onButtonClick,
                             isNormal = false,
-                            isSelected = isSelected[3],
+                            isSelected = isSelected[FilterCategory.CATEGORIES]==true,
                         )
 
                         1 -> if (!inOnSale) FilterButton(
-                            text = "On Sale",
+                            text = stringResource(R.string.on_sale),
                             contentDescription = "On Sale Filter",
-                            type = "Deals",
+                            type = stringResource(R.string.on_sale),
                             onButtonClick = onNormalButtonClick,
-                            isSelected = isSelected[0],
+                            isSelected = isSelected[FilterCategory.ON_SALE]==true,
                         )
 
                         2 -> FilterButton(
-                            text = "Price",
+                            text = stringResource(R.string.price),
                             icon = Icons.Outlined.KeyboardArrowDown,
                             contentDescription = "Price Sort",
-                            type = "Price",
+                            type = stringResource(R.string.price),
                             onButtonClick = onButtonClick,
                             isNormal = false,
-                            isSelected = isSelected[1]
+                            isSelected = isSelected[FilterCategory.PRICE]==true,
                         )
 
                         3 -> FilterButton(
-                            text = "Sort by",
+                            text = stringResource(R.string.sort_by),
                             icon = Icons.Outlined.KeyboardArrowDown,
                             contentDescription = "Sort by",
-                            type = "Sort by",
+                            type = stringResource(R.string.sort_by),
                             onButtonClick = onButtonClick,
                             isNormal = false,
-                            isSelected = isSelected[2]
+                            isSelected = isSelected[FilterCategory.SORT_BY]==true,
                         )
 
                         4 -> FilterButton(
-                            text = "Rating",
+                            text = stringResource(R.string.rating),
                             icon = Icons.Outlined.KeyboardArrowDown,
                             contentDescription = "Rating Filter",
-                            type = "Rating",
+                            type = stringResource(R.string.rating),
                             onButtonClick = onButtonClick,
                             isNormal = false,
-                            isSelected = isSelected[4],
+                            isSelected = isSelected[FilterCategory.RATING_RANGE]==true,
                         )
 
                         5-> FilterButton(
-                            text="Pricing Range",
+                            text= stringResource(R.string.pricing_range),
                             icon = Icons.Outlined.KeyboardArrowDown,
-                            type = "Pricing Range",
+                            type = stringResource(R.string.pricing_range),
                             onButtonClick = onButtonClick,
                             isNormal = false,
-                            isSelected = isSelected[5],
+                            isSelected = isSelected[FilterCategory.PRICING_RANGE]==true,
                         )
                     }
                 }
@@ -261,40 +267,38 @@ fun DrawProductInCategoryScreenContent(
         }
     }
 }
-
 @Composable
 fun PriceSlider(
     minPrice: Float,
     maxPrice: Float,
     currentPriceRange: ClosedFloatingPointRange<Float>,
-    onPriceRangeChanged: (ClosedFloatingPointRange<Float>) -> Unit
+    onPriceRangeChanged: (ClosedFloatingPointRange<Float>) -> Unit,
+    steps: Int = 25 // Default to 15 steps
 ) {
     var sliderPosition by remember { mutableStateOf(currentPriceRange) }
 
     Column {
         RangeSlider(
             value = sliderPosition,
+            steps=steps,
             onValueChange = { newRange ->
                 sliderPosition = newRange
                 onPriceRangeChanged(newRange)
             },
             valueRange = minPrice..maxPrice,
-            // Add any other desired styling or configuration
         )
-
-        // Display labels for selected values
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = "${sliderPosition.start.toInt()} ", // Start value label
+                text = "${sliderPosition.start.toInt()} ", 
                 modifier = Modifier.weight(1f),
                 color = LadosTheme.colorScheme.onBackground
             )
-            Spacer(modifier = Modifier.width(10.dp)) // 10 spaces between labels
+            Spacer(modifier = Modifier.width(10.dp))
             Text(
-                text = " ${sliderPosition.endInclusive.toInt()}", // End value label
+                text = " ${sliderPosition.endInclusive.toInt()}",
                 modifier = Modifier.weight(1f),
                 color = LadosTheme.colorScheme.onBackground
             )
@@ -305,6 +309,33 @@ fun PriceSlider(
 fun Product.getAverageRating(): Float {
     Log.d("Product", "getAverageRating: ${engagements.sumOf { it.ratings } * 1.0f / engagements.size}")
     return engagements.sumOf { it.ratings } * 1.0f / engagements.size
+}
+
+data class FilterState(
+    var selectedCategories: String?=null,
+    var isOnSale: Boolean = false,
+    var price: String? = null,
+    var sortBy: String?=null,
+    var ratingRange: ClosedFloatingPointRange<Float>?=null,
+    var pricingRange: ClosedFloatingPointRange<Float>? = null // Assuming this is different from priceRange
+)
+
+enum class FilterCategory {
+    CATEGORIES,
+    ON_SALE,
+    PRICE,
+    SORT_BY,
+    RATING_RANGE,
+    PRICING_RANGE
+}
+
+fun updateSelected(selectedFilters: MutableMap<FilterCategory, Boolean>, filterState: FilterState) {
+    selectedFilters[FilterCategory.CATEGORIES] = filterState.selectedCategories != null
+    selectedFilters[FilterCategory.ON_SALE] = filterState.isOnSale
+    selectedFilters[FilterCategory.PRICE] = filterState.price != null
+    selectedFilters[FilterCategory.SORT_BY] = filterState.sortBy != null
+    selectedFilters[FilterCategory.RATING_RANGE] = filterState.ratingRange != null
+    selectedFilters[FilterCategory.PRICING_RANGE] = filterState.pricingRange != null
 }
 
 @Composable
@@ -320,9 +351,12 @@ fun ProductInCategoryScreen(
     context: Context
 ) {
     val productUiState = viewModel.productUiState.collectAsStateWithLifecycle().value
-    var selectedSortOption by remember { mutableStateOf<String?>(null) }
-    var isSelected by remember { mutableStateOf(listOf(false, false, false, false, false, false)) }
     val typeScreen = sharedViewModel.typeScreen
+    val filterState by remember { mutableStateOf(FilterState()) }
+    val selectedFilters = remember { mutableStateMapOf<FilterCategory, Boolean>() }
+    updateSelected(selectedFilters, filterState)
+
+    val selectedOptions = remember { mutableStateMapOf<FilterCategory, Int?>() }
 
     val sheetState = rememberModalBottomSheetState(
         initialValue = ModalBottomSheetValue.Hidden
@@ -342,7 +376,15 @@ fun ProductInCategoryScreen(
         ) else listOf("Recommended"),
         "Price" to listOf("Lowest - Highest Price", "Highest - Lowest Price"),
         "Category" to listOf("Pant", "Crop-top", "Top"),
-        "Rating" to listOf("1.0 to 2.0", "2.0 to 3.0", "3.0 to 4.0", "4.0 +")
+        "Rating" to listOf("1.0 - 2.0", "2.0 - 3.0", "3.0 - 4.0", "4.0 +"),
+
+        "Sắp xếp" to if (typeScreen!="Newest")listOf(
+            "Đề xuất",
+            "Mới nhất",
+        ) else listOf("Đề xuất"),
+        "Giá" to listOf("Giá từ thấp đến cao", "Giá từ cao đến thấp"),
+        "Loại" to listOf("Quần", "Crop-top", "Thân trên"),
+        "Đánh giá" to listOf("1.0 - 2.0", "2.0 - 3.0", "3.0 - 4.0", "4.0 +")
     )
     ModalBottomSheetLayout(
         sheetState = sheetState,
@@ -432,48 +474,35 @@ fun ProductInCategoryScreen(
                         inOnSale = typeScreen == "On Sale",
                         inAllProducts = typeScreen == "All Products",
                         onNormalButtonClick = { _ ->
-                            val oldStatus: List<Boolean> = isSelected
-                            if (selectedSortOption == "On Sale") {
-                                selectedSortOption = null
-                                viewModel.resetProducts()
-                                isSelected = listOf(false, oldStatus[1], oldStatus[2], oldStatus[3], oldStatus[4] )
+                            if (selectedFilters[FilterCategory.ON_SALE] == true) {
+                                filterState.isOnSale = false
+                                updateSelected(selectedFilters, filterState)
+                                viewModel.filterProducts(filterState)
                             } else {
-                                selectedSortOption = "On Sale"
-                                viewModel.filterSaleProducts()
-                                isSelected = listOf(true, oldStatus[1], false, oldStatus[3], oldStatus[4])
+                                filterState.isOnSale = true
+                                updateSelected(selectedFilters, filterState)
+                                viewModel.filterProducts(filterState)
                             }
                         },
                         onButtonClick = { content ->
                             Log.d("FilterButton", "onButtonClick: $content")
-                            if (content=="Pricing Range") {
+                            if (content==context.getString(R.string.pricing_range)) {
                                 sheetContent = {
                                     BottomSheetContent(
+                                        minPrice = viewModel.findMinPrice().toFloat(),
+                                        maxPrice = viewModel.findMaxPrice().toFloat(),
                                         title = content,
                                         paddingValues = paddingValues,
                                         onClearClick = {
-                                            isSelected = listOf(
-                                                selectedSortOption == "On Sale",
-                                                isSelected[1],
-                                                isSelected[2],
-                                                isSelected[3],
-                                                isSelected[4],
-                                                false
-                                            )
+                                            filterState.pricingRange=null
+                                            updateSelected(selectedFilters, filterState)
+                                            viewModel.filterProducts(filterState)
                                         },
                                         onSliderChanged = { sliderRange ->
-                                            viewModel.resetProducts()
-                                            viewModel.filterProductsByPrice(
-                                                sliderRange.start,
-                                                sliderRange.endInclusive
-                                            )
-                                            isSelected = listOf(
-                                                selectedSortOption == "On Sale",
-                                                true,
-                                                false,
-                                                isSelected[3],
-                                                isSelected[4],
-                                                true
-                                            )
+                                            filterState.pricingRange=sliderRange
+                                            updateSelected(selectedFilters, filterState)
+                                            Log.d("BSC", "onSliderChanged: $filterState")
+                                            viewModel.filterProducts(filterState)
                                         },
                                         onCloseClick = {
                                             scope.launch {
@@ -481,6 +510,8 @@ fun ProductInCategoryScreen(
                                             }
                                         },
                                         options = emptyList(),
+                                        selectedFilters = selectedOptions,
+                                        context = context
                                     )
                                 }
                                 scope.launch { sheetState.show() }
@@ -490,232 +521,118 @@ fun ProductInCategoryScreen(
                                 if (option.isNotEmpty()) {
                                     sheetContent = {
                                         BottomSheetContent(
+                                            selectedFilters = selectedOptions,
                                             title = content,
                                             options = option,
                                             paddingValues = paddingValues,
                                             onClearClick = { clearOption ->
                                                 when (clearOption) {
-                                                    "Sort by" -> {
-                                                        val oldStatus = isSelected[1]
-                                                        isSelected = listOf(
-                                                            selectedSortOption == "On Sale",
-                                                            oldStatus,
-                                                            false,
-                                                            isSelected[3],
-                                                            isSelected[4],
-                                                            isSelected[5]
-                                                        )
+                                                    context.getString(R.string.sort_by) -> {
+                                                        filterState.sortBy=null
+                                                        updateSelected(selectedFilters, filterState)
+                                                        viewModel.filterProducts(filterState)
                                                     }
 
-                                                    "Price" -> {
-                                                        val oldStatus = isSelected[2]
-                                                        isSelected = listOf(
-                                                            selectedSortOption == "On Sale",
-                                                            false,
-                                                            oldStatus,
-                                                            isSelected[3],
-                                                            isSelected[4],
-                                                            isSelected[5]
-                                                        )
+                                                    context.getString(R.string.price) -> {
+                                                        filterState.price=null
+                                                        updateSelected(selectedFilters, filterState)
+                                                        viewModel.filterProducts(filterState)
                                                     }
 
-                                                    "Category" -> {
-                                                        isSelected = listOf(
-                                                            selectedSortOption == "On Sale",
-                                                            isSelected[1],
-                                                            isSelected[2],
-                                                            false,
-                                                            isSelected[4],
-                                                            isSelected[5]
-                                                        )
+                                                    context.getString(R.string.category) -> {
+                                                        filterState.selectedCategories=null
+                                                        updateSelected(selectedFilters, filterState)
+                                                        viewModel.filterProducts(filterState)
                                                     }
 
-                                                    "Rating" -> {
-                                                        isSelected = listOf(
-                                                            selectedSortOption == "On Sale",
-                                                            isSelected[1],
-                                                            isSelected[2],
-                                                            isSelected[3],
-                                                            false,
-                                                            isSelected[5]
-                                                        )
+                                                    context.getString(R.string.rating) -> {
+                                                        filterState.ratingRange=null
+                                                        updateSelected(selectedFilters, filterState)
+                                                        viewModel.filterProducts(filterState)
                                                     }
                                                 }
-                                                viewModel.resetProducts()
                                             },
                                             onSelectionChanged = { selectedOption ->
-                                                Log.d(
-                                                    "FilterButton",
-                                                    "onSelectionChanged: $selectedOption"
-                                                )
+                                                Log.d("BottomSheetContent", "onSelectionChanged: $selectedOption")
                                                 when (selectedOption) {
-                                                    "Lowest - Highest Price" -> {
-                                                        viewModel.sortProductsByPriceLowToHigh()
-                                                        isSelected = listOf(
-                                                            selectedSortOption == "On Sale",
-                                                            true,
-                                                            false,
-                                                            isSelected[3],
-                                                            isSelected[4],
-                                                            isSelected[5]
-                                                        )
+                                                    context.getString(R.string.lowest_highest_price) -> {
+                                                        filterState.price="Price (Low to High)"
+                                                        filterState.sortBy=null
+                                                        selectedOptions[FilterCategory.SORT_BY]=null
+                                                        updateSelected(selectedFilters, filterState)
+                                                        viewModel.filterProducts(filterState)
                                                     }
 
-                                                    "Highest - Lowest Price" -> {
-                                                        viewModel.sortProductsByPriceHighToLow()
-                                                        isSelected = listOf(
-                                                            selectedSortOption == "On Sale",
-                                                            true,
-                                                            false,
-                                                            isSelected[3],
-                                                            isSelected[4],
-                                                            isSelected[5]
-                                                        )
+                                                    context.getString(R.string.highest_lowest_price) -> {
+                                                        filterState.price="Price (High to Low)"
+                                                        filterState.sortBy=null
+                                                        selectedOptions[FilterCategory.SORT_BY]=null
+                                                        updateSelected(selectedFilters, filterState)
+                                                        viewModel.filterProducts(filterState)
                                                     }
 
-                                                    "Recommended" -> {
-                                                        viewModel.resetProducts()
-                                                        isSelected = listOf(
-                                                            false,
-                                                            false,
-                                                            true,
-                                                            isSelected[3],
-                                                            isSelected[4],
-                                                            isSelected[5]
-                                                        )
+                                                    context.getString(R.string.recommended) -> {
+                                                        filterState.price=null
+                                                        selectedOptions[FilterCategory.PRICE]=null
+                                                        filterState.sortBy="Recommended"
+                                                        updateSelected(selectedFilters, filterState)
+                                                        viewModel.filterProducts(filterState)
                                                     }
 
-                                                    "Newest" -> {
-                                                        viewModel.sortProductsByCreatedAt()
-                                                        isSelected = listOf(
-                                                            selectedSortOption == "On Sale",
-                                                            false,
-                                                            true,
-                                                            isSelected[3],
-                                                            isSelected[4],
-                                                            isSelected[5]
-                                                        )
+                                                    context.getString(R.string.newest) -> {
+                                                        filterState.price=null
+                                                        selectedOptions[FilterCategory.PRICE]=null
+                                                        filterState.sortBy="Newest"
+                                                        updateSelected(selectedFilters, filterState)
+                                                        viewModel.filterProducts(filterState)
                                                     }
 
-                                                    "Pant" -> {
-                                                        viewModel.resetProducts()
-                                                        viewModel.findCategoryByName("Pant")
-                                                            ?.let { it1 ->
-                                                                viewModel.filterProductsByCategory(
-                                                                    it1
-                                                                )
-                                                            }
-                                                        isSelected = listOf(
-                                                            selectedSortOption == "On Sale",
-                                                            false,
-                                                            false,
-                                                            true,
-                                                            isSelected[4],
-                                                            isSelected[5]
-                                                        )
+                                                    context.getString(R.string.pant) -> {
+                                                        filterState.selectedCategories=context.getString(R.string.pant)
+                                                        updateSelected(selectedFilters, filterState)
+                                                        viewModel.filterProducts(filterState)
                                                     }
 
-                                                    "Crop-top" -> {
-                                                        viewModel.resetProducts()
-                                                        viewModel.findCategoryByName("Crop-top")
-                                                            ?.let { it1 ->
-                                                                viewModel.filterProductsByCategory(
-                                                                    it1
-                                                                )
-                                                            }
-                                                        isSelected = listOf(
-                                                            selectedSortOption == "On Sale",
-                                                            false,
-                                                            false,
-                                                            true,
-                                                            isSelected[4],
-                                                            isSelected[5]
-                                                        )
+                                                    context.getString(R.string.crop_top) -> {
+                                                        filterState.selectedCategories=context.getString(R.string.crop_top) 
+                                                        updateSelected(selectedFilters, filterState)
+                                                        viewModel.filterProducts(filterState)
                                                     }
 
-                                                    "Top" -> {
-                                                        viewModel.resetProducts()
-                                                        viewModel.findCategoryByName("Top")
-                                                            ?.let { it1 ->
-                                                                viewModel.filterProductsByCategory(
-                                                                    it1
-                                                                )
-                                                            }
-                                                        isSelected = listOf(
-                                                            selectedSortOption == "On Sale",
-                                                            false,
-                                                            false,
-                                                            true,
-                                                            isSelected[4],
-                                                            isSelected[5]
-                                                        )
+                                                    context.getString(R.string.top) -> {
+                                                        filterState.selectedCategories=context.getString(R.string.top)  
+                                                        updateSelected(selectedFilters, filterState)
+                                                        viewModel.filterProducts(filterState)
                                                     }
 
-                                                    "1.0 to 2.0" -> {
-                                                        viewModel.resetProducts()
-                                                        viewModel.filterProductsByRating(
-                                                            1.0f,
-                                                            2.0f
-                                                        )
-                                                        isSelected = listOf(
-                                                            selectedSortOption == "On Sale",
-                                                            false,
-                                                            false,
-                                                            false,
-                                                            true,
-                                                            isSelected[5]
-                                                        )
+                                                    "1.0 - 2.0" -> {
+                                                        filterState.ratingRange=1.0f..2.0f
+                                                        updateSelected(selectedFilters, filterState)
+                                                        viewModel.filterProducts(filterState)
                                                     }
 
-                                                    "2.0 to 3.0" -> {
-                                                        viewModel.resetProducts()
-                                                        viewModel.filterProductsByRating(
-                                                            2.0f,
-                                                            3.0f
-                                                        )
-                                                        isSelected = listOf(
-                                                            selectedSortOption == "On Sale",
-                                                            false,
-                                                            false,
-                                                            false,
-                                                            true,
-                                                            isSelected[5]
-                                                        )
+                                                    "2.0 - 3.0" -> {
+                                                        filterState.ratingRange=2.0f..3.0f
+                                                        updateSelected(selectedFilters, filterState)
+                                                        viewModel.filterProducts(filterState)
                                                     }
 
-                                                    "3.0 to 4.0" -> {
-                                                        viewModel.resetProducts()
-                                                        viewModel.filterProductsByRating(
-                                                            3.0f,
-                                                            4.0f
-                                                        )
-                                                        isSelected = listOf(
-                                                            selectedSortOption == "On Sale",
-                                                            false,
-                                                            false,
-                                                            false,
-                                                            true,
-                                                            isSelected[5]
-                                                        )
+                                                    "3.0 - 4.0" -> {
+                                                        filterState.ratingRange=3.0f..4.0f
+                                                        updateSelected(selectedFilters, filterState)
+                                                        viewModel.filterProducts(filterState)
                                                     }
 
                                                     "4.0 +" -> {
-                                                        viewModel.resetProducts()
-                                                        viewModel.filterProductsByRating(
-                                                            4.0f,
-                                                            5.0f
-                                                        )
-                                                        isSelected = listOf(
-                                                            selectedSortOption == "On Sale",
-                                                            false,
-                                                            false,
-                                                            false,
-                                                            true,
-                                                            isSelected[5]
-                                                        )
+                                                        filterState.ratingRange=4.0f..5.0f
+                                                        updateSelected(selectedFilters, filterState)
+                                                        viewModel.filterProducts(filterState)
                                                     }
+
+                                                    else -> {}
                                                 }
                                             },
+                                            context = context,
                                             onCloseClick = {
                                                 scope.launch {
                                                     sheetState.hide()
@@ -728,7 +645,7 @@ fun ProductInCategoryScreen(
                                 }
                             }
                         },
-                        isSelected = isSelected,
+                        isSelected = selectedFilters,
                     )
 
                 }
@@ -736,13 +653,3 @@ fun ProductInCategoryScreen(
         }
     }
 }
-
-/*
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun ReviewProductInCategoryScreen() {
-    LadosTheme {
-        ProductInCategoryScreen(navController = NavController(LocalContext.current))
-    }
-}
- */

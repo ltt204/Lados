@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import okhttp3.internal.wait
 import org.nullgroup.lados.data.models.Message
 import org.nullgroup.lados.data.models.MessageType
 import org.nullgroup.lados.data.models.Product
@@ -98,10 +99,9 @@ class ChatViewModel @Inject constructor(
                     .onSuccess {
                         Log.d(
                             "ChatViewModel:sendTextMessage",
-                            "${message.content} ${message.senderId}"
+                            "Sender: ${message.senderId} \n Content ${message.content}"
                         )
-                        val currentUser = userRepository.getCurrentUser()
-                        repository.updateLastMessage(chatId, content)
+                        repository.updateLastMessage(currentUserId, chatId, content)
                     }
             } catch (e: Exception) {
                 uiState.value = ChatUiState.Error(e.message)
@@ -141,7 +141,7 @@ class ChatViewModel @Inject constructor(
                                 )
                             }
                         val currentUser = userRepository.getCurrentUser()
-                        repository.updateLastMessage(chatId, "${currentUser.name.capitalizeWords()} sent an image")
+                        repository.updateLastMessage(currentUserId, chatId, "${currentUser.name.capitalizeWords()} sent an image")
                     }
                     .onFailure { e ->
                         uiState.value = ChatUiState.Error(e.message)
@@ -156,7 +156,9 @@ class ChatViewModel @Inject constructor(
 
     private fun sendProductMessage(productId: String) {
         val messageId = repository.generateMessageId(chatId) ?: return
+        Log.d("ChatViewModel:sendProductMessage", "MessageId: $messageId")
         val currentUserId = repository.getCurrentUserId() ?: return
+        Log.d("ChatViewModel:sendProductMessage", "UserId: $currentUserId")
 
         val message = Message(
             id = messageId,
@@ -164,12 +166,21 @@ class ChatViewModel @Inject constructor(
             productId = productId,
             type = MessageType.PRODUCT,
         )
+        Log.d("ChatViewModel:sendProductMessage", "Message: $message")
 
         viewModelScope.launch {
             try {
                 repository.sendMessage(message, chatId)
                     .onFailure { e ->
+                        Log.d("ChatViewModel:sendProductMessage", e.message ?: "Error")
                         uiState.value = ChatUiState.Error(e.message)
+                    }
+                    .onSuccess {
+                        Log.d(
+                            "ChatViewModel:sendProductMessage",
+                            "Sender: ${message.senderId} \n ProductId ${message.productId}"
+                        )
+                        repository.updateLastMessage(currentUserId, chatId, "Sent a product")
                     }
             } catch (e: Exception) {
                 uiState.value = ChatUiState.Error(e.message)
@@ -184,7 +195,7 @@ class ChatViewModel @Inject constructor(
                     uiState.value = ChatUiState.Error(e.message)
                 }
                 .collect { messageList ->
-                    messages.value = messageList
+                    messages.value = messageList.sortedBy { it.timestamp }
                 }
         }
     }

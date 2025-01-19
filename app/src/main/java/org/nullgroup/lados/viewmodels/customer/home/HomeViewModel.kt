@@ -14,6 +14,7 @@ import org.nullgroup.lados.data.repositories.interfaces.category.CategoryReposit
 import org.nullgroup.lados.data.repositories.interfaces.product.ProductRepository
 import org.nullgroup.lados.screens.customer.home.hasNoSalePrice
 import org.nullgroup.lados.screens.customer.home.isProductOnSale
+import org.nullgroup.lados.screens.customer.product.FilterState
 import org.nullgroup.lados.screens.customer.product.getAverageRating
 import javax.inject.Inject
 
@@ -62,6 +63,36 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    fun filterProducts(filterCriteria: FilterState){
+        resetProducts()
+        if (filterCriteria.selectedCategories != null){
+            filterProductsByCategory(findCategoryByName(filterCriteria.selectedCategories!!)!!)
+        }
+        if (filterCriteria.isOnSale){
+            filterSaleProducts()
+        }
+        if (filterCriteria.price != null){
+            when (filterCriteria.price){
+                "Price (Low to High)" -> sortProductsByPriceLowToHigh()
+                "Price (High to Low)" -> sortProductsByPriceHighToLow()
+            }
+        }
+        if (filterCriteria.sortBy != null){
+            when (filterCriteria.sortBy){
+                "Recommended" -> sortProductsByRating()
+                "Newest" -> sortProductsByCreatedAt()
+            }
+        }
+        if (filterCriteria.ratingRange != null){
+            filterProductsByRating(filterCriteria.ratingRange!!.start, filterCriteria.ratingRange!!.endInclusive)
+        }
+        if (filterCriteria.pricingRange != null){
+            filterProductsByPrice(filterCriteria.pricingRange!!.start, filterCriteria.pricingRange!!.endInclusive)
+        }
+
+    }
+
+
     fun resetProducts() {
         _productUiState.value = ProductUiState.Success(_originalProducts.value)
     }
@@ -73,6 +104,31 @@ class HomeViewModel @Inject constructor(
                 products = currentState.products.sortedBy { if (it.hasNoSalePrice()) it.variants[0].originalPrice else it.isProductOnSale().second }
             )
         }
+    }
+
+    fun sortProductsByRating() {
+        val currentState = _productUiState.value
+        if (currentState is ProductUiState.Success) {
+            _productUiState.value = ProductUiState.Success(
+                products = currentState.products.sortedByDescending { it.getAverageRating() }
+            )
+        }
+    }
+
+    fun findMaxPrice(): Double {
+        val currentState = _productUiState.value
+        if (currentState is ProductUiState.Success) {
+            return currentState.products.maxOf { if (it.hasNoSalePrice()) it.variants[0].originalPrice else it.isProductOnSale().second!! }
+        }
+        return 0.0
+    }
+
+    fun findMinPrice(): Double {
+        val currentState = _productUiState.value
+        if (currentState is ProductUiState.Success) {
+            return currentState.products.minOf { if (it.hasNoSalePrice()) it.variants[0].originalPrice else it.isProductOnSale().second!! }
+        }
+        return 0.0
     }
 
     fun filterProductsByRating(low: Float, high: Float){

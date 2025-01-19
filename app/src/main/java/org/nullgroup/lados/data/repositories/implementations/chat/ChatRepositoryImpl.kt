@@ -11,7 +11,6 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.storage.FirebaseStorage
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -135,7 +134,12 @@ class ChatRepositoryImpl(
         }
     }
 
-    override suspend fun uploadImage(uri: Uri, chatId: String, messageId: String, context: Context): Result<String> =
+    override suspend fun uploadImage(
+        uri: Uri,
+        chatId: String,
+        messageId: String,
+        context: Context
+    ): Result<String> =
         withContext(Dispatchers.IO) {
             suspendCoroutine { continuation ->
                 val imageRef = storage.reference.child("chat_images/$chatId/$messageId.jpg")
@@ -228,20 +232,106 @@ class ChatRepositoryImpl(
         database.reference.child("chats").child(chatId).child("messages").push().key
 
     override fun getCurrentUserId(): String? = auth.currentUser?.uid
-    override suspend fun updateLastMessage(chatRoomId: String, message: String): Result<Boolean> {
+    override suspend fun updateLastMessage(sendBy: String, chatRoomId: String, message: String): Result<Boolean> {
         return withContext(Dispatchers.IO) {
+            Log.d("ChatRepository", "Updating last message")
             suspendCoroutine { continuation ->
-                val charRoomRef = database.reference.child("chat_rooms")
+                val chatRoomRef = database.reference.child("chat_rooms")
                     .child(chatRoomId)
                 try {
-                    charRoomRef.child("lastMessageTime").setValue(System.currentTimeMillis())
-                    charRoomRef.child("lastMessage")
+                    chatRoomRef.child("lastMessageTime").setValue(System.currentTimeMillis())
+                    chatRoomRef.child("lastMessage")
                         .setValue(message)
-
+                    chatRoomRef.child("lastMessageSendBy")
+                        .setValue(sendBy)
+                    chatRoomRef.child("unreadCount").get().addOnSuccessListener {
+                        val unreadMessages = it.value as? Long ?: 0
+                        Log.d("ChatRepository", "Unread messages: $unreadMessages")
+                        chatRoomRef.child("unreadCount").setValue(unreadMessages + 1)
+                    }
                     continuation.resume(Result.success(true))
                 } catch (e: Exception) {
                     continuation.resume(Result.failure(e))
                 }
+            }
+        }
+    }
+
+    override suspend fun getChatRoomByUserId(userId: String): Result<ChatRoom> {
+        return withContext(Dispatchers.IO) {
+            suspendCoroutine {
+                database.reference.child("chat_rooms")
+                    .orderByChild("customerId")
+                    .equalTo(userId)
+                    .get()
+                    .addOnSuccessListener { snapshot ->
+                        val chatRoom =
+                            snapshot.children.firstOrNull()?.getValue(ChatRoom::class.java)
+                        if (chatRoom != null) {
+                            it.resume(Result.success(chatRoom))
+                        } else {
+                            it.resume(Result.failure(Exception("Chat room not found")))
+                        }
+                    }
+                    .addOnFailureListener { e ->
+                        it.resume(Result.failure(e))
+                    }
+            }
+        }
+    }
+
+    override suspend fun getChatRoomById(chatRoomId: String): Result<ChatRoom> {
+        return withContext(Dispatchers.IO) {
+            suspendCoroutine {
+                database.reference.child("chat_rooms")
+                    .child(chatRoomId)
+                    .get()
+                    .addOnSuccessListener { snapshot ->
+                        val chatRoom = snapshot.getValue(ChatRoom::class.java)
+                        if (chatRoom != null) {
+                            it.resume(Result.success(chatRoom))
+                        } else {
+                            it.resume(Result.failure(Exception("Chat room not found")))
+                        }
+                    }
+                    .addOnFailureListener { e ->
+                        it.resume(Result.failure(e))
+                    }
+            }
+        }
+    }
+
+    override suspend fun removeChatRoom(chatRoomId: String): Result<Boolean> {
+        return withContext(Dispatchers.IO) {
+            suspendCoroutine { continuation ->
+                val chatRoomRef = database.reference.child("chat_rooms").child(chatRoomId)
+                val messagesRef =
+                    database.reference.child("chats").child(chatRoomId)
+
+                chatRoomRef.removeValue().addOnSuccessListener {
+                    messagesRef.removeValue().addOnSuccessListener {
+                        continuation.resume(Result.success(true))
+                    }.addOnFailureListener { e ->
+                        continuation.resume(Result.failure(e))
+                    }
+                }.addOnFailureListener { e ->
+                    continuation.resume(Result.failure(e))
+                }
+            }
+        }
+    }
+
+    override suspend fun markMessagesAsRead(chatRoomId: String): Result<Boolean> {
+        return withContext(Dispatchers.IO) {
+            suspendCoroutine { continuation ->
+                val chatRoomRef = database.reference.child("chat_rooms").child(chatRoomId)
+                chatRoomRef.child("unreadCount").setValue(0)
+                    .addOnSuccessListener {
+                        continuation.resume(Result.success(true))
+                    }
+                    .addOnFailureListener { e ->
+                        continuation.resume(Result.failure(e))
+                    }
             }
         }
     }
