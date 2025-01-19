@@ -13,12 +13,14 @@ import kotlinx.coroutines.launch
 import okhttp3.internal.wait
 import org.nullgroup.lados.data.models.AddProduct
 import org.nullgroup.lados.data.models.AddProductVariant
+import org.nullgroup.lados.data.models.Category
 import org.nullgroup.lados.data.models.Image
 import org.nullgroup.lados.data.remote.models.ColorRemoteModel
 import org.nullgroup.lados.data.remote.models.ProductRemoteModel
 import org.nullgroup.lados.data.remote.models.ProductVariantRemoteModel
 import org.nullgroup.lados.data.remote.models.SizeRemoteModel
 import org.nullgroup.lados.data.repositories.implementations.product.ProductVariantRepository
+import org.nullgroup.lados.data.repositories.interfaces.category.CategoryRepository
 import org.nullgroup.lados.data.repositories.interfaces.common.ImageRepository
 import org.nullgroup.lados.data.repositories.interfaces.product.ProductRepository
 import org.nullgroup.lados.utilities.EXCHANGE_RATE
@@ -123,11 +125,14 @@ fun validateVariants(variants: List<ProductVariantRemoteModel>): Pair<Boolean, S
     return Pair(true, "")
 }
 
+
+
 @HiltViewModel
 class AddProductScreenViewModel @Inject constructor(
     private val productRepository: ProductRepository,
     private val variantRepository: ProductVariantRepository,
-    private val imageRepository: ImageRepository
+    private val imageRepository: ImageRepository,
+    private val categoryRepository: CategoryRepository
 ) : ViewModel() {
 
     var productUiState: MutableState<ProductUiState> = mutableStateOf(ProductUiState.Loading)
@@ -147,8 +152,22 @@ class AddProductScreenViewModel @Inject constructor(
     )
         private set
 
+    private val _categories = MutableStateFlow<List<Category>>(listOf())
+    val categories: MutableStateFlow<List<Category>> get() = _categories
+
     init {
         createBlankProduct()
+    }
+
+    fun getCategories() {
+        viewModelScope.launch {
+            val result = categoryRepository.getAllCategoriesFromFireStore()
+            if (result.isSuccess) {
+                _categories.value = result.getOrNull() ?: listOf()
+            } else {
+                Log.d("AddProductScreenViewModel", "getCategories: ${result.exceptionOrNull()}")
+            }
+        }
     }
 
     fun clearProductZombie(){
@@ -250,6 +269,13 @@ class AddProductScreenViewModel @Inject constructor(
         viewModelScope.launch {
             delay(500)
             _productZombie.value = _productZombie.value.copy(name = name)
+        }
+    }
+
+    fun onCategoryChanged(categoryId: String) {
+        viewModelScope.launch {
+            delay(500)
+            _productZombie.value = _productZombie.value.copy(categoryId = categoryId)
         }
     }
 }

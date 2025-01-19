@@ -64,6 +64,7 @@ import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import org.nullgroup.lados.compose.common.LoadOnProgress
 import org.nullgroup.lados.compose.signin.CustomTextField
+import org.nullgroup.lados.data.models.Category
 import org.nullgroup.lados.data.remote.models.ProductVariantRemoteModel
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.viewmodels.admin.product.AddProductScreenViewModel
@@ -85,7 +86,11 @@ fun AddProductScreen(
     val productVariants = viewModel.productVariants.collectAsState()
     Log.d("AddProductScreen", "Current Product variants: ${productVariants.value.size}")
     val productUiState = viewModel.productUiState.value
+    val categories by viewModel.categories.collectAsState()
 
+    LaunchedEffect(key1 = Unit) {
+        viewModel.getCategories()
+    }
 
     var name by rememberSaveable {
         mutableStateOf(
@@ -105,11 +110,14 @@ fun AddProductScreen(
         )
     }
 
+    var selectedCategory by remember { mutableStateOf(Category()) }
+
     var viNameError by remember { mutableStateOf(Pair(true, "")) }
     var enNameError by remember { mutableStateOf(Pair(true, "")) }
     var viDescriptionError by remember { mutableStateOf(Pair(true, "")) }
     var enDescriptionError by remember { mutableStateOf(Pair(true, "")) }
     var variantError by remember { mutableStateOf(Pair(true, "")) }
+    var categoryError by remember { mutableStateOf(Pair(true, "")) }
 
     var viNameFocus by remember { mutableStateOf(false) }
     var enNameFocus by remember  { mutableStateOf(false) }
@@ -158,6 +166,7 @@ fun AddProductScreen(
                         viDescriptionError = validateEmpty(description["vi"] ?: "")
                         enDescriptionError = validateEmpty(description["en"] ?: "")
                         variantError = validateVariants(productVariants.value)
+                        categoryError = validateEmpty(selectedCategory.categoryName)
 
                         if(
                             viNameError.first &&
@@ -346,6 +355,36 @@ fun AddProductScreen(
             }
 
             Spacer(modifier = Modifier.size(4.dp))
+
+            Text(
+                text = "Category",
+                style = LadosTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = LadosTheme.colorScheme.onBackground,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            DropdownMenuWithTextField(
+                label = "Choose category",
+                options = categories,
+                displayName = {
+                    it.categoryName
+                },
+                selectedOption = selectedCategory,
+                onOptionSelected = {
+                    selectedCategory = it
+                    categoryError = validateEmpty(it.categoryName)
+                    viewModel.onCategoryChanged(it.categoryId)
+                }
+            )
+
+            if (!categoryError.first) {
+                Text(
+                    text = categoryError.second,
+                    style = LadosTheme.typography.bodySmall,
+                    color = LadosTheme.colorScheme.error
+                )
+            }
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
