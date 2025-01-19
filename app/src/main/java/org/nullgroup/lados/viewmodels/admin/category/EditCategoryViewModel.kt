@@ -103,7 +103,7 @@ class EditCategoryViewModel @Inject constructor(
 
                                 delay(500)
                                 categoryPictureUiState.value =
-                                    CategoryPictureUiState.Success(firebaseStorageUrl)
+                                    CategoryPictureUiState.Success(firebaseStorageUrl.toString())
                             } else {
                                 categoryPictureUiState.value =
                                     CategoryPictureUiState.Success(category.categoryImage)
