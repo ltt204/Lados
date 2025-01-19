@@ -1,6 +1,7 @@
 package org.nullgroup.lados.screens.customer.product
 
 import android.os.Build
+import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
@@ -603,10 +604,15 @@ fun ProductReviewSection(
             verticalArrangement = Arrangement.spacedBy(5.dp),
             horizontalAlignment = Alignment.Start
         ) {
+            Log.d("ProductDetailScreen", "Average Rating: $averageRating")
             Text(
                 text = stringResource(
                     R.string.product_ratings,
-                    String.format(Locale.getDefault(), "%.2f", averageRating)
+                    String.format(
+                        Locale.getDefault(),
+                        "%.2f",
+                        if (averageRating.isNaN()) 0.0 else averageRating
+                    )
                 ),
                 fontWeight = FontWeight.Bold,
                 fontSize = 25.sp,
@@ -623,22 +629,33 @@ fun ProductReviewSection(
             )
         }
 
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            horizontalAlignment = Alignment.Start,
-            modifier = Modifier
-                .height(250.dp)
-        ) {
-            items(items = engagements, key = { it.id }) { engagement ->
-                productViewModel.getUser(engagement.userId)
-
-                ReviewCard(
-                    name = users[engagement.userId] ?: engagement.userId,
-                    maxRatings = 5,
-                    ratings = engagement.ratings,
-                    reviews = engagement.reviews,
-                    createAt = formatToRelativeTime(engagement.createdAt)
+        if (engagements.isEmpty()) {
+            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                Text(
+                    text = stringResource(R.string.no_reviews_yet),
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 18.sp,
+                    color = LadosTheme.colorScheme.outline
                 )
+            }
+        } else {
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                horizontalAlignment = Alignment.Start,
+                modifier = Modifier
+                    .height(250.dp)
+            ) {
+                items(items = engagements, key = { it.id }) { engagement ->
+                    productViewModel.getUser(engagement.userId)
+
+                    ReviewCard(
+                        name = users[engagement.userId] ?: engagement.userId,
+                        maxRatings = 5,
+                        ratings = engagement.ratings,
+                        reviews = engagement.reviews,
+                        createAt = formatToRelativeTime(engagement.createdAt)
+                    )
+                }
             }
         }
     }

@@ -111,4 +111,5 @@
     <string name="wishlist_back_description">Trở về</string>
     <string name="english_name">Tên tiếng Anh</string>
     <string name="vietnamese_name">Tên tiếng Việt</string>
+    <string name="no_reviews_yet">Chưa có lượt đánh giá nào</string>
 </resources>
