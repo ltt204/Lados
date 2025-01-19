@@ -168,10 +168,12 @@ fun SalesAndProductReportScreen(
             var groupListProducts by remember { mutableStateOf<List<OrderProduct>>(emptyList()) }
             var groupListOrders by remember { mutableStateOf<List<Order>>(emptyList()) }
 
+            var mapListProducts by remember { mutableStateOf<Map<String, Int>>(emptyMap()) }
+
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(top = paddingValues.calculateTopPadding())
+                    .padding(top = paddingValues.calculateTopPadding(), bottom = paddingValues.calculateBottomPadding()+4.dp)
                     .padding(horizontal = 8.dp)
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -228,6 +230,7 @@ fun SalesAndProductReportScreen(
                                             val creationTimestamp = order.orderStatusLog[OrderStatus.CREATED.name]
                                             val creationDate = creationTimestamp?.let { Date(it) }
                                             creationDate != null && creationDate >= start && creationDate <= end
+                                                    && order.orderStatusLog.containsKey(OrderStatus.SHIPPED.name)
                                         }
 
                                         listProducts = filteredOrders.flatMap { it.orderProducts }
@@ -247,10 +250,39 @@ fun SalesAndProductReportScreen(
                                                     )
                                                 }
                                             }
+
+                                        val groupedOrders = listOrders.groupBy { order ->
+                                            val creationTimestamp =
+                                                order.orderStatusLog[OrderStatus.CREATED.name]
+                                            val creationDate = creationTimestamp?.let { Date(it) }
+                                            creationDate?.let {
+                                                SimpleDateFormat(
+                                                    "yyyy-MM-dd",
+                                                    Locale.getDefault()
+                                                ).format(it)
+                                            }
+                                        }
+
+                                        // Combine grouped orders into a single list of orders with count
+                                        groupListOrders =
+                                            groupedOrders.map { (date, ordersForDate) ->
+                                                val aggregatedOrder =
+                                                    ordersForDate.reduce { acc, order ->
+                                                        acc.copy(
+                                                            orderProducts = acc.orderProducts + order.orderProducts,
+                                                            orderTotal = acc.orderTotal + order.orderTotal
+                                                        )
+                                                    }
+
+                                                // Add metadata for the count of orders in the group
+                                                aggregatedOrder.copy(
+                                                    orderStatusLog = aggregatedOrder.orderStatusLog + ("OrderCount" to ordersForDate.size.toLong())
+                                                )
+                                            }
+
+                                        mapListProducts = groupListProducts.associate { it.productId to it.amount }
+                                        Log.d("SalesAndProductReportScreen", "List products: $mapListProducts")
                                         //listProducts = listOrders.flatMap { it.orderProducts }
-
-                                        // Group products by productId and combine them
-
 
                                     }
                                 }
@@ -298,23 +330,6 @@ fun SalesAndProductReportScreen(
                             selectedGroupByOrdersTable,
                             groupByOrdersTable,
                             onClick = { type ->
-
-                                listProducts = listOrders.flatMap { it.orderProducts }
-                                listOrders = listOrders.filter { order ->
-                                    order.orderStatusLog.containsKey(OrderStatus.SHIPPED.name)
-                                }
-
-                                groupListProducts = listProducts
-                                    .groupBy { it.productId }
-                                    .map { (productId, products) ->
-                                        products.reduce { acc, product ->
-                                            acc.copy(
-                                                amount = acc.amount + product.amount, // Sum quantities
-                                                totalPrice = acc.totalPrice + product.totalPrice // Sum total prices
-                                            )
-                                        }
-                                    }
-
                                 when (type) {
                                     "Day" -> {
                                         val groupedOrders = listOrders.groupBy { order ->
@@ -540,51 +555,60 @@ fun SalesAndProductReportScreen(
                         })
                     }
 
-                    //val mapName= mutableMapOf<String, String>()
-
+                    val mapName= mutableMapOf<String, String>()
+                    //Log.d("SalesTable", "List products: $mapListProducts")
                     SalesTable(
-                        data = listProducts,
-                        //onUpdateResult = { result ->
-                        //    mapName.putAll(result)
+                        data = groupListProducts,
+                        onUpdateResult = { result ->
+                            mapName.putAll(result)
                             // Handle the result map here (e.g., save it in the ViewModel or handle it locally)
                          //   Log.d("SalesTable", "Updated result: $result")
                         //    Log.d("SalesTable", "Updated result_: $mapName")
-                        //}
+                        }
                     )
 
 
                     Spacer(Modifier.width(16.dp))
 
+                    mapListProducts = groupListProducts
+                        .mapNotNull { product ->
+                            mapName[product.productId]?.let { productName ->
+                                productName to product.amount
+                            }
+                        }
+                        .toMap()
+                    //mapListProducts = groupListProducts.associate {  to it.amount}
+
+                    if (mapListProducts.isNotEmpty()) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.Center
                     ) {
                         Text("Revenue by Product", fontWeight = FontWeight.Bold, fontSize = 28.sp)
                     }
-
-                       /*
-                    ChartPlaceholder(
+                        ChartPlaceholder(
                             modifier = Modifier.height(512.dp),
-                            amountMap = groupListProducts.associate { it.productId to it.amount },
-
-                        )
-
-
-                        */
+                            amountMap = mapListProducts,
+                            )
+                    }
 
                 }
 
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                    horizontalArrangement = Arrangement.End,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    /*
                     Button(onClick = { /* Export logic */ }) {
                         Text("Export as CSV")
                     }
+
+                     */
                     Text(
                         "Total Revenue: $${listOrders.sumOf { it.orderTotal }}",
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp
                     )
                 }
             }
@@ -705,7 +729,7 @@ fun OrderTable(
 fun SalesTable(
     data: List<OrderProduct>,
     viewModel: DashBoardViewModel = hiltViewModel(),
-    //onUpdateResult: (Map<String, String>) -> Unit
+    onUpdateResult: (Map<String, String>) -> Unit
 ) {
     val result = mutableMapOf<String, String>()
     val productUiState = viewModel.productUiState.collectAsStateWithLifecycle()
@@ -761,7 +785,7 @@ fun SalesTable(
                             Text(product.name, Modifier.weight(1.5f))
                         }
 
-                        //result[item.productId]= product?.name ?: ""
+                        result[item.productId]= product?.name ?: ""
 
                         val categoryName =
                             categories.find { it.categoryId == product?.categoryId }?.categoryName
@@ -773,9 +797,9 @@ fun SalesTable(
                     }
                 }
             }
-            //LaunchedEffect(result) {
-            //    onUpdateResult(result)
-            //}
+            LaunchedEffect(result) {
+                onUpdateResult(result)
+            }
 
         }
     }
@@ -787,7 +811,7 @@ fun SalesTable(
 @Composable
 fun ChartPlaceholder(
     modifier: Modifier = Modifier,
-    amountMap: Map<String?, Int>
+    amountMap: Map<String, Int>
 ) {
     val primaryColor = LadosTheme.colorScheme.primary
     val listData = mutableListOf<Bars>()
