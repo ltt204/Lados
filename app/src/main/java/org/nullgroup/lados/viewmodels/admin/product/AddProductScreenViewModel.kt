@@ -199,6 +199,14 @@ class AddProductScreenViewModel @Inject constructor(
         }
     }
 
+    fun handleAddSuccess(){
+        viewModelScope.launch {
+            _productZombie.value = ProductRemoteModel()
+            productVariants.value = listOf()
+            productUiState.value = ProductUiState.Loading
+        }
+    }
+
     fun onAddProductButtonClick() {
         viewModelScope.launch {
             productUiState.value = ProductUiState.Loading

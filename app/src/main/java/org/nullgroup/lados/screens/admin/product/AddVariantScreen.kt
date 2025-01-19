@@ -188,7 +188,7 @@ fun AddVariantScreen(
                                 size = size,
                                 quantityInStock = quantity.toInt(),
                                 originalPrice = exchangePrice(originalPrice, priceOption),
-                                salePrice = exchangePrice(salePrice, priceOption),
+                                salePrice =  exchangePrice(salePrice.ifEmpty { "0" }, priceOption),
                                 saleAmount = 0,
                                 images = listOf()
                             )

@@ -20,6 +20,7 @@ import org.nullgroup.lados.data.repositories.implementations.product.ProductVari
 import org.nullgroup.lados.data.repositories.interfaces.category.CategoryRepository
 import org.nullgroup.lados.data.repositories.interfaces.common.ImageRepository
 import org.nullgroup.lados.data.repositories.interfaces.product.ProductRepository
+import org.nullgroup.lados.screens.Screen
 import javax.inject.Inject
 
 @HiltViewModel
@@ -28,13 +29,12 @@ class EditProductScreenViewModel @Inject constructor(
     private val categoryRepository: CategoryRepository,
     private val variantRepository: ProductVariantRepository,
     private val imageRepository: ImageRepository,
-    private val savedStateHandle: SavedStateHandle
+    private  val saveStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     val productId = savedStateHandle.get<String>("product_id") ?: ""
 
     val isInfoChanged = mutableStateOf(false)
-
     val isVariantPictureChanged = mutableStateOf(false)
 
     private var isFirstTimeLoadData = false
@@ -56,36 +56,19 @@ class EditProductScreenViewModel @Inject constructor(
     )
         private set
 
+    // Save image of product variant to delete
+    var imageListDelete = arrayListOf<String>()
+
     private val _updateSuccess = MutableStateFlow(false)
     val updateSuccess: MutableStateFlow<Boolean> get() = _updateSuccess
 
     private val _categories = MutableStateFlow<List<Category>>(listOf())
     val categories: MutableStateFlow<List<Category>> get() = _categories
 
-     fun clearProductZombie(){
-        viewModelScope.launch {
-            _productZombie.value = ProductRemoteModel()
-        }
-    }
-
-    fun clearProductVariants(){
-        viewModelScope.launch {
-            productVariants.value = listOf()
-        }
-    }
-
-    fun setFirstTimeLoadData(value: Boolean){
-        viewModelScope.launch {
-            isFirstTimeLoadData = value
-        }
-    }
-
     fun loadProduct(productId: String){
         productUiState.value = EditProductUiState.Loading
         viewModelScope.launch {
             try {
-
-                Log.d("Product", "loadProduct: $productId")
                 val result = productRepository.getProductRemoteModelByIdFromFireStore(productId)
                 if(result.isSuccess){
                     val product = result.getOrNull()
@@ -113,23 +96,26 @@ class EditProductScreenViewModel @Inject constructor(
         viewModelScope.launch {
             productUiState.value = EditProductUiState.Loading
             try {
-                Log.d(
-                    "Product",
-                    "onAddProduct: Variants ${productVariants.value}"
-                )
                 _productZombie.value.variants = productVariants.value
 
-                Log.d(
-                    "Product After Update",
-                    "onAddProduct: Product ${_productZombie.value}"
-                )
+                Log.d("Product After Update", "onAddProduct: Product ${_productZombie.value}")
 
                 val result = productRepository.updateProductInFireStore(_productZombie.value)
+
+                if(imageListDelete.isNotEmpty()){
+                    imageListDelete.forEach{
+                        imageRepository.deleteImage(
+                            child = "products",
+                            fileName = it,
+                            extension = "png",
+                        )
+                    }
+                }
+                imageListDelete.clear()
 
                 if (result.isSuccess) {
                     productUiState.value = EditProductUiState.Success(ProductRemoteModel())
                     _updateSuccess.value = true
-
                 } else {
                     productUiState.value = EditProductUiState.Error(result.exceptionOrNull()?.message ?: "An error occurred")
                     _updateSuccess.value = false
@@ -142,11 +128,19 @@ class EditProductScreenViewModel @Inject constructor(
         }
     }
 
+    fun handleUpdateSuccess(){
+        viewModelScope.launch {
+            _productZombie.value = ProductRemoteModel()
+            productVariants.value = listOf()
+            isFirstTimeLoadData = false
+            _updateSuccess.value = false
+            productUiState.value = EditProductUiState.Loading
+        }
+    }
+
     fun onUpdateVariant(variant: ProductVariantRemoteModel, withImageByteArray: ByteArray) {
         viewModelScope.launch {
             Log.d("UpdateProductScreenViewModel", "variant: $variant")
-           // val productVariantId = variantRepository.getProductVariantId().getOrNull() ?: ""
-           // Log.d("AddProductScreenViewModel", "productVariantId: $productVariantId")
 
             uploadImageState.value = VariantImageUiState.Loading
             val imageUrl = imageRepository.uploadImage(
@@ -172,6 +166,7 @@ class EditProductScreenViewModel @Inject constructor(
                     it
                 }
             }
+
             _productZombie.value = _productZombie.value.copy(variants = productVariants.value)
 
             Log.d("AddProductScreenViewModel", "productVariants: ${productVariants.value}")
@@ -181,20 +176,12 @@ class EditProductScreenViewModel @Inject constructor(
         }
     }
 
-    fun deleteVariant(variant: ProductVariantRemoteModel){
+    fun onDeleteVariant(variantId: String){
         viewModelScope.launch {
-            Log.d("UpdateProductScreenViewModel", "variant: $variant")
-
             uploadImageState.value = VariantImageUiState.Loading
-            imageRepository.deleteImage(
-                child = "products",
-                fileName = variant.id,
-                extension = "png",
-            )
 
-            variant.images = listOf()
-
-            productVariants.value = productVariants.value.filter { it.id != variant.id }
+            imageListDelete.add(variantId)
+            productVariants.value = productVariants.value.filter { it.id != variantId }
 
             _productZombie.value = _productZombie.value.copy(variants = productVariants.value)
 

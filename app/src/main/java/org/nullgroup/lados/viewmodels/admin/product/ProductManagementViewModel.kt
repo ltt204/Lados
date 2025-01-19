@@ -195,6 +195,29 @@ class ProductManagementScreenViewModel @Inject constructor(
         }
     }
 
+    fun deleteProduct(productId: String) {
+        viewModelScope.launch {
+            _isLoading.value = true
+           val result = productRepository.deleteProductByIdFromFireStore(productId)
+            if(result.isSuccess){
+                _editProducts.value = _editProducts.value.filter { it.id != productId }
+            }
+            _isLoading.value = false
+        }
+    }
+
+    fun deleteChosenProducts(productIds: List<String>) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            val results = productIds.map { productId ->
+                productRepository.deleteProductByIdFromFireStore(productId)
+            }
+            if(results.all { it.isSuccess }){
+                _editProducts.value = _editProducts.value.filter { !productIds.contains(it.id) }
+            }
+            _isLoading.value = false
+        }
+    }
 
     private fun getSortOption(sortOption: String): Pair<String, String> {
         return when (sortOption) {
