@@ -31,6 +31,7 @@ import org.nullgroup.lados.utilities.getDayString
 import org.nullgroup.lados.utilities.getMonth
 import org.nullgroup.lados.utilities.getMonthString
 import org.nullgroup.lados.utilities.getYear
+import org.nullgroup.lados.utilities.toDateTimeString
 import org.nullgroup.lados.utilities.toUsdCurrency
 import org.nullgroup.lados.viewmodels.customer.home.CategoryUiState
 import org.nullgroup.lados.viewmodels.customer.home.ProductUiState
@@ -171,14 +172,14 @@ class DashBoardViewModel @Inject constructor(
                         }
                         .groupBy { order ->
                             val day =
-                                order.orderStatusLog.entries.minBy { it.value }.value.getDayString()
+                                order.orderStatusLog.entries.minBy { it.value }.value.toDateTimeString("dd/MM").toString()
                             Log.d("Revenue", "Day: $day")
                             day
                         }
                         .mapValues {
                             it.value.filter {
                                 it.orderStatusLog.entries.firstOrNull { it.key == OrderStatus.RETURNED.name } == null
-                                        && it.orderStatusLog.entries.firstOrNull { it.key == OrderStatus.CANCELLED.name } == null
+                                        && it.orderStatusLog.containsKey(OrderStatus.SHIPPED.name)
                             }.sumOf { it.orderTotal.toUsdCurrency() }
                         }
                     revenueByDay.value = DashBoardRevenueState.Success(_revenueByDay)

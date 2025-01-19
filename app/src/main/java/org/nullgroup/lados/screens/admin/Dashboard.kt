@@ -230,13 +230,12 @@ fun SalesAndProductReportScreen(
                                             val creationTimestamp = order.orderStatusLog[OrderStatus.CREATED.name]
                                             val creationDate = creationTimestamp?.let { Date(it) }
                                             creationDate != null && creationDate >= start && creationDate <= end
+                                                    && order.orderStatusLog.entries.firstOrNull { it.key == OrderStatus.RETURNED.name } == null
                                                     && order.orderStatusLog.containsKey(OrderStatus.SHIPPED.name)
                                         }
 
                                         listProducts = filteredOrders.flatMap { it.orderProducts }
-                                        listOrders = filteredOrders.filter { order ->
-                                            order.orderStatusLog.containsKey(OrderStatus.SHIPPED.name)
-                                        }
+                                        listOrders = filteredOrders
 
                                         // group by 2 order same date into 1 order
 
@@ -844,9 +843,11 @@ fun RevenueChart(
     modifier: Modifier = Modifier,
     revenueMap: Map<String, Double>
 ) {
+    val sortedMap =revenueMap.toSortedMap()
+
     val primaryColor = LadosTheme.colorScheme.primary
     val listData = mutableListOf<Bars>()
-    revenueMap.forEach { (mon, rev) ->
+    sortedMap.forEach { (mon, rev) ->
         val revWith = ((rev*100).roundToLong().toDouble())/100
         listData.add(
             Bars(
