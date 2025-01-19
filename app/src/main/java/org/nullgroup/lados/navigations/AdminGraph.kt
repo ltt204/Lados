@@ -194,12 +194,6 @@ fun AdminGraph(
                 }
 
                 composable(route = Screen.Admin.ProductManagement.route) {
-//                    Screen.Admin.ProductManagement(
-//                        modifier = Modifier,
-//                        paddingValues = innerPadding,
-//                        navController = navController,
-//                    )
-
                     ManageProductScreen(
                         modifier = Modifier,
                         paddingValues = innerPadding,

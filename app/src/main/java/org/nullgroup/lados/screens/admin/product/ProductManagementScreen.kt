@@ -37,7 +37,6 @@ import androidx.compose.material.icons.automirrored.outlined.Comment
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.outlined.Comment
 import androidx.compose.material.icons.outlined.Style
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -92,11 +91,15 @@ import org.nullgroup.lados.compose.common.LoadOnProgress
 import org.nullgroup.lados.data.models.Product
 import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.ui.theme.LadosTheme
+import org.nullgroup.lados.utilities.formatStringByLocale
+import org.nullgroup.lados.utilities.getAppLocale
 import org.nullgroup.lados.viewmodels.admin.product.FilterItem
 import org.nullgroup.lados.viewmodels.admin.product.ProductManagementScreenViewModel
-import org.nullgroup.lados.viewmodels.admin.product.priceOptions
 import org.nullgroup.lados.viewmodels.admin.product.ratingOptions
 import org.nullgroup.lados.viewmodels.admin.product.sortOptions
+import org.nullgroup.lados.viewmodels.admin.product.usPriceOptions
+import org.nullgroup.lados.viewmodels.admin.product.vnPriceOptions
+import java.util.Locale
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -679,6 +682,9 @@ fun ProductItem(
     val image = product.variants.firstOrNull()?.images.orEmpty().firstOrNull()?.link
 
     var isCheck by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+
+    var locale = getAppLocale(context)
 
     Card(
         modifier = modifier
@@ -802,14 +808,14 @@ fun ProductItem(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "$originalPrice",
+                            text = formatStringByLocale(originalPrice,locale, true),
                             style = LadosTheme.typography.bodySmall.copy(
                                 fontWeight = FontWeight.Bold,
                                 color = LadosTheme.colorScheme.primary
                             )
                         )
                         Text(
-                            text = "$salePrice",
+                            text = formatStringByLocale(salePrice, locale, true),
                             style = LadosTheme.typography.bodySmall.copy(
                                 fontWeight = FontWeight.Bold,
                                 color = LadosTheme.colorScheme.outline
@@ -907,6 +913,9 @@ fun FilterDialog(
 
     var isReset by remember { mutableStateOf(false) }
 
+    val localContext = LocalContext.current
+    val locale = getAppLocale(localContext)
+
     LaunchedEffect(isReset) {
         Log.d("FilterDialog", "isReset: $isReset")
     }
@@ -936,7 +945,7 @@ fun FilterDialog(
                 ) {
                     DropdownWithTitle(
                         title = "Price",
-                        options = priceOptions,
+                        options = if(locale == Locale.US) usPriceOptions else vnPriceOptions,
                         isReset = isReset,
                         currentOption = currentPrice,
                         onOptionSelected = {

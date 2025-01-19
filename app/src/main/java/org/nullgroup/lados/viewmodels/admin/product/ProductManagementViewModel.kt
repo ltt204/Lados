@@ -1,5 +1,7 @@
 package org.nullgroup.lados.viewmodels.admin.product
 
+import android.content.Context
+import android.os.Build
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -15,7 +17,11 @@ import org.nullgroup.lados.data.models.Product
 import org.nullgroup.lados.data.repositories.interfaces.category.CategoryRepository
 import org.nullgroup.lados.data.repositories.interfaces.product.ProductRepository
 import org.nullgroup.lados.utilities.toLocalProduct
+import java.text.NumberFormat
+import java.util.Locale
 import javax.inject.Inject
+
+
 
 val ratingOptions = listOf(
     "Default",
@@ -25,7 +31,9 @@ val ratingOptions = listOf(
     "4 - 5"
 )
 
-val priceOptions = listOf(
+
+
+val vnPriceOptions = listOf(
     "Default",
     "100.000 - 200.000 VND",
     "200.000 - 500.000 VND",
@@ -33,6 +41,16 @@ val priceOptions = listOf(
     "1.000.000 - 2.000.000 VND",
     "2.000.000 VND + "
 )
+
+val usPriceOptions = listOf(
+    "Default",
+    "10- 20 USD",
+    "20 - 50 USD",
+    "50 - 100 USD",
+    "100 USD +",
+)
+
+
 
 val sortOptions = listOf(
     "All",
