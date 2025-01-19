@@ -48,6 +48,7 @@ import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.screens.admin.category.AddCategoryScreen
 import org.nullgroup.lados.screens.admin.category.CategoryManagementScreen
 import org.nullgroup.lados.screens.admin.category.EditCategoryScreen
+import org.nullgroup.lados.screens.admin.inventory.InventoryTracking
 import org.nullgroup.lados.screens.admin.product.AddEditVariantScreen
 import org.nullgroup.lados.screens.admin.product.AddProductScreen
 import org.nullgroup.lados.screens.admin.product.AddVariantScreen
@@ -138,6 +139,17 @@ fun AdminGraph(
                             }
                             currentDestination = Screen.Admin.ProductManagement
                             navController.navigate(Screen.Admin.ProductManagement.route)
+                        }
+                    )
+                    NavigationDrawerItem(
+                        label = { Text(text = Screen.Admin.InventoryTracking.name!!) },
+                        selected = currentDestination.route == Screen.Admin.InventoryTracking.route,
+                        onClick = {
+                            scope.launch {
+                                drawerState.close()
+                            }
+                            currentDestination = Screen.Admin.InventoryTracking
+                            navController.navigate(Screen.Admin.InventoryTracking.route)
                         }
                     )
                     NavigationDrawerItem(
@@ -296,9 +308,6 @@ fun AdminGraph(
 
                 }
 
-
-
-
                 composable(
                     route = Screen.Admin.EditProduct.ROUTE_WITH_ARG,
                     arguments = listOf(
@@ -361,6 +370,13 @@ fun AdminGraph(
 
                 composable(route = Screen.Admin.PromotionManagement.route) {
                     // PromotionManagement()
+                }
+
+                composable(route = Screen.Admin.InventoryTracking.route){
+                    InventoryTracking(
+                        modifier = Modifier,
+                        paddingValues = innerPadding,
+                    )
                 }
             }
         }

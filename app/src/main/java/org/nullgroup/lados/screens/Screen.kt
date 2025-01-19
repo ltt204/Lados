@@ -272,6 +272,9 @@ sealed class Screen(
 
         data object Analytics : Admin("Analytics", "analytics", Icons.Default.AccountCircle)
 
+        data object InventoryTracking:
+        Admin("Inventory Tracking", "inventory_tracking", Icons.Default.AccountCircle)
+
         companion object {
             fun getAllScreens() =
                 listOf(Analytics, UserManagement, ProductManagement, PromotionManagement)
