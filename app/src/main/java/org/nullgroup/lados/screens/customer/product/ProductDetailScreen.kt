@@ -70,6 +70,7 @@ import org.nullgroup.lados.R
 import org.nullgroup.lados.compose.common.LoadOnProgress
 import org.nullgroup.lados.data.models.Image
 import org.nullgroup.lados.data.models.Product
+import org.nullgroup.lados.data.models.ProductVariant
 import org.nullgroup.lados.data.models.Size
 import org.nullgroup.lados.data.models.UserEngagement
 import org.nullgroup.lados.screens.Screen
@@ -193,7 +194,9 @@ fun ProductDetailScreen(
                         name = uiState.product.name,
                         originalPrice = uiState.product.variants.first().originalPrice,
                         salePrice = uiState.product.variants.first().salePrice,
-                        productImages = uiState.product.variants.first().images,
+                        productImages = uiState.product.variants.filter { variant ->
+                            variant.color.hexCode == uiState.selectedColor?.hexCode
+                        }.flatMap { it.images },
                         quantityInStock = uiState.quantityInStock
                     )
 
