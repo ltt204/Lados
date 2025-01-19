@@ -44,12 +44,12 @@ fun exchangePrice(price: String, priceOption: String): Map<String, Double> {
     return if (priceOption == "USD") {
         mapOf(
             "en" to price.toDouble(),
-            "vi" to price.toDouble() / EXCHANGE_RATE
+            "vi" to price.toDouble() * EXCHANGE_RATE
         )
     } else {
         mapOf(
-            "en" to price.toDouble() * EXCHANGE_RATE,
-            "vi" to price.toDouble()
+            "en" to price.toDouble(),
+            "vi" to price.toDouble() * EXCHANGE_RATE
         )
     }
 }
@@ -141,11 +141,11 @@ class AddProductScreenViewModel @Inject constructor(
         viewModelScope.launch {
             productUiState.value = ProductUiState.Loading
             try {
-//                _productZombie.value.variants = productVariants.value
                 Log.d(
                     "Product",
                     "onAddProduct: Variants ${productVariants.value}"
                 )
+                _productZombie.value.variants = productVariants.value
                 Log.d(
                     "Product",
                     "onAddProduct: Product ${_productZombie.value}"
@@ -179,7 +179,8 @@ class AddProductScreenViewModel @Inject constructor(
                     fileName = productVariantId,
                 )
             )
-            _productZombie.value.variants += variant
+//            _productZombie.value.variants += variant
+            productVariants.value += variant
             uploadImageState.value = VariantImageUiState.Success(imageUrl)
             Log.d("AddProductScreenViewModel", "productVariants: ${_productZombie.value.variants}")
         }

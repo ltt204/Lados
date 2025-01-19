@@ -49,6 +49,7 @@ import org.nullgroup.lados.screens.admin.product.AddProductScreen
 import org.nullgroup.lados.screens.admin.product.AddVariantScreen
 import org.nullgroup.lados.screens.admin.product.ManageProductScreen
 import org.nullgroup.lados.ui.theme.LadosTheme
+import org.nullgroup.lados.viewmodels.admin.product.AddProductScreenViewModel
 import org.nullgroup.lados.viewmodels.customer.profile.ProfileViewModel
 
 private const val TAG = "AdminGraph"
@@ -71,6 +72,8 @@ fun AdminGraph(
     var currentDestination by remember {
         mutableStateOf(startDestination)
     }
+    var addProductViewModel: AddProductScreenViewModel = hiltViewModel()
+
     ModalNavigationDrawer(
         modifier = modifier,
         drawerState = drawerState,
@@ -203,7 +206,8 @@ fun AdminGraph(
                     AddProductScreen(
                         modifier = Modifier,
                         paddingValues = innerPadding,
-                        navController = navController
+                        navController = navController,
+                        viewModel = addProductViewModel
                     )
                 }
 
@@ -219,7 +223,8 @@ fun AdminGraph(
                         modifier = Modifier,
                         productId = productId,
                         navController = navController,
-                        paddingValues = innerPadding
+                        paddingValues = innerPadding,
+                        viewModel = addProductViewModel
                     )
                 }
 
