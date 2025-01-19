@@ -109,8 +109,6 @@ class AuthRepositoryImpl(
         return try {
             val user =
                 userRepository.getUserFromFirestore(firebaseAuth.currentUser?.uid ?: "").getOrNull()
-            val user =
-                userRepository.getUserFromFirestore(firebaseAuth.currentUser?.uid ?: "").getOrNull()
 
             if (user != null) {
                 return ResourceState.Success(user)
@@ -128,8 +126,7 @@ class AuthRepositoryImpl(
                 if (authResult?.user != null) {
                     val userAuth =
                         userRepository.getUserFromFirestore(authResult.user?.uid ?: "").getOrNull()
-                    val userAuth =
-                        userRepository.getUserFromFirestore(authResult.user?.uid ?: "").getOrNull()
+
                     return ResourceState.Success(userAuth)
                 }
             }
@@ -148,8 +145,7 @@ class AuthRepositoryImpl(
                     sharedPreferences.saveAuthTokens(tokens.copy(idToken = newIdToken))
                     val userAuth =
                         userRepository.getUserFromFirestore(authResult.user?.uid ?: "").getOrNull()
-                    val userAuth =
-                        userRepository.getUserFromFirestore(authResult.user?.uid ?: "").getOrNull()
+
                     ResourceState.Success(userAuth)
                 } else {
                     ResourceState.Error("Failed to get new token")
