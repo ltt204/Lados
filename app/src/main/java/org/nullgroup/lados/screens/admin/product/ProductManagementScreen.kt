@@ -106,6 +106,7 @@ fun ManageProductScreen(
 ) {
     val products by viewModel.editProducts.collectAsState(emptyList())
     val categories by viewModel.categories.collectAsState(emptyList())
+    val isLoading by viewModel.isLoading.collectAsState(false)
 
     var selectedProduct by remember {
         mutableStateOf(null as String?)
@@ -234,18 +235,29 @@ fun ManageProductScreen(
                 onDeleteAllSelected = {}
             )
 
-            LazyColumn(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(products.size) { index ->
-                    ProductItem(products[index],
-                        onLongClick = {
-                            selectedProduct = products[index].id
-                            scope.launch {
-                                sheetState.show()
-                            }
-                        })
+            if(isLoading){
+                Box(
+                    modifier = Modifier.fillMaxSize()
+                ){
+                    CircularProgressIndicator(
+                        color = LadosTheme.colorScheme.primary,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(products.size) { index ->
+                        ProductItem(products[index],
+                            onLongClick = {
+                                selectedProduct = products[index].id
+                                scope.launch {
+                                    sheetState.show()
+                                }
+                            })
+                    }
                 }
             }
         }

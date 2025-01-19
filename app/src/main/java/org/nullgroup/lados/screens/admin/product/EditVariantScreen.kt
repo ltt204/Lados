@@ -89,13 +89,15 @@ fun EditVariantScreen(
         productUiState
     ){
         if(productUiState is EditProductUiState.Success){
-            Log.d(
-                "Check variant",
-                "Product variants: ${productUiState.product.variants}"
-            )
+
             currentVariant = productUiState.product.variants.first {
                 it.id == variantId
             }
+
+            Log.d(
+                "Check variant",
+                "Product variants: ${currentVariant}"
+            )
         }
     }
 
@@ -104,7 +106,7 @@ fun EditVariantScreen(
     var size by remember { mutableStateOf(currentVariant.size) }
     var color by remember { mutableStateOf(currentVariant.color) }
     var originalPrice by remember { mutableStateOf((currentVariant.originalPrice["en"]).toString()) }
-    var salePrice by remember { mutableStateOf((currentVariant.salePrice?.get("en")).toString()) }
+    var salePrice by remember { mutableStateOf("") }
     var priceOption by remember { mutableStateOf("USD") }
     var quantity by remember { mutableStateOf(currentVariant.quantityInStock.toString()) }
     var saleAmount by remember { mutableStateOf(currentVariant.saleAmount.toString()) }
@@ -122,6 +124,15 @@ fun EditVariantScreen(
 
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
     var imageByteArray by remember { mutableStateOf<ByteArray?>(null) }
+
+    LaunchedEffect(currentVariant) {
+        size = currentVariant.size
+        color = currentVariant.color
+        originalPrice = currentVariant.originalPrice["en"].toString()
+        salePrice = if(currentVariant.salePrice?.get("en") == null) "" else currentVariant.salePrice!!["en"].toString()
+        quantity = currentVariant.quantityInStock.toString()
+        saleAmount = currentVariant.saleAmount.toString()
+    }
 
     val context = LocalContext.current
 

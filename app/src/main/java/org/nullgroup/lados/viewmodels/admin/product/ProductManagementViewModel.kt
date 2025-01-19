@@ -91,6 +91,9 @@ class ProductManagementScreenViewModel @Inject constructor(
     private val _categories = MutableStateFlow<List<Category>>(emptyList())
     val categories: StateFlow<List<Category>> = _categories.asStateFlow()
 
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
     init {
         loadProducts()
         loadCategories()
@@ -99,6 +102,7 @@ class ProductManagementScreenViewModel @Inject constructor(
 
     private fun loadProducts() {
         viewModelScope.launch {
+            _isLoading.value = true
             val response = withContext(Dispatchers.IO) {
                 productRepository.getAllProductsFromFireStore()
             }
@@ -108,6 +112,7 @@ class ProductManagementScreenViewModel @Inject constructor(
                     _products.value = it
                     _editProducts.value = it
                 }
+                _isLoading.value = false
             }
         }
     }
@@ -129,9 +134,11 @@ class ProductManagementScreenViewModel @Inject constructor(
 
     fun searchProducts(query: String) {
         viewModelScope.launch {
+            _isLoading.value = true
             _editProducts.value = _products.value.filter { product ->
                 product.name.contains(query, ignoreCase = true)
             }
+            _isLoading.value = false
         }
     }
 
@@ -142,6 +149,7 @@ class ProductManagementScreenViewModel @Inject constructor(
         ratingOption: String,
     ) {
         viewModelScope.launch {
+            _isLoading.value = true
             val sort = getSortOption(sortOption)
             val priceRange = getRange(priceOption)
             val ratingRange = getRange(ratingOption)
@@ -180,6 +188,8 @@ class ProductManagementScreenViewModel @Inject constructor(
                     attributeSelector = sortSelectors,
                 )
             }
+
+            _isLoading.value = false
         }
     }
 
