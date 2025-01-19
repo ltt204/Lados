@@ -74,6 +74,12 @@ class EditProductScreenViewModel @Inject constructor(
         }
     }
 
+    fun setFirstTimeLoadData(value: Boolean){
+        viewModelScope.launch {
+            isFirstTimeLoadData = value
+        }
+    }
+
     fun loadProduct(productId: String){
         productUiState.value = EditProductUiState.Loading
         viewModelScope.launch {
@@ -123,6 +129,7 @@ class EditProductScreenViewModel @Inject constructor(
                 if (result.isSuccess) {
                     productUiState.value = EditProductUiState.Success(ProductRemoteModel())
                     _updateSuccess.value = true
+
                 } else {
                     productUiState.value = EditProductUiState.Error(result.exceptionOrNull()?.message ?: "An error occurred")
                     _updateSuccess.value = false
@@ -170,6 +177,28 @@ class EditProductScreenViewModel @Inject constructor(
             Log.d("AddProductScreenViewModel", "productVariants: ${productVariants.value}")
 
             uploadImageState.value = VariantImageUiState.Success(imageUrl)
+            Log.d("AddProductScreenViewModel", "zomebie productVariants: ${_productZombie.value.variants}")
+        }
+    }
+
+    fun deleteVariant(variant: ProductVariantRemoteModel){
+        viewModelScope.launch {
+            Log.d("UpdateProductScreenViewModel", "variant: $variant")
+
+            uploadImageState.value = VariantImageUiState.Loading
+            imageRepository.deleteImage(
+                child = "products",
+                fileName = variant.id,
+                extension = "png",
+            )
+
+            variant.images = listOf()
+
+            productVariants.value = productVariants.value.filter { it.id != variant.id }
+
+            _productZombie.value = _productZombie.value.copy(variants = productVariants.value)
+
+            uploadImageState.value = VariantImageUiState.Success("")
             Log.d("AddProductScreenViewModel", "zomebie productVariants: ${_productZombie.value.variants}")
         }
     }
