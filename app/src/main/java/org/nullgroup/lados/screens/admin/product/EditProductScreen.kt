@@ -1,6 +1,8 @@
 package org.nullgroup.lados.screens.admin.product
 
+import android.os.HandlerThread
 import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -79,11 +81,24 @@ fun EditProductScreen(
         if(updateSuccess){
             viewModel.clearProductVariants()
             viewModel.clearProductZombie()
-            navController.navigateUp()
+            viewModel.setFirstTimeLoadData(false)
+            navController.navigate(
+                Screen.Admin.ProductManagement.route
+            ) {
+                popUpTo( Screen.Admin.ProductManagement.route) {
+                    inclusive = true // Xóa cả màn hình hiện tại khỏi back stack
+                }
+            }
 
         }
     }
 
+    BackHandler {
+        viewModel.clearProductVariants()
+        viewModel.clearProductZombie()
+        viewModel.setFirstTimeLoadData(false)
+        navController.navigateUp()
+    }
 
 //    LaunchedEffect(key1 = productUiState) {
 //        if(productUiState is ProductUiState.Success){

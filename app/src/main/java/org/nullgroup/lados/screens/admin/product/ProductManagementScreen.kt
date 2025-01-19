@@ -382,7 +382,11 @@ fun ManageProductScreen(
                         }
                         onUpdateSelected = true
 
-                        navController.navigate(Screen.Admin.EditProduct.route + "/$selectedProduct")
+                        navController.navigate(Screen.Admin.EditProduct.route + "/$selectedProduct") {
+                            popUpTo(Screen.Admin.EditProduct.route) {
+                                inclusive = true // Xóa cả màn hình hiện tại khỏi back stack
+                            }
+                        }
 
                         // TODO: navigate to  product update. !!Care for variant, also image.
                     }) {
