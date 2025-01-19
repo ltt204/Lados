@@ -39,16 +39,10 @@ class CategoryManagementViewModel @Inject constructor(
     private val _deleteCategory = MutableStateFlow<Boolean>(false)
     val deleteCategory: StateFlow<Boolean> = _deleteCategory
 
-    init {
-        getSortedAndFilteredCategories()
-    }
-
     fun extractSortOption(sortOption: String): Pair<String, Boolean> {
         return when (sortOption) {
             "Name: A-Z" -> Pair("categoryName", true)
             "Name: Z-A" -> Pair("categoryName", false)
-            "Newest" -> Pair("createdAt", false)
-            "Oldest" -> Pair("createdAt", true)
             else -> Pair("categoryName", true)
         }
     }
@@ -60,7 +54,7 @@ class CategoryManagementViewModel @Inject constructor(
         ascending: Boolean = true
     ) {
         viewModelScope.launch {
-            _categoriesUiState.value = CategoryManagementUiState.Loading
+
 
             val result = categoryRepository.getAllSortedAndFilteredCategoriesFromFireStore(
                 filterField = filterField,
@@ -77,7 +71,6 @@ class CategoryManagementViewModel @Inject constructor(
                     result.exceptionOrNull()?.message ?: "Unknown error"
                 )
             }
-
         }
     }
 
@@ -114,6 +107,31 @@ class CategoryManagementViewModel @Inject constructor(
             }
         }
     }
+
+    fun deleteCategories(ids: List<String>) {
+        viewModelScope.launch {
+            _categoriesUiState.value = CategoryManagementUiState.Loading
+            ids.forEach {
+                try {
+                    val result = categoryRepository.deleteCategory(it)
+                    if (result.isSuccess) {
+                        imageRepository.deleteImage(
+                            "categories",
+                            it,
+                            extension = "jpg"
+                        )
+                    }
+                } catch (e: Exception) {
+                    _deleteCategory.value = false
+                }
+
+            }
+
+            _deleteCategory.value = true
+            _categoriesUiState.value = CategoryManagementUiState.Success(emptyList())
+        }
+    }
+
 }
 
 sealed class CategoryManagementUiState {

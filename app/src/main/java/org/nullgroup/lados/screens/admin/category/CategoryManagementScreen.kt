@@ -7,6 +7,7 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,6 +30,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -39,18 +41,22 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedIconButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -106,7 +112,9 @@ fun CategoryManagementScreen(
     val categoriesUiState by viewModel.categoriesUiState.collectAsState()
     val deleteCategory by viewModel.deleteCategory.collectAsState()
     var deleteConfirmation by remember { mutableStateOf(false) }
+    var deleteAllConfirmation by remember { mutableStateOf(false) }
     var deleteId by remember { mutableStateOf("") }
+    var deletedIds by remember { mutableStateOf(emptyList<String>()) }
 
     Log.d("ManageProductScreen", "products: $categoriesUiState")
 
@@ -114,6 +122,10 @@ fun CategoryManagementScreen(
         if(deleteCategory){
             viewModel.getSortedAndFilteredCategories()
         }
+    }
+
+    LaunchedEffect(Unit){
+        viewModel.getSortedAndFilteredCategories()
     }
 
     Scaffold(
@@ -194,7 +206,7 @@ fun CategoryManagementScreen(
                 onAddNewCategory = {
                     navController.navigate(Screen.Admin.AddCategory.route)
                 },
-                onDeleteAllSelected = { showConfirmDialog = true }
+                onDeleteAllSelected = { deleteAllConfirmation = true }
             )
 
             when (categoriesUiState) {
@@ -214,6 +226,13 @@ fun CategoryManagementScreen(
                                 onDelete = {
                                     deleteId = it
                                     deleteConfirmation = true
+                                },
+                                onChecked = {
+                                    deletedIds = if (deletedIds.contains(it)) {
+                                        deletedIds.filter { id -> id != it }
+                                    } else {
+                                        deletedIds + it
+                                    }
                                 }
                             )
                         }
@@ -272,6 +291,19 @@ fun CategoryManagementScreen(
                     onConfirm = {
                         viewModel.deleteCategory(deleteId)
                         deleteConfirmation = false
+                    }
+                )
+            }
+
+            if(deleteAllConfirmation){
+                ConfirmDialog(
+                    title = "Confirm delete all",
+                    message = "Are you sure you want to delete all chosen category?",
+                    onDismiss = { deleteAllConfirmation = false },
+                    onCancel = { deleteAllConfirmation = false },
+                    onConfirm = {
+                        viewModel.deleteCategories(deletedIds)
+                        deleteAllConfirmation = false
                     }
                 )
             }
@@ -396,9 +428,11 @@ fun CategoryItem(
     category: Category,
     onEdit: (String) -> Unit = {},
     onDelete: (String) -> Unit = {},
+    onChecked: (String) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     var expanded by remember { mutableStateOf(false) }
+    var isChecked by remember { mutableStateOf(false) }
 
     Card(
         modifier = Modifier
@@ -416,11 +450,30 @@ fun CategoryItem(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
+
+            Checkbox(
+                checked = isChecked,  // Trạng thái của checkbox
+                onCheckedChange = {
+                    isChecked = it
+                    onChecked(category.categoryId)
+                                  }, // Xử lý thay đổi trạng thái
+                modifier = Modifier.padding(top = 8.dp)
+            )
+
             SubcomposeAsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
                     .data(category.categoryImage)
                     .crossfade(true)
                     .build(),
+                loading = {
+                    LoadOnProgress(
+                        modifier = Modifier
+                            .clip(CircleShape)
+                    ) {
+                        CircularProgressIndicator(modifier = Modifier.size(30.dp))
+                        Spacer(modifier = Modifier.padding(top = 16.dp))
+                    }
+                },
                 modifier = Modifier
                     .size(40.dp)
                     .clip(CircleShape),
@@ -851,3 +904,62 @@ fun ConfirmDialog(
         }
     )
 }
+
+
+@Composable
+fun <T> DropdownMenuWithTextField(
+    label: String,
+    options: List<T>,
+    displayName: (T) -> String, // Hàm để hiển thị tên của mỗi item
+    selectedOption: T,
+    onOptionSelected: (T) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Column(modifier = Modifier.wrapContentSize()) {
+        OutlinedTextField(
+            value = displayName(selectedOption),
+            onValueChange = {}, // Không thay đổi giá trị khi nhập
+            readOnly = true, // Chỉ cho phép chọn từ menu
+            modifier = Modifier
+                .clickable { expanded = true }, // Mở menu khi nhấn
+            trailingIcon = {
+                Icon(
+                    imageVector = Icons.Default.ArrowDropDown,
+                    contentDescription = "Mở menu",
+                    modifier = Modifier.clickable {
+                        expanded = true
+                    }
+                )
+            },
+            placeholder = { Text(text = label, color = LadosTheme.colorScheme.onBackground) },
+            shape = RoundedCornerShape(12.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedContainerColor = LadosTheme.colorScheme.surfaceContainerHighest,
+                focusedBorderColor = LadosTheme.colorScheme.primary,
+                unfocusedContainerColor = LadosTheme.colorScheme.surfaceContainerHigh,
+                unfocusedBorderColor = Color.Transparent,
+                errorBorderColor = LadosTheme.colorScheme.error,
+                focusedTextColor = LadosTheme.colorScheme.onBackground,
+                unfocusedTextColor = LadosTheme.colorScheme.onBackground,
+                errorTextColor = LadosTheme.colorScheme.error,
+            )
+        )
+
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            options.forEach { option ->
+                DropdownMenuItem(
+                    text = { Text(text = displayName(option)) },
+                    onClick = {
+                        onOptionSelected(option) // Chọn tùy chọn và cập nhật trạng thái bên ngoài
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
+}
+

@@ -47,6 +47,33 @@ class EditCategoryViewModel @Inject constructor(
     var categoryPictureUiState: MutableState<CategoryPictureUiState> =
         mutableStateOf(CategoryPictureUiState.Initial(""))
 
+    private val _categories = MutableStateFlow<List<Category>>(emptyList())
+    val categories: StateFlow<List<Category>> = _categories.asStateFlow()
+
+    private val _originalParent = MutableStateFlow<Category?>(null)
+    val originalParent: StateFlow<Category?> = _originalParent.asStateFlow()
+
+
+    init {
+        getCategories()
+    }
+
+    private fun getCategories() {
+        viewModelScope.launch {
+            val result = categoryRepository.getAllCategoriesFromFireStore()
+            if (result.isSuccess) {
+                _categories.value += Category(
+                    categoryId = "",
+                    categoryName = "No parent",
+                    categoryImage = ""
+                )
+                _categories.value += result.getOrDefault(emptyList())
+            } else {
+                _categories.value = emptyList()
+            }
+        }
+    }
+
     fun onSaveClicked() {
         viewModelScope.launch {
             if (categoryUiState.value is EditCategoryUiState.Success) {
@@ -135,6 +162,17 @@ class EditCategoryViewModel @Inject constructor(
         }
     }
 
+    fun onParentCategoryChanged(parentId: String){
+        viewModelScope.launch {
+            delay(500)
+            if (categoryUiState.value is EditCategoryUiState.Success) {
+                isInfoChanged.value = true
+                val category = (categoryUiState.value as EditCategoryUiState.Success).category
+                categoryUiState.value = EditCategoryUiState.Success(category.copy(parentCategoryId = parentId))
+            }
+        }
+    }
+
 
     fun loadCategory(id: String) {
         categoryUiState.value = EditCategoryUiState.Loading
@@ -143,6 +181,9 @@ class EditCategoryViewModel @Inject constructor(
                 val currentCategory = categoryRepository.getCategoryRemoteByIdFromFireStore(id).getOrNull() ?: CategoryRemoteModel()
                 categoryUiState.value = EditCategoryUiState.Success(currentCategory)
                 categoryPictureUiState.value = CategoryPictureUiState.Initial(currentCategory.categoryImage)
+                Log.d("See parent Id", currentCategory.parentCategoryId)
+                Log.d("See parent Id", _categories.value.toString())
+                _originalParent.value = _categories.value.find { it.categoryId == currentCategory.parentCategoryId }
                 Log.d("EditCategoryViewModel", "Category picture: ${currentCategory.categoryImage}")
             } catch (e: Exception) {
                 categoryUiState.value = EditCategoryUiState.Error(e.message ?: "An error occurred")

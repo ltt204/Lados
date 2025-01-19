@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import org.nullgroup.lados.data.models.Category
 import org.nullgroup.lados.data.remote.models.CategoryRemoteModel
 import org.nullgroup.lados.data.repositories.interfaces.category.CategoryRepository
 import org.nullgroup.lados.data.repositories.interfaces.common.ImageRepository
@@ -25,8 +26,30 @@ class AddCategoryViewModel @Inject constructor(
     )
     val addCategoryUiState: StateFlow<AddCategoryUiState> = _addCategoryUiState.asStateFlow()
 
+    private val _categories = MutableStateFlow<List<Category>>(emptyList())
+    val categories: StateFlow<List<Category>> = _categories.asStateFlow()
 
-    fun addCategory(name: Map<String, String>, image: ByteArray) {
+    init {
+        getCategories()
+    }
+
+    private fun getCategories() {
+        viewModelScope.launch {
+            val result = categoryRepository.getAllCategoriesFromFireStore()
+            if (result.isSuccess) {
+                _categories.value += Category(
+                    categoryId = "",
+                    categoryName = "No parent",
+                    categoryImage = ""
+                )
+                _categories.value += result.getOrDefault(emptyList())
+            } else {
+                _categories.value = emptyList()
+            }
+        }
+    }
+
+    fun addCategory(name: Map<String, String>, image: ByteArray, parentCategory: Category? = null) {
         viewModelScope.launch {
             _addCategoryUiState.value = AddCategoryUiState.Loading
 
@@ -57,7 +80,8 @@ class AddCategoryViewModel @Inject constructor(
                 val category = CategoryRemoteModel(
                     categoryId = id.toString(),
                     categoryImage = url,
-                    categoryName = name
+                    categoryName = name,
+                    parentCategoryId = parentCategory?.categoryId ?: ""
                 )
 
                 val result = categoryRepository.updateCategory(id.toString(), category)

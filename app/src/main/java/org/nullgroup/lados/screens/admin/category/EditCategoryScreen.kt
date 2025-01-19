@@ -16,14 +16,17 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import org.nullgroup.lados.compose.signin.CustomTextField
+import org.nullgroup.lados.data.models.Category
 import org.nullgroup.lados.screens.customer.profile.ErrorContent
 import org.nullgroup.lados.screens.customer.profile.LoadingContent
 import org.nullgroup.lados.ui.theme.LadosTheme
@@ -59,9 +63,29 @@ fun EditCategoryScreen(
     var cancelConfirmation by remember { mutableStateOf(false) }
     val categoryInfo = viewModel.categoryUiState.value
     val categoryPictureUiState = viewModel.categoryPictureUiState.value
+    val originalParent = viewModel.originalParent.collectAsState()
     var isSaveClick by remember {
         mutableStateOf(false)
     }
+    val categories by viewModel.categories.collectAsState()
+
+
+    var selectedParentCategory by remember {
+        mutableStateOf(Category())
+    }
+    LaunchedEffect(
+        originalParent.value
+    ) {
+        if(originalParent.value != null){
+            selectedParentCategory = originalParent.value!!
+        }
+    }
+
+
+    Log.d(
+        "EditCategoryScreen",
+        "selectedParentCategory: ${selectedParentCategory?.categoryName}"
+    )
 
     LaunchedEffect(Unit) {
         viewModel.loadCategory(categoryId)
@@ -96,21 +120,7 @@ fun EditCategoryScreen(
         "EditCategoryScreen",
         "viName: $viName, enName: $enName"
     )
-    var name by rememberSaveable {
-        mutableStateOf(
-            mapOf(
-                "vi" to viName,
-                "en" to enName
-            )
-        )
-    }
 
-    LaunchedEffect(viName, enName) {
-        name = mapOf(
-            "vi" to viName,
-            "en" to enName
-        )
-    }
 
     Scaffold(
         modifier = Modifier
@@ -143,7 +153,7 @@ fun EditCategoryScreen(
             }
         }
 
-    ) { it -> val padding = it
+    ) { it ->
 
         when (categoryInfo) {
             is EditCategoryUiState.Loading -> {
@@ -152,11 +162,22 @@ fun EditCategoryScreen(
 
             is EditCategoryUiState.Success -> {
 
+                var name by rememberSaveable {
+                    mutableStateOf(
+                        mapOf(
+                            "vi" to categoryInfo.category.categoryName["vi"],
+                            "en" to categoryInfo.category.categoryName["en"]
+                        )
+                    )
+                }
+
 
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
                         .background(LadosTheme.colorScheme.background)
+                        .padding(it)
+                        .verticalScroll(rememberScrollState())
                         .padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
@@ -213,6 +234,26 @@ fun EditCategoryScreen(
                     )
 
                     Spacer(modifier = Modifier.size(4.dp))
+
+                    Text(
+                        text = "Parent category",
+                        style = LadosTheme.typography.titleMedium,
+                        color = LadosTheme.colorScheme.onBackground,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    DropdownMenuWithTextField(
+                        label = "Choose parent category",
+                        options = categories,
+                        onOptionSelected = { selectedOption ->
+                            // Handle the selected option
+                            selectedParentCategory = selectedOption
+                            viewModel.onParentCategoryChanged(selectedOption.categoryId)
+                        },
+                        selectedOption = selectedParentCategory,
+                        displayName = { it?.categoryName ?: "" }
+                    )
                 }
 
             }

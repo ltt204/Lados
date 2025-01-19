@@ -1,6 +1,7 @@
 package org.nullgroup.lados.screens.admin.category
 
 import android.net.Uri
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -15,14 +16,17 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -31,6 +35,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -38,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import org.nullgroup.lados.compose.signin.CustomTextField
+import org.nullgroup.lados.data.models.Category
 import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.utilities.toByteArray
@@ -54,6 +60,7 @@ fun AddCategoryScreen(
 ) {
 
     val addCategoryUiState by viewModel.addCategoryUiState.collectAsState()
+    val categories by viewModel.categories.collectAsState()
 
     var name by rememberSaveable {
         mutableStateOf(
@@ -66,6 +73,9 @@ fun AddCategoryScreen(
 
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
     var imageByteArray by remember { mutableStateOf<ByteArray?>(null) }
+
+    var parentCategory by remember { mutableStateOf(Category()) }
+    var selectedParentCategory by remember { mutableStateOf(Category()) }
 
     val context = LocalContext.current
 
@@ -83,7 +93,11 @@ fun AddCategoryScreen(
     }
 
     if (addCategoryUiState is AddCategoryUiState.Success) {
-        navController.navigate(Screen.Admin.CategoryManagement.route)
+        LaunchedEffect(Unit) {
+            navController.navigate(Screen.Admin.CategoryManagement.route) {
+                popUpTo(Screen.Admin.CategoryManagement.route) { inclusive = true }
+            }
+        }
     }
 
     Scaffold(
@@ -102,7 +116,8 @@ fun AddCategoryScreen(
                     onClick = {
                         viewModel.addCategory(
                             name = name,
-                            image = imageByteArray ?: ByteArray(0)
+                            image = imageByteArray ?: ByteArray(0),
+                            parentCategory = selectedParentCategory
                         )
                     }, shape = RoundedCornerShape(12.dp), colors = ButtonDefaults.buttonColors(
                         containerColor = LadosTheme.colorScheme.primary,
@@ -126,7 +141,10 @@ fun AddCategoryScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .background(LadosTheme.colorScheme.background)
-                .padding(16.dp),
+                .padding(it)
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp)
+               ,
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             if (addCategoryUiState is AddCategoryUiState.Loading) {
@@ -192,6 +210,25 @@ fun AddCategoryScreen(
                 )
 
                 Spacer(modifier = Modifier.size(4.dp))
+
+                Text(
+                    text = "Parent category",
+                    style = LadosTheme.typography.titleMedium,
+                    color = LadosTheme.colorScheme.onBackground,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                DropdownMenuWithTextField(
+                    label = "Choose parent category",
+                    options = categories,
+                    onOptionSelected = { selectedOption ->
+                        // Handle the selected option
+                        selectedParentCategory = selectedOption
+                    },
+                    selectedOption = selectedParentCategory,
+                    displayName = { it.categoryName }
+                )
 
             }
         }
