@@ -21,7 +21,7 @@ class OrderDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val orderRepository: OrderRepository
 ) : ViewModel() {
-    private val orderId =
+    public val orderId =
         checkNotNull(savedStateHandle.get<String>(Screen.Customer.Order.OrderDetail.ID_ARG))
 
     private var _orderDetailState = MutableStateFlow<OrderDetailState>(OrderDetailState.Loading)

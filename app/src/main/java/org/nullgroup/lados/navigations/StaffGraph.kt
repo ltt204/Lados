@@ -14,10 +14,10 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -46,10 +46,14 @@ import androidx.navigation.navArgument
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.nullgroup.lados.screens.Screen
+import org.nullgroup.lados.screens.customer.order.OrderProductsViewScreen
 import org.nullgroup.lados.screens.customer.product.ProductDetailScreen
 import org.nullgroup.lados.screens.staff.chat.ChatScreen
 import org.nullgroup.lados.screens.staff.chat.ChatWithCustomerScreen
 import org.nullgroup.lados.screens.staff.chat.SearchScreen
+import org.nullgroup.lados.screens.staff.ordermanagement.OrderDetailScreen
+import org.nullgroup.lados.screens.staff.ordermanagement.OrderListScreen
+import org.nullgroup.lados.screens.staff.ordermanagement.OrderProductsScreen
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.viewmodels.customer.profile.ProfileViewModel
 
@@ -65,7 +69,7 @@ fun StaffGraph(
     drawerState: DrawerState = rememberDrawerState(DrawerValue.Closed),
     scrollBehavior: TopAppBarScrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(),
     scope: CoroutineScope = rememberCoroutineScope(),
-    viewModel: ProfileViewModel = hiltViewModel()
+    viewModel: ProfileViewModel = hiltViewModel(),
 ) {
     var currentDestination by remember {
         mutableStateOf(startDestination)
@@ -74,19 +78,29 @@ fun StaffGraph(
         mutableStateOf(true)
     }
     ModalNavigationDrawer(
-        modifier = modifier,
         drawerState = drawerState,
         drawerContent = {
-            ModalDrawerSheet {
+            ModalDrawerSheet(
+                drawerContainerColor = LadosTheme.colorScheme.surfaceContainer,
+            ) {
                 Column {
                     Text(
                         "Staff panel",
-                        style = MaterialTheme.typography.headlineSmall,
+                        style = LadosTheme.typography.headlineSmall,
+                        color = LadosTheme.colorScheme.onBackground,
                         modifier = Modifier.padding(16.dp)
                     )
-                    HorizontalDivider()
+                    HorizontalDivider(Modifier.padding(bottom = LadosTheme.size.medium))
                     NavigationDrawerItem(
-                        label = { Text(text = Screen.Staff.ChatScreen.name!!) },
+                        modifier = Modifier.padding(horizontal = LadosTheme.size.medium),
+                        label = {
+                            Text(
+                                text = Screen.Staff.ChatScreen.name!!,
+                                color = if (currentDestination.route == Screen.Staff.ChatScreen.route)
+                                    LadosTheme.colorScheme.onPrimary else LadosTheme.colorScheme.onBackground,
+                                modifier = Modifier.padding(start = LadosTheme.size.medium),
+                            )
+                        },
                         selected = currentDestination.route == Screen.Staff.ChatScreen.route,
                         onClick = {
                             scope.launch {
@@ -94,10 +108,21 @@ fun StaffGraph(
                             }
                             currentDestination = Screen.Staff.ChatScreen
                             navController.navigate(Screen.Staff.ChatScreen.route)
-                        }
+                        },
+                        colors = NavigationDrawerItemDefaults.colors(
+                            selectedContainerColor = LadosTheme.colorScheme.primary,
+                        ),
                     )
                     NavigationDrawerItem(
-                        label = { Text(text = Screen.Staff.OrderManagement.name!!) },
+                        modifier = Modifier.padding(horizontal = LadosTheme.size.medium),
+                        label = {
+                            Text(
+                                text = Screen.Staff.OrderManagement.name!!,
+                                color = if (currentDestination.route == Screen.Staff.OrderManagement.route)
+                                    LadosTheme.colorScheme.onPrimary else LadosTheme.colorScheme.onBackground,
+                                modifier = Modifier.padding(start = LadosTheme.size.medium),
+                            )
+                        },
                         selected = currentDestination.route == Screen.Staff.OrderManagement.route,
                         onClick = {
                             scope.launch {
@@ -105,7 +130,10 @@ fun StaffGraph(
                             }
                             currentDestination = Screen.Staff.OrderManagement
                             navController.navigate(Screen.Staff.OrderManagement.route)
-                        }
+                        },
+                        colors = NavigationDrawerItemDefaults.colors(
+                            selectedContainerColor = LadosTheme.colorScheme.primary,
+                        ),
                     )
                 }
                 TextButton(
@@ -131,7 +159,12 @@ fun StaffGraph(
                         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                             containerColor = LadosTheme.colorScheme.background
                         ),
-                        title = { Text(text = currentDestination.name!!) },
+                        title = {
+                            Text(
+                                text = currentDestination.name!!,
+                                color = LadosTheme.colorScheme.onBackground
+                            )
+                        },
                         navigationIcon = {
                             IconButton(onClick = {
                                 Log.d("AdminTopAppBar", "onDrawerClick")
@@ -142,7 +175,8 @@ fun StaffGraph(
                             }) {
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Default.List,
-                                    contentDescription = "Back button"
+                                    contentDescription = "Back button",
+                                    tint = LadosTheme.colorScheme.onBackground,
                                 )
                             }
                         },
@@ -168,10 +202,26 @@ fun StaffGraph(
                             }
 
                             Screen.Staff.OrderManagement.route -> {
-                                // Reports()
+                                isVisibility = true
+                                OrderListScreen(
+                                    navController = navController,
+                                    paddingValues = innerPadding,
+                                    modifier = modifier,
+                                )
                             }
                         }
                     }
+                }
+
+                composable(
+                    route = Screen.Staff.SearchScreen.route
+                ) {
+                    isVisibility = false
+                    SearchScreen(
+                        modifier = Modifier,
+                        navController = navController,
+                        paddingValues = innerPadding,
+                    )
                 }
 
                 composable(
@@ -213,6 +263,50 @@ fun StaffGraph(
                     ProductDetailScreen(
                         productId = productId,
                         navController = navController,
+                    )
+                }
+
+                composable(
+                    Screen.Staff.OrderDetail.ROUTE_WITH_ARG,
+                    arguments = listOf(
+                        navArgument(Screen.Staff.OrderDetail.ID_ARG) {
+                            type = NavType.StringType
+                        })
+                ) {
+                    isVisibility = false
+                    OrderDetailScreen(
+                        modifier = modifier,
+                        navController = navController,
+                    )
+                }
+
+                composable(
+                    Screen.Customer.Order.OrderProductsView.ROUTE_WITH_ARG,
+                    arguments = listOf(
+                        navArgument(Screen.Customer.Order.OrderProductsView.ID_ARG) {
+                            type = NavType.StringType
+                        })
+                ) {
+                    isVisibility = false
+                    OrderProductsViewScreen(
+                        modifier = modifier,
+                        navController = navController,
+                        paddingValues = innerPadding
+                    )
+                }
+
+                composable(
+                    Screen.Staff.OrderProducts.ROUTE_WITH_ARG,
+                    arguments = listOf(
+                        navArgument(Screen.Staff.OrderProducts.ID_ARG) {
+                            type = NavType.StringType
+                        })
+                ) {
+                    isVisibility = false
+                    OrderProductsScreen(
+                        modifier = modifier,
+                        navController = navController,
+                        paddingValues = innerPadding
                     )
                 }
             }

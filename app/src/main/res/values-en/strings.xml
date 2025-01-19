@@ -120,8 +120,10 @@
     <string name="cancel_order">Cancel</string>
     <string name="return_order">Return</string>
     <string name="are_you_sure">Are you sure?</string>
-    <string name="order_cancel_return_message">Please contact our staffs to %1$s this order.</string>
+    <string name="order_cancel_return_message">Please contact store staff for assistance.</string>
     <string name="delivery_detail">Delivery Details</string>
+    <string name="order_title_with_id">Order code:</string>
+    <string name="order_id_is_copied_message">Order id is copied to clipboard</string>
     <string name="wishlist_empty">Your wishlist is empty</string>
     <string name="wishlist_empty_description">Empty wishlist</string>
     <string name="wishlist_back_description">Back</string>

@@ -405,6 +405,7 @@ fun MessageItem(
                                 Text(
                                     text = "Product Shared",
                                     style = LadosTheme.typography.titleSmall,
+                                color = LadosTheme.colorScheme.onBackground,
                                 )
 
                                 Text(
