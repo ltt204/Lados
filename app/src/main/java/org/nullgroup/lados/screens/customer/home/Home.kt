@@ -664,7 +664,7 @@ fun DrawProductScreenContent(
                     ProductRow(
                         onProductClick = onProductClick,
                         products = (productUiState.value as ProductUiState.Success).products.sortedByDescending { it.createdAt }
-                            .take(1),
+                            .take(3),
                         isIconToggled = isProductInWishList,
                         onToggleIcon = switchWishListState,
                     )
