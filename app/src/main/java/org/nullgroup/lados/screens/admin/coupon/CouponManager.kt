@@ -54,10 +54,10 @@ import org.nullgroup.lados.compose.cart.ConfirmDialog
 import org.nullgroup.lados.compose.cart.DialogInfo
 import org.nullgroup.lados.compose.coupon.ServerCouponItem
 import org.nullgroup.lados.data.models.ServerCoupon
-import org.nullgroup.lados.data.models.currentHostTimeZoneInString
-import org.nullgroup.lados.data.models.toDurationInSeconds
-import org.nullgroup.lados.data.models.toLocalDateTime
 import org.nullgroup.lados.ui.theme.LadosTheme
+import org.nullgroup.lados.utilities.datetime.currentHostTimeZoneInString
+import org.nullgroup.lados.utilities.datetime.toDurationInSeconds
+import org.nullgroup.lados.utilities.datetime.toLocalDateTime
 import org.nullgroup.lados.viewmodels.admin.coupon.CouponManagerUiState
 import org.nullgroup.lados.viewmodels.admin.coupon.CouponManagerViewModel
 
@@ -115,7 +115,7 @@ fun CouponManager(
     val updateCouponFailedTitle = stringResource(R.string.coupon_update_failed_title)
     val updateCouponFailedMessage = stringResource(R.string.coupon_update_failed_message)
 
-    val onFormSubmitted = { coupon: ServerCoupon ->
+    val onFormSubmitted = fun(coupon: ServerCoupon) {
         if (selectedCoupon == null) {
             scope.launch(Dispatchers.IO) {
                 couponManagerViewModel.handleCouponCreation(
@@ -137,6 +137,7 @@ fun CouponManager(
                     }
                 )
             }
+            return
         } else {
             scope.launch(Dispatchers.IO) {
                 couponManagerViewModel.handleCouponUpdate(

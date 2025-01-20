@@ -25,7 +25,7 @@ import org.nullgroup.lados.compose.cart.ConfirmDialog
 import org.nullgroup.lados.compose.cart.DialogInfo
 import org.nullgroup.lados.compose.coupon.CouponForm
 import org.nullgroup.lados.data.models.ServerCoupon
-import org.nullgroup.lados.data.models.currentHostTimeZoneInString
+import org.nullgroup.lados.utilities.datetime.currentHostTimeZoneInString
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.viewmodels.admin.coupon.CouponFormEvent
 import org.nullgroup.lados.viewmodels.admin.coupon.CouponFormViewModel

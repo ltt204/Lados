@@ -11,8 +11,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.nullgroup.lados.data.models.CustomerCoupon
 import org.nullgroup.lados.data.models.ServerCoupon
-import org.nullgroup.lados.data.models.currentHostTimeZoneInString
-import org.nullgroup.lados.data.models.toTimestamp
+import org.nullgroup.lados.utilities.datetime.currentHostTimeZoneInString
+import org.nullgroup.lados.utilities.datetime.toTimestamp
 import org.nullgroup.lados.data.repositories.interfaces.coupon.CouponRepository
 import java.time.LocalDateTime
 import javax.inject.Inject

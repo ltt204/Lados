@@ -28,17 +28,30 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.OffsetMapping
+import androidx.compose.ui.text.input.TransformedText
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.nullgroup.lados.R
 import org.nullgroup.lados.ui.theme.LadosTheme
+import org.nullgroup.lados.utilities.datetime.toDateMillis
+import org.nullgroup.lados.utilities.datetime.toDayCountsFromSeconds
+import org.nullgroup.lados.utilities.datetime.toTimeOfDateMillisWith
+import org.nullgroup.lados.utilities.datetime.toTimeOfDayMillis
+import org.nullgroup.lados.utilities.datetime.toTimeOfDayMillisFromSeconds
+import org.nullgroup.lados.utilities.datetime.toZoneOffset
+import org.nullgroup.lados.utilities.text.DOUBLE_EQUALITY_DELTA
+import org.nullgroup.lados.utilities.text.toTextFieldString
 import org.nullgroup.lados.viewmodels.admin.coupon.CouponFormEvent
 import org.nullgroup.lados.viewmodels.admin.coupon.CouponFormUiState
-import java.time.LocalDateTime
-import java.time.LocalTime
 
 @Composable
 fun CouponForm(
@@ -56,15 +69,30 @@ fun CouponForm(
     val maximumRedemption = couponFormUiState.maximumRedemption
     val autoFetching = couponFormUiState.autoFetching
 
+    val zoneOffset = startDate.value.toZoneOffset(couponFormUiState.dateZoneId)
+
     val outlineTextFieldColors = OutlinedTextFieldDefaults.colors(
         focusedContainerColor = LadosTheme.colorScheme.surfaceContainerHighest,
         focusedBorderColor = LadosTheme.colorScheme.primary,
+        focusedTextColor = LadosTheme.colorScheme.onBackground,
+        focusedLabelColor = LadosTheme.colorScheme.onBackground,
+        focusedPlaceholderColor = LadosTheme.colorScheme.onBackground.copy(alpha = 0.37f),
         unfocusedContainerColor = LadosTheme.colorScheme.surfaceContainerHigh,
         unfocusedBorderColor = Color.Transparent,
-        errorBorderColor = LadosTheme.colorScheme.error,
-        focusedTextColor = LadosTheme.colorScheme.onBackground,
         unfocusedTextColor = LadosTheme.colorScheme.onBackground,
+        unfocusedLabelColor = LadosTheme.colorScheme.onBackground,
+        unfocusedPlaceholderColor = LadosTheme.colorScheme.onBackground.copy(alpha = 0.37f),
+        errorBorderColor = LadosTheme.colorScheme.error,
         errorTextColor = LadosTheme.colorScheme.error,
+        disabledContainerColor = LadosTheme.colorScheme.surfaceContainerLow.copy(alpha = 0.37f),
+        disabledTextColor = LadosTheme.colorScheme.onBackground.copy(alpha = 0.37f),
+        disabledLabelColor = LadosTheme.colorScheme.onBackground.copy(alpha = 0.37f),
+        disabledPlaceholderColor = LadosTheme.colorScheme.onBackground.copy(alpha = 0.37f),
+        disabledTrailingIconColor = LadosTheme.colorScheme.onBackground.copy(alpha = 0.37f),
+    )
+
+    val placeholderSpanStyle = SpanStyle(
+        color = LadosTheme.colorScheme.onBackground.copy(alpha = 0.37f),
     )
 
     val scrollOffset = remember { mutableFloatStateOf(0f) }
@@ -133,7 +161,7 @@ fun CouponForm(
         OutlinedTextField(
             value = discountPercentage.value.toString(),
             onValueChange = {
-                handleEvent(CouponFormEvent.DiscountPercentageChanged(it.toIntOrNull() ?: 0))
+                handleEvent(CouponFormEvent.DiscountPercentageChanged(it))
             },
             modifier = Modifier.width(128.dp),
             keyboardOptions = KeyboardOptions(
@@ -153,9 +181,10 @@ fun CouponForm(
             onToggled = { handleEvent(CouponFormEvent.MaximumDiscountNullMarkChanged) },
         ) {
             OutlinedTextField(
-                value = maximumDiscount.value?.toString() ?: "",
+                value = maximumDiscount.value.toTextFieldString() +
+                        if (maximumDiscount.preservingDecimalPoint) "." else "",
                 onValueChange = {
-                    handleEvent(CouponFormEvent.MaximumDiscountChanged(it.toDoubleOrNull() ?: 0.0))
+                    handleEvent(CouponFormEvent.MaximumDiscountChanged(it))
                 },
                 modifier = Modifier.width(256.dp),
                 enabled = !isMaximumDiscountMarkedAsNull,
@@ -167,6 +196,10 @@ fun CouponForm(
                 ),
                 label = { Text(stringResource(R.string.coupon_form_maximum_discount)) },
                 isError = maximumDiscount.isError,
+                visualTransformation = if (maximumDiscount.value == null) PlaceholderTransformation(
+                    "null", placeholderSpanStyle
+                )
+                else VisualTransformation.None,
                 shape = LadosTheme.shape.medium,
                 colors = outlineTextFieldColors,
             )
@@ -174,9 +207,10 @@ fun CouponForm(
 
         // Minimum order amount
         OutlinedTextField(
-            value = minimumOrderAmount.value.toString(),
+            value = minimumOrderAmount.value.toTextFieldString() +
+                    if (minimumOrderAmount.preservingDecimalPoint) "." else "",
             onValueChange = {
-                handleEvent(CouponFormEvent.MinimumOrderAmountChanged(it.toDoubleOrNull() ?: 0.0))
+                handleEvent(CouponFormEvent.MinimumOrderAmountChanged(it))
             },
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Decimal,
@@ -184,6 +218,10 @@ fun CouponForm(
             modifier = Modifier.width(256.dp),
             label = { Text(stringResource(R.string.coupon_form_minimum_order_amount)) },
             isError = minimumOrderAmount.isError,
+            visualTransformation = if (minimumOrderAmount.value < DOUBLE_EQUALITY_DELTA) PlaceholderTransformation(
+                "0", placeholderSpanStyle
+            )
+            else VisualTransformation.None,
             shape = LadosTheme.shape.medium,
             colors = outlineTextFieldColors,
         )
@@ -194,17 +232,16 @@ fun CouponForm(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            val currentDate = startDate.value.toLocalDate()
-            val currentTime = startDate.value.toLocalTime()
             DatePickerTextField(
-                currentDate = currentDate,
+                currentDateMillis = startDate.value.toDateMillis(),
                 onDateSelected = {
                     handleEvent(
                         CouponFormEvent.StartDateChanged(
-                            LocalDateTime.of(it, currentTime)
+                            it, null
                         )
                     )
                 },
+                zoneId = couponFormUiState.dateZoneId,
                 modifier = Modifier.width(196.dp),
                 label = { Text(stringResource(R.string.coupon_form_start_date)) },
                 isError = startDate.isError,
@@ -213,14 +250,15 @@ fun CouponForm(
             )
             Spacer(modifier = Modifier.width(LadosTheme.size.medium))
             TimePickerTextField(
-                currentTime = currentTime,
+                currentTimeOfDayMillis = startDate.value.toTimeOfDayMillis(),
                 onTimeSelected = {
                     handleEvent(
                         CouponFormEvent.StartDateChanged(
-                            LocalDateTime.of(currentDate, it)
+                            null, it?.toTimeOfDateMillisWith(zoneOffset)
                         )
                     )
                 },
+                zoneOffset = zoneOffset,
                 modifier = Modifier.width(128.dp),
                 label = { Text(stringResource(R.string.coupon_form_start_time)) },
                 isError = startDate.isError,
@@ -236,14 +274,12 @@ fun CouponForm(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            val currentDate = endDate.value.toLocalDate()
-            val currentTime = endDate.value.toLocalTime()
             DatePickerTextField(
-                currentDate = currentDate,
+                currentDateMillis = endDate.value.toDateMillis(),
                 onDateSelected = {
                     handleEvent(
                         CouponFormEvent.EndDateChanged(
-                            LocalDateTime.of(it, currentTime)
+                            it, null
                         )
                     )
                 },
@@ -255,11 +291,11 @@ fun CouponForm(
             )
             Spacer(modifier = Modifier.width(LadosTheme.size.medium))
             TimePickerTextField(
-                currentTime = currentTime,
+                currentTimeOfDayMillis = endDate.value.toTimeOfDayMillis(),
                 onTimeSelected = {
                     handleEvent(
                         CouponFormEvent.EndDateChanged(
-                            LocalDateTime.of(currentDate, it)
+                            null, it
                         )
                     )
                 },
@@ -281,20 +317,12 @@ fun CouponForm(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                val oneDayInSecond: Long = 60 * 60 * 24
-                val oneHourInSecond = 60 * 60
-                var oneMinuteInSecond = 60
-                val usageDurationInDays = (usageDuration.value ?: 0.0.toLong()) / oneDayInSecond
-                val exceedingTimeLessThanOneDay =
-                    (usageDuration.value ?: 0.0.toLong()) % oneDayInSecond
-
                 OutlinedTextField(
-                    value = usageDurationInDays.toString(),
+                    value = usageDuration.value?.toDayCountsFromSeconds()?.toString() ?: "",
                     onValueChange = {
                         handleEvent(
                             CouponFormEvent.UsageDurationChanged(
-                                (it.toLongOrNull()
-                                    ?: 0) * oneDayInSecond + exceedingTimeLessThanOneDay
+                                it, null
                             )
                         )
                     },
@@ -308,20 +336,20 @@ fun CouponForm(
                     ),
                     label = { Text(stringResource(R.string.coupon_form_usage_duration_day)) },
                     isError = usageDuration.isError,
+                    visualTransformation = if (usageDuration.value == null) PlaceholderTransformation(
+                        "null", placeholderSpanStyle
+                    )
+                    else VisualTransformation.None,
                     shape = LadosTheme.shape.medium,
                     colors = outlineTextFieldColors,
                 )
                 Spacer(modifier = Modifier.width(LadosTheme.size.medium))
-                val currentTime = LocalTime.of(
-                    (exceedingTimeLessThanOneDay / oneHourInSecond).toInt(),
-                    ((exceedingTimeLessThanOneDay % oneHourInSecond) / oneMinuteInSecond).toInt()
-                )
                 TimePickerTextField(
-                    currentTime = currentTime,
+                    currentTimeOfDayMillis = usageDuration.value?.toTimeOfDayMillisFromSeconds(),
                     onTimeSelected = {
                         handleEvent(
                             CouponFormEvent.UsageDurationChanged(
-                                it.hour.toLong() * oneHourInSecond + it.minute.toLong() * oneMinuteInSecond + usageDurationInDays * oneDayInSecond
+                                null, it?.let { millis -> millis / 1000 }
                             )
                         )
                     },
@@ -344,7 +372,7 @@ fun CouponForm(
             OutlinedTextField(
                 value = maximumRedemption.value?.toString() ?: "",
                 onValueChange = {
-                    handleEvent(CouponFormEvent.MaximumRedemptionChanged(it.toIntOrNull() ?: 0))
+                    handleEvent(CouponFormEvent.MaximumRedemptionChanged(it))
                 },
                 modifier = Modifier.width(128.dp),
                 enabled = !isMaximumRedemptionMarkedAsNull,
@@ -356,6 +384,10 @@ fun CouponForm(
                 ),
                 label = { Text(stringResource(R.string.coupon_form_maximum_redemption)) },
                 isError = maximumRedemption.isError,
+                visualTransformation = if (maximumRedemption.value == null) PlaceholderTransformation(
+                    "null", placeholderSpanStyle
+                )
+                else VisualTransformation.None,
                 shape = LadosTheme.shape.medium,
                 colors = outlineTextFieldColors,
             )
@@ -383,6 +415,39 @@ fun CouponForm(
 //        }
     }
 }
+
+// https://stackoverflow.com/questions/75294655/equivalent-of-expandedhintenabled-in-jetpack-compose-textfield
+class PlaceholderTransformation(
+    val placeholder: String,
+    val spanStyle: SpanStyle = SpanStyle(),
+) : VisualTransformation {
+    override fun filter(text: AnnotatedString): TransformedText {
+        return placeholderFilter(text, placeholder)
+    }
+
+    fun placeholderFilter(text: AnnotatedString, placeholder: String): TransformedText {
+
+        val numberOffsetTranslator = object : OffsetMapping {
+            override fun originalToTransformed(offset: Int): Int {
+                return 0
+            }
+
+            override fun transformedToOriginal(offset: Int): Int {
+                return 0
+            }
+        }
+
+        return TransformedText(
+            buildAnnotatedString {
+                withStyle(spanStyle) {
+                    append(placeholder)
+                }
+            },
+            numberOffsetTranslator
+        )
+    }
+}
+
 
 @Composable
 private fun NullableInputWrapper(

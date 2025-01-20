@@ -20,8 +20,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import org.nullgroup.lados.R
 import org.nullgroup.lados.data.models.CustomerCoupon
-import org.nullgroup.lados.data.models.currentHostTimeZoneInString
-import org.nullgroup.lados.data.models.toLocalDateTime
+import org.nullgroup.lados.utilities.datetime.currentHostTimeZoneInString
+import org.nullgroup.lados.utilities.datetime.toLocalDateTime
 import org.nullgroup.lados.ui.theme.LadosTheme
 
 @Composable

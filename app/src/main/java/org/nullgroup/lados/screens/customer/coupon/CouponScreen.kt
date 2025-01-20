@@ -52,8 +52,8 @@ import org.nullgroup.lados.compose.coupon.CouponItem
 import org.nullgroup.lados.compose.coupon.ItemState
 import org.nullgroup.lados.compose.signin.CustomTextField
 import org.nullgroup.lados.data.models.CustomerCoupon
-import org.nullgroup.lados.data.models.currentHostTimeZoneInString
-import org.nullgroup.lados.data.models.toLocalDateTime
+import org.nullgroup.lados.utilities.datetime.currentHostTimeZoneInString
+import org.nullgroup.lados.utilities.datetime.toLocalDateTime
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.utilities.toCurrency
 import org.nullgroup.lados.viewmodels.customer.coupon.CouponUiState

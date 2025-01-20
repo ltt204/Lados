@@ -24,35 +24,29 @@ import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import org.nullgroup.lados.compose.cart.ConfirmDialog
 import org.nullgroup.lados.compose.cart.DialogInfo
-import org.nullgroup.lados.data.models.currentHostTimeZoneInString
-import org.nullgroup.lados.data.models.timestampFromNow
-import org.nullgroup.lados.data.models.toLocalDateTime
-import org.nullgroup.lados.data.models.toTimestamp
-import java.time.LocalDate
-import java.time.LocalDateTime
+import org.nullgroup.lados.utilities.datetime.toDateStringFromEpochMillis
 import java.time.LocalTime
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DatePickerTextField(
-    currentDate: LocalDate,
-    onDateSelected: (LocalDate) -> Unit,
+    currentDateMillis: Long?,
+    onDateSelected: (Long?) -> Unit,
+    zoneId: String = "UTC",
     modifier: Modifier = Modifier,
     label: @Composable (() -> Unit)? = null,
     isError: Boolean = false,
     shape: Shape = OutlinedTextFieldDefaults.shape,
     colors: TextFieldColors = OutlinedTextFieldDefaults.colors()
 ) {
-    val zoneId = currentHostTimeZoneInString()
-
     val dialogInfoState = remember { mutableStateOf<DialogInfo?>(null) }
     val datePickerState = rememberDatePickerState(
-        initialSelectedDateMillis = LocalDateTime.of(currentDate, LocalTime.MIDNIGHT)
-            .toTimestamp(zoneId).seconds * 1000
+        initialSelectedDateMillis = currentDateMillis
     )
 
-    var showDatePickerDialog = { currentDate: LocalDate ->
+    var showDatePickerDialog = {
         dialogInfoState.value = DialogInfo(
             message = @Composable {
                 DatePicker(
@@ -60,10 +54,7 @@ fun DatePickerTextField(
                 )
             },
             onConfirm = {
-                val selectedDate = datePickerState.selectedDateMillis?.let {
-                    timestampFromNow(it / 1000).toLocalDateTime(zoneId).toLocalDate()
-                }
-                selectedDate?.let { onDateSelected(it) }
+                onDateSelected(datePickerState.selectedDateMillis)
                 dialogInfoState.value = null
             },
             onCancel = {
@@ -75,10 +66,10 @@ fun DatePickerTextField(
     ConfirmDialog(dialogInfoState.value)
 
     OutlinedTextField(
-        value = currentDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+        value = currentDateMillis?.toDateStringFromEpochMillis(zoneId) ?: "",
         onValueChange = { },
         modifier = modifier
-            .pointerInput(currentDate) {
+            .pointerInput(currentDateMillis) {
                 awaitEachGesture {
                     // https://developer.android.com/develop/ui/compose/components/datepickers
 
@@ -88,7 +79,7 @@ fun DatePickerTextField(
                     awaitFirstDown(pass = PointerEventPass.Initial)
                     val upEvent = waitForUpOrCancellation(pass = PointerEventPass.Initial)
                     if (upEvent != null) {
-                        showDatePickerDialog(currentDate)
+                        showDatePickerDialog()
                     }
                 }
             },
@@ -108,8 +99,9 @@ fun DatePickerTextField(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TimePickerTextField(
-    currentTime: LocalTime,
-    onTimeSelected: (LocalTime) -> Unit,
+    currentTimeOfDayMillis: Long?,
+    onTimeSelected: (Long?) -> Unit,
+    zoneOffset: ZoneOffset? = null,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     label: @Composable (() -> Unit)? = null,
@@ -117,6 +109,16 @@ fun TimePickerTextField(
     shape: Shape = OutlinedTextFieldDefaults.shape,
     colors: TextFieldColors = OutlinedTextFieldDefaults.colors()
 ) {
+    val currentTime = remember(currentTimeOfDayMillis, zoneOffset) {
+        (
+            if (currentTimeOfDayMillis == null) LocalTime.now()
+            else LocalTime.ofSecondOfDay(currentTimeOfDayMillis / 1000)
+        ).let {
+            if (zoneOffset != null) it.atOffset(zoneOffset).toLocalTime()
+            else it
+        }
+    }
+
     val dialogInfoState = remember { mutableStateOf<DialogInfo?>(null) }
     val timePickerState = rememberTimePickerState(
         initialHour = currentTime.hour,
@@ -133,7 +135,7 @@ fun TimePickerTextField(
             },
             onConfirm = {
                 val selectedTime = LocalTime.of(timePickerState.hour, timePickerState.minute)
-                onTimeSelected(selectedTime)
+                onTimeSelected((selectedTime.hour.toLong() * 60L + selectedTime.minute.toLong()) * 60L * 1000L)
                 dialogInfoState.value = null
             },
             onCancel = {
@@ -145,7 +147,9 @@ fun TimePickerTextField(
     ConfirmDialog(dialogInfoState.value)
 
     OutlinedTextField(
-        value = currentTime.format(DateTimeFormatter.ofPattern("HH:mm")),
+        value = if (currentTimeOfDayMillis == null) "--:--" else currentTime.format(
+            DateTimeFormatter.ofPattern("HH:mm")
+        ),
         onValueChange = { },
         modifier = modifier
             .pointerInput(currentTime) {
@@ -157,6 +161,7 @@ fun TimePickerTextField(
                     }
                 }
             },
+        enabled = enabled,
         trailingIcon = {
             Icon(
                 imageVector = Icons.Filled.Timer,

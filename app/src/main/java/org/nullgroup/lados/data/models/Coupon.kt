@@ -1,42 +1,8 @@
 package org.nullgroup.lados.data.models
 
-import android.icu.util.TimeZone
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.DocumentId
-import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.ZonedDateTime
-import kotlin.time.Duration
-import kotlin.time.DurationUnit
-import kotlin.time.toDuration
-
-fun currentHostTimeZone() = TimeZone.getDefault()
-
-fun currentHostTimeZoneInString() = currentHostTimeZone().id
-
-fun LocalDateTime.toTimestamp(zoneId: String): Timestamp {
-    val zonedDateTime = ZonedDateTime.of(this, ZoneId.of(zoneId))
-    return Timestamp(zonedDateTime.toInstant().epochSecond, 0)
-}
-
-fun Timestamp.toLocalDateTime(zoneId: String): LocalDateTime {
-    val zonedDateTime = ZonedDateTime.ofInstant(this.toDate().toInstant(), ZoneId.of(zoneId))
-    return zonedDateTime.toLocalDateTime()
-}
-
-fun timestampFromNow(seconds: Long = 0): Timestamp {
-    val currentDate = System.currentTimeMillis()
-    val futureDate = currentDate + seconds * 1000
-    return Timestamp(futureDate / 1000, 0)
-}
-
-fun Long.toDurationInSeconds(): Duration {
-    return this.toDuration(DurationUnit.SECONDS)
-}
-
-fun Duration.toLongFromSeconds(): Long {
-    return this.toLong(DurationUnit.SECONDS)
-}
+import org.nullgroup.lados.utilities.datetime.timestampFromNow
 
 /**
  * @param code Should be trimmed and in uppercase
