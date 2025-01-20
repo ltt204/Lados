@@ -187,6 +187,7 @@ sealed class Screen(
         data object OrderManagement :
             Staff("Order Management", "staff_order_management", Icons.Default.AccountCircle)
 
+
         data object OrderDetail :
             Staff("Order Detail", "staff_order_detail", Icons.Default.AccountCircle) {
             const val ID_ARG = "order_id"
@@ -198,6 +199,7 @@ sealed class Screen(
             const val ID_ARG = "order_id"
             const val ROUTE_WITH_ARG = "staff_order_products/{$ID_ARG}"
         }
+
         data object SearchScreen : Staff("Search", "staff_search", Icons.Default.MailOutline)
 
         companion object {
@@ -216,13 +218,61 @@ sealed class Screen(
         data object UserManagement :
             Admin("User Management", "user_management", Icons.Default.AccountCircle)
 
+        data object CategoryManagement:
+        Admin("Category Management", "category_management", Icons.Default.AccountCircle)
+
+        data object AddCategory:
+        Admin("Add Category", "add_category", Icons.Default.AccountCircle)
+
+        data object EditCategory:
+        Admin("Edit Category", "edit_category", Icons.Default.AccountCircle){
+            const val ID_ARG = "category_id"
+            const val ROUTE_WITH_ARG = "edit_category/{$ID_ARG}"
+        }
+
         data object ProductManagement :
             Admin("Product Management", "product_management", Icons.Default.AccountCircle)
+
+        data object AddProduct :
+            Admin("Add Product", "add_product", Icons.Default.AccountCircle)
+
+        data object AddVariant :
+            Admin("Add Variant", "add_variant", Icons.Default.AccountCircle) {
+            const val ID_ARG = "product_id"
+            const val ROUTE_WITH_ARG = "add_variant/{$ID_ARG}"
+        }
+        data object EditAddVariantScreen :
+            Admin("Edit Variant", "edit_add_variant", Icons.Default.AccountCircle){
+                const val VARIANT_ID_ARG = "variant_id"
+                const val ROUTE_WITH_ARG = "edit_add_variant/{$VARIANT_ID_ARG}"
+            }
+
+        data object EditProduct :
+            Admin("Edit Product", "edit_product", Icons.Default.AccountCircle) {
+            const val ID_ARG = "product_id"
+            const val ROUTE_WITH_ARG = "edit_product/{$ID_ARG}"
+        }
+
+        data object EditVariant :
+            Admin("Edit Variant", "edit_variant", Icons.Default.AccountCircle) {
+            const val PRODUCT_ID_ARG = "product_id"
+            const val VARIANT_ID_ARG = "variant_id"
+            const val ROUTE_WITH_ARG = "edit_variant/{$PRODUCT_ID_ARG}/{$VARIANT_ID_ARG}"
+        }
+
+        data object AddEditVariantScreen :
+            Admin("Add Edit Variant", "add_edit_variant", Icons.Default.AccountCircle) {
+            const val ID_ARG = "product_id"
+            const val ROUTE_WITH_ARG = "add_edit_variant/{$ID_ARG}"
+        }
 
         data object PromotionManagement :
             Admin("Promotion Management", "promotion_management", Icons.Default.AccountCircle)
 
         data object Analytics : Admin("Analytics", "analytics", Icons.Default.AccountCircle)
+
+        data object InventoryTracking:
+        Admin("Inventory Tracking", "inventory_tracking", Icons.Default.AccountCircle)
 
         companion object {
             fun getAllScreens() =

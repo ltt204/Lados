@@ -86,21 +86,7 @@ class ProductDetailScreenViewModel @Inject constructor(
         }
     }
 
-    fun addProduct(product: Product) {
-        viewModelScope.launch {
-            try {
-                val result = productRepository.addProductToFireStore(product)
-                result.onSuccess {
-                    Log.d("ProductViewModel", "Product added successfully")
-                    // Optional: Refresh product list or trigger a success event
-                }.onFailure { exception ->
-                    Log.e("ProductViewModel", "Failed to add product: ${exception.message}")
-                }
-            } catch (e: Exception) {
-                Log.e("ProductViewModel", "Error adding product: ${e.message}")
-            }
-        }
-    }
+
 
     private fun loadProductDetailsIntoUiState(product: Product) {
         val sortedColors = getSortedColors(product)

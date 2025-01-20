@@ -24,6 +24,7 @@ import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.viewmodels.staff.order.OrderDetailEvent
 import org.nullgroup.lados.viewmodels.staff.order.OrderDetailViewModel
 import java.io.ByteArrayOutputStream
+import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.time.Duration
 import java.time.Instant
@@ -313,46 +314,36 @@ fun updateLocale(context: Context, locale: Locale) {
 fun ProductRemoteModel.toLocalProduct(): Product {
     val locale = Locale.getDefault()
     Log.d("toLocalProduct", "locale language: ${locale.language}")
-    val productVariants: MutableList<ProductVariant> = mutableListOf()
 
-    this.variants.forEach { variant ->
-        productVariants.add(
-            ProductVariant(
-                id = variant.id,
-                productId = this.id,
-                size = Size(
-                    id = variant.size.id,
-                    sizeName = variant.size.sizeName.getValue(locale.language),
-                    sortOrder = variant.size.sortOrder
-                ),
-                color = Color(
-                    id = variant.color.id,
-                    colorName = variant.color.colorName.getValue(locale.language),
-                    hexCode = variant.color.hexCode
-                ),
-                quantityInStock = variant.quantityInStock,
-                originalPrice = variant.originalPrice[locale.language] ?: 0.0,
-                salePrice = variant.salePrice?.get(locale.language),
-                images = variant.images
-            )
+    val productVariants = this.variants.map { variant ->
+        ProductVariant(
+            id = variant.id,
+            productId = this.id,
+            size = Size(
+                id = variant.size.id,
+                sizeName = variant.size.sizeName.getValue(locale.language),
+                sortOrder = variant.size.sortOrder
+            ),
+            color = Color(
+                id = variant.color.id,
+                colorName = variant.color.colorName.getValue(locale.language),
+                hexCode = variant.color.hexCode
+            ),
+            quantityInStock = variant.quantityInStock,
+            originalPrice = variant.originalPrice[locale.language] ?: 0.0,
+            salePrice = variant.salePrice?.get(locale.language),
+            images = variant.images
         )
     }
+
+    val name = this.name[locale.language] ?: this.name[SupportedRegion.entries.first().locale.language]
+    val description = this.description[locale.language] ?: this.description[SupportedRegion.entries.first().locale.language]
 
     return Product(
         id = this.id,
         categoryId = this.categoryId,
-        name = if (this.name.containsKey(locale.language))
-            this.name.getValue(locale.language)
-        else
-            this.name.getValue(
-                SupportedRegion.entries.first().locale.language
-            ),
-        description = if (this.description.containsKey(locale.language))
-            this.description.getValue(locale.language)
-        else
-            this.description.getValue(
-                SupportedRegion.entries.first().locale.language
-            ),
+        name = name!!,
+        description = description!!,
         variants = productVariants,
         createdAt = this.createdAt,
         engagements = this.engagements
@@ -438,4 +429,31 @@ fun Long.getMessageTimeGapBetweenTwoMessagesDisplayment(previousMessageTime: Lon
 
     val formatter = DateTimeFormatter.ofPattern("MMM yyyy")
     return formatter.format(currentDateTime)
+}
+
+fun getAppLocale(context: Context): Locale {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        context.resources.configuration.locales[0] // Lấy locale đầu tiên trong danh sách
+    } else {
+        @Suppress("DEPRECATION")
+        context.resources.configuration.locale
+    }
+}
+
+fun formatStringByLocale(
+    value: Double,
+    locale: Locale = Locale.getDefault(),
+    isCurrency: Boolean = false
+): String {
+    return try {
+        val formatter = if (isCurrency) {
+            NumberFormat.getCurrencyInstance(locale)
+        } else {
+            NumberFormat.getNumberInstance(locale)
+        }
+        formatter.format(value)
+    } catch (e: Exception) {
+        // Handle any exception, e.g., invalid locale or value
+        value.toString() // Return as plain string if formatting fails
+    }
 }

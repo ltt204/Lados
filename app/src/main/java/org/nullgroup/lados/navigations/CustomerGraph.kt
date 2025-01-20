@@ -63,6 +63,7 @@ import org.nullgroup.lados.screens.customer.profile.SettingScreen
 import org.nullgroup.lados.screens.customer.wishlist.WishlistScreen
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.viewmodels.SharedViewModel
+import org.nullgroup.lados.viewmodels.customer.home.HomeViewModel
 
 @Composable
 fun CustomerGraph(
@@ -74,6 +75,8 @@ fun CustomerGraph(
 ) {
 
     var isVisibility by remember { mutableStateOf(true) }
+
+    var homeViewModel = hiltViewModel<HomeViewModel>()
 
     Scaffold(
         modifier = modifier
@@ -168,6 +171,7 @@ fun CustomerGraph(
                                 navController = navController,
                                 paddingValues = innerPadding,
                                 sharedViewModel = sharedViewModel,
+                                viewModel = homeViewModel,
                                 modifier = modifier,
                             )
                         }
@@ -197,6 +201,7 @@ fun CustomerGraph(
                                 paddingValues = innerPadding,
                                 sharedViewModel = sharedViewModel,
                                 context = LocalContext.current,
+                                viewModel = homeViewModel,
                                 modifier = modifier,
                             )
                         }

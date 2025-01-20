@@ -260,7 +260,7 @@ fun TitleTextRow(
 @Composable
 fun CategoryItems(
     modifier: Modifier = Modifier,
-    viewModel: HomeViewModel = hiltViewModel(),
+    viewModel: HomeViewModel,
     sharedViewModel: SharedViewModel,
     navController: NavController,
 ) {
@@ -471,7 +471,6 @@ fun ProductItem(
 fun ProductRow(
     modifier: Modifier = Modifier,
     onProductClick: (String) -> Unit,
-    viewModel: HomeViewModel = hiltViewModel(),
     products: List<Product> = emptyList(),
     isIconToggled: (String) -> Boolean? = { null },
     onToggleIcon: (String) -> Unit = {}
@@ -604,6 +603,7 @@ fun DrawProductScreenContent(
                 item {
                     CategoryItems(
                         sharedViewModel = sharedViewModel,
+                        viewModel = viewModel,
                         navController = navController
                     )
                 }
@@ -669,7 +669,7 @@ fun DrawProductScreenContent(
                     ProductRow(
                         onProductClick = onProductClick,
                         products = (productUiState.value as ProductUiState.Success).products.sortedByDescending { it.createdAt }
-                            .take(1),
+                            .take(3),
                         isIconToggled = isProductInWishList,
                         onToggleIcon = switchWishListState,
                     )
@@ -856,7 +856,7 @@ fun ProductScreen(
     navController: NavController,
     paddingValues: PaddingValues = PaddingValues(0.dp),
     sharedViewModel: SharedViewModel = SharedViewModel(),
-    viewModel: HomeViewModel = hiltViewModel(),
+    viewModel: HomeViewModel,
     wishlistViewModel: WishlistViewModel = hiltViewModel()
 ) {
     Scaffold(
@@ -916,22 +916,6 @@ fun ProductScreen(
             },
             viewModel = viewModel,
             wishlistViewModel = wishlistViewModel
-        )
-    }
-}
-
-
-@Preview(
-    name = "Summary",
-    showBackground = true,
-    showSystemUi = true
-)
-
-@Composable
-fun Summary() {
-    LadosTheme {
-        ProductScreen(
-            navController = NavController(LocalContext.current)
         )
     }
 }

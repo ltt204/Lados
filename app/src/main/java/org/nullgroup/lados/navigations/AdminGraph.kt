@@ -37,14 +37,29 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.screens.admin.coupon.CouponManager
+import org.nullgroup.lados.screens.admin.category.AddCategoryScreen
+import org.nullgroup.lados.screens.admin.category.CategoryManagementScreen
+import org.nullgroup.lados.screens.admin.category.EditCategoryScreen
+import org.nullgroup.lados.screens.admin.inventory.InventoryTracking
+import org.nullgroup.lados.screens.admin.product.AddEditVariantScreen
+import org.nullgroup.lados.screens.admin.product.AddProductScreen
+import org.nullgroup.lados.screens.admin.product.AddVariantScreen
+import org.nullgroup.lados.screens.admin.product.EditAddVariantScreen
+import org.nullgroup.lados.screens.admin.product.EditProductScreen
+import org.nullgroup.lados.screens.admin.product.EditVariantScreen
+import org.nullgroup.lados.screens.admin.product.ManageProductScreen
 import org.nullgroup.lados.ui.theme.LadosTheme
+import org.nullgroup.lados.viewmodels.admin.product.AddProductScreenViewModel
+import org.nullgroup.lados.viewmodels.admin.product.EditProductScreenViewModel
 import org.nullgroup.lados.viewmodels.customer.profile.ProfileViewModel
 
 private const val TAG = "AdminGraph"
@@ -67,6 +82,9 @@ fun AdminGraph(
     var currentDestination by remember {
         mutableStateOf(startDestination)
     }
+    var addProductViewModel: AddProductScreenViewModel = hiltViewModel()
+    var editProductViewModel: EditProductScreenViewModel = hiltViewModel()
+
     ModalNavigationDrawer(
         modifier = modifier,
         drawerState = drawerState,
@@ -92,6 +110,17 @@ fun AdminGraph(
                         }
                     )
                     NavigationDrawerItem(
+                        label = { Text(text = Screen.Admin.CategoryManagement.name!!) },
+                        selected = currentDestination.route == Screen.Admin.CategoryManagement.route,
+                        onClick = {
+                            scope.launch {
+                                drawerState.close()
+                            }
+                            currentDestination = Screen.Admin.CategoryManagement
+                            navController.navigate(Screen.Admin.CategoryManagement.route)
+                        }
+                    )
+                    NavigationDrawerItem(
                         label = { Text(text = Screen.Admin.UserManagement.name!!) },
                         selected = currentDestination.route == Screen.Admin.UserManagement.route,
                         onClick = {
@@ -111,6 +140,17 @@ fun AdminGraph(
                             }
                             currentDestination = Screen.Admin.ProductManagement
                             navController.navigate(Screen.Admin.ProductManagement.route)
+                        }
+                    )
+                    NavigationDrawerItem(
+                        label = { Text(text = Screen.Admin.InventoryTracking.name!!) },
+                        selected = currentDestination.route == Screen.Admin.InventoryTracking.route,
+                        onClick = {
+                            scope.launch {
+                                drawerState.close()
+                            }
+                            currentDestination = Screen.Admin.InventoryTracking
+                            navController.navigate(Screen.Admin.InventoryTracking.route)
                         }
                     )
                     NavigationDrawerItem(
@@ -145,7 +185,10 @@ fun AdminGraph(
             topBar = {
                 CenterAlignedTopAppBar(
                     colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                        containerColor = LadosTheme.colorScheme.background
+                        containerColor = LadosTheme.colorScheme.background,
+                        scrolledContainerColor = LadosTheme.colorScheme.background,
+                        navigationIconContentColor = LadosTheme.colorScheme.onBackground,
+                        titleContentColor = LadosTheme.colorScheme.onBackground,
                     ),
                     title = { Text(text = currentDestination.name!!) },
                     navigationIcon = {
@@ -177,12 +220,153 @@ fun AdminGraph(
                     // UserManagement()
                 }
 
+                composable(route = Screen.Admin.CategoryManagement.route) {
+                    CategoryManagementScreen(
+                        modifier = Modifier,
+                        paddingValues = innerPadding,
+                        navController = navController,
+                    )
+                }
+
+                composable(route = Screen.Admin.AddCategory.route) {
+                    AddCategoryScreen(
+                        modifier = Modifier,
+                        paddingValues = innerPadding,
+                        navController = navController
+                    )
+                }
+
+                composable(
+                    route = Screen.Admin.EditCategory.ROUTE_WITH_ARG,
+                    arguments = listOf(
+                        navArgument(Screen.Admin.EditCategory.ID_ARG) {
+                            type = NavType.StringType
+                        })
+                ) {
+                    val categoryId =
+                        it.arguments?.getString(Screen.Admin.EditCategory.ID_ARG) ?: ""
+                    EditCategoryScreen(
+                        modifier = Modifier,
+                        categoryId = categoryId,
+                        paddingValues = innerPadding,
+                        navController = navController
+                    )
+                }
+
                 composable(route = Screen.Admin.ProductManagement.route) {
-//                    Screen.Admin.ProductManagement(
-//                        modifier = Modifier,
-//                        paddingValues = innerPadding,
-//                        navController = navController,
-//                    )
+                    ManageProductScreen(
+                        modifier = Modifier,
+                        paddingValues = innerPadding,
+                        navController = navController
+                    )
+
+                }
+
+                composable(route = Screen.Admin.AddProduct.route) {
+                    AddProductScreen(
+                        modifier = Modifier,
+                        paddingValues = innerPadding,
+                        navController = navController,
+                        viewModel = addProductViewModel
+                    )
+                }
+
+                composable(
+                    route = Screen.Admin.AddVariant.ROUTE_WITH_ARG,
+                    arguments = listOf(
+                        navArgument(Screen.Admin.AddVariant.ID_ARG)
+                        { type = NavType.StringType }
+                    )) {
+                    val productId = it.arguments?.getString(Screen.Admin.AddVariant.ID_ARG)
+
+                    AddVariantScreen(
+                        modifier = Modifier,
+                        productId = productId,
+                        navController = navController,
+                        paddingValues = innerPadding,
+                        viewModel = addProductViewModel
+                    )
+                }
+
+                composable(
+                    route = Screen.Admin.EditAddVariantScreen.ROUTE_WITH_ARG,
+                    arguments = listOf(
+                        navArgument(Screen.Admin.EditAddVariantScreen.VARIANT_ID_ARG)
+                        { type = NavType.StringType }
+                    )) {
+                    val variantId =
+                        it.arguments?.getString(Screen.Admin.EditAddVariantScreen.VARIANT_ID_ARG)
+
+                    if (variantId != null) {
+                        EditAddVariantScreen(
+                            modifier = Modifier,
+                            variantId = variantId.toInt(),
+                            navController = navController,
+                            paddingValues = innerPadding,
+                            viewModel = addProductViewModel
+                        )
+                    }
+
+                }
+
+                composable(
+                    route = Screen.Admin.EditProduct.ROUTE_WITH_ARG,
+                    arguments = listOf(
+                        navArgument(Screen.Admin.EditProduct.ID_ARG)
+                        { type = NavType.StringType }
+                    )) {
+                    val productId = it.arguments?.getString(Screen.Admin.EditProduct.ID_ARG)
+                    if (productId != null) {
+                        EditProductScreen(
+                            modifier = Modifier,
+                            productId = productId,
+                            navController = navController,
+                            paddingValues = innerPadding,
+                            viewModel = editProductViewModel
+                        )
+                    }
+                }
+
+                composable(
+                    route = Screen.Admin.EditVariant.ROUTE_WITH_ARG,
+                    arguments = listOf(
+                        navArgument(Screen.Admin.EditVariant.PRODUCT_ID_ARG)
+                        { type = NavType.StringType },
+                        navArgument(Screen.Admin.EditVariant.VARIANT_ID_ARG)
+                        { type = NavType.StringType }
+                    )
+                ) {
+                    val productId = it.arguments?.getString(Screen.Admin.EditVariant.PRODUCT_ID_ARG)
+                    val variantId = it.arguments?.getString(Screen.Admin.EditVariant.VARIANT_ID_ARG)
+                    if (productId != null && variantId != null) {
+                        EditVariantScreen(
+                            modifier = Modifier,
+                            productId = productId,
+                            variantId = variantId,
+                            navController = navController,
+                            paddingValues = innerPadding,
+                            viewModel = editProductViewModel
+                        )
+                    }
+                }
+
+                composable(route = Screen.Admin.AddEditVariantScreen.ROUTE_WITH_ARG,
+                    arguments = listOf(
+                        navArgument(Screen.Admin.AddEditVariantScreen.ID_ARG)
+                        { type = NavType.StringType }
+                    )) {
+                    val productId =
+                        it.arguments?.getString(Screen.Admin.AddEditVariantScreen.ID_ARG)
+
+                    if (productId != null) {
+                        AddEditVariantScreen(
+                            modifier = Modifier,
+                            paddingValues = innerPadding,
+                            viewModel = editProductViewModel,
+                            navController = navController,
+                            productId = productId
+                        )
+                    }
                 }
 
                 composable(route = Screen.Admin.PromotionManagement.route) {
@@ -190,6 +374,13 @@ fun AdminGraph(
                         modifier = Modifier,
                         navController = navController,
                         innerPadding = innerPadding,
+                    )
+                }
+
+                composable(route = Screen.Admin.InventoryTracking.route){
+                    InventoryTracking(
+                        modifier = Modifier,
+                        paddingValues = innerPadding,
                     )
                 }
             }

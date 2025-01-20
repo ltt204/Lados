@@ -347,7 +347,7 @@ fun ProductInCategoryScreen(
         vertical = 8.dp
     ),
     sharedViewModel: SharedViewModel = SharedViewModel(),
-    viewModel: HomeViewModel = hiltViewModel(),
+    viewModel: HomeViewModel,
     context: Context
 ) {
     val productUiState = viewModel.productUiState.collectAsStateWithLifecycle().value

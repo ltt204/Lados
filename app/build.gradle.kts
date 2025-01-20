@@ -165,6 +165,9 @@ dependencies {
 
     // Enable Java 8+ features supposed to be for SDK 26, to be used with MIN SDK 24
     coreLibraryDesugaring(libs.desugar.jdk.libs)
+    
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.coroutines.android)
 }
 
 kapt {
