@@ -7,4 +7,8 @@ sealed class OrderScreenEvent {
         val status: OrderStatus,
         val isRefresh: Boolean = false,
     ) : OrderScreenEvent()
+
+    data class SearchOrders(
+        val query: String,
+    ): OrderScreenEvent()
 }

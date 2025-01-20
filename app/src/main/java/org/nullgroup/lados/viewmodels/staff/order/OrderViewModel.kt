@@ -27,6 +27,7 @@ class OrderViewModel @Inject constructor(
     private var currentLastDocument: DocumentSnapshot? = null
     private var loadJob: Job? = null
     private var currentStatus: OrderStatus? = null
+    private var searchJob: Job? = null
 
     private fun loadOrders(status: OrderStatus, isRefresh: Boolean = false) {
         loadJob?.cancel()
@@ -82,10 +83,60 @@ class OrderViewModel @Inject constructor(
         }
     }
 
+    private fun searchOrders(query: String) {
+        if (query.isEmpty()) {
+            currentStatus?.let { loadOrders(it, true) }
+            return
+        }
+
+        searchJob?.cancel()
+        searchJob = viewModelScope.launch {
+            orders.update {
+                it.copy(isLoading = true)
+            }
+
+            try {
+                orderRepository.searchOrdersById(query)
+                    .onSuccess { searchResult ->
+                        orders.update {
+                            it.copy(
+                                orders = searchResult,
+                                isLoading = false,
+                                hasMoreOrders = false,
+                                error = null,
+                            )
+                        }
+                    }
+                    .onFailure { error ->
+                        orders.update {
+                            it.copy(
+                                error = error.message,
+                                isLoading = false,
+                                hasMoreOrders = false
+                            )
+                        }
+                    }
+
+            } catch (e: Exception) {
+                orders.update {
+                    it.copy(
+                        error = e.message,
+                        isLoading = false,
+                        hasMoreOrders = false,
+                    )
+                }
+            }
+        }
+    }
+
     fun handleEvent(event: OrderScreenEvent) {
         when (event) {
             is OrderScreenEvent.LoadOrders -> {
                 loadOrders(event.status, event.isRefresh)
+            }
+
+            is OrderScreenEvent.SearchOrders -> {
+                searchOrders(event.query)
             }
         }
     }
