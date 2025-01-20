@@ -8,11 +8,11 @@ data class User(
     @DocumentId val id: String = "",
     val name: String = "",
     val email: String = "",
-    val role: String = "",
+    var role: String = "",
     val phoneNumber: String = "",
     var avatarUri: String = "",
     var provider: String = "",
-    var isActive: Boolean = true,
+    var isActive: Boolean = false,
 )
 
 data class UserProfilePicture(

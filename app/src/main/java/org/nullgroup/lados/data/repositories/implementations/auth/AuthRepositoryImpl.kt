@@ -72,13 +72,12 @@ class AuthRepositoryImpl(
             val authResult = firebaseAuth.signInWithCredential(firebaseCredential).await()
 
             if (authResult != null) {
-                val userRef =
-                    firestore.collection("users").document(authResult.user!!.uid).get().await()
-                val user = userRef.toObject(User::class.java)
 
-                if (user != null && !user.isActive) {
-                    return ResourceState.Error("Account is disabled, please check your email for reset password")
-                }
+
+                val user =
+                    userRepository.getUserFromFirestore(authResult.user?.uid ?: "").getOrNull()
+                        ?: mapToUser(authResult.user!!, "google.com", UserRole.CUSTOMER.name)
+                Log.d("SignIn", "Firestore user: $user")
 
                 val refreshToken = authResult.user!!.getIdToken(false).await().token ?: ""
                 sharedPreferences.saveAuthTokens(
@@ -127,6 +126,7 @@ class AuthRepositoryImpl(
                 if (authResult?.user != null) {
                     val userAuth =
                         userRepository.getUserFromFirestore(authResult.user?.uid ?: "").getOrNull()
+
                     return ResourceState.Success(userAuth)
                 }
             }
@@ -145,6 +145,7 @@ class AuthRepositoryImpl(
                     sharedPreferences.saveAuthTokens(tokens.copy(idToken = newIdToken))
                     val userAuth =
                         userRepository.getUserFromFirestore(authResult.user?.uid ?: "").getOrNull()
+
                     ResourceState.Success(userAuth)
                 } else {
                     ResourceState.Error("Failed to get new token")

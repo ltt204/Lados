@@ -108,3 +108,9 @@ data class AddImage(
 )
 
 
+data class ProductNameAndCategory(
+    val id: String,
+    val name: String,
+    val category: String
+)
+

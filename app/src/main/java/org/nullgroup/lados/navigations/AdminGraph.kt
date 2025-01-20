@@ -1,6 +1,9 @@
 package org.nullgroup.lados.navigations
 
 import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -28,6 +31,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -45,6 +49,7 @@ import androidx.navigation.navArgument
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.nullgroup.lados.screens.Screen
+import org.nullgroup.lados.screens.admin.SalesAndProductReportScreen
 import org.nullgroup.lados.screens.admin.category.AddCategoryScreen
 import org.nullgroup.lados.screens.admin.category.CategoryManagementScreen
 import org.nullgroup.lados.screens.admin.category.EditCategoryScreen
@@ -56,6 +61,11 @@ import org.nullgroup.lados.screens.admin.product.EditAddVariantScreen
 import org.nullgroup.lados.screens.admin.product.EditProductScreen
 import org.nullgroup.lados.screens.admin.product.EditVariantScreen
 import org.nullgroup.lados.screens.admin.product.ManageProductScreen
+import org.nullgroup.lados.screens.admin.userManagement.UserDetailScreen
+import org.nullgroup.lados.screens.admin.userManagement.UserManagementScreen
+import org.nullgroup.lados.ui.theme.LadosTheme
+import org.nullgroup.lados.viewmodels.SharedViewModel
+import org.nullgroup.lados.viewmodels.admin.UserManagementViewModel
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.viewmodels.admin.product.AddProductScreenViewModel
 import org.nullgroup.lados.viewmodels.admin.product.EditProductScreenViewModel
@@ -70,6 +80,8 @@ fun AdminGraph(
     navController: NavHostController = rememberNavController(),
     globalNavHostController: NavHostController,
     startDestination: Screen = Screen.Admin.ProductManagement,
+    sharedViewModel: SharedViewModel = hiltViewModel(),
+    userManagementViewModel: UserManagementViewModel = hiltViewModel(),
     drawerState: DrawerState = rememberDrawerState(DrawerValue.Closed),
     scrollBehavior: TopAppBarScrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(),
     scope: CoroutineScope = rememberCoroutineScope(),
@@ -83,6 +95,11 @@ fun AdminGraph(
     }
     var addProductViewModel: AddProductScreenViewModel = hiltViewModel()
     var editProductViewModel: EditProductScreenViewModel = hiltViewModel()
+
+
+    var topAppBarVisibility by rememberSaveable {
+        mutableStateOf(true)
+    }
 
     ModalNavigationDrawer(
         modifier = modifier,
@@ -182,6 +199,33 @@ fun AdminGraph(
         Scaffold(
             containerColor = LadosTheme.colorScheme.background,
             topBar = {
+                AnimatedVisibility(
+                    visible = topAppBarVisibility,
+                    enter = expandVertically(),
+                    exit = shrinkVertically()
+                ) {
+                    CenterAlignedTopAppBar(
+                        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                            containerColor = LadosTheme.colorScheme.background
+                        ),
+                        title = { Text(text = currentDestination.name!!) },
+                        navigationIcon = {
+                            IconButton(onClick = {
+                                Log.d("AdminTopAppBar", "onDrawerClick")
+                                scope.launch {
+                                    Log.d(TAG, "AdminGraph: onDrawerClick: ${drawerState.isClosed}")
+                                    if (drawerState.isClosed) drawerState.open() else drawerState.close()
+                                }
+                            }) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Default.List,
+                                    contentDescription = "Back button"
+                                )
+                            }
+                        },
+                        scrollBehavior = scrollBehavior
+                    )
+                }
                 CenterAlignedTopAppBar(
                     colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                         containerColor = LadosTheme.colorScheme.background,
@@ -212,11 +256,65 @@ fun AdminGraph(
             NavHost(navController = navController, startDestination = startDestination.route) {
 
                 composable(route = Screen.Admin.Analytics.route) {
-                    // Analytics()
+                    SalesAndProductReportScreen(
+                        paddingValues = innerPadding
+                    )
                 }
 
                 composable(route = Screen.Admin.UserManagement.route) {
-                    // UserManagement()
+                    topAppBarVisibility = true
+                    UserManagementScreen(
+                        modifier = Modifier,
+                        paddingValues = innerPadding,
+                        navController = navController,
+                        context = LocalContext.current,
+                        sharedViewModel = sharedViewModel
+                    )
+                }
+
+                composable(route = Screen.Admin.UserDetailScreen.route) {
+                    topAppBarVisibility = false
+                    UserDetailScreen(
+                        modifier = Modifier,
+                        paddingValues = innerPadding,
+                        navController = navController,
+                        sharedViewModel = sharedViewModel,
+                        userManagementViewModel = userManagementViewModel,
+                        context = LocalContext.current
+                    )
+                }
+
+                composable(route = Screen.Admin.CategoryManagement.route) {
+                    CategoryManagementScreen(
+                        modifier = Modifier,
+                        paddingValues = innerPadding,
+                        navController = navController,
+                    )
+                }
+
+                composable(route = Screen.Admin.AddCategory.route) {
+                    AddCategoryScreen(
+                        modifier = Modifier,
+                        paddingValues = innerPadding,
+                        navController = navController
+                    )
+                }
+
+                composable(
+                    route = Screen.Admin.EditCategory.ROUTE_WITH_ARG,
+                    arguments = listOf(
+                        navArgument(Screen.Admin.EditCategory.ID_ARG) {
+                            type = NavType.StringType
+                        })
+                ) {
+                    val categoryId =
+                        it.arguments?.getString(Screen.Admin.EditCategory.ID_ARG) ?: ""
+                    EditCategoryScreen(
+                        modifier = Modifier,
+                        categoryId = categoryId,
+                        paddingValues = innerPadding,
+                        navController = navController
+                    )
                 }
 
                 composable(route = Screen.Admin.CategoryManagement.route) {
@@ -372,7 +470,9 @@ fun AdminGraph(
                     // PromotionManagement()
                 }
 
-                composable(route = Screen.Admin.InventoryTracking.route){
+
+                composable(route = Screen.Admin.InventoryTracking.route) {
+
                     InventoryTracking(
                         modifier = Modifier,
                         paddingValues = innerPadding,

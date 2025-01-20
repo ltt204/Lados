@@ -1,6 +1,7 @@
 package org.nullgroup.lados.data.repositories.implementations.order
 
 import android.util.Log
+import com.google.firebase.Timestamp
 import androidx.compose.animation.core.snap
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentReference
@@ -24,6 +25,7 @@ import org.nullgroup.lados.data.models.User
 import org.nullgroup.lados.data.remote.models.ProductVariantRemoteModel
 import org.nullgroup.lados.data.repositories.interfaces.order.OrderRepository
 import org.nullgroup.lados.utilities.OrderStatus
+import java.util.Date
 
 // Firebase-specific repository example
 class OrderRepositoryImplement(
@@ -217,6 +219,26 @@ class OrderRepositoryImplement(
         }
     }
 
+    override fun getOrdersForAdmin(): Flow<List<Order>> {
+        return callbackFlow {
+            val orderRef = firestore.collection("orders")
+
+            val subscription = orderRef.addSnapshotListener { snapshot, e ->
+                if (e != null) {
+                    close(e)
+                    return@addSnapshotListener
+                }
+
+                if (snapshot != null) {
+                    val orders = snapshot.documents.mapNotNull { it.toObject(Order::class.java) }
+                    trySend(orders).isSuccess
+                }
+            }
+
+            awaitClose { subscription.remove() }
+        }
+    }
+
     private fun isValidStatusTransition(
         currentStatus: OrderStatus,
         newStatus: OrderStatus,
@@ -299,6 +321,32 @@ class OrderRepositoryImplement(
         }
 
         awaitClose { subscription.remove() }
+    }
+
+    override suspend fun getAllOrders(startDate: Date, endDate: Date): Result<List<Order>> {
+        return try {
+            val ordersRef = firestore.collection("orders")
+            val querySnapshot = ordersRef
+                .whereGreaterThanOrEqualTo("lastUpdatedAt", startDate.time)
+                .whereLessThanOrEqualTo("lastUpdatedAt", endDate.time)
+                .whereEqualTo("currentStatus", "PAID") // Only include orders with status PAID
+                .get()
+                .await()
+
+            val orders = querySnapshot.documents.mapNotNull { it.toObject(Order::class.java) }
+            Result.success(orders)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun getAllOrdersFromFirestore(): Result<List<Order>> {
+        return try {
+            val orders = firestore.collection("orders").get().await().toObjects(Order::class.java)
+            Result.success(orders)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
     override suspend fun getOrderByStatus(
