@@ -163,9 +163,15 @@ dependencies {
     // DI for WorkManager
     implementation(libs.androidx.hilt.work)
 
+
     // Enable Java 8+ features supposed to be for SDK 26, to be used with MIN SDK 24
     coreLibraryDesugaring(libs.desugar.jdk.libs)
     
+
+    //Chart
+    implementation("io.github.ehsannarmani:compose-charts:0.1.0")
+
+
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.android)
 }

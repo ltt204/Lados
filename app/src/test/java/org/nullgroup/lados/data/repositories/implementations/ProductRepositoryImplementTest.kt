@@ -38,7 +38,7 @@ class ProductRepositoryImplementTest {
             id = "product1",
             categoryId = "category1",
             name = mapOf("en" to "product1"),
-            description = "test",
+            description = mapOf("en" to "Test", "vi" to "Test"),
             variants = listOf(
                 ProductVariantRemoteModel(
                     id = "variant1",
