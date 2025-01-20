@@ -74,6 +74,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import java.util.SortedMap
 import kotlin.math.roundToLong
 import kotlin.random.Random
 
@@ -170,6 +171,9 @@ fun SalesAndProductReportScreen(
 
             var mapListProducts by remember { mutableStateOf<Map<String, Int>>(emptyMap()) }
 
+            var startDateForChart by remember { mutableStateOf<Date?>(null) }
+            var endDateForChart by remember { mutableStateOf<Date?>(null) }
+
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -233,6 +237,9 @@ fun SalesAndProductReportScreen(
                                                     && order.orderStatusLog.entries.firstOrNull { it.key == OrderStatus.RETURNED.name } == null
                                                     && order.orderStatusLog.containsKey(OrderStatus.SHIPPED.name)
                                         }
+
+                                        startDateForChart = start
+                                        endDateForChart = end
 
                                         listProducts = filteredOrders.flatMap { it.orderProducts }
                                         listOrders = filteredOrders
@@ -474,7 +481,9 @@ fun SalesAndProductReportScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.Center
                     ) {
-                        Text("Revenue", fontWeight = FontWeight.Bold, fontSize = 28.sp)
+                        Text(
+                            text = "Revenue"+ if (selectedGroupByOrdersTable.value == "Month") " by Year" else " by Month",
+                            fontWeight = FontWeight.Bold, fontSize = 28.sp)
                     }
 
                     if (selectedGroupByOrdersTable.value == "Month") {
@@ -502,7 +511,7 @@ fun SalesAndProductReportScreen(
                             is DashBoardRevenueState.Success -> {
                                 val revenueByDaySuccess =
                                     (revenueByDay as DashBoardRevenueState.Success).data
-                                RevenueChart(Modifier.height(512.dp), revenueByDaySuccess)
+                                RevenueChart(Modifier.height(512.dp), revenueByDaySuccess, startDateForChart, endDateForChart)
                             }
 
                             is DashBoardRevenueState.Error -> {}
@@ -568,6 +577,8 @@ fun SalesAndProductReportScreen(
 
 
                     Spacer(Modifier.width(16.dp))
+
+                    Log.d("SalesTable", "List products: $mapName")
 
                     mapListProducts = groupListProducts
                         .mapNotNull { product ->
@@ -784,7 +795,7 @@ fun SalesTable(
                             Text(product.name, Modifier.weight(1.5f))
                         }
 
-                        result[item.productId]= product?.name ?: ""
+
 
                         val categoryName =
                             categories.find { it.categoryId == product?.categoryId }?.categoryName
@@ -841,7 +852,9 @@ fun ChartPlaceholder(
 @Composable
 fun RevenueChart(
     modifier: Modifier = Modifier,
-    revenueMap: Map<String, Double>
+    revenueMap: Map<String, Double>,
+    startDate: Date?=null,
+    endDate: Date?=null
 ) {
     val sortedMap =revenueMap.toSortedMap()
 
