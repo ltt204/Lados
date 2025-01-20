@@ -116,7 +116,7 @@ fun CouponManager(
     val updateCouponFailedMessage = stringResource(R.string.coupon_update_failed_message)
 
     val onFormSubmitted = fun(coupon: ServerCoupon) {
-        if (selectedCoupon == null) {
+        if (selectedCoupon == null || coupon.id.isEmpty()) {
             scope.launch(Dispatchers.IO) {
                 couponManagerViewModel.handleCouponCreation(
                     coupon = coupon,
@@ -311,7 +311,7 @@ fun CouponManager(
         CouponFormBottomSheet(
             isShownBottomSheet = formOpenState.value,
             changeBottomSheetState = { formOpenState.value = it },
-            onFormSubmitted = { onFormSubmitted(it) },
+            onFormSubmitted = onFormSubmitted,
             selectedCoupon = selectedCoupon,
         )
 
@@ -453,9 +453,7 @@ fun CouponFormBottomSheet(
             scrimColor = LadosTheme.colorScheme.surfaceContainerLowest.copy(alpha = 0.5f),
         ) {
             CouponFormEditor(
-                onSubmitted = {
-                    onFormSubmitted(it)
-                },
+                onSubmitted = onFormSubmitted,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp),

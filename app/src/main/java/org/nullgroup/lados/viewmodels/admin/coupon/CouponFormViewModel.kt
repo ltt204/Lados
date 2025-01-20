@@ -86,17 +86,23 @@ data class CouponFormUiState(
     val maximumRedemption: FieldInfo<Int?> = FieldInfo(null),
     val autoFetching: FieldInfo<Boolean> = FieldInfo(false),
 
+    val id: String = "",
+    val redeemedCount: Int = 0,
+
     val dateZoneId: String = "UTC",
 ) {
     companion object {
         fun fromServerCoupon(serverCoupon: ServerCoupon, zoneId: String): CouponFormUiState {
             return CouponFormUiState(
+                id = serverCoupon.id,
                 code = FieldInfo(serverCoupon.code),
                 discountPercentage = FieldInfo(serverCoupon.discountPercentage),
                 maximumDiscount = FieldInfo(serverCoupon.maximumDiscount),
+                minimumOrderAmount = FieldInfo(serverCoupon.minimumOrderAmount),
                 startDate = FieldInfo(serverCoupon.startDate),
                 endDate = FieldInfo(serverCoupon.endDate),
                 usageDuration = FieldInfo(serverCoupon.usageDuration),
+                redeemedCount = serverCoupon.redeemedCount,
                 maximumRedemption = FieldInfo(serverCoupon.maximumRedemption),
                 autoFetching = FieldInfo(serverCoupon.autoFetching),
                 dateZoneId = zoneId,
@@ -184,7 +190,7 @@ class CouponFormViewModel @Inject constructor(
             is CouponFormEvent.MaximumDiscountNullMarkChanged -> updateMaximumDiscountNullMark()
             is CouponFormEvent.UsageDurationNullMarkChanged -> updateUsageDurationNullMark()
             is CouponFormEvent.MaximumRedemptionNullMarkChanged -> updateMaximumRedemptionNullMark()
-            is CouponFormEvent.Submit -> submitCoupon(event.onApproved)
+            is CouponFormEvent.Submit -> submitCoupon(event.onApproved, event.onRejected)
         }
     }
 
@@ -195,6 +201,7 @@ class CouponFormViewModel @Inject constructor(
         if (couponFormUiState.value.isValid()) {
             onApproved?.invoke(
                 ServerCoupon(
+                    id = couponFormUiState.value.id,
                     code = couponFormUiState.value.code.value,
                     discountPercentage = couponFormUiState.value.discountPercentage.value,
                     maximumDiscount = if (couponFormUiState.value.maximumDiscount.markedAsNull) null
@@ -204,6 +211,7 @@ class CouponFormViewModel @Inject constructor(
                     endDate = couponFormUiState.value.endDate.value,
                     usageDuration = if (couponFormUiState.value.usageDuration.markedAsNull) null
                     else couponFormUiState.value.usageDuration.value,
+                    redeemedCount = couponFormUiState.value.redeemedCount,
                     maximumRedemption = if (couponFormUiState.value.maximumRedemption.markedAsNull)
                         couponFormUiState.value.maximumRedemption.value
                     else null,

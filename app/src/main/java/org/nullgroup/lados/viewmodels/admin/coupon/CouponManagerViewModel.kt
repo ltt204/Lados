@@ -12,11 +12,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.nullgroup.lados.compose.coupon.ItemState
 import org.nullgroup.lados.data.models.ServerCoupon
+import org.nullgroup.lados.data.repositories.interfaces.coupon.CouponRepository
+import org.nullgroup.lados.screens.customer.coupon.CouponInfo
 import org.nullgroup.lados.utilities.datetime.currentHostTimeZoneInString
 import org.nullgroup.lados.utilities.datetime.timestampFromNow
 import org.nullgroup.lados.utilities.datetime.toTimestamp
-import org.nullgroup.lados.data.repositories.interfaces.coupon.CouponRepository
-import org.nullgroup.lados.screens.customer.coupon.CouponInfo
 import java.time.LocalDateTime
 import javax.inject.Inject
 
@@ -58,7 +58,12 @@ class CouponManagerViewModel @Inject constructor(
                 if (newCoupons.isEmpty()) {
                     _couponUiState.value = CouponManagerUiState.Empty
                 } else {
-                    _couponUiState.value = CouponManagerUiState.Success(newCoupons)
+                    _couponUiState.value = when (val currentState = _couponUiState.value) {
+                        is CouponManagerUiState.Success -> {
+                            currentState.copy(data = newCoupons)
+                        }
+                        else -> CouponManagerUiState.Success(data = newCoupons)
+                    }
                 }
                 _serverCoupons.value = newCoupons
             }
