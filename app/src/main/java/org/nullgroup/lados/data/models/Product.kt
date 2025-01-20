@@ -65,6 +65,48 @@ enum class AttributeType {
     COLOR // Tương ứng với Color
 }
 
+data class AddProduct(
+    @DocumentId val id: String= "",
+    val categoryId: String = "",
+    val name: Map<String, String> = mapOf(),
+    val description: Map<String, String> = mapOf(),
+    val createdAt: Timestamp = Timestamp.now(),
+    var variants: List<AddProductVariant> = emptyList(),
+    var engagements: List<UserEngagement> = emptyList()
+)
+
+data class AddProductVariant(
+    @DocumentId val id: String= "",
+    val productId: String = "",
+    val size: AddSize = AddSize(),
+    val color: AddColor = AddColor(),
+    val quantityInStock: Int = 0,
+    val originalPrice: Map<String, Double> = mapOf(),
+    val saleAmount: Int = 0,
+    val salePrice: Map<String, Double> = mapOf(),
+    var images: List<AddImage> = emptyList()
+)
+
+data class AddColor(
+    val id: Int = 0,
+    val colorName: Map<String, String> = mapOf(),
+    val hexCode: String = ""
+)
+
+data class AddSize(
+    val id: Int = 0,
+    val sizeName: Map<String, String> = mapOf(),
+    val sortOrder: Boolean = true
+)
+
+data class AddImage(
+    @DocumentId val id: String = "",
+    val productVariantId: String = "",
+    val link: String = "",
+    val fileName: String = "",
+    val image: ByteArray? = byteArrayOf()
+)
+
 data class ProductNameAndCategory(
     val id: String,
     val name: String,

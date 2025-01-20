@@ -86,6 +86,7 @@ fun EditProfileScreen(
                 )
             }
         }
+
     BackHandler {
         cancelConfirmation = true
     }

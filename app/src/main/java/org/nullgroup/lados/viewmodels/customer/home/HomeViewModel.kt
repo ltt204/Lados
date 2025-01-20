@@ -5,9 +5,11 @@ import androidx.annotation.FloatRange
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.nullgroup.lados.data.models.Category
 import org.nullgroup.lados.data.models.Product
 import org.nullgroup.lados.data.repositories.interfaces.category.CategoryRepository
@@ -16,6 +18,7 @@ import org.nullgroup.lados.screens.customer.home.hasNoSalePrice
 import org.nullgroup.lados.screens.customer.home.isProductOnSale
 import org.nullgroup.lados.screens.customer.product.FilterState
 import org.nullgroup.lados.screens.customer.product.getAverageRating
+import org.nullgroup.lados.utilities.toLocalProduct
 import javax.inject.Inject
 
 @HiltViewModel
@@ -51,11 +54,22 @@ class HomeViewModel @Inject constructor(
 
     private fun fetchProducts() {
         viewModelScope.launch {
+                Log.d("HomeViewModel", "fetchProducts: ${_originalProducts.value}")
+            if (_originalProducts.value.isNotEmpty()) {
+                _productUiState.value = ProductUiState.Success(_originalProducts.value)
+                return@launch
+            }
             try {
-                val getProductsResult = productRepository.getAllProductsFromFireStore()
-                val products = getProductsResult.getOrNull() ?: emptyList()
-                _originalProducts.value = products
-                _productUiState.value = ProductUiState.Success(products)
+                Log.d("HomeViewModel", "fetchProducts: Fetching products")
+                val products = withContext(Dispatchers.IO) {
+                    productRepository.getAllProductsFromFireStore().getOrNull().orEmpty()
+                }
+                val localeProducts = withContext(Dispatchers.Default) {
+                    products.map { it.toLocalProduct() }
+                }
+                _originalProducts.value = localeProducts
+                _productUiState.value = ProductUiState.Success(localeProducts)
+                Log.d("HomeViewModel", "after fetchProducts original: ${_originalProducts.value}")
             } catch (e: Exception) {
                 Log.d("HomeViewModel", "fetchProducts: ${e.message}")
                 _productUiState.value = ProductUiState.Error(e.message ?: "An error occurred")
