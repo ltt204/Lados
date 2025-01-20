@@ -54,7 +54,13 @@ class HomeViewModel @Inject constructor(
 
     private fun fetchProducts() {
         viewModelScope.launch {
+                Log.d("HomeViewModel", "fetchProducts: ${_originalProducts.value}")
+            if (_originalProducts.value.isNotEmpty()) {
+                _productUiState.value = ProductUiState.Success(_originalProducts.value)
+                return@launch
+            }
             try {
+                Log.d("HomeViewModel", "fetchProducts: Fetching products")
                 val products = withContext(Dispatchers.IO) {
                     productRepository.getAllProductsFromFireStore().getOrNull().orEmpty()
                 }
@@ -63,6 +69,7 @@ class HomeViewModel @Inject constructor(
                 }
                 _originalProducts.value = localeProducts
                 _productUiState.value = ProductUiState.Success(localeProducts)
+                Log.d("HomeViewModel", "after fetchProducts original: ${_originalProducts.value}")
             } catch (e: Exception) {
                 Log.d("HomeViewModel", "fetchProducts: ${e.message}")
                 _productUiState.value = ProductUiState.Error(e.message ?: "An error occurred")

@@ -8,8 +8,10 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.nullgroup.lados.data.models.Category
@@ -117,6 +119,8 @@ class ProductManagementScreenViewModel @Inject constructor(
     fun loadProducts() {
         viewModelScope.launch {
             _isLoading.value = true
+
+            Log.d("ProductManagementViewModel", "Fetching products")
             val response = withContext(Dispatchers.IO) {
                 productRepository.getAllProductsFromFireStore()
             }
