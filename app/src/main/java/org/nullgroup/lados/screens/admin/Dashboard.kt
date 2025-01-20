@@ -580,14 +580,8 @@ fun SalesAndProductReportScreen(
 
                     Log.d("SalesTable", "List products: $mapName")
 
-                    mapListProducts = groupListProducts
-                        .mapNotNull { product ->
-                            mapName[product.productId]?.let { productName ->
-                                productName to product.amount
-                            }
-                        }
-                        .toMap()
-                    //mapListProducts = groupListProducts.associate {  to it.amount}
+
+                    mapListProducts = groupListProducts.associate { it.productId to it.amount }
 
                     if (mapListProducts.isNotEmpty()) {
                     Row(
@@ -604,9 +598,11 @@ fun SalesAndProductReportScreen(
 
                 }
 
+                Spacer(Modifier.height(8.dp))
+
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
-                    horizontalArrangement = Arrangement.End,
+                    horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     /*
@@ -621,6 +617,8 @@ fun SalesAndProductReportScreen(
                         fontSize = 20.sp
                     )
                 }
+
+                Spacer(Modifier.height(8.dp))
             }
         }
     }
@@ -821,32 +819,61 @@ fun SalesTable(
 @Composable
 fun ChartPlaceholder(
     modifier: Modifier = Modifier,
-    amountMap: Map<String, Int>
+    amountMap: Map<String, Int>,
+    viewModel: DashBoardViewModel = hiltViewModel()
 ) {
-    val primaryColor = LadosTheme.colorScheme.primary
-    val listData = mutableListOf<Bars>()
-    amountMap.forEach { (mon, rev) ->
-        mon?.let {
-            Bars(
-                label = it, values = listOf(
-                    Bars.Data(value = rev.toDouble(), color = SolidColor(primaryColor)),
+    val filterMap = amountMap.filter { (mon,ren) -> ren > 0 }
+    Log.d("SalesTable", "amountMap: $amountMap")
+    val productUiState = viewModel.productUiState.collectAsStateWithLifecycle()
+
+    when (productUiState.value) {
+        is ProductUiState.Loading -> {
+            LoadOnProgress(
+                modifier = Modifier,
+                content = { CircularProgressIndicator() }
+            )
+        }
+
+        is ProductUiState.Error -> {
+            Text(
+                text = "Failed to load data",
+                style = LadosTheme.typography.headlineSmall.copy(
+                    color = LadosTheme.colorScheme.error,
                 )
             )
-        }?.let {
-            listData.add(
-                it
+        }
+
+        is ProductUiState.Success -> {
+            val productNamesAndCategories =
+                (productUiState.value as ProductUiState.Success).products
+            val primaryColor = LadosTheme.colorScheme.primary
+            val listData = mutableListOf<Bars>()
+            filterMap.forEach { (mon, rev) ->
+                mon?.let {
+                    val product =
+                        productNamesAndCategories.find { it.id == mon }
+                    Bars(
+                        label = product?.name ?: mon, values = listOf(
+                            Bars.Data(value = rev.toDouble(), color = SolidColor(primaryColor)),
+                        )
+                    )
+                }?.let {
+                    listData.add(
+                        it
+                    )
+                }
+            }
+
+            ColumnChart(
+                modifier = modifier,
+                data = listData,
+                barProperties = BarProperties(
+                    spacing = 1.dp,
+                    thickness = 10.dp,
+                )
             )
         }
     }
-
-    ColumnChart(
-        modifier = modifier,
-        data = listData,
-        barProperties = BarProperties(
-            spacing = 1.dp,
-            thickness = 10.dp,
-        )
-    )
 }
 
 @Composable
@@ -881,6 +908,7 @@ fun RevenueChart(
     )
 
 }
+
 
 data class ProductData(
     val productName: String,
