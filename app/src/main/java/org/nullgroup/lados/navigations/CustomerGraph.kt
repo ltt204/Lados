@@ -42,6 +42,7 @@ import org.nullgroup.lados.screens.common.ForgotPasswordScreen
 import org.nullgroup.lados.screens.common.LoginScreen
 import org.nullgroup.lados.screens.common.RegisterScreen
 import org.nullgroup.lados.screens.customer.chat.ChatScreen
+import org.nullgroup.lados.screens.customer.coupon.CouponScreen
 import org.nullgroup.lados.screens.customer.home.Error_FindNotMatchScreen
 import org.nullgroup.lados.screens.customer.home.FilterScreen
 import org.nullgroup.lados.screens.customer.home.ProductScreen
@@ -398,6 +399,15 @@ fun CustomerGraph(
             composable(route = Screen.Customer.WishlistScreen.route) {
                 isVisibility = false
                 WishlistScreen(
+                    modifier = Modifier,
+                    innerPadding = innerPadding,
+                    navController = navController,
+                )
+            }
+
+            composable(route = Screen.Customer.CouponScreen.route) {
+                isVisibility = false
+                CouponScreen(
                     modifier = Modifier,
                     innerPadding = innerPadding,
                     navController = navController,

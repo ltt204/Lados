@@ -1,8 +1,8 @@
 package org.nullgroup.lados.data.models
 
 import com.google.firebase.firestore.DocumentId
-import com.google.firebase.firestore.Exclude
 import java.util.UUID
+import kotlin.math.max
 
 // Data class for cart items
 data class CartItem(
@@ -46,13 +46,15 @@ data class CheckingOutItem(
 //    }
 }
 
-data class CheckoutInfo (
+data class CheckoutInfo(
     val subtotal: Double = 0.0,
     val productDiscount: Double = 0.0,
     val orderDiscount: Double = 0.0,
-    val total: Double = 0.0,
 ) {
-    companion object{
+    val total: Double
+        get() = max(subtotal - productDiscount - orderDiscount, 0.0)
+
+    companion object {
         const val FIELD_NAME = "lastCheckoutInfo"
     }
 }

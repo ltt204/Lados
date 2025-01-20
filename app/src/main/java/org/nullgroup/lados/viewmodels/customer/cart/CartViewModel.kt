@@ -98,7 +98,6 @@ class CartViewModel @Inject constructor(
             subtotal,
             productDiscount,
             orderDiscount,
-            total - orderDiscount
         )
     }
 

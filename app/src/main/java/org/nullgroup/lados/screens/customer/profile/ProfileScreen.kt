@@ -232,6 +232,27 @@ fun ProfileScreen(
                         modifier = Modifier.height(56.dp),
                         content = {
                             Text(
+                                text = stringResource(R.string.profile_coupons),
+                                color = LadosTheme.colorScheme.onBackground.copy(alpha = 0.8f),
+                                style = Typography.bodyLarge
+                            )
+                        },
+                        trailingAction = {
+                            Icon(
+                                modifier = Modifier
+                                    .fillMaxHeight()
+                                    .height(20.dp),
+                                painter = painterResource(id = R.drawable.arrowright2),
+                                tint = LadosTheme.colorScheme.outline,
+                                contentDescription = "Arrow",
+                            )
+                        }, onClick = {
+                            navController?.navigate(Screen.Customer.CouponScreen.route)
+                        })
+                    TwoColsItem(
+                        modifier = Modifier.height(56.dp),
+                        content = {
+                            Text(
                                 text = stringResource(R.string.profile_privacy),
                                 color = LadosTheme.colorScheme.onBackground.copy(alpha = 0.8f),
                                 style = Typography.bodyLarge

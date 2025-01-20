@@ -49,7 +49,9 @@ import androidx.navigation.navArgument
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.nullgroup.lados.screens.Screen
+import org.nullgroup.lados.screens.admin.coupon.CouponManager
 import org.nullgroup.lados.screens.admin.SalesAndProductReportScreen
+>>>>>>> app/src/main/java/org/nullgroup/lados/navigations/AdminGraph.kt
 import org.nullgroup.lados.screens.admin.category.AddCategoryScreen
 import org.nullgroup.lados.screens.admin.category.CategoryManagementScreen
 import org.nullgroup.lados.screens.admin.category.EditCategoryScreen
@@ -467,7 +469,11 @@ fun AdminGraph(
                 }
 
                 composable(route = Screen.Admin.PromotionManagement.route) {
-                    // PromotionManagement()
+                    CouponManager(
+                        modifier = Modifier,
+                        navController = navController,
+                        innerPadding = innerPadding,
+                    )
                 }
 
 
