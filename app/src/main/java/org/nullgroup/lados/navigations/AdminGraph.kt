@@ -35,6 +35,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -51,7 +52,7 @@ import kotlinx.coroutines.launch
 import org.nullgroup.lados.screens.Screen
 import org.nullgroup.lados.screens.admin.coupon.CouponManager
 import org.nullgroup.lados.screens.admin.SalesAndProductReportScreen
->>>>>>> app/src/main/java/org/nullgroup/lados/navigations/AdminGraph.kt
+
 import org.nullgroup.lados.screens.admin.category.AddCategoryScreen
 import org.nullgroup.lados.screens.admin.category.CategoryManagementScreen
 import org.nullgroup.lados.screens.admin.category.EditCategoryScreen
@@ -68,7 +69,6 @@ import org.nullgroup.lados.screens.admin.userManagement.UserManagementScreen
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.viewmodels.SharedViewModel
 import org.nullgroup.lados.viewmodels.admin.UserManagementViewModel
-import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.viewmodels.admin.product.AddProductScreenViewModel
 import org.nullgroup.lados.viewmodels.admin.product.EditProductScreenViewModel
 import org.nullgroup.lados.viewmodels.customer.profile.ProfileViewModel
