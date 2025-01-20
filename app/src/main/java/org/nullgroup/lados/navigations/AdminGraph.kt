@@ -35,7 +35,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -67,6 +66,7 @@ import org.nullgroup.lados.screens.admin.userManagement.UserManagementScreen
 import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.viewmodels.SharedViewModel
 import org.nullgroup.lados.viewmodels.admin.UserManagementViewModel
+import org.nullgroup.lados.ui.theme.LadosTheme
 import org.nullgroup.lados.viewmodels.admin.product.AddProductScreenViewModel
 import org.nullgroup.lados.viewmodels.admin.product.EditProductScreenViewModel
 import org.nullgroup.lados.viewmodels.customer.profile.ProfileViewModel
@@ -96,9 +96,11 @@ fun AdminGraph(
     var addProductViewModel: AddProductScreenViewModel = hiltViewModel()
     var editProductViewModel: EditProductScreenViewModel = hiltViewModel()
 
+
     var topAppBarVisibility by rememberSaveable {
         mutableStateOf(true)
     }
+
     ModalNavigationDrawer(
         modifier = modifier,
         drawerState = drawerState,
@@ -315,6 +317,39 @@ fun AdminGraph(
                     )
                 }
 
+                composable(route = Screen.Admin.CategoryManagement.route) {
+                    CategoryManagementScreen(
+                        modifier = Modifier,
+                        paddingValues = innerPadding,
+                        navController = navController,
+                    )
+                }
+
+                composable(route = Screen.Admin.AddCategory.route) {
+                    AddCategoryScreen(
+                        modifier = Modifier,
+                        paddingValues = innerPadding,
+                        navController = navController
+                    )
+                }
+
+                composable(
+                    route = Screen.Admin.EditCategory.ROUTE_WITH_ARG,
+                    arguments = listOf(
+                        navArgument(Screen.Admin.EditCategory.ID_ARG) {
+                            type = NavType.StringType
+                        })
+                ) {
+                    val categoryId =
+                        it.arguments?.getString(Screen.Admin.EditCategory.ID_ARG) ?: ""
+                    EditCategoryScreen(
+                        modifier = Modifier,
+                        categoryId = categoryId,
+                        paddingValues = innerPadding,
+                        navController = navController
+                    )
+                }
+
                 composable(route = Screen.Admin.ProductManagement.route) {
                     ManageProductScreen(
                         modifier = Modifier,
@@ -435,7 +470,9 @@ fun AdminGraph(
                     // PromotionManagement()
                 }
 
+
                 composable(route = Screen.Admin.InventoryTracking.route) {
+
                     InventoryTracking(
                         modifier = Modifier,
                         paddingValues = innerPadding,

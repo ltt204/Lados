@@ -162,8 +162,10 @@ dependencies {
     implementation(libs.androidx.hilt.work)
 
 
+
     //Chart
     implementation("io.github.ehsannarmani:compose-charts:0.1.0")
+
 
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.android)

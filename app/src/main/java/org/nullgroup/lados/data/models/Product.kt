@@ -107,8 +107,10 @@ data class AddImage(
     val image: ByteArray? = byteArrayOf()
 )
 
+
 data class ProductNameAndCategory(
     val id: String,
     val name: String,
     val category: String
 )
+

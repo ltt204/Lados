@@ -468,6 +468,7 @@ fun Long.getMessageTimeGapBetweenTwoMessagesDisplayment(previousMessageTime: Lon
 }
 
 
+
 // Only use for Order Total
 fun Double.toVnCurrency(): Double {
     val locale = Locale.getDefault()
@@ -487,6 +488,7 @@ fun Double.toUsdCurrency(): Double {
     }
     return this / 23.000
 }
+
 
 fun getAppLocale(context: Context): Locale {
     return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {

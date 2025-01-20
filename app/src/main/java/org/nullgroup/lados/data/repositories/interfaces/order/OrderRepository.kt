@@ -29,4 +29,6 @@ interface OrderRepository {
     suspend fun updateOrderStatus(orderId: String, newStatus: OrderStatus): Result<Boolean>
     suspend fun getAllOrders(startDate: Date, endDate: Date): Result<List<Order>>
     suspend fun getAllOrdersFromFirestore(): Result<List<Order>>
+    suspend fun searchOrdersById(query: String): Result<List<Order>>
+
 }

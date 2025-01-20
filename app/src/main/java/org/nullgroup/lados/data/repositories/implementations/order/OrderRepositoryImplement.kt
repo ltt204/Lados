@@ -6,16 +6,19 @@ import androidx.compose.animation.core.snap
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.toObject
 import com.google.firebase.firestore.toObjects
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 import org.nullgroup.lados.data.models.Order
 import org.nullgroup.lados.data.models.OrderProduct
 import org.nullgroup.lados.data.models.User
@@ -390,6 +393,24 @@ class OrderRepositoryImplement(
             subscription.remove()
         }
     }
+
+    override suspend fun searchOrdersById(query: String): Result<List<Order>> =
+        withContext(Dispatchers.IO) {
+            try {
+                val orderRef = firestore.collection("orders")
+
+                val orderIdQuery = orderRef.whereGreaterThanOrEqualTo(FieldPath.documentId(), query)
+                    .whereLessThanOrEqualTo(FieldPath.documentId(), query + '\uf8ff')
+                    .limit(6)
+                    .get()
+                    .await()
+
+                val results = orderIdQuery.toObjects(Order::class.java)
+                Result.success(results)
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+        }
 }
 
 data class OrderPage(

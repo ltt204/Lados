@@ -465,6 +465,7 @@ class ProductRepositoryImplement(
         }
     }
 
+
     override suspend fun getProductRemoteModelByIdFromFireStore(id: String): Result<ProductRemoteModel?> {
         return try {
             val productDoc = firestore.collection("products")
