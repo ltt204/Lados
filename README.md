@@ -8,7 +8,6 @@
 - [Project Setup](#Project-Setup)
 - [Key Feature](#Key-Feature)
 - [Usage](#Usage)
-- 
 
 ## Overview
 **Lados** is a market mobile application for clothes shop to sell their products, where customers can view and decide if they want to make a purchase.
