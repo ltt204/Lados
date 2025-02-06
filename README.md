@@ -11,7 +11,7 @@
 - 
 
 ## Overview
-
+**Lados** is a market mobile application for clothes shop to sell their products, where customers can view and decide if they want to make a purchase.
 ## Members 
 |Student Id |Name|
 |---|---|
@@ -22,7 +22,11 @@
 | 22120415   |  Trần Quang Tuyên | 
 
 ## Tech Stack
-
+- **Languages**: Kotlin
+- **Back-end**: Firebase
+- **Database**: SQLite
+- **Tool kit**: Jetpack compose
+  
 ## Project Setup
 ### Firebase Configuration
 #### For team members:
@@ -35,7 +39,7 @@ To set up Firebase for your local development:
 4. Place the `google-services.json` file in the root directory of your project (or wherever your Firebase SDK expects it).
 
 #### For someone who is not apart of our team
-- You need to look at this [tutorial](https://firebase.google.com/docs/android/setup) of `Firebase` to configure Firebase in **Android Studio**.
+- You need to look at [this tutorial](https://firebase.google.com/docs/android/setup) of `Firebase` to configure Firebase in **Android Studio**.
 - Before you the Firebase Android configuration file (`google-services.json`) to your app, please add these Firease products after you done create Firebase project:
     - `Authentication`:  with two methods which are `Email/Password` and `Google`
     - `Cloud FireStore`
@@ -58,5 +62,17 @@ To set up Firebase for your local development:
     2. After you got the SHA1 key, you will need to go to Firebase project. At project setting, scroll down and you will see **Your apps** part (make sure you have enable the Google provider), add SHA1 to SHA1 finger print.
 
 ## Key Feature
-
+The application provides multiple features for three main roles which are _Customer_, _Staff_ and _Admin_. Here is some key features:
+1. Admin: Have the ability to
+   - Manage user, product and coupon
+   - View total statistics of business activities.
+3. Staff: Have the ability to
+   - Track orders
+   - Support customers through chat
+4. Customer:  Have the ability to
+   - View, Buy products
+   - View their orders status
+   - Leave review when the product is dilivered
+   - Return or cancel the order
 ## Usage
+_later update_
